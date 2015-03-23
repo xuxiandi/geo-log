@@ -28,7 +28,6 @@ import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACEncoder;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.TModel;
@@ -243,7 +242,7 @@ public class CameraStreamerFRAME extends Camera {
 					//.
 			        if (Streamer.MeasurementID != null) 
 			        	try {
-			        		String FN = Streamer.MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName+"."+"Config"+"."+"txt";
+			        		String FN = Streamer.MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName+"."+"Config"+"."+"txt";
 			        		SaveCodecConfig(FN, Buffer,BufferSize);
 						} catch (Exception E) {
 						}
@@ -350,7 +349,7 @@ public class CameraStreamerFRAME extends Camera {
 				//.
 		        if (Streamer.MeasurementID != null) 
 		        	try {
-		        		String FN = Streamer.MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName+"."+"Config"+"."+"txt";
+		        		String FN = Streamer.MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName+"."+"Config"+"."+"txt";
 		        		SaveCodecConfig(FN, Buffer,BufferSize);
 					} catch (Exception E) {
 					}
@@ -409,7 +408,7 @@ public class CameraStreamerFRAME extends Camera {
 				//.
 		        if (Streamer.MeasurementID != null) 
 		        	try {
-		        		String FN = Streamer.MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName+"."+"Config"+"."+"txt";
+		        		String FN = Streamer.MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName+"."+"Config"+"."+"txt";
 		        		SaveCodecConfig(FN, Buffer,BufferSize);
 					} catch (Exception E) {
 					}
@@ -546,7 +545,7 @@ public class CameraStreamerFRAME extends Camera {
 			camera_parameters_Audio_SampleCount = 0;
 	        //.
 	        if (MeasurementID != null) {
-				AudioSampleFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName);
+				AudioSampleFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName);
 				AudioSampleBufferedStream = new BufferedOutputStream(AudioSampleFileStream, 65535);
 				AudioSampleEncoder = new TAudioSampleEncoder(this, abr, AudioSampleSource.Microphone_SamplePerSec, AudioSampleBufferedStream);
 	        }
@@ -604,11 +603,11 @@ public class CameraStreamerFRAME extends Camera {
 			}
 	        //.
 	        if (MeasurementID != null) { 
-				VideoFrameFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName);
+				VideoFrameFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName);
 				VideoFrameBufferedStream = new BufferedOutputStream(VideoFrameFileStream, 256*1024);
-				VideoFrameIndexFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName);
+				VideoFrameIndexFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.VideoIndex32FileName);
 				VideoFrameIndexBufferedStream = new BufferedOutputStream(VideoFrameIndexFileStream, 65535);
-				VideoFrameTimestampFileStream = new FileOutputStream(MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName);
+				VideoFrameTimestampFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.VideoTS32FileName);
 				VideoFrameTimestampBufferedStream = new BufferedOutputStream(VideoFrameTimestampFileStream, 65535);
 				if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists()) {
 					VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient(this, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
@@ -632,6 +631,8 @@ public class CameraStreamerFRAME extends Camera {
 		synchronized (this) {
 	        if (MeasurementDescriptor != null) {
 	        	MeasurementDescriptor.Model = new TModel();
+	        	MeasurementDescriptor.Model.TypeID = "AV.FRAME";
+	        	MeasurementDescriptor.Model.ContainerTypeID = "Audio.AAC-Video.H264I";
 	        	if (flAudio) {
 	        		AACChannel = new TAACChannel();
 	        		AACChannel.ID = TChannel.GetNextID();

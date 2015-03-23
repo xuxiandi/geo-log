@@ -121,6 +121,8 @@ public class TDEVICEModule extends TModule
 
 	public static class TSensorMeasurementDescriptor {
 		
+		public static final String DescriptorFileName = "Data.xml";
+		
 		public static final int LOCATION_DEVICE = 0;
 		public static final int LOCATION_SERVER = 1;
 		public static final int LOCATION_CLIENT = 2;

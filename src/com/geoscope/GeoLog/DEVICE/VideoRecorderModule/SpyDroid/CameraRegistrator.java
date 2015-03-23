@@ -5,7 +5,6 @@ import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -103,11 +102,11 @@ public class CameraRegistrator extends Camera {
     	String OutputFileName = "";
     	switch (Mode) {
     	case TVideoRecorderModule.MODE_MPEG4: 
-    		OutputFileName = MeasurementFolder+"/"+TVideoRecorderMeasurements.MediaMPEG4FileName;
+    		OutputFileName = MeasurementFolder+"/"+TMeasurementDescriptor.MediaMPEG4FileName;
     		break; //. >
 
     	case TVideoRecorderModule.MODE_3GP: 
-    		OutputFileName = MeasurementFolder+"/"+TVideoRecorderMeasurements.Media3GPFileName;
+    		OutputFileName = MeasurementFolder+"/"+TMeasurementDescriptor.Media3GPFileName;
     		break; //. >
     	}
 		media.setOutputFile(OutputFileName);
@@ -142,7 +141,7 @@ public class CameraRegistrator extends Camera {
 			if (flVideo)
 				VideoPackets = -1;
 			//.
-			TVideoRecorderMeasurements.SetMeasurementFinish(MeasurementID,AudioPackets,VideoPackets);
+			com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements.SetMeasurementFinish(MeasurementID,AudioPackets,VideoPackets);
 			//.
 			MeasurementID = null;
 		}
@@ -162,7 +161,7 @@ public class CameraRegistrator extends Camera {
 	public synchronized TMeasurementDescriptor GetMeasurementCurrentDescriptor() throws Exception {
 		if (MeasurementID == null)
 			return null; //. ->
-		TMeasurementDescriptor Result = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementID);
+		TMeasurementDescriptor Result = com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementID);
 		if (Result == null)
 			return null; //. ->
 		//.

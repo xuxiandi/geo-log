@@ -43,11 +43,10 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implements SurfaceHolder.Callback {
@@ -165,7 +164,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		}
 		
 		public TAudioAACChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pFolder, TChannel Channel) {
-			this(pPlayer, pFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, ((TAACChannel)Channel).Packets, ((TAACChannel)Channel).SampleRate, 0);
+			this(pPlayer, pFolder+"/"+com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.AudioAACADTSFileName, ((TAACChannel)Channel).Packets, ((TAACChannel)Channel).SampleRate, 0);
 		}
 		
 		@Override
@@ -444,7 +443,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		}
 		
 		public TVideoH264IChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pFolder, TChannel Channel, SurfaceHolder pSurface, int pWidth, int pHeight) {
-			this(pPlayer, pFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,pFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,pFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, ((TH264IChannel)Channel).Packets, ((TH264IChannel)Channel).FrameRate, pSurface, pWidth,pHeight);		
+			this(pPlayer, pFolder+"/"+com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.VideoH264FileName,pFolder+"/"+com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.VideoIndex32FileName,pFolder+"/"+com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.VideoTS32FileName, ((TH264IChannel)Channel).Packets, ((TH264IChannel)Channel).FrameRate, pSurface, pWidth,pHeight);		
 		}
 		
 		@SuppressWarnings("unused")
@@ -895,9 +894,9 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 	private String 					MeasurementDatabaseFolder = null;
 	private String 					MeasurementID = null;
 	//.
-	public String 					MeasurementFolder = null;
-	public TMeasurementDescriptor 	MeasurementDescriptor = null;
-	public double 					MeasurementCurrentPositionFactor = 0.0;
+	public String 						MeasurementFolder = null;
+	public TSensorMeasurementDescriptor	MeasurementDescriptor = null;
+	public double 						MeasurementCurrentPositionFactor = 0.0;
 	//.
 	private SurfaceView 	svVideoRecorderServerMyPlayer;
 	private TextView 		lbVideoRecorderServerMyPlayer;
@@ -1007,7 +1006,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		MeasurementID = pMeasurementID;
 		//.
     	MeasurementFolder = MeasurementDatabaseFolder+"/"+MeasurementID; 
-		MeasurementDescriptor = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
+		MeasurementDescriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
 		//.
 		if (MeasurementDescriptor.Model != null) {
 			int Cnt = MeasurementDescriptor.Model.Stream.Channels.size();
@@ -1038,38 +1037,6 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 					}
 				}
 			}
-		}
-		else {
-			flAudio = (MeasurementDescriptor.AudioPackets > 0);
-			flVideo = (MeasurementDescriptor.VideoPackets > 0);
-			//.
-			if (flAudio) 
-				synchronized (this) {
-					if (AudioChannelProcessor != null) { 
-						AudioChannelProcessor.Destroy();
-						AudioChannelProcessor = null;
-					}
-					switch (MeasurementDescriptor.AudioFormat) {
-					
-					case CameraStreamerFRAME.AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS:
-						AudioChannelProcessor = new TAudioAACChannelProcessor(this, MeasurementFolder+"/"+TVideoRecorderMeasurements.AudioAACADTSFileName, MeasurementDescriptor.AudioPackets, MeasurementDescriptor.AudioSPS);
-						break; //. >
-					}
-				}
-			if (flVideo && (surface != null)) 
-				synchronized (this) {
-					if (VideoChannelProcessor != null) {
-						VideoChannelProcessor.Destroy();
-						VideoChannelProcessor = null;
-					}
-					//.
-					switch (MeasurementDescriptor.VideoFormat) {
-					
-					case CameraStreamerFRAME.VIDEO_FRAME_FILE_FORMAT_H264PACKETS: 
-						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoH264FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoIndex32FileName,MeasurementFolder+"/"+TVideoRecorderMeasurements.VideoTS32FileName, MeasurementDescriptor.VideoPackets, MeasurementDescriptor.VideoFPS, surface,surface_width,surface_height);
-						break; //. >
-					}
-				}
 		}
 		//.
 		sbVideoRecorderServerMyPlayer.setVisibility(View.VISIBLE);

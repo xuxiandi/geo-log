@@ -32,8 +32,6 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescript
 public class TSensorsModuleMeasurements {
 
 	public static final String DataBaseFolder = TSensorsModule.Measurements_Folder();
-	//.
-	public static final String DescriptorFileName = "Data.xml";
 	
 	public static class MeasurementDataIsNotFoundException extends Exception {
 
@@ -220,7 +218,7 @@ public class TSensorsModuleMeasurements {
 		File Folder = new File(MeasurementFolder);
 		if (!Folder.exists())
 			return; //. ->
-		String TDFN = MeasurementFolder+"/"+DescriptorFileName+".tmp";
+		String TDFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName+".tmp";
 	    XmlSerializer serializer = Xml.newSerializer();
 	    FileWriter writer = new FileWriter(TDFN);
 	    try {
@@ -259,7 +257,7 @@ public class TSensorsModuleMeasurements {
 	    finally {
 	    	writer.close();
 	    }
-		String DFN = MeasurementFolder+"/"+DescriptorFileName;
+		String DFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
 		File TF = new File(TDFN);
 		File F = new File(DFN);
 		TF.renameTo(F);
@@ -271,7 +269,7 @@ public class TSensorsModuleMeasurements {
 	
 	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID) throws Exception {
 		TSensorMeasurementDescriptor Descriptor = null;
-		String _SFN = DataBaseFolder+"/"+MeasurementID+"/"+DescriptorFileName;
+		String _SFN = DataBaseFolder+"/"+MeasurementID+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
 		File F = new File(_SFN);
 		if (!F.exists()) 
 			return Descriptor; //. ->

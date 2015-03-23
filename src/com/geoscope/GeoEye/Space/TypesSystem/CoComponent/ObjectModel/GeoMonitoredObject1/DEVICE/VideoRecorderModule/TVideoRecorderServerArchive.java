@@ -380,10 +380,10 @@ public class TVideoRecorderServerArchive extends Activity {
 			DVRMs = null;
 		}
 		//.
-		TGeographDataServerClient.TSensorMeasurementDescriptor[] SVRMs;
+		TSensorMeasurementDescriptor[] SVRMs;
 		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, Object.Server.User.UserID,Object.Server.User.UserPassword, Object.GeographServerObjectID());
 		try {
-			SVRMs = (TGeographDataServerClient.TSensorMeasurementDescriptor[])TDEVICEModule.SensorMeasurementDescriptors_Filter(GeographDataServerClient.SERVICE_GETSENSORDATA_GetMeasurementList(BeginTimestamp,EndTimestamp, Canceller), com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.TypeIDPrefix);
+			SVRMs = TDEVICEModule.SensorMeasurementDescriptors_Filter(GeographDataServerClient.SERVICE_GETSENSORDATA_GetMeasurementList(BeginTimestamp,EndTimestamp, Canceller), com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.TypeIDPrefix);
 		}
 		finally {
 			GeographDataServerClient.Destroy();
@@ -450,7 +450,7 @@ public class TVideoRecorderServerArchive extends Activity {
 					Result[Idx].ID = SVRMs[I].ID;
 					Result[Idx].StartTimestamp = SVRMs[I].StartTimestamp;
 					Result[Idx].FinishTimestamp = SVRMs[I].FinishTimestamp;
-					Result[Idx].CPC = SVRMs[I].CPC;
+					Result[Idx].CPC = ((TGeographDataServerClient.TSensorMeasurementDescriptor)SVRMs[I]).CPC;
 					Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_SERVER;
 					//.
 					Idx++;
@@ -539,7 +539,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	private static void Items_DoRemove(Context context, TCoGeoMonitorObject Object, String GeographDataServerAddress, int GeographDataServerPort, String MeasurementID, TCanceller Canceller) throws Exception {
 		TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model(Object.GeographServerObjectController());
 		//.
-		ObjectModel.VideoRecorder_Measurements_Delete(MeasurementID);
+		ObjectModel.SensorsModule_Measurements_Delete(MeasurementID);
 		Canceller.Check();
 		//.
 		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, Object.Server.User.UserID,Object.Server.User.UserPassword, Object.GeographServerObjectID());
@@ -811,7 +811,7 @@ public class TVideoRecorderServerArchive extends Activity {
     				if (Tracker != null)
     					ThisGeographServerObjectID = Tracker.GeoLog.idGeographServerObject;
     				//.
-    				boolean flLocal = false;//////////////////(Object.GeographServerObjectID() == ThisGeographServerObjectID);
+    				boolean flLocal = (Object.GeographServerObjectID() == ThisGeographServerObjectID);
     				if (flLocal)
     					flLocal = (com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements.GetMeasurementDescriptor(com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements.DataBaseFolder, MeasurementID) != null);
     				//.
@@ -837,7 +837,7 @@ public class TVideoRecorderServerArchive extends Activity {
         						break; //. >
         					if (!flFound) {
         	    				TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model(Object.GeographServerObjectController());
-        	    				ObjectModel.VideoRecorder_Measurements_MoveToDataServer(MeasurementID);
+        	    				ObjectModel.SensorsModule_Measurements_MoveToDataServer(MeasurementID);
         		    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,0).sendToTarget();
         					}
         					//.

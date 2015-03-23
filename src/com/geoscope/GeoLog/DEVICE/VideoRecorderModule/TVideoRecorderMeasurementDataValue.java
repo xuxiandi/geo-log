@@ -149,10 +149,12 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
             	Value = VideoRecorderModule.Measurement_GetData(MeasurementID, flDecriptor,flAudio,flVideo); 
     		}
     		else {
-    			double StartTimestamp = 0.0;
+    			@SuppressWarnings("unused")
+				double StartTimestamp = 0.0;
     			if (SA.length >= 4)
     				StartTimestamp = Double.parseDouble(SA[3]);
-    			double FinishTimestamp = 0.0;
+    			@SuppressWarnings("unused")
+				double FinishTimestamp = 0.0;
     			if (SA.length >= 5)
     				FinishTimestamp = Double.parseDouble(SA[4]);
     			//.
@@ -162,7 +164,8 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
     	    			CurrentMeasurement.FinishTimestamp = TVideoRecorderMeasurements.GetCurrentTime();
     	    		//.
     	    		Timestamp = OleDate.UTCCurrentTimestamp();
-    				Value = VideoRecorderModule.Measurement_GetDataFragment(MeasurementID,CurrentMeasurement, StartTimestamp,FinishTimestamp, flDecriptor,flAudio,flVideo);
+    				//. Value = VideoRecorderModule.Measurement_GetDataFragment(MeasurementID,CurrentMeasurement, StartTimestamp,FinishTimestamp, flDecriptor,flAudio,flVideo);
+                	Value = VideoRecorderModule.Measurement_GetData(MeasurementID, flDecriptor,flAudio,flVideo); 
     			}
     			catch (TVideoRecorderMeasurements.MeasurementDataIsNotFoundException E) {
             		throw new OperationException(TGetVideoRecorderMeasurementDataValueSO.OperationErrorCode_DataIsNotFound); //. =>

@@ -7,11 +7,12 @@ import android.net.Uri;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
 
 public class TVideoRecorderServerPlayer {
 
-	public static boolean IsDefaultPlayer(TMeasurementDescriptor MeasurementDescriptor) {
-		return ((MeasurementDescriptor.Model != null) || (MeasurementDescriptor.Mode == TVideoRecorderModule.MODE_FRAMESTREAM));
+	public static boolean IsDefaultPlayer(TSensorMeasurementDescriptor MeasurementDescriptor) {
+		return (MeasurementDescriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.TypeIDPrefix));
 	}
 	
 	

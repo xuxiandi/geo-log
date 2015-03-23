@@ -118,7 +118,7 @@ public class TDEVICEModule extends TModule
 	public static final String 	DeviceOldFileName = "Device.xml";
 	public static final String 	DeviceFileName = "Data.xml";
 	public static final String 	DeviceLogFileName = "Device.log";
-	
+
 	public static class TSensorMeasurementDescriptor {
 		
 		public static final int LOCATION_DEVICE = 0;
@@ -148,23 +148,35 @@ public class TDEVICEModule extends TModule
 				switch (Version) {
 				case 1:
 					try {
-						Node node;
+						Node node,valuenode;
 						TypeID = "";
-		    			node = TMyXML.SearchNode(ANode,"TypeID").getFirstChild();
-		    			if (node != null)
-		    				TypeID = node.getNodeValue();
+		    			node = TMyXML.SearchNode(ANode,"TypeID");
+		    			if (node != null) {
+		    				valuenode = node.getFirstChild();
+		    				if (valuenode != null)
+			    				TypeID = valuenode.getNodeValue();
+		    			} 
 						ContainerTypeID = "";
-		    			node = TMyXML.SearchNode(ANode,"ContainerTypeID").getFirstChild();
-		    			if (node != null)
-		    				ContainerTypeID = node.getNodeValue();
+		    			node = TMyXML.SearchNode(ANode,"ContainerTypeID");
+		    			if (node != null) {
+		    				valuenode = node.getFirstChild();
+		    				if (valuenode != null)
+		    					ContainerTypeID = valuenode.getNodeValue();
+		    			}
 		    			Name = "";
-		    			node = TMyXML.SearchNode(ANode,"Name").getFirstChild();
-		    			if (node != null)
-		    				Name = node.getNodeValue();
+		    			node = TMyXML.SearchNode(ANode,"Name");
+		    			if (node != null) {
+		    				valuenode = node.getFirstChild();
+		    				if (valuenode != null)
+		    					Name = valuenode.getNodeValue();
+		    			}
 		    			Info = "";
-		    			node = TMyXML.SearchNode(ANode,"Info").getFirstChild();
-		    			if (node != null)
-		    				Info = node.getNodeValue();
+		    			node = TMyXML.SearchNode(ANode,"Info");
+		    			if (node != null) {
+		    				valuenode = node.getFirstChild();
+		    				if (valuenode != null)
+		    					Info = valuenode.getNodeValue();
+		    			}
 		    			//.
 		    			Node StreamNode = TMyXML.SearchNode(ANode,"Stream");
 		    			if (StreamNode != null)
@@ -240,6 +252,18 @@ public class TDEVICEModule extends TModule
 			ID = pID;
 		}
 		
+		public boolean IsTypeOf(String TypeIDPrefix) {
+			if (Model == null)
+				return false; //. ->
+			return (Model.TypeID.startsWith(TypeIDPrefix));
+		}
+		
+		public boolean IsContainerTypeOf(String ContainerTypeIDPrefix) {
+			if (Model == null)
+				return false; //. ->
+			return (Model.ContainerTypeID.startsWith(ContainerTypeIDPrefix));
+		}
+		
 		public boolean IsStarted() {
 			return (StartTimestamp != 0.0);
 		}
@@ -262,6 +286,47 @@ public class TDEVICEModule extends TModule
 
 		public long DurationInNs() {
 			return (long)(Duration()*24.0*3600.0*1000000000.0);
+		}
+	}
+	
+	public static TSensorMeasurementDescriptor[] SensorMeasurementDescriptors_Filter(TSensorMeasurementDescriptor[] Descriptors, String TypeIDPrefix) {
+		int Cnt = Descriptors.length;
+		ArrayList<TSensorMeasurementDescriptor> _Result = new ArrayList<TSensorMeasurementDescriptor>(Cnt);
+		for (int I = 0; I < Cnt; I++) 
+			if (Descriptors[I].Model.TypeID.startsWith(TypeIDPrefix))
+				_Result.add(Descriptors[I]);
+		Cnt = _Result.size();
+		TSensorMeasurementDescriptor[] Result = new TSensorMeasurementDescriptor[Cnt];
+		for (int I = 0; I < Cnt; I++) 
+			Result[I] = _Result.get(I);
+		return Result;
+	}
+	
+	public static class TSensorMeasurement {
+		
+		public static Object LastIDLock = new Object();
+		public static String LastID = "";
+		
+		public static String GetNewID() throws InterruptedException {
+			while (true) {
+				String NewID = Double.toString(OleDate.UTCCurrentTimestamp());
+				synchronized (LastIDLock) {
+					if (!NewID.equals(LastID))
+						return NewID; //. ->
+					Thread.sleep(10);
+				}
+			}
+		}
+	}
+	
+	public static class TSensorMeter {
+		
+		public TSensorMeasurement Measurement;
+		
+		public void Start() {
+		}
+
+		public void Finish() {
 		}
 	}
 	

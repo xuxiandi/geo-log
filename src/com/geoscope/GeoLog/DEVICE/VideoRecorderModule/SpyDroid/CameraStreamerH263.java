@@ -86,7 +86,7 @@ public class CameraStreamerH263 extends Camera {
 				MeasurementID = TVideoRecorderMeasurements.CreateNewMeasurementID();
 				//.
 				TVideoRecorderMeasurements.CreateNewMeasurement(MeasurementID,TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1); 
-				MeasurementFolder = TVideoRecorderMeasurements.VideoRecorder0_DataBaseFolder+"/"+MeasurementID;
+				MeasurementFolder = TVideoRecorderMeasurements.DataBaseFolder+"/"+MeasurementID;
 			}
 			else { 
 				MeasurementID = null;

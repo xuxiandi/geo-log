@@ -5,6 +5,9 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class TMeasurementDescriptor extends TDEVICEModule.TSensorMeasurementDescriptor {
 
+	public static final String TypeIDPrefix = "AV";
+	
+	
 	public short 	Mode = TVideoRecorderModule.MODE_UNKNOWN;
 	//.
 	public int 		AudioFormat = 0;
@@ -20,29 +23,5 @@ public class TMeasurementDescriptor extends TDEVICEModule.TSensorMeasurementDesc
 	
 	public TMeasurementDescriptor(String pID) {
 		super(pID);
-	}
-	
-	public boolean IsStarted() {
-		return (StartTimestamp != 0.0);
-	}
-
-	public boolean IsFinished() {
-		return (FinishTimestamp != 0.0);
-	}
-	
-	public boolean IsValid() {
-		return (IsStarted() && IsFinished() && (Duration() > 0.0));
-	}
-	
-	public double Duration() {
-		return (FinishTimestamp-StartTimestamp);
-	}
-
-	public int DurationInMs() {
-		return (int)(Duration()*24.0*3600.0*1000.0);
-	}
-
-	public long DurationInNs() {
-		return (long)(Duration()*24.0*3600.0*1000000000.0);
 	}
 }

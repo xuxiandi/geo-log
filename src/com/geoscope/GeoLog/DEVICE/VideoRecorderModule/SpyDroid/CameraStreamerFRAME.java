@@ -25,6 +25,7 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneCapturingServer;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACEncoder;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
@@ -34,6 +35,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.PacketTimeBase;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 @SuppressLint("NewApi")
 public class CameraStreamerFRAME extends Camera {
@@ -516,13 +518,14 @@ public class CameraStreamerFRAME extends Camera {
 		//.
 		synchronized (this) {
 			if (flSaving) {
-				MeasurementID = TVideoRecorderMeasurements.CreateNewMeasurementID();
-				//.
-				TVideoRecorderMeasurements.CreateNewMeasurement(MeasurementID,TVideoRecorderModule.MODE_FRAMESTREAM); 
-				MeasurementFolder = TVideoRecorderMeasurements.VideoRecorder0_DataBaseFolder+"/"+MeasurementID;
+				MeasurementID = TDEVICEModule.TSensorMeasurement.GetNewID();
+				MeasurementDescriptor = new TMeasurementDescriptor(MeasurementID);
+				TSensorsModuleMeasurements.CreateNewMeasurement(TSensorsModuleMeasurements.DataBaseFolder,MeasurementID,MeasurementDescriptor); 
+				MeasurementFolder = TSensorsModuleMeasurements.DataBaseFolder+"/"+MeasurementID;
 			}
 			else {  
 				MeasurementID = null;
+				MeasurementDescriptor = null;
 				MeasurementFolder = "";
 			}
 		}
@@ -627,8 +630,7 @@ public class CameraStreamerFRAME extends Camera {
 		}
 		//.
 		synchronized (this) {
-	        if (MeasurementID != null) {
-	        	MeasurementDescriptor = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementID);
+	        if (MeasurementDescriptor != null) {
 	        	MeasurementDescriptor.Model = new TModel();
 	        	if (flAudio) {
 	        		AACChannel = new TAACChannel();
@@ -664,10 +666,8 @@ public class CameraStreamerFRAME extends Camera {
 	            	MeasurementDescriptor.VideoFormat = VIDEO_FRAME_FILE_FORMAT_H264PACKETS;
 	            	MeasurementDescriptor.VideoFPS = camera_parameters_Video_FrameRate;
 	        	}
-	        	TVideoRecorderMeasurements.SetMeasurementDescriptor(MeasurementID, MeasurementDescriptor);
+	        	TSensorsModuleMeasurements.SetMeasurementDescriptor(MeasurementID, MeasurementDescriptor);
 	        }
-	        else 
-	        	MeasurementDescriptor = null;
 		}
 	}
 	
@@ -803,7 +803,7 @@ public class CameraStreamerFRAME extends Camera {
 					MeasurementDescriptor.AudioPackets = AudioSampleEncoderPackets;
 					MeasurementDescriptor.VideoPackets = VideoFrameEncoderPackets;
 					//.
-		        	TVideoRecorderMeasurements.SetMeasurementDescriptor(MeasurementID, MeasurementDescriptor);
+		        	TSensorsModuleMeasurements.SetMeasurementDescriptor(MeasurementID, MeasurementDescriptor);
 				}
 			}
 			//.

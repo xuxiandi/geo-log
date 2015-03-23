@@ -35,13 +35,9 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.TSensorsModuleMeasurements;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient;
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient.TVideoRecorderMeasurementDescriptor;
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -54,16 +50,20 @@ public class TVideoRecorderServerArchive extends Activity {
 	
 	public static class TMeasurementPlayHandler {
 		
-		public boolean PlayMeasurement(final TMeasurementDescriptor MeasurementDescriptor, double MeasurementPosition) throws Exception {
+		public boolean PlayMeasurement(final TSensorMeasurementDescriptor MeasurementDescriptor, double MeasurementPosition) throws Exception {
 			return false;
 		}
 	}
 	
 	public static class TArchiveItem {
+		
 		public String ID;
+		//.
 		public double StartTimestamp;
 		public double FinishTimestamp;
+		//.
 		public double CPC;
+		//.
 		public int Location;
 		//.
 		public double Position = 0.0;
@@ -163,16 +163,16 @@ public class TVideoRecorderServerArchive extends Activity {
 				//.
 				final TArchiveItem Item = Items[arg2];
 				//.
-				TMeasurementDescriptor MeasurementDescriptor = null;
+				TSensorMeasurementDescriptor MeasurementDescriptor = null;
 				if (Item.Location == TSensorMeasurementDescriptor.LOCATION_CLIENT)
 					try {
-						MeasurementDescriptor = TVideoRecorderMeasurements.GetMeasurementDescriptor(LocalArchive_Folder(Object.GeographServerObjectID()),Item.ID);
+						MeasurementDescriptor = com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements.GetMeasurementDescriptor(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()),Item.ID);
 					} catch (Exception E) {
 					}
 				//.
 	    		final CharSequence[] _items;
 	    		int SelectedIdx = -1;
-	    		if ((MeasurementDescriptor != null) && (MeasurementDescriptor.Mode == TVideoRecorderModule.MODE_FRAMESTREAM)) {
+	    		if ((MeasurementDescriptor != null) && MeasurementDescriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.TypeIDPrefix)) {
 		    		_items = new CharSequence[3];	    		
 		    		_items[0] = getString(R.string.SOpen); 
 		    		_items[1] = getString(R.string.SRemove); 
@@ -253,7 +253,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	    		    				public void Process() throws Exception {
 	    		    					ExportFile = TGeoLogApplication.TempFolder+"/"+ExpertFileName;
 	    		    					//.
-	    		    					TVideoRecorderMeasurements.ExportMeasurementToMP4File(LocalArchive_Folder(Object.GeographServerObjectID()), Item.ID, ExportFile);
+	    		    					com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, ExportFile);
 	    		    				}
 
 	    		    				@Override
@@ -372,25 +372,25 @@ public class TVideoRecorderServerArchive extends Activity {
 	public static TArchiveItem[] GetItemsList(double BeginTimestamp, double EndTimestamp, TCoGeoMonitorObject Object, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {
 		TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model(Object.GeographServerObjectController());
 		//.
-		TVideoRecorderMeasurementDescriptor[] DVRMs;
+		TSensorMeasurementDescriptor[] DVRMs;
 		try {
-			DVRMs = ObjectModel.VideoRecorder_Measurements_GetList(BeginTimestamp,EndTimestamp);
+			DVRMs = ObjectModel.SensorsModule_Measurements_GetList(BeginTimestamp,EndTimestamp);
 		}
 		catch (Exception E) {
 			DVRMs = null;
 		}
 		//.
-		TGeographDataServerClient.TVideoRecorderMeasurementDescriptor[] SVRMs;
+		TGeographDataServerClient.TSensorMeasurementDescriptor[] SVRMs;
 		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, Object.Server.User.UserID,Object.Server.User.UserPassword, Object.GeographServerObjectID());
 		try {
-			SVRMs = GeographDataServerClient.SERVICE_GETSENSORDATA_GetMeasurementList(BeginTimestamp,EndTimestamp, Canceller);
+			SVRMs = (TGeographDataServerClient.TSensorMeasurementDescriptor[])TDEVICEModule.SensorMeasurementDescriptors_Filter(GeographDataServerClient.SERVICE_GETSENSORDATA_GetMeasurementList(BeginTimestamp,EndTimestamp, Canceller), com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.TypeIDPrefix);
 		}
 		finally {
 			GeographDataServerClient.Destroy();
 		}
 		//.
-		TVideoRecorderMeasurementDescriptor[] CVRMs;
-		CVRMs = LocalArchive_GetMeasurementsList(Object.GeographServerObjectID(), BeginTimestamp,EndTimestamp);
+		TSensorMeasurementDescriptor[] CVRMs;
+		CVRMs = TSensorsModuleMeasurements.Context_GetMeasurementsList(Object.GeographServerObjectID(), BeginTimestamp,EndTimestamp);
 		//.
 		int DVRMs_Count = 0;
 		if (DVRMs != null)
@@ -551,7 +551,7 @@ public class TVideoRecorderServerArchive extends Activity {
 			GeographDataServerClient.Destroy();
 		}
 		//.
-		LocalArchive_RemoveMeasurement(Object.GeographServerObjectID(), MeasurementID);
+		TSensorsModuleMeasurements.Context_RemoveMeasurement(Object.GeographServerObjectID(), MeasurementID);
 	}
 	
 	private void Items_Remove(final String MeasurementID) {
@@ -599,7 +599,7 @@ public class TVideoRecorderServerArchive extends Activity {
 			
 		case TSensorMeasurementDescriptor.LOCATION_CLIENT:
 			try {
-				TVideoRecorderServerArchive.LocalArchive_PlayMeasurement(PlayHandler,PlayerRequest, Object.GeographServerObjectID(), Item.ID, Item.Position, context);
+				TSensorsModuleMeasurements.Context_PlayMeasurement(PlayHandler,PlayerRequest, Object.GeographServerObjectID(), Item.ID, Item.Position, context);
 			} catch (Exception E) {
 			}
 			break; //. >
@@ -608,92 +608,6 @@ public class TVideoRecorderServerArchive extends Activity {
 	
 	public static void StartOpeningItem(TCanceller Canceller, TArchiveItem Item, TMeasurementPlayHandler PlayHandler, int PlayerRequest, final TCoGeoMonitorObject Object, final String GeographDataServerAddress, final int GeographDataServerPort, final Activity context, TArchiveItemsListUpdater ArchiveItemsListUpdater, TSensorMeasurementDescriptor.TLocationUpdater LocationUpdater) {
 		StartOpeningItem(Canceller, Item, PlayHandler,PlayerRequest, -Double.MAX_VALUE,Double.MAX_VALUE, Object, GeographDataServerAddress,GeographDataServerPort, context, ArchiveItemsListUpdater, LocationUpdater);
-	}
-	
-	public static String LocalArchive_Folder(long GeographServerObjectID) throws Exception {
-		return TSystemTGeographServerObject.ContextFolder+"/"+Long.toString(GeographServerObjectID)+"/"+"VideoRecorder"+"/"+"0";		
-	}
-	
-	public static String LocalArchive_GetMeasurementFolder(long GeographServerObjectID, String MeasurementID) throws Exception {
-		return LocalArchive_Folder(GeographServerObjectID)+"/"+MeasurementID;
-	}
-	
-	public static String LocalArchive_CreateMeasurementFolder(long GeographServerObjectID, String MeasurementID) throws Exception {
-		String Result = LocalArchive_GetMeasurementFolder(GeographServerObjectID, MeasurementID);
-		File F = new File(Result);
-		F.mkdirs();
-		//.
-		return Result;
-	}
-	
-	public static void LocalArchive_RemoveMeasurement(long GeographServerObjectID, String MeasurementID) throws Exception {
-		TVideoRecorderMeasurements.DeleteMeasurement(LocalArchive_Folder(GeographServerObjectID), MeasurementID);
-	}
-	
-	public static String LocalArchive_GetMeasurementTempFolder(long GeographServerObjectID, String MeasurementID) throws Exception {
-		return TGeoLogApplication.GetTempFolder()+"/"+TGeoLogApplication.ProfileName()+"/"+"GeographServerObject"+"/"+Long.toString(GeographServerObjectID)+"/"+"VideoRecorder"+"/"+"0"+"/"+MeasurementID;
-	}
-	
-	public static String LocalArchive_CreateMeasurementTempFolder(long GeographServerObjectID, String MeasurementID) throws Exception {
-		String Result = LocalArchive_GetMeasurementTempFolder(GeographServerObjectID, MeasurementID);
-		File F = new File(Result);
-		F.mkdirs();
-		//.
-		return Result;
-	}
-	
-	public static TVideoRecorderMeasurementDescriptor[] LocalArchive_GetMeasurementsList(long GeographServerObjectID, double BeginTimestamp, double EndTimestamp) throws Exception {
-		String ResultString = TVideoRecorderMeasurements.GetMeasurementsList(LocalArchive_Folder(GeographServerObjectID), BeginTimestamp,EndTimestamp);
-		TVideoRecorderMeasurementDescriptor[] Result;
-		if ((ResultString != null) && (!ResultString.equals(""))) {
-			String[] Items = ResultString.split(";");
-			Result = new TVideoRecorderMeasurementDescriptor[Items.length];
-			for (int I = 0; I < Items.length; I++) {
-				String[] Properties = Items[I].split(",");
-				Result[I] = new TVideoRecorderMeasurementDescriptor();
-				Result[I].ID = Properties[0];
-				Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
-				Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
-				Result[I].Location = TVideoRecorderMeasurementDescriptor.LOCATION_CLIENT;
-				if (Properties.length > 3)
-					Result[I].AudioSize = Integer.parseInt(Properties[3]);
-				if (Properties.length > 4)
-					Result[I].VideoSize = Integer.parseInt(Properties[4]);
-			}
-		}
-		else
-			Result = new TVideoRecorderMeasurementDescriptor[0];
-		return Result;
-	}
-	
-	public static TVideoRecorderMeasurementDescriptor[] LocalArchive_GetMeasurementsList(long GeographServerObjectID) throws Exception {
-		return LocalArchive_GetMeasurementsList(GeographServerObjectID, -Double.MAX_VALUE,Double.MAX_VALUE);
-	}
-	
-	public static boolean LocalArchive_IsMeasurementExist(long GeographServerObjectID, String MeasurementID) throws Exception {
-		File F = new File(LocalArchive_GetMeasurementFolder(GeographServerObjectID, MeasurementID));
-		return F.exists();
-	}
-	
-	public static void LocalArchive_PlayMeasurementByFolder(TMeasurementPlayHandler PlayHandler, int PlayerRequest, long GeographServerObjectID, String MeasurementFolder, double MeasurementStartPosition, Activity context) throws Exception {
-    	File MF = new File(MeasurementFolder);
-    	String MeasurementDatabaseFolder = MF.getParent(); 
-    	String MeasurementID = MF.getName();
-    	//.
-		boolean flPlayAsDefault = true;
-		if (PlayHandler != null) {
-			TMeasurementDescriptor MeasurementDescriptor = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
-			flPlayAsDefault = (!PlayHandler.PlayMeasurement(MeasurementDescriptor, MeasurementStartPosition));
-		}
-		if (flPlayAsDefault) {
-        	TVideoRecorderServerPlayer Player = new TVideoRecorderServerPlayer(MeasurementDatabaseFolder,MeasurementID, MeasurementStartPosition);
-        	Intent PI = Player.GetPlayer(context);
-        	context.startActivityForResult(PI, PlayerRequest);	            	
-		}
-	}
-	
-	public static void LocalArchive_PlayMeasurement(TMeasurementPlayHandler PlayHandler, int PlayerRequest, long GeographServerObjectID, String MeasurementID, double MeasurementStartPosition, Activity context) throws Exception {
-		LocalArchive_PlayMeasurementByFolder(PlayHandler,PlayerRequest, GeographServerObjectID, LocalArchive_GetMeasurementFolder(GeographServerObjectID, MeasurementID), MeasurementStartPosition, context);
 	}
 	
     private class TUpdating extends TCancelableThread {
@@ -885,8 +799,8 @@ public class TVideoRecorderServerArchive extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-					String MeasurementFolder = LocalArchive_GetMeasurementFolder(Object.GeographServerObjectID(), MeasurementID);
-					if (TVideoRecorderMeasurements.MeasurementExists(MeasurementFolder)) { 
+					String MeasurementFolder = TSensorsModuleMeasurements.Context_GetMeasurementFolder(Object.GeographServerObjectID(), MeasurementID);
+					if (com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements.MeasurementExists(MeasurementFolder)) { 
 	        			MessageHandler.obtainMessage(MESSAGE_SUCCESSLOCALLY,MeasurementFolder).sendToTarget();
 	        			//.
 	        			return; //. ->
@@ -897,9 +811,9 @@ public class TVideoRecorderServerArchive extends Activity {
     				if (Tracker != null)
     					ThisGeographServerObjectID = Tracker.GeoLog.idGeographServerObject;
     				//.
-    				boolean flLocal = (Object.GeographServerObjectID() == ThisGeographServerObjectID);
+    				boolean flLocal = false;//////////////////(Object.GeographServerObjectID() == ThisGeographServerObjectID);
     				if (flLocal)
-    					flLocal = (TVideoRecorderMeasurements.GetMeasurementDescriptor(TVideoRecorderMeasurements.GetDatabaseFolder(TVideoRecorderMeasurements.Camera0), MeasurementID) != null);
+    					flLocal = (com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements.GetMeasurementDescriptor(com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements.DataBaseFolder, MeasurementID) != null);
     				//.
     				if (!flLocal) {
         				while (!Canceller.flCancel) {
@@ -932,8 +846,8 @@ public class TVideoRecorderServerArchive extends Activity {
     				}
     				else {
     					synchronized (MeasurementCopyingLock) {
-        					String SrcMeasurementFolder = TVideoRecorderMeasurements.GetDatabaseFolder(TVideoRecorderMeasurements.Camera0)+"/"+MeasurementID;
-        					String MeasurementTempFolder = LocalArchive_GetMeasurementTempFolder(Object.GeographServerObjectID(), MeasurementID);
+        					String SrcMeasurementFolder = com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements.DataBaseFolder+"/"+MeasurementID;
+        					String MeasurementTempFolder = TSensorsModuleMeasurements.Context_GetMeasurementTempFolder(Object.GeographServerObjectID(), MeasurementID);
         					try {
         						byte[] CopyBuffer = new byte[1024*1024];
             					TFileSystem.CopyFolder(new File(SrcMeasurementFolder), new File(MeasurementTempFolder), CopyBuffer, Canceller);
@@ -997,7 +911,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	                	if (LocationUpdater != null) 
 	                		LocationUpdater.DoOnLocationUpdated(MeasurementID, TSensorMeasurementDescriptor.LOCATION_CLIENT);
 	                	//.
-	                	LocalArchive_PlayMeasurementByFolder(PlayHandler,PlayerRequest, Object.GeographServerObjectID(), _MeasurementFolder, MeasurementPosition, context);
+	                	TSensorsModuleMeasurements.Context_PlayMeasurementByFolder(PlayHandler,PlayerRequest, Object.GeographServerObjectID(), _MeasurementFolder, MeasurementPosition, context);
 	                	//.
 		            	break; //. >
 		            	
@@ -1140,11 +1054,11 @@ public class TVideoRecorderServerArchive extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				MeasurementFolder = LocalArchive_GetMeasurementFolder(Object.GeographServerObjectID(), MeasurementID);
+    				MeasurementFolder = TSensorsModuleMeasurements.Context_GetMeasurementFolder(Object.GeographServerObjectID(), MeasurementID);
     				synchronized (MeasurementLoadingLock) {
     					try {
-            				if (!LocalArchive_IsMeasurementExist(Object.GeographServerObjectID(), MeasurementID)) {
-                				MeasurementTempFolder = LocalArchive_CreateMeasurementTempFolder(Object.GeographServerObjectID(), MeasurementID);
+            				if (!TSensorsModuleMeasurements.Context_IsMeasurementExist(Object.GeographServerObjectID(), MeasurementID)) {
+                				MeasurementTempFolder = TSensorsModuleMeasurements.Context_CreateMeasurementTempFolder(Object.GeographServerObjectID(), MeasurementID);
                 				//.
                 				TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, UserID,UserPassword, Object.GeographServerObjectID());
                 				try {
@@ -1214,7 +1128,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	                		LocationUpdater.DoOnLocationUpdated(MeasurementID, TSensorMeasurementDescriptor.LOCATION_CLIENT);
 	                	//.
 	                	String _MeasurementFolder = (String)msg.obj;
-	                	LocalArchive_PlayMeasurementByFolder(PlayHandler,PlayerRequest, Object.GeographServerObjectID(), _MeasurementFolder, MeasurementPosition, context);
+	                	TSensorsModuleMeasurements.Context_PlayMeasurementByFolder(PlayHandler,PlayerRequest, Object.GeographServerObjectID(), _MeasurementFolder, MeasurementPosition, context);
 	                	//.
 		            	break; //. >
 		            	

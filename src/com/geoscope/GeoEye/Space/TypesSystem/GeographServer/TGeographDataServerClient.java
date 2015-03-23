@@ -49,7 +49,6 @@ public class TGeographDataServerClient {
 	public static final int SERVICE_GETVIDEORECORDERDATA_V2_COMMAND_DELETEMEASUREMENTDATA = 3;
 	//.
 	public static final int SERVICE_GETSENSORDATA_COMMAND_GETMEASUREMENTLIST    = 1;
-	public static final int SERVICE_GETSENSORDATA_COMMAND_GETMEASUREMENTLIST_V1 = 11;
 	public static final int SERVICE_GETSENSORDATA_COMMAND_GETMEASUREMENTDATA    = 2;
 	public static final int SERVICE_GETSENSORDATA_COMMAND_DELETEMEASUREMENTDATA = 3;
 	//.
@@ -70,6 +69,11 @@ public class TGeographDataServerClient {
 		public int AudioSize;
 		public int VideoSize;
 		//.
+		public double CPC;
+	}
+	
+	public static class TSensorMeasurementDescriptor extends com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor {
+
 		public double CPC;
 	}
 	
@@ -510,11 +514,12 @@ public class TGeographDataServerClient {
 		}
 	}
 
-	public TVideoRecorderMeasurementDescriptor[] SERVICE_GETSENSORDATA_GetMeasurementList(TCanceller Canceller) throws Exception {
+	public TSensorMeasurementDescriptor[] SERVICE_GETSENSORDATA_GetMeasurementList(double BeginTimestamp, double EndTimestamp, TCanceller Canceller) throws Exception {
+		short Version = 1;
 		Connect();
 		try {
 	        //. send login info
-	    	byte[] LoginBuffer = new byte[24];
+	    	byte[] LoginBuffer = new byte[42];
 			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_GETSENSORDATA);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray((int)UserID);
@@ -527,6 +532,12 @@ public class TGeographDataServerClient {
 			Buffer_Encrypt(LoginBuffer,10,10,UserPassword);
 			BA = TDataConverter.ConvertInt32ToLEByteArray(SERVICE_GETSENSORDATA_COMMAND_GETMEASUREMENTLIST);
 			System.arraycopy(BA,0, LoginBuffer,20, BA.length);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(BeginTimestamp);
+			System.arraycopy(BA,0, LoginBuffer,24, BA.length);
+			BA = TDataConverter.ConvertDoubleToLEByteArray(EndTimestamp);
+			System.arraycopy(BA,0, LoginBuffer,32, BA.length);
+			BA = TDataConverter.ConvertInt16ToLEByteArray(Version);
+			System.arraycopy(BA,0, LoginBuffer,40, BA.length);
 			ConnectionOutputStream.write(LoginBuffer);
 			//. check login
 			byte[] DecriptorBA = new byte[4];
@@ -537,25 +548,34 @@ public class TGeographDataServerClient {
 			//.
 			ConnectionInputStream.read(DecriptorBA);
 			Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-			TVideoRecorderMeasurementDescriptor[] Result;
+			TSensorMeasurementDescriptor[] Result;
 			if (Descriptor > 0) {
 				BA = new byte[Descriptor];
 				InputStream_ReadData(ConnectionInputStream,BA,BA.length,null,Canceller);
 				String ResultString = new String(BA,"US-ASCII");
 				String[] Items = ResultString.split(";");
-				Result = new TVideoRecorderMeasurementDescriptor[Items.length];
+				Result = new TSensorMeasurementDescriptor[Items.length];
 				for (int I = 0; I < Items.length; I++) {
 					String[] Properties = Items[I].split(",");
-					Result[I] = new TVideoRecorderMeasurementDescriptor();
+					Result[I] = new TSensorMeasurementDescriptor();
+					//.
 					Result[I].ID = Properties[0];
+					//.
 					Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
 					Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
-					Result[I].CPC = Double.parseDouble(Properties[3]);
-					Result[I].Location = TVideoRecorderMeasurementDescriptor.LOCATION_SERVER; 
+					//.
+					com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor.TModel Model = new com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor.TModel();
+					Model.TypeID = Properties[3];
+					Model.ContainerTypeID = Properties[4];
+					Result[I].Model = Model; 
+					//.
+					Result[I].CPC = Double.parseDouble(Properties[5]);
+					//.
+					Result[I].Location = TSensorMeasurementDescriptor.LOCATION_SERVER; 
 				}
 			}
 			else
-				Result = new TVideoRecorderMeasurementDescriptor[0];
+				Result = new TSensorMeasurementDescriptor[0];
 			return Result;
 		}
 		finally {
@@ -563,62 +583,8 @@ public class TGeographDataServerClient {
 		}
 	}
 	
-	public TVideoRecorderMeasurementDescriptor[] SERVICE_GETSENSORDATA_GetMeasurementList(double BeginTimestamp, double EndTimestamp, TCanceller Canceller) throws Exception {
-		Connect();
-		try {
-	        //. send login info
-	    	byte[] LoginBuffer = new byte[40];
-			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_GETSENSORDATA);
-			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray((int)UserID);
-			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray((int)idGeographServerObject);
-			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
-			short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
-			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
-			System.arraycopy(BA,0, LoginBuffer,18, BA.length);
-			Buffer_Encrypt(LoginBuffer,10,10,UserPassword);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(SERVICE_GETSENSORDATA_COMMAND_GETMEASUREMENTLIST_V1);
-			System.arraycopy(BA,0, LoginBuffer,20, BA.length);
-			BA = TDataConverter.ConvertDoubleToLEByteArray(BeginTimestamp);
-			System.arraycopy(BA,0, LoginBuffer,24, BA.length);
-			BA = TDataConverter.ConvertDoubleToLEByteArray(EndTimestamp);
-			System.arraycopy(BA,0, LoginBuffer,32, BA.length);
-			ConnectionOutputStream.write(LoginBuffer);
-			//. check login
-			byte[] DecriptorBA = new byte[4];
-			ConnectionInputStream.read(DecriptorBA);
-			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-			if (Descriptor != MESSAGE_OK)
-				throw new Exception(context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
-			//.
-			ConnectionInputStream.read(DecriptorBA);
-			Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-			TVideoRecorderMeasurementDescriptor[] Result;
-			if (Descriptor > 0) {
-				BA = new byte[Descriptor];
-				InputStream_ReadData(ConnectionInputStream,BA,BA.length,null,Canceller);
-				String ResultString = new String(BA,"US-ASCII");
-				String[] Items = ResultString.split(";");
-				Result = new TVideoRecorderMeasurementDescriptor[Items.length];
-				for (int I = 0; I < Items.length; I++) {
-					String[] Properties = Items[I].split(",");
-					Result[I] = new TVideoRecorderMeasurementDescriptor();
-					Result[I].ID = Properties[0];
-					Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
-					Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
-					Result[I].CPC = Double.parseDouble(Properties[3]);
-					//.
-					Result[I].Location = TVideoRecorderMeasurementDescriptor.LOCATION_SERVER; 
-				}
-			}
-			else
-				Result = new TVideoRecorderMeasurementDescriptor[0];
-			return Result;
-		}
-		finally {
-			Disconnect();
-		}
+	public TSensorMeasurementDescriptor[] SERVICE_GETSENSORDATA_GetMeasurementList(TCanceller Canceller) throws Exception {
+		return SERVICE_GETSENSORDATA_GetMeasurementList(-Double.MAX_VALUE,Double.MAX_VALUE, Canceller);
 	}
 	
 	public void SERVICE_GETSENSORDATA_GetMeasurementData(String MeasurementID, String MeasurementFolder, TItemProgressor ItemProgressor, TCanceller Canceller) throws Exception {

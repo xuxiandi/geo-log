@@ -1561,7 +1561,7 @@ public class TVideoRecorderModule extends TModule {
 		return TVideoRecorderMeasurements.GetMeasurementData(MeasurementID, flDescriptor,flAudio,flVideo);
 	}
 	
-	public byte[] Measurement_GetDataFragment(String MeasurementID, TMeasurementDescriptor CurrentMeasurement, double StartTimestamp, double FinishTimestamp, boolean flDescriptor, boolean flAudio, boolean flVideo) throws Exception {
+	/* public byte[] Measurement_GetDataFragment(String MeasurementID, TMeasurementDescriptor CurrentMeasurement, double StartTimestamp, double FinishTimestamp, boolean flDescriptor, boolean flAudio, boolean flVideo) throws Exception {
 		return TVideoRecorderMeasurements.GetMeasurementDataFragment(MeasurementID, CurrentMeasurement, StartTimestamp,FinishTimestamp, flDescriptor,flAudio,flVideo);
-	}	
+	} */
 }

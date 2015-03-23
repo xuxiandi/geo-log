@@ -37,6 +37,20 @@ public class TFileSystem {
 		}
 	}
 
+	public static long GetSize(String path) throws IOException {
+		long Result = 0;
+		File file = new File(path);
+		if (file.isDirectory()) {
+			String[] files = file.list();
+			for (String _file : files) 
+				Result += GetSize(_file);
+		}
+		else 
+			Result += file.length();
+		//.
+		return Result;
+	}
+	
 	public static boolean RemoveFolder(File path) {
 	    if (path.exists()) {
 	    	File[] files = path.listFiles();

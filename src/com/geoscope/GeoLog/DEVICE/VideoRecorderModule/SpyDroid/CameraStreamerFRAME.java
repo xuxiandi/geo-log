@@ -631,7 +631,6 @@ public class CameraStreamerFRAME extends Camera {
 		synchronized (this) {
 	        if (MeasurementDescriptor != null) {
 	        	MeasurementDescriptor.Model = new TModel();
-	        	MeasurementDescriptor.Model.TypeID = "AV.FRAME";
 	        	MeasurementDescriptor.Model.ContainerTypeID = "Audio.AAC-Video.H264I";
 	        	if (flAudio) {
 	        		AACChannel = new TAACChannel();

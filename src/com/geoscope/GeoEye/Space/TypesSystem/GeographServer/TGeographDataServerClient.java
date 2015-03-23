@@ -592,7 +592,7 @@ public class TGeographDataServerClient {
 		try {
 			byte[] MeasurementIDBA = MeasurementID.getBytes("US-ASCII");
 	        //. send parameters
-	    	byte[] LoginBuffer = new byte[24+4/*SizeOf(IDsBA)*/+MeasurementIDBA.length];
+	    	byte[] LoginBuffer = new byte[24+4/*SizeOf(MeasurementIDBA)*/+MeasurementIDBA.length];
 			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_GETSENSORDATA);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
 			BA = TDataConverter.ConvertInt32ToLEByteArray((int)UserID);

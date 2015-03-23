@@ -1002,5 +1002,9 @@
     <string name="SEnterCodeBelowAndRegister">Enter a code below and register</string>
     <string name="SDoYouWantToCreateYourOwnUser">You are using an anonymous access to the service.\nThere are many features disabled in that mode.\n\nDo you want to create your own user ?</string>
     <string name="SThereIsNoDataYet">there is no data yet</string>
+    <string name="SDataIsNotFound">data not found</string>
+    <string name="SDataIsLocked">data is locked</string>
+    <string name="SDataTransmitterIsDisabled">data transmitter is disabled</string>
+    <string name="SDataTransmitterIsBusy">data transmitter is busy</string>
     
 </resources>

@@ -32,6 +32,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClien
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleMeasurementsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
@@ -661,6 +662,12 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
 				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
 			default:
 				throw new OperationException(OE.Code,"error SensorsModule_Measurements_GetList(BeginTimestamp,EndTimestamp), "+OE.getMessage()); //. =>
 			}
@@ -709,6 +716,12 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
 				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
 			default:
 				throw new OperationException(OE.Code,"error SensorsModule_Measurements_Delete(), "+OE.getMessage()); //. =>
 			}
@@ -731,6 +744,18 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 
 			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
 				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_ServerSaverIsDisabled:
+				throw new Exception(ObjectController.context.getString(R.string.SDataTransmitterIsDisabled)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_ServerSaverIsBusy:
+				throw new Exception(ObjectController.context.getString(R.string.SDataTransmitterIsBusy)); //. =>
 
 			default:
 				throw new OperationException(OE.Code,"error SensorsModule_Measurements_MoveToDataServer(), "+OE.getMessage()); //. =>

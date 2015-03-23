@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,6 +27,10 @@ public class TSensorsModule extends TModule {
 		return TDEVICEModule.DeviceFolder()+"/"+"SensorsModule";
 	}
 	
+	public static String Measurements_Folder() {
+		return Folder()+"/"+"Measurements";
+	}
+	
 	
 	public TInternalSensorsModule InternalSensorsModule;
 	//.
@@ -37,7 +42,14 @@ public class TSensorsModule extends TModule {
     	super(pDevice);
     	//.
         Device = pDevice;
-        //.
+    	//. 
+		File F = new File(Folder());
+		if (!F.exists()) 
+			F.mkdirs();
+		F = new File(Measurements_Folder());
+		if (!F.exists()) 
+			F.mkdirs();
+		//.
         InternalSensorsModule = new TInternalSensorsModule(this);
         //.
         Data = new TSensorsDataValue(this);
@@ -255,5 +267,25 @@ public class TSensorsModule extends TModule {
 			return _Model.GetStreamer(pTypeID, pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters); //. ->
 		else 
 			return null; //. ->
+	}
+
+	public String Measurements_GetList(short Version) {
+		return TSensorsModuleMeasurements.GetMeasurementsList(Version);
+	}
+	
+	public String Measurements_GetList(double BeginTimestamp, double EndTimestamp, short Version) {
+		return TSensorsModuleMeasurements.GetMeasurementsList(BeginTimestamp,EndTimestamp, Version);
+	}
+	
+	public void Measurements_Delete(String MeasurementID) throws IOException {
+		TSensorsModuleMeasurements.DeleteMeasurement(MeasurementID);
+	}
+	
+	public long Measurement_GetSize(String MeasurementID) throws IOException {
+		return TSensorsModuleMeasurements.GetMeasurementSize(MeasurementID);
+	}
+	
+	public byte[] Measurement_GetData(String MeasurementID) throws IOException {
+		return TSensorsModuleMeasurements.GetMeasurementData(MeasurementID);
 	}
 }

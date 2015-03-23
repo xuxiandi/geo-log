@@ -58,6 +58,8 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPIValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPSFixSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPSModuleConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetSensorDataValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetSensorsModuleMeasurementsValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetSensorsModuleMetersValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderMeasurementDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderMeasurementsListValueADSO;
@@ -108,6 +110,8 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetGPOValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetGPSModuleConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetGeoDistanceThresholdSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorDataValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleMeasurementsValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleMetersValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetTaskModuleTaskResultSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetTaskModuleTaskStatusSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetVideoRecorderActiveValueSO;
@@ -1972,6 +1976,10 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TSetTaskModuleTaskResultSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData); //. =>
         if (TSetTaskModuleTaskStatusSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TSetTaskModuleTaskStatusSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData); //. =>
+        if (TSetSensorsModuleMetersValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetSensorsModuleMetersValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData); //. =>
+        if (TSetSensorsModuleMeasurementsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetSensorsModuleMeasurementsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData); //. =>
         else
             return null;
     } 
@@ -2010,6 +2018,10 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TGetControlDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetSensorDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TGetSensorDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
+        if (TGetSensorsModuleMetersValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TGetSensorsModuleMetersValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
+        if (TGetSensorsModuleMeasurementsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TGetSensorsModuleMeasurementsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         else
             return null;
     } 

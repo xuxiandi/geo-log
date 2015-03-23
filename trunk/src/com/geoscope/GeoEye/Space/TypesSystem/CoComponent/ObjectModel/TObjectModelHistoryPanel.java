@@ -57,6 +57,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObj
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.TGeoLocationRecord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.THistoryRecord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.TObjectHistoryRecords;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.TSensorsModuleMeasurements;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive.TArchiveItem;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerMyPlayerComponent;
@@ -1973,13 +1974,13 @@ public class TObjectModelHistoryPanel extends Activity {
         	    			TVideoRecorderServerArchive.TMeasurementPlayHandler PlayHandler = new TVideoRecorderServerArchive.TMeasurementPlayHandler() {
         	    				
         	    				@Override
-        	    				public boolean PlayMeasurement(final TMeasurementDescriptor MeasurementDescriptor, double MeasurementPosition) throws Exception {
+        	    				public boolean PlayMeasurement(final TSensorMeasurementDescriptor MeasurementDescriptor, double MeasurementPosition) throws Exception {
                     				if (Canceller.flCancel) 
                     					return true; //. ->
                     				//.
         	    					if (TVideoRecorderServerPlayer.IsDefaultPlayer(MeasurementDescriptor)) {
         			    	        	if ((VideoViewer.MeasurementDescriptor == null) || !TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer_CurrentMeasurement.ID, VideoViewer.MeasurementDescriptor.ID)) { 
-        	    		    	        	VideoViewer.Setup(TVideoRecorderServerArchive.LocalArchive_Folder(Object.GeographServerObjectID()), MeasurementDescriptor.ID);
+        	    		    	        	VideoViewer.Setup(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), MeasurementDescriptor.ID);
         	    		    	        	if (!VideoViewer.IsVisible())
         	    		    	        		VideoViewer.Show();
         			    	        	}

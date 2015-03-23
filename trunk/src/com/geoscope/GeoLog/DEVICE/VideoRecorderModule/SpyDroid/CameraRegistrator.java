@@ -4,9 +4,11 @@ import android.media.MediaRecorder;
 import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class CameraRegistrator extends Camera {
 
@@ -46,21 +48,15 @@ public class CameraRegistrator extends Camera {
 		//.
 		synchronized (this) {
 			if (flSaving) {
-				MeasurementID = TVideoRecorderMeasurements.CreateNewMeasurementID();
-				//.
-		    	switch (Mode) {
-		    	case TVideoRecorderModule.MODE_MPEG4: 
-					TVideoRecorderMeasurements.CreateNewMeasurement(MeasurementID,TVideoRecorderModule.MODE_MPEG4); 
-		    		break; //. >
-
-		    	case TVideoRecorderModule.MODE_3GP: 
-					TVideoRecorderMeasurements.CreateNewMeasurement(MeasurementID,TVideoRecorderModule.MODE_3GP); 
-		    		break; //. >
-		    	}
-				MeasurementFolder = TVideoRecorderMeasurements.VideoRecorder0_DataBaseFolder+"/"+MeasurementID;
+				MeasurementID = TDEVICEModule.TSensorMeasurement.GetNewID();
+				MeasurementDescriptor = new TMeasurementDescriptor(MeasurementID);
+				MeasurementDescriptor.Mode = (short)Mode; 
+				TSensorsModuleMeasurements.CreateNewMeasurement(TSensorsModuleMeasurements.DataBaseFolder,MeasurementID,MeasurementDescriptor); 
+				MeasurementFolder = TSensorsModuleMeasurements.DataBaseFolder+"/"+MeasurementID;
 			}
 			else { 
 				MeasurementID = null;
+				MeasurementDescriptor = null;
 				MeasurementFolder = "";
 			}
 		}

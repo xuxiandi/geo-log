@@ -1002,5 +1002,9 @@
     <string name="SEnterCodeBelowAndRegister">Введите код на картинке и зарегистрируйтесь</string>
     <string name="SDoYouWantToCreateYourOwnUser">Вы используете анонимный вход в сервис.\nМногие возможности не доступны в данном режиме.\n\nХотите создать вашего собственного пользователя ?</string>
     <string name="SThereIsNoDataYet">Нет данных, или еще не загружены.</string>
+    <string name="SDataIsNotFound">данные не найдены</string>
+    <string name="SDataIsLocked">данные блокированы</string>
+    <string name="SDataTransmitterIsDisabled">передатчик данных недоступен</string>
+    <string name="SDataTransmitterIsBusy">передатчик данных занят</string>
     
 </resources>

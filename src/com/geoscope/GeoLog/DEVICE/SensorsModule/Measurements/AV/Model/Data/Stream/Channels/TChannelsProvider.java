@@ -17,6 +17,6 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 		if (TH264IChannel.TypeID.equals(pTypeID))
 			return (new TH264IChannel()); // =>
 		else
-			return null;
+			return null; //. ->
 	}	
 }

@@ -1,6 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels;
 
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.TStreamChannel;
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
@@ -9,11 +9,17 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 	}
 	
 	@Override
-	public TStreamChannel GetChannel(String pTypeID) {
-		TStreamChannel Result = null;
+	public TChannel GetChannel(String pTypeID) {
+		TChannel Result = null;
+		com.geoscope.Classes.Data.Stream.Channel.TChannelProvider CP;
 		//.
-		com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.TChannelsProvider AVChannelsProvider = new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.TChannelsProvider();
-		Result = AVChannelsProvider.GetChannel(pTypeID);
+		CP = new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.TChannelsProvider();
+		Result = CP.GetChannel(pTypeID);
+		if (Result != null)
+			return Result; //. ->
+		//.
+		CP = new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ECTLR.Model.Data.Stream.Channels.TChannelsProvider();
+		Result = CP.GetChannel(pTypeID);
 		if (Result != null)
 			return Result; //. ->
 		//.

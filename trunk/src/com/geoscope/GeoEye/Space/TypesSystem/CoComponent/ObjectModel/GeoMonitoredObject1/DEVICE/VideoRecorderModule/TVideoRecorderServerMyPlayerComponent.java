@@ -43,10 +43,10 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implements SurfaceHolder.Callback {
@@ -164,7 +164,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		}
 		
 		public TAudioAACChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pFolder, TChannel Channel) {
-			this(pPlayer, pFolder+"/"+com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.AudioAACADTSFileName, ((TAACChannel)Channel).Packets, ((TAACChannel)Channel).SampleRate, 0);
+			this(pPlayer, pFolder+"/"+com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.AudioAACADTSFileName, ((TAACChannel)Channel).Packets, ((TAACChannel)Channel).SampleRate, 0);
 		}
 		
 		@Override
@@ -443,7 +443,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		}
 		
 		public TVideoH264IChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pFolder, TChannel Channel, SurfaceHolder pSurface, int pWidth, int pHeight) {
-			this(pPlayer, pFolder+"/"+com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.VideoH264FileName,pFolder+"/"+com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.VideoIndex32FileName,pFolder+"/"+com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.VideoTS32FileName, ((TH264IChannel)Channel).Packets, ((TH264IChannel)Channel).FrameRate, pSurface, pWidth,pHeight);		
+			this(pPlayer, pFolder+"/"+com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.VideoH264FileName,pFolder+"/"+com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.VideoIndex32FileName,pFolder+"/"+com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.VideoTS32FileName, ((TH264IChannel)Channel).Packets, ((TH264IChannel)Channel).FrameRate, pSurface, pWidth,pHeight);		
 		}
 		
 		@SuppressWarnings("unused")

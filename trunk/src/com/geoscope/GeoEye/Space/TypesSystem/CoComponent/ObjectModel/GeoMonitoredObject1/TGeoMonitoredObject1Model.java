@@ -24,7 +24,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionStopHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionUDPStartHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionUDPStopHandler;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.TSensorsModuleMeasurements;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneCallPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient.TVideoRecorderMeasurementDescriptor;
@@ -36,10 +36,9 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleMe
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeterDescriptor;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeterInfo;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterInfo;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 public class TGeoMonitoredObject1Model extends TObjectModel
@@ -234,12 +233,12 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			for (int I = 0; I < DVRMs.length; I++) {
 				boolean flFound = false;
 				for (int J = 0; J < SVRMs.length; J++) 
-					if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, SVRMs[J].ID)) {
+					if (TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, SVRMs[J].ID)) {
 						flFound = true;
 						break; //. >
 					}
 				for (int J = 0; J < CVRMs.length; J++) 
-					if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, CVRMs[J].ID)) {
+					if (TSensorMeasurementDescriptor.IDsAreTheSame(DVRMs[I].ID, CVRMs[J].ID)) {
 						flFound = true;
 						break; //. >
 					}
@@ -254,7 +253,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			for (int I = 0; I < SVRMs.length; I++) {
 				boolean flFound = false;
 				for (int J = 0; J < CVRMs.length; J++) 
-					if (TDEVICEModule.TSensorMeasurementDescriptor.IDsAreTheSame(SVRMs[I].ID, CVRMs[J].ID)) {
+					if (TSensorMeasurementDescriptor.IDsAreTheSame(SVRMs[I].ID, CVRMs[J].ID)) {
 						flFound = true;
 						break; //. >
 					}
@@ -856,7 +855,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
 				Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
 				//.
-				com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor.TModel Model = new com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor.TModel();
+				com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel Model = new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel();
 				Model.TypeID = Properties[3];
 				Model.ContainerTypeID = Properties[4];
 				Result[I].Model = Model; 

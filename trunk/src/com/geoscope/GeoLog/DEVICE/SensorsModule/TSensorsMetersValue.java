@@ -5,7 +5,7 @@ import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 
 public class TSensorsMetersValue extends TComponentTimestampedDataValue {
 

@@ -64,7 +64,7 @@ public class TGeographDataServerClient {
 	public static final int MESSAGE_WRONGPARAMETERS       = -15;
 	public static final int MESSAGE_SAVINGDATAERROR       = -101;
 	  
-	public static class TVideoRecorderMeasurementDescriptor extends com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor {
+	public static class TVideoRecorderMeasurementDescriptor extends com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor {
 
 		public int AudioSize;
 		public int VideoSize;
@@ -72,7 +72,7 @@ public class TGeographDataServerClient {
 		public double CPC;
 	}
 	
-	public static class TSensorMeasurementDescriptor extends com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor {
+	public static class TSensorMeasurementDescriptor extends com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor {
 
 		public double CPC;
 	}
@@ -564,7 +564,7 @@ public class TGeographDataServerClient {
 					Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
 					Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
 					//.
-					com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor.TModel Model = new com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor.TModel();
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel Model = new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel();
 					Model.TypeID = Properties[3];
 					Model.ContainerTypeID = Properties[4];
 					Result[I].Model = Model; 

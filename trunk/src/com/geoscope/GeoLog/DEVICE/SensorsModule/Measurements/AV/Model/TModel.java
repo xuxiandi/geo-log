@@ -1,10 +1,8 @@
-package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model;
 
 import org.w3c.dom.Node;
 
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-
-public class TModel extends TDEVICEModule.TSensorMeasurementDescriptor.TModel {
+public class TModel extends com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.TModel {
 
 	public TModel() {
     	TypeID = "AV.FRAME";

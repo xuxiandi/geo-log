@@ -3,9 +3,9 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.PacketTimeBase;
 
 public class Camera {

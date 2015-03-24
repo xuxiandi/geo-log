@@ -41,7 +41,7 @@ public class TStreamDescriptor {
 		FromByteArray(BA);
 	}
 	
-	public void FromXMLNode(Node ANode, TChannelProvider pChannelProvider) throws Exception {
+	public synchronized void FromXMLNode(Node ANode, TChannelProvider pChannelProvider) throws Exception {
 		int Version = Integer.parseInt(TMyXML.SearchNode(ANode,"Version").getFirstChild().getNodeValue());
 		switch (Version) {
 		case 1:

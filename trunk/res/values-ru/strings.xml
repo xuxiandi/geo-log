@@ -1006,5 +1006,8 @@
     <string name="SDataIsLocked">данные блокированы</string>
     <string name="SDataTransmitterIsDisabled">передатчик данных недоступен</string>
     <string name="SDataTransmitterIsBusy">передатчик данных занят</string>
+    <string name="SApplyChanges">Применить изменения</string>
+    <string name="SDeviceSensorMeters">Регистраторы сенсоров</string>
+    <string name="SMeters">Регистраторы</string>
     
 </resources>

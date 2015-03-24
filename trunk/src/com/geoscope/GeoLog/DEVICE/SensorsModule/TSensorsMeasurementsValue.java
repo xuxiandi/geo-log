@@ -42,6 +42,7 @@ public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
     	String[] SA = Params.split(",");
     	int Operation = Integer.parseInt(SA[0]);
     	switch (Operation) {
+    	
     	case 1: //. delete measurement(s)
     		for (int I = 1; I < SA.length; I++)
         		SensorsModule.Measurements_Delete(SA[I]);
@@ -92,6 +93,7 @@ public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
     	int Operation = Integer.parseInt(SA[0]);
     	//.
     	switch (Operation) {
+    	
     	case 1: //. get measurements list
         	short Version = Short.parseShort(SA[1]); 
         	double BeginTimestamp = Double.parseDouble(SA[2]); 

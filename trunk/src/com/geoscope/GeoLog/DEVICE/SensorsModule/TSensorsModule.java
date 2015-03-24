@@ -14,6 +14,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetSensorsDa
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessagingModule.TUserMessagingModule.TUserMessaging;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMeters;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TChannelsProvider;
@@ -27,6 +28,10 @@ public class TSensorsModule extends TModule {
 		return TDEVICEModule.DeviceFolder()+"/"+"SensorsModule";
 	}
 	
+	public static String Meters_Folder() {
+		return Folder()+"/"+"Meters";
+	}
+	
 	public static String Measurements_Folder() {
 		return Folder()+"/"+"Measurements";
 	}
@@ -37,6 +42,8 @@ public class TSensorsModule extends TModule {
 	public TSensorsDataValue Data;
 	//.
 	private TModel Model;
+	//.
+	public TSensorsMeters Meters;
 	
     public TSensorsModule(TDEVICEModule pDevice) throws Exception {
     	super(pDevice);
@@ -44,6 +51,9 @@ public class TSensorsModule extends TModule {
         Device = pDevice;
     	//. 
 		File F = new File(Folder());
+		if (!F.exists()) 
+			F.mkdirs();
+		F = new File(Meters_Folder());
 		if (!F.exists()) 
 			F.mkdirs();
 		F = new File(Measurements_Folder());
@@ -55,9 +65,29 @@ public class TSensorsModule extends TModule {
         Data = new TSensorsDataValue(this);
         //.
         Model = null;
+        //.
+        Meters = new TSensorsMeters(Meters_Folder());
     }
     
-    public void Destroy() {
+    public void Destroy() throws Exception {
+    	if (Meters != null) {
+    		Meters.Destroy();
+    		Meters = null;
+    	}
+    }
+    
+    @Override
+    public void Start() throws Exception {
+    	super.Start();
+    	//.
+    	Meters.Initialize();
+    }
+    
+    @Override
+    public void Stop() throws Exception {
+    	Meters.Finalize();
+    	//.
+    	super.Stop();
     }
     
     public synchronized void Model_Build() throws Exception {

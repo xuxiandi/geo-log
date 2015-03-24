@@ -1006,5 +1006,8 @@
     <string name="SDataIsLocked">data is locked</string>
     <string name="SDataTransmitterIsDisabled">data transmitter is disabled</string>
     <string name="SDataTransmitterIsBusy">data transmitter is busy</string>
+    <string name="SApplyChanges">Apply changes</string>
+    <string name="SDeviceSensorMeters">Device sensor registrators</string>
+    <string name="SMeters">Registrators</string>
     
 </resources>

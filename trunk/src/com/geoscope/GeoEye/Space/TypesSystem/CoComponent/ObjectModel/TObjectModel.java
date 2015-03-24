@@ -33,6 +33,7 @@ import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentElement;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeterInfo;
 import com.jcraft.jzlib.ZInputStream;
 
 
@@ -484,7 +485,21 @@ public class TObjectModel {
 		return new TObjectHistoryRecords(ObjectModelRecords,BusinessModelRecords);
 	}
 	
-	public TSensorMeasurementDescriptor[] Sensors_GetMeasurements(double BeginTimestamp, double EndTimestamp, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {
+	public TSensorMeterInfo[] Sensors_Meters_GetList() throws Exception {
+		return null;
+	}
+	
+	public void Sensors_Meters_SetProfile(String MeterID, byte[] Profile) throws IOException, Exception {
+	}
+	
+	public byte[] Sensors_Meters_GetProfile(String MeterID) throws Exception {
+		return null;
+	}
+	
+	public void Sensors_Meters_SetActive(String MeterIDs, boolean flActive) throws IOException, Exception {
+	}
+	
+	public TSensorMeasurementDescriptor[] Sensors_Measurements_GetList(double BeginTimestamp, double EndTimestamp, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {
 		return null;
 	}
 	

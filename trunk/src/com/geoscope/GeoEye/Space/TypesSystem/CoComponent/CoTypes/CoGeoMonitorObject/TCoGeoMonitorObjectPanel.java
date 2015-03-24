@@ -656,6 +656,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						Button btnShowVideoRecorderViewer = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer);
 						Button btnShowVideoRecorderArchive = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderArchive);
 						Button btnShowSensorsModuleStream = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleStream);
+						Button btnShowSensorsModuleMeters = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleMeters);
 						Button btnShowControlsModuleStream = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowControlsModuleStream);
 						Button btnSendAudioFileMessage = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnSendAudioFileMessage);
 						Button btnImportAudioFiles = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles);
@@ -1125,6 +1126,36 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						        		break; //. >
 						        	}
 				    	        	intent.putExtra("DataStreamDescriptorData",Model.Stream.ToByteArray());
+						            startActivity(intent);
+								} catch (Exception E) {
+							    	Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+							    	return; //. ->
+								}
+							}
+						});
+						btnShowSensorsModuleMeters.setEnabled(DC.SensorsModule.SensorsDataValue.Value != null);
+						btnShowSensorsModuleMeters.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+					            try {
+									if ((DC.SensorsModule.SensorsDataValue.Value == null) || (DC.SensorsModule.SensorsDataValue.Value.length == 0)) {
+								    	Toast.makeText(TCoGeoMonitorObjectPanel.this, R.string.SThereAreNoSensors, Toast.LENGTH_LONG).show();
+										return; //. ->
+									}
+									//.
+						            Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Meters.TSensorsMetersPanel.class);
+						            long _ObjectID = 0;
+						        	switch (ParametersType) {
+						        	
+						        	case PARAMETERS_TYPE_OID:
+										_ObjectID = ObjectID;
+						        		break; //. >
+						        		
+						        	case PARAMETERS_TYPE_OIDX:
+										_ObjectID = Component.CoGeoMonitorObjects.Items[ObjectIndex].ID;
+						        		break; //. >
+						        	}
+									intent.putExtra("ObjectID", _ObjectID);
 						            startActivity(intent);
 								} catch (Exception E) {
 							    	Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();

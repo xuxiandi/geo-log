@@ -786,11 +786,24 @@
                         style="android:attr/buttonBarButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
                         android:text="@string/SSensors"
                         android:textSize="18sp"
                         android:textStyle="bold|italic"
                         android:typeface="monospace" />
-                </LinearLayout>
+
+                    <Button
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleMeters"
+                        style="android:attr/buttonBarButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/SMeters"
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:typeface="monospace" />
+
+                    </LinearLayout>
 
                 <TextView
                     android:layout_width="fill_parent"

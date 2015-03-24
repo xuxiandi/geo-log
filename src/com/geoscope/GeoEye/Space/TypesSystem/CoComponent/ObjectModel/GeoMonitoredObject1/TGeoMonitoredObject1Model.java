@@ -38,6 +38,8 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeograp
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeterDescriptor;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeterInfo;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 public class TGeoMonitoredObject1Model extends TObjectModel
@@ -184,7 +186,27 @@ public class TGeoMonitoredObject1Model extends TObjectModel
     }
 	
 	@Override
-	public TSensorMeasurementDescriptor[] Sensors_GetMeasurements(double BeginTimestamp, double EndTimestamp, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {
+	public TSensorMeterInfo[] Sensors_Meters_GetList() throws Exception {
+		return SensorsModule_Meters_GetList();
+	}
+	
+	@Override
+	public void Sensors_Meters_SetProfile(String MeterID, byte[] Profile) throws IOException, Exception {
+		SensorsModule_Meters_SetProfile(MeterID, Profile);
+	}
+	
+	@Override
+	public byte[] Sensors_Meters_GetProfile(String MeterID) throws Exception {
+		return SensorsModule_Meters_GetProfile(MeterID);
+	}
+	
+	@Override
+	public void Sensors_Meters_SetActive(String MeterIDs, boolean flActive) throws IOException, Exception {
+		SensorsModule_Meters_SetActive(MeterIDs, flActive);
+	}
+	
+	@Override
+	public TSensorMeasurementDescriptor[] Sensors_Measurements_GetList(double BeginTimestamp, double EndTimestamp, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {
 		TGeoMonitoredObject1Model ObjectModel = new TGeoMonitoredObject1Model(ObjectController);
 		//.
 		TSensorMeasurementDescriptor[] DVRMs;
@@ -643,6 +665,154 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 
 	public TLANConnectionUDPStopHandler TLANConnectionUDPStopHandler_Create(TCoGeoMonitorObject Object) {
 		return new TLANConnectionUDPStopper(Object);
+	}
+	
+	public TSensorMeterInfo[] SensorsModule_Meters_GetList() throws Exception {
+		int Version = 2;
+		int SubVersion = 1;
+		String Params = "1,"+Integer.toString(Version)+","+Integer.toString(SubVersion);
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,19,1001});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		TComponentTimestampedANSIStringValue Value = new TComponentTimestampedANSIStringValue();
+		try {
+			byte[] Data = ObjectController.Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Value.FromByteArray(Data,(new TIndex(0)));
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
+			default:
+				throw new OperationException(OE.Code,"error SensorsModule_Measurements_GetList(BeginTimestamp,EndTimestamp), "+OE.getMessage()); //. =>
+			}
+		}
+		//.
+		TSensorMeterInfo[] Result;
+		if ((Value.Value != null) && (Value.Value.length() > 0)) {
+			String[] Items = Value.Value.split(";");
+			Result = new TSensorMeterInfo[Items.length];
+			for (int I = 0; I < Items.length; I++) {
+				String[] Properties = Items[I].split(",");
+				TSensorMeterDescriptor Descriptor = new TSensorMeterDescriptor();
+				//.
+				Descriptor.ID = Properties[0];
+				//.
+				Descriptor.TypeID = Properties[1];
+				Descriptor.ContainerTypeID = Properties[2];
+				//.
+				Descriptor.Name = Properties[3];
+				Descriptor.Info = Properties[4];
+				//.
+				boolean flEnabled = (Integer.parseInt(Properties[5]) != 0);
+				//.
+				boolean flActive = (Integer.parseInt(Properties[6]) != 0);
+				//.
+				int Status = Integer.parseInt(Properties[7]);
+				//.
+				Result[I] = new TSensorMeterInfo(Descriptor, flEnabled, flActive, Status);
+			}
+		}
+		else
+			Result = new TSensorMeterInfo[0];
+		return Result;
+	}
+	
+	public void SensorsModule_Meters_SetProfile(String MeterID, byte[] Profile) throws IOException, Exception {
+		String Params = "1,1,"+MeterID; //. set profile command
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,19,1001});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		try {
+			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
+			V.Timestamp = OleDate.UTCCurrentTimestamp();
+			V.Value = Profile;
+			ObjectController.Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
+			default:
+				throw new OperationException(OE.Code,"error SensorsModule_Measurements_Delete(), "+OE.getMessage()); //. =>
+			}
+		}
+	}
+	
+	public byte[] SensorsModule_Meters_GetProfile(String MeterID) throws Exception {
+		int Version = 1;
+		String Params = "1,"+Integer.toString(Version)+","+MeterID;
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,19,1001});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		TComponentTimestampedDataValue Value = new TComponentTimestampedDataValue();
+		try {
+			byte[] Data = ObjectController.Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Value.FromByteArray(Data,(new TIndex(0)));
+			//.
+			return Value.Value; //. ->
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
+			default:
+				throw new OperationException(OE.Code,"error SensorsModule_Measurements_GetList(BeginTimestamp,EndTimestamp), "+OE.getMessage()); //. =>
+			}
+		}
+	}
+	
+	public void SensorsModule_Meters_SetActive(String MeterIDs, boolean flActive) throws IOException, Exception {
+		String Params = "1,2,"+(flActive ? "1" : "2")+","+MeterIDs; //. set profile command
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,19,1001});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		try {
+			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
+			V.Timestamp = OleDate.UTCCurrentTimestamp();
+			V.Value = null;
+			ObjectController.Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
+			default:
+				throw new OperationException(OE.Code,"error SensorsModule_Measurements_Delete(), "+OE.getMessage()); //. =>
+			}
+		}
 	}
 	
 	public TSensorMeasurementDescriptor[] SensorsModule_Measurements_GetList(double BeginTimestamp, double EndTimestamp) throws Exception {

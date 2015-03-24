@@ -1,0 +1,74 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="center"
+        android:text="@string/SChannels"
+        android:textColor="#ff000000"
+        android:textSize="18sp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/llName"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/ivMeters"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:adjustViewBounds="true"
+            android:background="@drawable/meter"
+            android:contentDescription="@string/SDataStream"
+            android:scaleType="matrix" />
+
+        <TextView
+            android:id="@+id/lbName"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white"
+            android:gravity="center_vertical"
+            android:paddingLeft="2dp"
+            android:text="@string/SDeviceSensorMeters"
+            android:textColor="@android:color/black"
+            android:textSize="24sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <ListView
+            android:id="@+id/lvMeters"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" >
+        </ListView>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white" >
+
+            <Button
+                android:id="@+id/btnApplyChanges"
+                style="@style/Theme.DefaultTransparent"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/SApplyChanges"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

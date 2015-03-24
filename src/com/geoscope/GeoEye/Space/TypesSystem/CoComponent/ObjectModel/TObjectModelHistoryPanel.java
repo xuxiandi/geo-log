@@ -1375,72 +1375,79 @@ public class TObjectModelHistoryPanel extends Activity {
 			
 			@Override
 			public void Process() throws Exception {
-				byte[] ObjectModelData = TObjectModelHistoryPanel.this.Object.GetData(1000001);
-				if (ObjectModelData != null) {
-    				Canceller.Check();
-    				//.
-					int Idx = 0;
-					int ObjectModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
-					int BusinessModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
-					//.
-					if (ObjectModelID != 0) {
-						_ObjectModel = TObjectModel.GetObjectModel(ObjectModelID);
-						if (_ObjectModel != null) {
-							_ObjectModel.SetBusinessModel(BusinessModelID);
-							//.
-							TGeographServerObjectController GSOC = TObjectModelHistoryPanel.this.Object.GeographServerObjectController();
-							synchronized (GSOC) {
-								boolean flKeepConnectionLast = GSOC.KeepConnection();
-								try {
-									GSOC.Connect();
+				try {
+					byte[] ObjectModelData = TObjectModelHistoryPanel.this.Object.GetData(1000001);
+					if (ObjectModelData != null) {
+	    				Canceller.Check();
+	    				//.
+						int Idx = 0;
+						int ObjectModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+						int BusinessModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+						//.
+						if (ObjectModelID != 0) {
+							_ObjectModel = TObjectModel.GetObjectModel(ObjectModelID);
+							if (_ObjectModel != null) {
+								_ObjectModel.SetBusinessModel(BusinessModelID);
+								//.
+								TGeographServerObjectController GSOC = TObjectModelHistoryPanel.this.Object.GeographServerObjectController();
+								synchronized (GSOC) {
+									boolean flKeepConnectionLast = GSOC.KeepConnection();
 									try {
-					    				Canceller.Check();
-					    				//.
-										byte[] ObjectSchemaData = GSOC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
-										//.
-										DoOnProgress(10);
-										//.
-					    				Canceller.Check();
-					    				//.
-										if (ObjectSchemaData != null)
-											_ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
-										//.
-										byte[] ObjectDeviceSchemaData = GSOC.Component_ReadAllCUAC(new int[] {2/*device side*/});
-										//.
-										DoOnProgress(20);
-										//.
-					    				Canceller.Check();
-					    				//.
-										if (ObjectDeviceSchemaData != null)
-											_ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
-										//.
-										_ObjectModel.SetObjectController(GSOC, false);
-										TObjectHistoryRecords _HistoryRecords = _ObjectModel.History_GetRecords(DayDate,DaysCount, context);
-										//.
-										DoOnProgress(60);
-										//.
-					    				Canceller.Check();
-										//.
-										TSensorMeasurementDescriptor[] _SensorMeasurements = _ObjectModel.Sensors_GetMeasurements(DayDate, DayDate+DaysCount, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, Canceller);
-										//.
-										DoOnProgress(80);
-										//.
-					    				Canceller.Check();
-										//.
-										_History = new THistory(_ObjectModel.ObjectDatumID(), _HistoryRecords, _SensorMeasurements);
-										//.
-										DoOnProgress(100);
+										GSOC.Connect();
+										try {
+						    				Canceller.Check();
+						    				//.
+											byte[] ObjectSchemaData = GSOC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
+											//.
+											DoOnProgress(10);
+											//.
+						    				Canceller.Check();
+						    				//.
+											if (ObjectSchemaData != null)
+												_ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
+											//.
+											byte[] ObjectDeviceSchemaData = GSOC.Component_ReadAllCUAC(new int[] {2/*device side*/});
+											//.
+											DoOnProgress(20);
+											//.
+						    				Canceller.Check();
+						    				//.
+											if (ObjectDeviceSchemaData != null)
+												_ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
+											//.
+											_ObjectModel.SetObjectController(GSOC, false);
+											TObjectHistoryRecords _HistoryRecords = _ObjectModel.History_GetRecords(DayDate,DaysCount, context);
+											//.
+											DoOnProgress(60);
+											//.
+						    				Canceller.Check();
+											//.
+											TSensorMeasurementDescriptor[] _SensorMeasurements = _ObjectModel.Sensors_Measurements_GetList(DayDate, DayDate+DaysCount, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, Canceller);
+											//.
+											DoOnProgress(80);
+											//.
+						    				Canceller.Check();
+											//.
+											_History = new THistory(_ObjectModel.ObjectDatumID(), _HistoryRecords, _SensorMeasurements);
+											//.
+											DoOnProgress(100);
+										}
+										finally {
+											GSOC.Disconnect();
+										}
 									}
 									finally {
-										GSOC.Disconnect();
+										GSOC.Connection_flKeepAlive = flKeepConnectionLast;
 									}
-								}
-								finally {
-									GSOC.Connection_flKeepAlive = flKeepConnectionLast;
 								}
 							}
 						}
 					}
+				}
+				catch (Exception E) {
+					if (_ObjectModel != null)
+						_ObjectModel.Destroy();
+					throw E; //. =>
 				}
 			}
 			

@@ -3,13 +3,13 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 import android.app.Activity;
 import android.content.Intent;
 
-import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 
 public class TVideoRecorderServerPlayer {
 
 	public static boolean IsDefaultPlayer(TSensorMeasurementDescriptor MeasurementDescriptor) {
-		return (MeasurementDescriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor.TypeIDPrefix));
+		return (MeasurementDescriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeIDPrefix));
 	}
 	
 	

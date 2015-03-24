@@ -26,7 +26,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectMode
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeterInfo;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterInfo;
 
 @SuppressLint("HandlerLeak")
 public class TSensorsMetersPanel extends Activity {

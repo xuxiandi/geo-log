@@ -32,8 +32,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServe
 import com.geoscope.GeoLog.COMPONENT.TComponent;
 import com.geoscope.GeoLog.COMPONENT.TComponentElement;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeterInfo;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterInfo;
 import com.jcraft.jzlib.ZInputStream;
 
 

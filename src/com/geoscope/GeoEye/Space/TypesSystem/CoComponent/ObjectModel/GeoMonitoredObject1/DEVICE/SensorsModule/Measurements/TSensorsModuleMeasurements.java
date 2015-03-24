@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule;
+package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements;
 
 import java.io.File;
 
@@ -9,7 +9,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive.TMeasurementPlayHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
 
 public class TSensorsModuleMeasurements {
 
@@ -30,7 +30,7 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static void Context_RemoveMeasurement(long GeographServerObjectID, String MeasurementID) throws Exception {
-		com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements.DeleteMeasurement(Context_Folder(GeographServerObjectID), MeasurementID);
+		com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.DeleteMeasurement(Context_Folder(GeographServerObjectID), MeasurementID);
 	}
 	
 	public static String Context_GetMeasurementTempFolder(long GeographServerObjectID, String MeasurementID) throws Exception {
@@ -46,7 +46,7 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static TSensorMeasurementDescriptor[] Context_GetMeasurementsList(long GeographServerObjectID, double BeginTimestamp, double EndTimestamp) throws Exception {
-		String ResultString = com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements.GetMeasurementsList(Context_Folder(GeographServerObjectID), BeginTimestamp,EndTimestamp, (short)1/*Version*/);
+		String ResultString = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.GetMeasurementsList(Context_Folder(GeographServerObjectID), BeginTimestamp,EndTimestamp, (short)1/*Version*/);
 		TSensorMeasurementDescriptor[] Result;
 		if ((ResultString != null) && (!ResultString.equals(""))) {
 			String[] Items = ResultString.split(";");
@@ -60,7 +60,7 @@ public class TSensorsModuleMeasurements {
 				Result[I].StartTimestamp = Double.parseDouble(Properties[1]);
 				Result[I].FinishTimestamp = Double.parseDouble(Properties[2]);
 				//.
-				com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor.TModel Model = new com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor.TModel();
+				com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel Model = new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel();
 				Model.TypeID = Properties[3];
 				Model.ContainerTypeID = Properties[4];
 				//.
@@ -88,7 +88,7 @@ public class TSensorsModuleMeasurements {
     	//.
 		boolean flPlayAsDefault = true;
 		if (PlayHandler != null) {
-			TSensorMeasurementDescriptor MeasurementDescriptor = com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
+			TSensorMeasurementDescriptor MeasurementDescriptor = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
 			flPlayAsDefault = (!PlayHandler.PlayMeasurement(MeasurementDescriptor, MeasurementStartPosition));
 		}
 		if (flPlayAsDefault) {

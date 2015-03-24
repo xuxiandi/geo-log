@@ -1,9 +1,9 @@
-package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV;
 
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
-public class TMeasurementDescriptor extends TDEVICEModule.TSensorMeasurementDescriptor {
+public class TMeasurementDescriptor extends TSensorMeasurementDescriptor {
 
 	public static final String TypeIDPrefix = "AV";
 	

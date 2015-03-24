@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.SensorsModule;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -26,8 +26,9 @@ import android.util.Xml;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeasurementDescriptor.TModel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel;
 
 public class TSensorsModuleMeasurements {
 
@@ -305,7 +306,7 @@ public class TSensorsModuleMeasurements {
 			Descriptor.FinishTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("FinishTimestamp").item(0).getFirstChild().getNodeValue());
 			Node ModelNode = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"Model");
 			if (ModelNode != null) 
-				Descriptor.Model = new TModel(ModelNode, new com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider());
+				Descriptor.Model = new TSensorMeasurementModel(ModelNode, new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider());
 			else
 				Descriptor.Model = null;
 			break; //. >

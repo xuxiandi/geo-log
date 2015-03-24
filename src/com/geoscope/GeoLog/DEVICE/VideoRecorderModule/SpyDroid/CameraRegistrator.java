@@ -4,10 +4,10 @@ import android.media.MediaRecorder;
 import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class CameraRegistrator extends Camera {
 
@@ -47,7 +47,7 @@ public class CameraRegistrator extends Camera {
 		//.
 		synchronized (this) {
 			if (flSaving) {
-				MeasurementID = TDEVICEModule.TSensorMeasurement.GetNewID();
+				MeasurementID = TSensorMeasurement.GetNewID();
 				MeasurementDescriptor = new TMeasurementDescriptor(MeasurementID);
 				MeasurementDescriptor.Mode = (short)Mode; 
 				TSensorsModuleMeasurements.CreateNewMeasurement(TSensorsModuleMeasurements.DataBaseFolder,MeasurementID,MeasurementDescriptor); 

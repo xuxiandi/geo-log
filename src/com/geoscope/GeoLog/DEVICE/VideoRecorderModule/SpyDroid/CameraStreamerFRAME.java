@@ -25,16 +25,16 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneCapturingServer;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACEncoder;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModuleMeasurements;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264Encoder;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.TMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.TModel;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.PacketTimeBase;
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 @SuppressLint("NewApi")
 public class CameraStreamerFRAME extends Camera {
@@ -517,7 +517,7 @@ public class CameraStreamerFRAME extends Camera {
 		//.
 		synchronized (this) {
 			if (flSaving) {
-				MeasurementID = TDEVICEModule.TSensorMeasurement.GetNewID();
+				MeasurementID = TSensorMeasurement.GetNewID();
 				MeasurementDescriptor = new TMeasurementDescriptor(MeasurementID);
 				TSensorsModuleMeasurements.CreateNewMeasurement(TSensorsModuleMeasurements.DataBaseFolder,MeasurementID,MeasurementDescriptor); 
 				MeasurementFolder = TSensorsModuleMeasurements.DataBaseFolder+"/"+MeasurementID;

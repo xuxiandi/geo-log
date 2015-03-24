@@ -1,11 +1,11 @@
-package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.Stream.Channels.Video.H264I;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Video.H264I;
 
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.Measurement.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.TStreamChannel;
 
 public class TH264IChannel extends TStreamChannel {
 

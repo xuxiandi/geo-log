@@ -2,7 +2,7 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters;
 
 import java.util.ArrayList;
 
-import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TSensorMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 
 public class TSensorsMeters {
 

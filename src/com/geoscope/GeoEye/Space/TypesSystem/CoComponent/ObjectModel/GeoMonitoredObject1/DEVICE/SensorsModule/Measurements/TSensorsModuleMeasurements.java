@@ -89,7 +89,7 @@ public class TSensorsModuleMeasurements {
     	//.
 		boolean flPlayAsDefault = true;
 		if (PlayHandler != null) {
-			TSensorMeasurementDescriptor MeasurementDescriptor = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
+			TSensorMeasurementDescriptor MeasurementDescriptor = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 			flPlayAsDefault = (!PlayHandler.PlayMeasurement(MeasurementDescriptor, MeasurementStartPosition));
 		}
 		if (flPlayAsDefault) {

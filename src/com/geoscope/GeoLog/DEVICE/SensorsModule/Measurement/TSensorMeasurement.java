@@ -2,6 +2,7 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement;
 
 import java.util.ArrayList;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 
@@ -39,14 +40,14 @@ public class TSensorMeasurement {
 	//.
 	public TSensorMeasurementDescriptor Descriptor;
 	
-	public TSensorMeasurement(String pDatabaseFolder, String pMeasurementID, Class<?> DescriptorClass) throws Exception {
+	public TSensorMeasurement(String pDatabaseFolder, String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
 		DatabaseFolder = pDatabaseFolder;
 		//.
-		Descriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(DatabaseFolder, pMeasurementID, DescriptorClass);
+		Descriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(DatabaseFolder, pMeasurementID, DescriptorClass, ChannelProvider);
 	}
 	
-	public TSensorMeasurement(String pMeasurementID, Class<?> DescriptorClass) throws Exception {
-		this(TSensorsModuleMeasurements.DataBaseFolder, pMeasurementID, DescriptorClass);
+	public TSensorMeasurement(String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+		this(TSensorsModuleMeasurements.DataBaseFolder, pMeasurementID, DescriptorClass, ChannelProvider);
 	}
 	
 	public String Folder() {

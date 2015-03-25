@@ -66,10 +66,10 @@ public class TStreamDescriptor {
 					if (ChannelNode.getLocalName() != null) {
 						String TypeID = TMyXML.SearchNode(ChannelNode,"TypeID").getFirstChild().getNodeValue();
 						//.
-						TChannel Channel;
+						TChannel Channel = null;
 						if (pChannelProvider != null)
 							Channel = pChannelProvider.GetChannel(TypeID);
-						else 
+						if (Channel == null) 
 							Channel = new TChannel();
 						//.
 						if (Channel != null) {

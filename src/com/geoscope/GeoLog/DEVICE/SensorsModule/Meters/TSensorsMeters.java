@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TASTLRMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ASTLR.TASTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TECTLRMeter;
 
 public class TSensorsMeters {

@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
@@ -113,7 +114,7 @@ public class TSensorsModuleMeasurements {
 				String ItemStr = null;
 				TSensorMeasurementDescriptor MeasurementDescriptor = null;
 				try {
-					MeasurementDescriptor = GetMeasurementDescriptor(pDataBaseFolder,MeasurementID);
+					MeasurementDescriptor = GetMeasurementDescriptor(pDataBaseFolder,MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 					if (MeasurementDescriptor != null) {
 						if (MeasurementDescriptor.IsValid() && !((MeasurementDescriptor.StartTimestamp > EndTimestamp) || (MeasurementDescriptor.FinishTimestamp < BeginTimestamp))) {
 							String TypeID = "?";
@@ -278,7 +279,7 @@ public class TSensorsModuleMeasurements {
 		SetMeasurementDescriptor(DataBaseFolder, MeasurementID, Descriptor);
 	}
 	
-	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, Class<?> DescriptorClass) throws Exception {
+	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
 		TSensorMeasurementDescriptor Descriptor = (TSensorMeasurementDescriptor)DescriptorClass.newInstance();
 		Descriptor.ID = MeasurementID; 
 		//.
@@ -316,7 +317,7 @@ public class TSensorsModuleMeasurements {
 			//.
 			Node ModelNode = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"Model");
 			if (ModelNode != null) 
-				Descriptor.Model = new TSensorMeasurementModel(ModelNode, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+				Descriptor.Model = new TSensorMeasurementModel(ModelNode, ChannelProvider);
 			else
 				Descriptor.Model = null;
 			break; //. >
@@ -326,16 +327,16 @@ public class TSensorsModuleMeasurements {
 		return Descriptor;
 	}
 
-	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID) throws Exception {
-		return GetMeasurementDescriptor(DataBaseFolder, MeasurementID, TSensorMeasurementDescriptor.class);
+	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, TChannelProvider ChannelProvider) throws Exception {
+		return GetMeasurementDescriptor(DataBaseFolder, MeasurementID, TSensorMeasurementDescriptor.class, ChannelProvider);
 	}
 	
-	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String MeasurementID) throws Exception {
-		return GetMeasurementDescriptor(DataBaseFolder, MeasurementID);
+	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String MeasurementID, TChannelProvider ChannelProvider) throws Exception {
+		return GetMeasurementDescriptor(DataBaseFolder, MeasurementID, ChannelProvider);
 	}
 	
 	public static synchronized void SetMeasurementStartTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
-		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID);
+		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 		if (Descriptor == null)
 			throw new Exception("measurement descriptor is not found, ID:"+MeasurementID); //. =>
 		//.
@@ -348,7 +349,7 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static synchronized double GetMeasurementStartTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
-		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID);
+		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 		if (Descriptor == null)
 			return 0.0; //. ->
 		return Descriptor.StartTimestamp;
@@ -359,7 +360,7 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static synchronized void SetMeasurementFinishTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
-		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID);
+		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 		if (Descriptor == null)
 			throw new Exception("measurement descriptor is not found, ID:"+MeasurementID); //. =>
 		//.
@@ -372,7 +373,7 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static synchronized double GetMeasurementFinishTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
-		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID);
+		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 		if (Descriptor == null)
 			return 0.0; //. ->
 		return Descriptor.FinishTimestamp;
@@ -383,7 +384,7 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static synchronized void SetMeasurementFinish(String DataBaseFolder, String MeasurementID, double FinishTimestamp) throws Exception {
-		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID);
+		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 		if (Descriptor == null)
 			throw new Exception("measurement descriptor is not found, ID:"+MeasurementID); //. =>
 		//.
@@ -455,7 +456,7 @@ public class TSensorsModuleMeasurements {
 		for (int I = 0; I < MeasurementFolders.length; I++)
 			if (MeasurementFolders[I].isDirectory()) {
 				String MeasurementID = MeasurementFolders[I].getName();
-				TSensorMeasurementDescriptor MeasurementDescriptor = GetMeasurementDescriptor(MeasurementID);
+				TSensorMeasurementDescriptor MeasurementDescriptor = GetMeasurementDescriptor(MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 				if ((MeasurementDescriptor != null) && MeasurementDescriptor.IsStarted() && !MeasurementDescriptor.IsFinished())
 					ValidateMeasurement(DataBaseFolder,MeasurementID);
 			}

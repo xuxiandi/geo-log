@@ -24,7 +24,7 @@ public class TVideoRecorderServerPlayer {
 		MeasurementID = pMeasurementID;
 		MeasurementStartPosition = pMeasurementStartPosition;
 		//.
-		MeasurementDescriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
+		MeasurementDescriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 	}
 	
 	public Intent GetPlayer(Activity context) throws Exception {

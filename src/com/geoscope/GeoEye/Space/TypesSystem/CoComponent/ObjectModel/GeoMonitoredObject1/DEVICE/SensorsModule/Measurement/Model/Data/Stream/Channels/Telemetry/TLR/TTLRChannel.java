@@ -1,13 +1,15 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.Telemetry.TLR;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.TStreamChannel;
-import com.jcraft.jzlib.JZlib;
-import com.jcraft.jzlib.ZOutputStream;
+import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.TStreamChannel;
+import com.jcraft.jzlib.ZInputStream;
 
 public class TTLRChannel extends TStreamChannel {
 
@@ -16,14 +18,14 @@ public class TTLRChannel extends TStreamChannel {
 	
 	private String InFile;
 	//.
-	private ByteArrayOutputStream	OutFileStream;
-	public ZOutputStream			DestrinationStream;
+	private FileInputStream InFileStream;
+	//.
+	public com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel.TDoOnDataHandler OnDataHandler = null;
 	
 	public TTLRChannel() {
 		Kind = TChannel.CHANNEL_KIND_IN;
 		//.
-		OutFileStream = null;
-		DestrinationStream = null;
+		InFileStream = null;
 	}
 
 	public TTLRChannel(String pMeasurementFolder) {
@@ -33,37 +35,79 @@ public class TTLRChannel extends TStreamChannel {
 	}
 
 	@Override
+	public String GetTypeID() {
+		return TypeID;
+	}
+	
+	@Override
 	public void Start() throws IOException {
 		super.Start();
 		//.
-		OutFileStream = new ByteArrayOutputStream();
-		DestrinationStream = new ZOutputStream(OutFileStream,JZlib.Z_BEST_SPEED);
+		InFileStream = new FileInputStream(InFile);
 	}
 	
 	@Override
 	public void Stop() throws IOException {
-		if (DestrinationStream != null) {
-			DestrinationStream.close();
-			DestrinationStream = null;
-		}
-		if (OutFileStream != null) {
-			FileOutputStream FOS = new FileOutputStream(InFile);
-			try {
-				FOS.write(OutFileStream.toByteArray());
-			}
-			finally {
-				FOS.close();
-			}
-			//.
-			OutFileStream.close();
-			OutFileStream = null;
+		if (InFileStream != null) {
+			InFileStream.close();
+			InFileStream = null;
 		}
 		//.
 		super.Close();
 	}
-	
+
 	@Override
-	public String GetTypeID() {
-		return TypeID;
+	public void Process(TCanceller Canceller) throws Exception {
+		ZInputStream ZIS = new ZInputStream(InFileStream);
+		try {
+			byte[] Buffer = new byte[8192];
+			int ReadSize;
+			ByteArrayOutputStream BOS = new ByteArrayOutputStream(Buffer.length);
+			try {
+				while ((ReadSize = ZIS.read(Buffer)) > 0) 
+					BOS.write(Buffer, 0,ReadSize);
+				//.
+				ByteArrayInputStream BIS = new ByteArrayInputStream(BOS.toByteArray());
+				try {
+					com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel DestinationChannel = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel();
+					DestinationChannel.Assign(this);
+					DestinationChannel.OnDataHandler = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel.TDoOnDataHandler() {
+						@Override
+						public void DoOnData(TDataType DataType) {
+							TTLRChannel.this.DoOnData(DataType);
+						}
+					};
+					com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel.TOnProgressHandler OnProgressHandler = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel.TOnProgressHandler() {
+						
+						@Override
+						public void DoOnProgress(int ReadSize, TCanceller Canceller) {
+						}
+					};
+					com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel.TOnIdleHandler OnIdleHandler = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel.TOnIdleHandler() {
+						
+						@Override
+						public void DoOnIdle(TCanceller Canceller) throws Exception {
+							throw new IOException("file reading timeout, "+InFile); //. =>
+						}
+					};
+					//. processing ...
+					DestinationChannel.DoStreaming(BIS,BOS.size(), null, OnProgressHandler, 1000, 5, OnIdleHandler, Canceller);
+				}
+				finally {
+					BIS.close();
+				}
+			}
+			finally {
+				BOS.close();
+			}
+		}
+		finally {
+			ZIS.close();
+		}
+	}
+	
+	private void DoOnData(TDataType DataType) {
+		if (OnDataHandler != null)
+			OnDataHandler.DoOnData(DataType);
 	}
 }

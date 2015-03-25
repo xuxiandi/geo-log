@@ -96,14 +96,16 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 								}
 								//.
 								TStreamChannel.TOnProgressHandler OnProgressHandler = new TStreamChannel.TOnProgressHandler() {
+									
 									@Override
 									public void DoOnProgress(int ReadSize, TCanceller Canceller) {
 										TChannelProcessing.this.DoOnProgress(ReadSize, Canceller);
 									}
 								};
 								TStreamChannel.TOnIdleHandler OnIdleHandler = new TStreamChannel.TOnIdleHandler() {
+									
 									@Override
-									public void DoOnIdle(TCanceller Canceller) {
+									public void DoOnIdle(TCanceller Canceller) throws Exception {
 										TChannelProcessing.this.DoOnIdle(Canceller);
 									}
 								};

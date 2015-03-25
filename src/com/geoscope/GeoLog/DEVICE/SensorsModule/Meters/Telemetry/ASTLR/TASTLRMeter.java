@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ASTLR;
 
 import java.io.IOException;
 
@@ -39,7 +39,8 @@ public class TASTLRMeter extends TSensorMeter {
 					throw new IOException("no source channel"); //. =>
 				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 				while (!Canceller.flCancel) {
-					TMeasurement Measurement = new TMeasurement(TSensorsModuleMeasurements.CreateNewMeasurement());
+					TMeasurement Measurement = new TMeasurement(TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+					Measurement.TLRChannel.Assign(SourceChannel);
 					Measurement.Start();
 					try {
 						SourceChannel.DoStreaming(Measurement.TLRChannel.DestrinationStream, Canceller, MeasurementMaxDuration);

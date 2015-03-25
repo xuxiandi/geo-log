@@ -95,9 +95,9 @@ public class TSensorsModuleMeasurements {
 		return MeasurementExists(MeasurementFolder);
 	}
 	
-	public static synchronized String GetMeasurementsList(String DataBaseFolder, double BeginTimestamp, double EndTimestamp, short Version) {
+	public static synchronized String GetMeasurementsList(String pDataBaseFolder, double BeginTimestamp, double EndTimestamp, short Version) {
 		String Result = "";
-		File DF = new File(DataBaseFolder);
+		File DF = new File(pDataBaseFolder);
 		if (!DF.exists())
 			return Result; //. ->
 		File[] MeasurementFolders = DF.listFiles();
@@ -113,7 +113,7 @@ public class TSensorsModuleMeasurements {
 				String ItemStr = null;
 				TSensorMeasurementDescriptor MeasurementDescriptor = null;
 				try {
-					MeasurementDescriptor = GetMeasurementDescriptor(DataBaseFolder,MeasurementID);
+					MeasurementDescriptor = GetMeasurementDescriptor(pDataBaseFolder,MeasurementID);
 					if (MeasurementDescriptor != null) {
 						if (MeasurementDescriptor.IsValid() && !((MeasurementDescriptor.StartTimestamp > EndTimestamp) || (MeasurementDescriptor.FinishTimestamp < BeginTimestamp))) {
 							String TypeID = "?";
@@ -316,7 +316,7 @@ public class TSensorsModuleMeasurements {
 			//.
 			Node ModelNode = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"Model");
 			if (ModelNode != null) 
-				Descriptor.Model = new TSensorMeasurementModel(ModelNode, new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider());
+				Descriptor.Model = new TSensorMeasurementModel(ModelNode, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 			else
 				Descriptor.Model = null;
 			break; //. >

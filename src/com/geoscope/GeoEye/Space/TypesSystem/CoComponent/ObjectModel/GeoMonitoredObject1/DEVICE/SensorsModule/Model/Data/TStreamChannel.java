@@ -27,7 +27,11 @@ public class TStreamChannel extends TChannel {
 	}
 	
 
+	public void DoStreaming(Socket Connection, InputStream pInputStream, int pInputStreamSize, OutputStream pOutputStream, TOnProgressHandler OnProgressHandler, int StreamingTimeout, int IdleTimeoutCounter, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws Exception {
+	}	
+
 	public void DoStreaming(Socket Connection, InputStream pInputStream, OutputStream pOutputStream, TOnProgressHandler OnProgressHandler, int StreamingTimeout, int IdleTimeoutCounter, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws Exception {
+		DoStreaming(Connection, pInputStream, -1, pOutputStream, OnProgressHandler, StreamingTimeout, IdleTimeoutCounter, OnIdleHandler, Canceller);
 	}	
 
 	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {

@@ -182,13 +182,19 @@ public class TChannel {
 		//.
 		DataFormat = Integer.parseInt(TMyXML.SearchNode(ANode,"DataFormat").getFirstChild().getNodeValue());
 		//.
-		Name = TMyXML.SearchNode(ANode,"Name").getFirstChild().getNodeValue();
+		Name = "";
+		Node ValueNode = TMyXML.SearchNode(ANode,"Name").getFirstChild();
+		if (ValueNode != null)
+			Name = ValueNode.getNodeValue();
 		//.
-		Info = TMyXML.SearchNode(ANode,"Info").getFirstChild().getNodeValue();
+		Info = "";
+		ValueNode = TMyXML.SearchNode(ANode,"Info").getFirstChild();
+		if (ValueNode != null)
+			Info = ValueNode.getNodeValue();
 		//.
 		Size = Integer.parseInt(TMyXML.SearchNode(ANode,"Size").getFirstChild().getNodeValue());
 		//.
-		Node ValueNode = TMyXML.SearchNode(ANode,"Configuration").getFirstChild();
+		ValueNode = TMyXML.SearchNode(ANode,"Configuration").getFirstChild();
 		if (ValueNode != null)
 			Configuration = ValueNode.getNodeValue();
 		else

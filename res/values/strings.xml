@@ -1009,5 +1009,8 @@
     <string name="SApplyChanges">Apply changes</string>
     <string name="SDeviceSensorMeters">Device sensor registrators</string>
     <string name="SMeters">Registrators</string>
+    <string name="SError1">ERROR</string>
+    <string name="SNotRunning">not running</string>
+    <string name="SRunning">running &#8230;</string>
     
 </resources>

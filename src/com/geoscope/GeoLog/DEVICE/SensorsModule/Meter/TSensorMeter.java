@@ -14,10 +14,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.content.Context;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 
@@ -26,6 +28,23 @@ public class TSensorMeter extends TCancelableThread {
 	public static final int STATUS_ERROR 		= -1;
 	public static final int STATUS_NOTRUNNING 	= 0;
 	public static final int STATUS_RUNNING 		= 1;
+	//.
+	public static String STATUS_GetString(int Status, Context context) {
+		switch (Status) {
+		
+		case STATUS_ERROR:
+			return context.getString(R.string.SError1); //. ->
+
+		case STATUS_NOTRUNNING:
+			return context.getString(R.string.SNotRunning); //. ->
+			
+		case STATUS_RUNNING:
+			return context.getString(R.string.SRunning); //. ->
+			
+		default:
+			return "?"; //. ->
+		}
+	}
 	
 	public static class TProfile {
 		

@@ -63,6 +63,7 @@ public class TSensorsModuleMeasurements {
 				com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel Model = new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel();
 				Model.TypeID = Properties[3];
 				Model.ContainerTypeID = Properties[4];
+				Result[I].Model = Model;
 				//.
 				Result[I].Location = TSensorMeasurementDescriptor.LOCATION_CLIENT;
 			}

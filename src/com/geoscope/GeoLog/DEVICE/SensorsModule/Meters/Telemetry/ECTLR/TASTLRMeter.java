@@ -5,25 +5,25 @@ import java.io.IOException;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ECTLR.TMeasurement;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.TMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 
-public class TECTLRMeter extends TSensorMeter {
+public class TASTLRMeter extends TSensorMeter {
 
-	public static final String ID = "Telemetry.ECTLR.1";
+	public static final String ID = "Telemetry.ASTLR.1";
 	//.
 	public static final String TypeID = "Telemetry.TLR";
 	public static final String ContainerTypeID = "";
 	//.
-	public static final String Name = "Environmental conditions";
+	public static final String Name = "Android state";
 	public static final String Info = "Telemetry";
 	
 	public static class TMyProfile extends TProfile {
 	}
 	
-	public TECTLRMeter(TSensorsModule pSensorsModule, String pProfileFolder) throws Exception {
+	public TASTLRMeter(TSensorsModule pSensorsModule, String pProfileFolder) throws Exception {
 		super(pSensorsModule, new TSensorMeterDescriptor(ID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
 	}
 	
@@ -32,9 +32,9 @@ public class TECTLRMeter extends TSensorMeter {
 		try {
 			SetStatus(STATUS_RUNNING);
 			try {
-				if (SensorsModule.InternalSensorsModule.ECTLRChannel == null)
+				if (SensorsModule.InternalSensorsModule.ASTLRChannel == null)
 					throw new IOException("no origin channel"); //. =>
-				TTLRChannel SourceChannel = (TTLRChannel)SensorsModule.InternalSensorsModule.ECTLRChannel.DestinationChannel_Get(); 	
+				TTLRChannel SourceChannel = (TTLRChannel)SensorsModule.InternalSensorsModule.ASTLRChannel.DestinationChannel_Get(); 	
 				if (SourceChannel == null)
 					throw new IOException("no source channel"); //. =>
 				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));

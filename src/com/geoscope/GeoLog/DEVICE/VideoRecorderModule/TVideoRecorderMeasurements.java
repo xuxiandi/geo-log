@@ -88,9 +88,9 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, short Mode) throws Exception {
-		TMeasurementDescriptor Descriptor = new TMeasurementDescriptor(NewMeasurementID);
+		TMeasurementDescriptor Descriptor = new TMeasurementDescriptor();
 		Descriptor.Mode = Mode;
-		return CreateNewMeasurement(DataBaseFolder,NewMeasurementID,Descriptor);
+		return CreateNewMeasurement(DataBaseFolder, NewMeasurementID, Descriptor);
 	}
 	
 	public static synchronized String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, TMeasurementDescriptor Descriptor) throws Exception {
@@ -432,7 +432,9 @@ public class TVideoRecorderMeasurements {
 	}
 	
 	public static synchronized TMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID) throws Exception {
-		TMeasurementDescriptor Descriptor = null;
+		TMeasurementDescriptor Descriptor = new TMeasurementDescriptor();
+		Descriptor.ID = MeasurementID; 
+		//.
 		String _SFN = DataBaseFolder+"/"+MeasurementID+"/"+TMeasurementDescriptor.DescriptorFileName;
 		File F = new File(_SFN);
 		if (!F.exists()) 
@@ -462,11 +464,9 @@ public class TVideoRecorderMeasurements {
 		int Version = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
 		switch (Version) {
 		case 1:
-			Descriptor = new TMeasurementDescriptor(MeasurementID);
-			//.
-			Descriptor.ID = MeasurementID; //. XmlDoc.getDocumentElement().getElementsByTagName("ID").item(0).getFirstChild().getNodeValue();
 			Descriptor.StartTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("StartTimestamp").item(0).getFirstChild().getNodeValue());
 			Descriptor.FinishTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("FinishTimestamp").item(0).getFirstChild().getNodeValue());
+			//.
 			Node ModelNode = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"Model");
 			if (ModelNode != null) 
 				Descriptor.Model = new TModel(ModelNode, new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.TChannelsProvider());

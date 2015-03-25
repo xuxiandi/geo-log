@@ -48,7 +48,7 @@ public class CameraRegistrator extends Camera {
 		synchronized (this) {
 			if (flSaving) {
 				MeasurementID = TSensorMeasurement.GetNewID();
-				MeasurementDescriptor = new TMeasurementDescriptor(MeasurementID);
+				MeasurementDescriptor = new TMeasurementDescriptor();
 				MeasurementDescriptor.Mode = (short)Mode; 
 				TSensorsModuleMeasurements.CreateNewMeasurement(TSensorsModuleMeasurements.DataBaseFolder,MeasurementID,MeasurementDescriptor); 
 				MeasurementFolder = TSensorsModuleMeasurements.DataBaseFolder+"/"+MeasurementID;

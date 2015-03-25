@@ -697,7 +697,7 @@ public class TInternalSensorsModule extends TModule {
 	private TXENVCChannel XENVCChannel = null;
 	//.
 	private boolean 	ASTLRChannel_flUse = true;
-	private TTLRChannel ASTLRChannel = null;
+	public TTLRChannel 	ASTLRChannel = null;
 	private TDataType 	ASTLRChannel_BatteryVoltage;
 	private TDataType 	ASTLRChannel_BatteryTemperature;
 	private TDataType 	ASTLRChannel_BatteryLevel;
@@ -707,7 +707,7 @@ public class TInternalSensorsModule extends TModule {
 	private TDataType 	ASTLRChannel_CellularConnectorSignalStrength;
 	//.
 	private boolean 	ECTLRChannel_flUse = true;
-	private TTLRChannel ECTLRChannel = null;
+	public TTLRChannel 	ECTLRChannel = null;
 	private TDataType 	ECTLRChannel_Temperature;
 	private TDataType 	ECTLRChannel_Pressure;
 	private TDataType 	ECTLRChannel_RelativeHumidity;

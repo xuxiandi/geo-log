@@ -1,6 +1,7 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV;
 
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 
 public class TMeasurementDescriptor extends TSensorMeasurementDescriptor {
@@ -29,9 +30,6 @@ public class TMeasurementDescriptor extends TSensorMeasurementDescriptor {
 	
 	
 	public TMeasurementDescriptor() {
-	}
-	
-	public TMeasurementDescriptor(String pID) {
-		super(pID);
+		Model = new TModel();
 	}
 }

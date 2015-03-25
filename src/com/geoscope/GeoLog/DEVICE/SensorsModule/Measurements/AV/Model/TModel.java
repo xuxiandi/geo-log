@@ -6,6 +6,7 @@ public class TModel extends com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement
 
 	public TModel() {
     	TypeID = "AV.FRAME";
+    	ContainerTypeID = "Audio.AAC-Video.H264I";
 	}
 
 	public TModel(Node ANode, com.geoscope.Classes.Data.Stream.Channel.TChannelProvider ChannelProvider) throws Exception {

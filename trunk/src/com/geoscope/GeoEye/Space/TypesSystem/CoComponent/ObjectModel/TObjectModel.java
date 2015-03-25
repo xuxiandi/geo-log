@@ -499,6 +499,9 @@ public class TObjectModel {
 	public void Sensors_Meters_SetActive(String MeterIDs, boolean flActive) throws IOException, Exception {
 	}
 	
+	public void Sensors_Meters_ValidateActivity(String MeterIDs) throws IOException, Exception {
+	}
+	
 	public TSensorMeasurementDescriptor[] Sensors_Measurements_GetList(double BeginTimestamp, double EndTimestamp, String GeographDataServerAddress, int GeographDataServerPort, Context context, TCanceller Canceller) throws Exception {
 		return null;
 	}

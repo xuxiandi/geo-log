@@ -27,6 +27,7 @@ public class TMeasurementDescriptor extends TSensorMeasurementDescriptor {
 	public int		VideoFPS = -1;
 	public int		VideoPackets = -1;
 	
+	
 	public TMeasurementDescriptor() {
 	}
 	

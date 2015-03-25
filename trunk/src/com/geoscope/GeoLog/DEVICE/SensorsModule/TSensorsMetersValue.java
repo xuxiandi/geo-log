@@ -58,7 +58,7 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
             	int SubVersion = Integer.parseInt(SA[2]);
             	switch (SubVersion) {
             	
-            	case 1: //. start meters
+            	case 1: //. set meters activity = true
             		int Cnt = SA.length;
             		for (int I = 3; I < Cnt; I++) {
                     	Meter = SensorsModule.Meters.GetItem(SA[I]);
@@ -67,13 +67,25 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
             		}
             		break; //. >
 
-            	case 2: //. stop meters
+            	case 2: //. set meters activity = false
             		Cnt = SA.length;
             		for (int I = 3; I < Cnt; I++) {
                     	Meter = SensorsModule.Meters.GetItem(SA[I]);
                     	if (Meter != null) 
                         	Meter.SetActive(false);
             		}
+            		break; //. >
+
+            	case 3: //. validate meters activity
+            		Cnt = SA.length-3;
+            		if (Cnt > 0) {
+                		String[] MeterIDs = new String[Cnt];
+                		for (int I = 0; I < Cnt; I++) 
+                			MeterIDs[I] = SA[I+3];
+                		SensorsModule.Meters.ValidateItemsActivity(MeterIDs);
+            		}
+            		else 
+            			SensorsModule.Meters.ValidateItemsActivity(new String[0]);
             		break; //. >
             	}            	
         		break; //. >

@@ -313,6 +313,8 @@ public class TDataStreamPropsPanel extends Activity {
     }    
     
     private void OpenStream() {
+    	if (DataStreamDescriptor == null)
+    		return; //. ->
     	final TChannelIDs Channels = new TChannelIDs();
 		for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
 			if (lvChannels.isItemChecked(I))

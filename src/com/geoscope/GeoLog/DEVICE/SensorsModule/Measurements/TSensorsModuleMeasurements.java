@@ -27,6 +27,7 @@ import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel;
 
@@ -58,9 +59,18 @@ public class TSensorsModuleMeasurements {
 		if (!Folder.exists())
 			Folder.mkdirs();
 		//.
-		SetMeasurementDescriptor(DataBaseFolder, NewMeasurementID, Descriptor);
+		if (Descriptor != null)
+			SetMeasurementDescriptor(DataBaseFolder, NewMeasurementID, Descriptor);
 		//.
 		return NewMeasurementID;
+	}
+	
+	public static synchronized String CreateNewMeasurement(TSensorMeasurementDescriptor Descriptor) throws Exception {
+		return CreateNewMeasurement(DataBaseFolder, TSensorMeasurement.GetNewID(), Descriptor);
+	}
+	
+	public static synchronized String CreateNewMeasurement() throws Exception {
+		return CreateNewMeasurement(null);
 	}
 	
 	public static synchronized void DeleteMeasurement(String DataBaseFolder, String MeasurementID) throws IOException {
@@ -268,11 +278,13 @@ public class TSensorsModuleMeasurements {
 		SetMeasurementDescriptor(DataBaseFolder, MeasurementID, Descriptor);
 	}
 	
-	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID) throws Exception {
-		TSensorMeasurementDescriptor Descriptor = null;
+	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, Class<?> DescriptorClass) throws Exception {
+		TSensorMeasurementDescriptor Descriptor = (TSensorMeasurementDescriptor)DescriptorClass.newInstance();
+		Descriptor.ID = MeasurementID; 
+		//.
 		String _SFN = DataBaseFolder+"/"+MeasurementID+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
 		File F = new File(_SFN);
-		if (!F.exists()) 
+		if (!F.exists())  
 			return Descriptor; //. ->
 		//.
 		byte[] XML;
@@ -299,11 +311,9 @@ public class TSensorsModuleMeasurements {
 		int Version = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
 		switch (Version) {
 		case 1:
-			Descriptor = new TSensorMeasurementDescriptor(MeasurementID);
-			//.
-			Descriptor.ID = MeasurementID; //. XmlDoc.getDocumentElement().getElementsByTagName("ID").item(0).getFirstChild().getNodeValue();
 			Descriptor.StartTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("StartTimestamp").item(0).getFirstChild().getNodeValue());
 			Descriptor.FinishTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("FinishTimestamp").item(0).getFirstChild().getNodeValue());
+			//.
 			Node ModelNode = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"Model");
 			if (ModelNode != null) 
 				Descriptor.Model = new TSensorMeasurementModel(ModelNode, new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider());
@@ -316,6 +326,10 @@ public class TSensorsModuleMeasurements {
 		return Descriptor;
 	}
 
+	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID) throws Exception {
+		return GetMeasurementDescriptor(DataBaseFolder, MeasurementID, TSensorMeasurementDescriptor.class);
+	}
+	
 	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String MeasurementID) throws Exception {
 		return GetMeasurementDescriptor(DataBaseFolder, MeasurementID);
 	}

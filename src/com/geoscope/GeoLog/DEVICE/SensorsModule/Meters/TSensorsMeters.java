@@ -3,6 +3,7 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters;
 import java.util.ArrayList;
 
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TECTLRMeter;
 
 public class TSensorsMeters {
 
@@ -33,7 +34,8 @@ public class TSensorsMeters {
 		Items.clear();
 	}
 
-	private void CreateMeters() {
+	private void CreateMeters() throws Exception {
+		TECTLRMeter ECTLRMeter = new TECTLRMeter(ProfileFolder); AddItem(ECTLRMeter);
 	}
 	
 	private void AddItem(TSensorMeter Meter) {
@@ -73,6 +75,28 @@ public class TSensorsMeters {
 			
 		default:
 			return null; //. ->
+		}
+	}
+
+	public void ValidateItemsActivity(String[] MeterIDs) throws Exception {
+		int Cnt = Items.size();
+		for (int I = 0; I < Cnt; I++) {
+			TSensorMeter Meter = Items.get(I);
+			boolean flFound = false;
+			int Cnt1 = MeterIDs.length;
+			for (int J = 0; J < Cnt1; J++)
+				if (MeterIDs[J].equals(Meter.Descriptor.ID)) {
+					flFound = true;
+					break; //. >
+				}
+			if (flFound) {
+				if (!Meter.IsActive())
+					Meter.SetActive(true);
+			}
+			else {
+				if (Meter.IsActive())
+					Meter.SetActive(false);
+			}
 		}
 	}
 }

@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
@@ -299,64 +300,37 @@ public class TSensorsMetersPanel extends Activity {
     }    
     
     private void ApplyChanges() {
-    	/*final TChannelIDs Channels = new TChannelIDs();
-		for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
-			if (lvMeters.isItemChecked(I))
-				Channels.AddID(DataStreamDescriptor.Channels.get(I).ID);
-		if (Channels.Count() == 0)
-			return; // ->
+    	if ((MetersInfo == null) || (ObjectModel == null))
+    		return; //. ->
+    	StringBuilder SB = new StringBuilder();
+		for (int I = 0; I < MetersInfo.length; I++)
+			if (lvMeters.isItemChecked(I)) {
+				if (I != 0)
+					SB.append(","+MetersInfo[I].Descriptor.ID);
+				else
+					SB.append(MetersInfo[I].Descriptor.ID);
+			}
+		final String MeterIDs = SB.toString();
     	//.
 		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
 			
-			private TUserAgent UserAgent;
-			private TGeoScopeServerInfo.TInfo ServersInfo;
-			private byte[] DescriptorData;
+			private TObjectModel _ObjectModel = TSensorsMetersPanel.this.ObjectModel;
 			
 			@Override
 			public void Process() throws Exception {
-				UserAgent = TUserAgent.GetUserAgent();
-				if (UserAgent == null)
-					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-				ServersInfo = UserAgent.Server.Info.GetInfo();
-				if (!ServersInfo.IsSpaceDataServerValid()) 
-					throw new Exception("Invalid space data server"); //. =>
-				//.
-				DescriptorData = DataStreamDescriptorData;
+				_ObjectModel.Sensors_Meters_ValidateActivity(MeterIDs);
 			}
+			
 			@Override 
 			public void DoOnCompleted() throws Exception {
-				Intent intent = new Intent(TSensorsMetersPanel.this, TDataStreamPanel.class);
-				//.
-				intent.putExtra("ServerAddress", ServersInfo.SpaceDataServerAddress); 
-				intent.putExtra("ServerPort", ServersInfo.SpaceDataServerPort);
-				//.
-				intent.putExtra("UserID", UserAgent.Server.User.UserID); 
-				intent.putExtra("UserPassword", UserAgent.Server.User.UserPassword);
-				//.
-	        	switch (ParametersType) {
-	        	
-	        	case PARAMETERS_TYPE_OID:
-					intent.putExtra("ParametersType", TDataStreamPanel.PARAMETERS_TYPE_OID);
-					intent.putExtra("ObjectID", ObjectID);
-	        		break; //. >
-	        		
-	        	case PARAMETERS_TYPE_OIDX:
-					intent.putExtra("ParametersType", TDataStreamPanel.PARAMETERS_TYPE_OIDX);
-					intent.putExtra("ObjectIndex", ObjectIndex);
-	        		break; //. >
-	        	}
-				//.
-				intent.putExtra("StreamDescriptorData", DescriptorData);
-				//.
-				intent.putExtra("StreamChannels", Channels.ToByteArray());
-				//.
-				startActivity(intent);
+				StartUpdating();
 			}
+			
 			@Override
 			public void DoOnException(Exception E) {
 				Toast.makeText(TSensorsMetersPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		};
-		Processing.Start();*/
+		Processing.Start();
     }
 }

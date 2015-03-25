@@ -25,7 +25,6 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneCapturingServer;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACEncoder;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel;
@@ -517,9 +516,8 @@ public class CameraStreamerFRAME extends Camera {
 		//.
 		synchronized (this) {
 			if (flSaving) {
-				MeasurementID = TSensorMeasurement.GetNewID();
-				MeasurementDescriptor = new TMeasurementDescriptor(MeasurementID);
-				TSensorsModuleMeasurements.CreateNewMeasurement(TSensorsModuleMeasurements.DataBaseFolder,MeasurementID,MeasurementDescriptor); 
+				MeasurementDescriptor = new TMeasurementDescriptor();
+				MeasurementID = TSensorsModuleMeasurements.CreateNewMeasurement(MeasurementDescriptor); 
 				MeasurementFolder = TSensorsModuleMeasurements.DataBaseFolder+"/"+MeasurementID;
 			}
 			else {  

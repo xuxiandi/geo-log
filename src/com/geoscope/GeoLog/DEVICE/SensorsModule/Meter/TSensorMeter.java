@@ -41,7 +41,7 @@ public class TSensorMeter extends TCancelableThread {
 		}
 		
 		private void SetDefaults() {
-			flEnabled = false;
+			flEnabled = true;
 			//.
 			flActive = false;
 			//. Measurement 
@@ -64,13 +64,13 @@ public class TSensorMeter extends TCancelableThread {
     			//. Measurement 
     			Node MeasurementNode = TMyXML.SearchNode(ANode,"Measurement");
     			if (MeasurementNode != null) {
-	    			node = TMyXML.SearchNode(ANode,"MaxDuration").getFirstChild();
+	    			node = TMyXML.SearchNode(MeasurementNode,"MaxDuration").getFirstChild();
 	    			if (node != null)
 	    				MeasurementMaxDuration = Double.parseDouble(node.getNodeValue());
-	    			node = TMyXML.SearchNode(ANode,"LifeTime").getFirstChild();
+	    			node = TMyXML.SearchNode(MeasurementNode,"LifeTime").getFirstChild();
 	    			if (node != null)
 	    				MeasurementLifeTime = Double.parseDouble(node.getNodeValue());
-	    			node = TMyXML.SearchNode(ANode,"AutosaveInterval").getFirstChild();
+	    			node = TMyXML.SearchNode(MeasurementNode,"AutosaveInterval").getFirstChild();
 	    			if (node != null)
 	    				MeasurementAutosaveInterval = Double.parseDouble(node.getNodeValue());
     			}
@@ -158,17 +158,18 @@ public class TSensorMeter extends TCancelableThread {
 	//.
 	private String 		ProfileFolder;
 	private String 		ProfileFile;
-	private TProfile 	Profile;
+	private TProfile 	Profile = null;
 	//.
 	private int Status = STATUS_NOTRUNNING;
 	//.
 	private TSensorMeasurement Measurement = null;
 	
-	public TSensorMeter(TSensorMeterDescriptor pDescriptor, String pProfileFolder) throws Exception {
+	public TSensorMeter(TSensorMeterDescriptor pDescriptor, Class<?> ProfileClass, String pProfileFolder) throws Exception {
 		super();
 		//.
 		Descriptor = pDescriptor;
 		//.
+		Profile = (TProfile)ProfileClass.newInstance();
 		ProfileFolder = pProfileFolder;
 		ProfileFile = ProfileFolder+"/"+Descriptor.ID+".xml";
 	}

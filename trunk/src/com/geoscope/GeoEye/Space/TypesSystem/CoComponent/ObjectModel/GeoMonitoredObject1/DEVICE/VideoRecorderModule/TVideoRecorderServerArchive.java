@@ -374,7 +374,7 @@ public class TVideoRecorderServerArchive extends Activity {
 		//.
 		TSensorMeasurementDescriptor[] DVRMs;
 		try {
-			DVRMs = ObjectModel.SensorsModule_Measurements_GetList(BeginTimestamp,EndTimestamp);
+			DVRMs = TSensorMeasurement.Filter(ObjectModel.SensorsModule_Measurements_GetList(BeginTimestamp,EndTimestamp), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeIDPrefix); 
 		}
 		catch (Exception E) {
 			DVRMs = null;
@@ -390,7 +390,7 @@ public class TVideoRecorderServerArchive extends Activity {
 		}
 		//.
 		TSensorMeasurementDescriptor[] CVRMs;
-		CVRMs = TSensorsModuleMeasurements.Context_GetMeasurementsList(Object.GeographServerObjectID(), BeginTimestamp,EndTimestamp);
+		CVRMs = TSensorMeasurement.Filter(TSensorsModuleMeasurements.Context_GetMeasurementsList(Object.GeographServerObjectID(), BeginTimestamp,EndTimestamp), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeIDPrefix); 
 		//.
 		int DVRMs_Count = 0;
 		if (DVRMs != null)

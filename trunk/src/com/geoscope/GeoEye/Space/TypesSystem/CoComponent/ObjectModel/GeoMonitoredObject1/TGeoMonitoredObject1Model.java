@@ -27,7 +27,6 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneCallPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient;
-import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient.TVideoRecorderMeasurementDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClient;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
@@ -268,16 +267,19 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 					SVRMs_Count++;
 			}
 		//.
-		TVideoRecorderMeasurementDescriptor[] Result = new TVideoRecorderMeasurementDescriptor[DVRMs_Count+SVRMs_Count+CVRMs.length];
+		TSensorMeasurementDescriptor[] Result = new TSensorMeasurementDescriptor[DVRMs_Count+SVRMs_Count+CVRMs.length];
 		int Idx = 0;
 		//.
 		if (DVRMs != null)
 			for (int I = 0; I < DVRMs.length; I++) 
 				if (DVRMs[I] != null) {
-					Result[Idx] = new TVideoRecorderMeasurementDescriptor();
+					Result[Idx] = new TSensorMeasurementDescriptor();
+					//.
 					Result[Idx].ID = DVRMs[I].ID;
+					//.
 					Result[Idx].StartTimestamp = DVRMs[I].StartTimestamp;
 					Result[Idx].FinishTimestamp = DVRMs[I].FinishTimestamp;
+					//.
 					Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_DEVICE;
 					//.
 					Idx++;
@@ -286,10 +288,13 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		if (SVRMs != null)
 			for (int I = 0; I < SVRMs.length; I++) 
 				if (SVRMs[I] != null) {
-					Result[Idx] = new TVideoRecorderMeasurementDescriptor();
+					Result[Idx] = new TSensorMeasurementDescriptor();
+					//.
 					Result[Idx].ID = SVRMs[I].ID;
+					//.
 					Result[Idx].StartTimestamp = SVRMs[I].StartTimestamp;
 					Result[Idx].FinishTimestamp = SVRMs[I].FinishTimestamp;
+					//.
 					Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_SERVER;
 					//.
 					Idx++;
@@ -297,18 +302,21 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		//.
 		for (int I = 0; I < CVRMs.length; I++) 
 			if (CVRMs[I] != null) {
-				Result[Idx] = new TVideoRecorderMeasurementDescriptor();
+				Result[Idx] = new TSensorMeasurementDescriptor();
+				//.
 				Result[Idx].ID = CVRMs[I].ID;
+				//.
 				Result[Idx].StartTimestamp = CVRMs[I].StartTimestamp;
 				Result[Idx].FinishTimestamp = CVRMs[I].FinishTimestamp;
+				//.
 				Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_CLIENT;
 				//.
 				Idx++;
 			}				
 		//.
-		Arrays.sort(Result, new Comparator<TVideoRecorderMeasurementDescriptor>() {
+		Arrays.sort(Result, new Comparator<TSensorMeasurementDescriptor>() {
 			@Override
-			public int compare(TVideoRecorderMeasurementDescriptor lhs, TVideoRecorderMeasurementDescriptor rhs) {
+			public int compare(TSensorMeasurementDescriptor lhs, TSensorMeasurementDescriptor rhs) {
 				return Double.valueOf(rhs.StartTimestamp).compareTo(lhs.StartTimestamp);
 			}}
 		);				
@@ -894,7 +902,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				Model.ContainerTypeID = Properties[4];
 				Result[I].Model = Model; 
 				//.
-				Result[I].Location = TVideoRecorderMeasurementDescriptor.LOCATION_DEVICE;
+				Result[I].Location = TSensorMeasurementDescriptor.LOCATION_DEVICE;
 			}
 		}
 		else

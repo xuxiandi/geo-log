@@ -25,7 +25,7 @@ public class TSensorMeasurement {
 		int Cnt = Descriptors.length;
 		ArrayList<TSensorMeasurementDescriptor> _Result = new ArrayList<TSensorMeasurementDescriptor>(Cnt);
 		for (int I = 0; I < Cnt; I++) 
-			if (Descriptors[I].Model.TypeID.startsWith(TypeIDPrefix))
+			if ((Descriptors[I].Model != null) && Descriptors[I].Model.TypeID.startsWith(TypeIDPrefix))
 				_Result.add(Descriptors[I]);
 		Cnt = _Result.size();
 		TSensorMeasurementDescriptor[] Result = new TSensorMeasurementDescriptor[Cnt];

@@ -1,0 +1,22 @@
+package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels;
+
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
+
+
+public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
+
+	public static TChannelsProvider Instance = new TChannelsProvider();
+	
+	
+	private TChannelsProvider() {
+	}
+	
+	@Override
+	public TChannel GetChannel(String pTypeID) {
+		if (TTLRChannel.TypeID.equals(pTypeID))
+			return (new TTLRChannel()); // =>
+		else
+			return null; //. ->
+	}	
+}

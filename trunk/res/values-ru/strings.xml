@@ -1009,5 +1009,8 @@
     <string name="SApplyChanges">Применить изменения</string>
     <string name="SDeviceSensorMeters">Регистраторы сенсоров</string>
     <string name="SMeters">Регистраторы</string>
+    <string name="SError1">ОШИБКА</string>
+    <string name="SNotRunning">не работает</string>
+    <string name="SRunning">работает &#8230;</string>
     
 </resources>

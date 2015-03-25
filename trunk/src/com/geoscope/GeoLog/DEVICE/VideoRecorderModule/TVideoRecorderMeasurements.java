@@ -469,7 +469,7 @@ public class TVideoRecorderMeasurements {
 			//.
 			Node ModelNode = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"Model");
 			if (ModelNode != null) 
-				Descriptor.Model = new TModel(ModelNode, new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.TChannelsProvider());
+				Descriptor.Model = new TModel(ModelNode, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 			else {
 				Descriptor.Model = null;
 				//. 

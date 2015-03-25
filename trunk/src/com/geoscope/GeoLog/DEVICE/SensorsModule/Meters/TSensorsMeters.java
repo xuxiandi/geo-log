@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TASTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TECTLRMeter;
 
 public class TSensorsMeters {
@@ -40,6 +41,7 @@ public class TSensorsMeters {
 
 	private void CreateMeters() throws Exception {
 		TECTLRMeter ECTLRMeter = new TECTLRMeter(SensorsModule, ProfileFolder); AddItem(ECTLRMeter);
+		TASTLRMeter ASTLRMeter = new TASTLRMeter(SensorsModule, ProfileFolder); AddItem(ASTLRMeter);
 	}
 	
 	private void AddItem(TSensorMeter Meter) {

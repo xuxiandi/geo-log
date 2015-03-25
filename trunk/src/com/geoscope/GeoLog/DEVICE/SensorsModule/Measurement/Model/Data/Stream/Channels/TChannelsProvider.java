@@ -6,7 +6,10 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Ch
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
 
-	public TChannelsProvider() {
+	public static TChannelsProvider Instance = new TChannelsProvider();
+	
+	
+	private TChannelsProvider() {
 	}
 	
 	@Override
@@ -14,7 +17,7 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 		if (TTLRChannel.TypeID.equals(pTypeID))
 			return (new TTLRChannel()); // =>
 		//.
-		com.geoscope.Classes.Data.Stream.Channel.TChannelProvider CP = new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.TChannelsProvider();
+		com.geoscope.Classes.Data.Stream.Channel.TChannelProvider CP = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.TChannelsProvider.Instance;
 		TChannel Result = CP.GetChannel(pTypeID);
 		if (Result != null)
 			return Result; //. ->

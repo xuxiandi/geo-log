@@ -7,7 +7,10 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Strea
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
 
-	public TChannelsProvider() {
+	public static TChannelsProvider Instance = new TChannelsProvider();
+	
+	
+	private TChannelsProvider() {
 	}
 	
 	@Override

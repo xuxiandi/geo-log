@@ -27,10 +27,10 @@ public class TTLRChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void DoStreaming(Socket Connection, InputStream pInputStream, OutputStream pOutputStream, TOnProgressHandler OnProgressHandler, int StreamingTimeout, int IdleTimeoutCounter, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws Exception {
+	public void DoStreaming(Socket Connection, InputStream pInputStream, int pInputStreamSize, OutputStream pOutputStream, TOnProgressHandler OnProgressHandler, int StreamingTimeout, int IdleTimeoutCounter, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws Exception {
 		byte[] TransferBuffer = new byte[DescriptorSize];
 		short Size;
-		int BytesRead;
+		int BytesRead,BytesRead1;
 		int IdleTimeoutCount = 0; 
 		int _StreamingTimeout = StreamingTimeout*IdleTimeoutCounter;
 		while (!Canceller.flCancel) {
@@ -52,18 +52,26 @@ public class TTLRChannel extends TStreamChannel {
 			}
 			if (BytesRead != DescriptorSize)
 				throw new IOException("wrong data descriptor"); //. =>
+			//.
+			BytesRead1 = 0;
 			Size = (short)(((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF));
 			if (Size > 0) { 
 				if (Size > TransferBuffer.length)
 					TransferBuffer = new byte[Size];
 				Connection.setSoTimeout(_StreamingTimeout);
-				BytesRead = TNetworkConnection.InputStream_ReadData(pInputStream, TransferBuffer, Size);	
-                if (BytesRead <= 0) 
+				BytesRead1 = TNetworkConnection.InputStream_ReadData(pInputStream, TransferBuffer, Size);	
+                if (BytesRead1 <= 0) 
                 	break; //. >
 				//. parse and process
             	ParseFromByteArrayAndProcess(TransferBuffer, 0);
             	//.
-            	OnProgressHandler.DoOnProgress(BytesRead, Canceller);
+            	OnProgressHandler.DoOnProgress(BytesRead1, Canceller);
+			}
+			//.
+			if (pInputStreamSize > 0) {
+				pInputStreamSize -= (BytesRead+BytesRead1);
+				if (pInputStreamSize <= 0)
+                	break; //. >
 			}
 		}    	
 	}		

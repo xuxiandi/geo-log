@@ -145,7 +145,7 @@ public class TChannel {
 	}
 	
 	public String GetTypeID() {
-		return null;
+		return "";
 	}
 	
 	public void Assign(TChannel AChannel) {

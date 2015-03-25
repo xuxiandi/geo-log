@@ -67,7 +67,8 @@ public class TLUMChannel extends TStreamChannel {
 		int _StreamingTimeout = StreamingTimeout*IdleTimeoutCounter;
 		while (!Canceller.flCancel) {
 			try {
-				Connection.setSoTimeout(StreamingTimeout);
+				if (Connection != null)
+					Connection.setSoTimeout(StreamingTimeout);
                 BytesRead = pInputStream.read(TransferBuffer,0,DescriptorSize);
                 if (BytesRead <= 0) 
                 	break; //. >
@@ -90,7 +91,8 @@ public class TLUMChannel extends TStreamChannel {
 			if (Size > 0) { 
 				if (Size > TransferBuffer.length)
 					TransferBuffer = new byte[Size];
-				Connection.setSoTimeout(_StreamingTimeout);
+				if (Connection != null)
+					Connection.setSoTimeout(_StreamingTimeout);
 				BytesRead1 = TNetworkConnection.InputStream_ReadData(pInputStream, TransferBuffer, Size);	
                 if (BytesRead1 <= 0) 
                 	break; //. >

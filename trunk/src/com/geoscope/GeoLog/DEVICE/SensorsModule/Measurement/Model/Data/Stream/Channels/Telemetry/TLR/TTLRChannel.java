@@ -33,6 +33,11 @@ public class TTLRChannel extends TStreamChannel {
 		//.
 		OutFile = pMeasurementFolder+"/"+FileName;
 	}
+	
+	@Override
+	public String GetTypeID() {
+		return TypeID;
+	}
 
 	@Override
 	public void Start() throws IOException {
@@ -62,10 +67,5 @@ public class TTLRChannel extends TStreamChannel {
 		}
 		//.
 		super.Close();
-	}
-	
-	@Override
-	public String GetTypeID() {
-		return TypeID;
 	}
 }

@@ -1006,7 +1006,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		MeasurementID = pMeasurementID;
 		//.
     	MeasurementFolder = MeasurementDatabaseFolder+"/"+MeasurementID; 
-		MeasurementDescriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder,MeasurementID);
+		MeasurementDescriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 		//.
 		if (MeasurementDescriptor.Model != null) {
 			int Cnt = MeasurementDescriptor.Model.Stream.Channels.size();

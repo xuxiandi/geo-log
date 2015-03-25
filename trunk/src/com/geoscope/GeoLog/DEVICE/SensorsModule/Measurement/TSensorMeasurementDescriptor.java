@@ -34,10 +34,6 @@ public class TSensorMeasurementDescriptor {
 	public TSensorMeasurementDescriptor() {
 	}
 
-	public TSensorMeasurementDescriptor(String pID) {
-		ID = pID;
-	}
-	
 	public boolean IsTypeOf(String TypeIDPrefix) {
 		if (Model == null)
 			return false; //. ->

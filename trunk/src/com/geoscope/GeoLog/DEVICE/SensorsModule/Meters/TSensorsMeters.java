@@ -2,16 +2,20 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters;
 
 import java.util.ArrayList;
 
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TECTLRMeter;
 
 public class TSensorsMeters {
 
+	private TSensorsModule SensorsModule;
+	//.
 	public String ProfileFolder;
 	//.
 	public ArrayList<TSensorMeter> Items = new ArrayList<TSensorMeter>();
 	
-	public TSensorsMeters(String pProfileFolder) {
+	public TSensorsMeters(TSensorsModule pSensorsModule, String pProfileFolder) {
+		SensorsModule = pSensorsModule;
 		ProfileFolder = pProfileFolder;
 	}
 	
@@ -35,7 +39,7 @@ public class TSensorsMeters {
 	}
 
 	private void CreateMeters() throws Exception {
-		TECTLRMeter ECTLRMeter = new TECTLRMeter(ProfileFolder); AddItem(ECTLRMeter);
+		TECTLRMeter ECTLRMeter = new TECTLRMeter(SensorsModule, ProfileFolder); AddItem(ECTLRMeter);
 	}
 	
 	private void AddItem(TSensorMeter Meter) {

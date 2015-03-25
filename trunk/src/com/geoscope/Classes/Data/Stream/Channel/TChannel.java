@@ -2,6 +2,7 @@ package com.geoscope.Classes.Data.Stream.Channel;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -136,6 +137,12 @@ public class TChannel {
 	public String Parameters = "";
 	//.
 	public TDataTypes DataTypes = null;
+	
+	public TChannel() {
+	}
+
+	public void Close() throws IOException {
+	}
 	
 	public String GetTypeID() {
 		return null;
@@ -308,6 +315,12 @@ public class TChannel {
     }
     
 	public void Parse() throws Exception {
+	}
+	
+	public void Start() throws IOException {
+	}
+
+	public void Stop() throws IOException {
 	}
 	
 	public void StartSource() {

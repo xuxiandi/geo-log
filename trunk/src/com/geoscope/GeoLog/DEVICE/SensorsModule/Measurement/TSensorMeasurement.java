@@ -21,16 +21,6 @@ public class TSensorMeasurement {
 		}
 	}
 
-	public static TSensorMeasurement CreateNew(Class<?> DescriptorClass) throws Exception {
-		String MeasurementID = TSensorsModuleMeasurements.CreateNewMeasurement();
-		return new TSensorMeasurement(TSensorsModuleMeasurements.DataBaseFolder, MeasurementID, DescriptorClass);
-	}
-	
-	public static TSensorMeasurement CreateNew() throws Exception {
-		String MeasurementID = TSensorsModuleMeasurements.CreateNewMeasurement();
-		return new TSensorMeasurement(TSensorsModuleMeasurements.DataBaseFolder, MeasurementID);
-	}
-	
 	public static TSensorMeasurementDescriptor[] Filter(TSensorMeasurementDescriptor[] Descriptors, String TypeIDPrefix) {
 		int Cnt = Descriptors.length;
 		ArrayList<TSensorMeasurementDescriptor> _Result = new ArrayList<TSensorMeasurementDescriptor>(Cnt);
@@ -55,16 +45,24 @@ public class TSensorMeasurement {
 		Descriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(DatabaseFolder, pMeasurementID, DescriptorClass);
 	}
 	
-	public TSensorMeasurement(String pDatabaseFolder, String pMeasurementID) throws Exception {
-		this(pDatabaseFolder, pMeasurementID, TSensorMeasurementDescriptor.class);
+	public TSensorMeasurement(String pMeasurementID, Class<?> DescriptorClass) throws Exception {
+		this(TSensorsModuleMeasurements.DataBaseFolder, pMeasurementID, DescriptorClass);
+	}
+	
+	public String Folder() {
+		return (DatabaseFolder+"/"+Descriptor.ID);
 	}
 	
 	public void Start() throws Exception {
 		Descriptor.StartTimestamp = OleDate.UTCCurrentTimestamp();
 		TSensorsModuleMeasurements.SetMeasurementDescriptor(DatabaseFolder, Descriptor.ID, Descriptor);
+		//.
+		Descriptor.Model.Start();
 	}
 	
 	public void Finish() throws Exception {
+		Descriptor.Model.Stop();
+		//.
 		Descriptor.FinishTimestamp = OleDate.UTCCurrentTimestamp();
 		TSensorsModuleMeasurements.SetMeasurementDescriptor(DatabaseFolder, Descriptor.ID, Descriptor);
 	}

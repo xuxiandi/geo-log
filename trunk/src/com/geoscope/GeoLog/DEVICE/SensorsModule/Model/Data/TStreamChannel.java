@@ -173,7 +173,11 @@ public class TStreamChannel extends TChannel {
 		return (PacketSubscribers.Count() > 0);
 	}
 	
-	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller) throws IOException {
+	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws IOException {
+	}	
+	
+	public void DoStreaming(OutputStream pOutputStream, TCanceller Canceller) throws IOException {
+		DoStreaming(pOutputStream, Canceller, -1);
 	}	
 	
 	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {

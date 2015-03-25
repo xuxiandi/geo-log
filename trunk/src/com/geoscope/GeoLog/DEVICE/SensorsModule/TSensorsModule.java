@@ -67,7 +67,7 @@ public class TSensorsModule extends TModule {
         //.
         Model = null;
         //.
-        Meters = new TSensorsMeters(Meters_Folder());
+        Meters = new TSensorsMeters(this, Meters_Folder());
     }
     
     public void Destroy() throws Exception {
@@ -80,8 +80,6 @@ public class TSensorsModule extends TModule {
     @Override
     public void Start() throws Exception {
     	super.Start();
-    	//.
-    	Meters.Initialize();
     }
     
     @Override
@@ -127,6 +125,8 @@ public class TSensorsModule extends TModule {
         	}
     	//.
     	Model = NewModel;
+    	//.
+    	Meters.Initialize();
     }
     
     public void Model_BuildAndPublish() throws Exception {
@@ -147,6 +147,18 @@ public class TSensorsModule extends TModule {
         Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
     }
     
+	public TChannel Model_Channels_GetOneByID(int ID) throws Exception {
+		if (Model == null)
+			return null; //. ->
+		return Model.StreamChannels_GetOneByID(ID); //. ->
+	}
+	
+	public TChannel Model_Channels_GetOneByTypeID(String TypeID) throws Exception {
+		if (Model == null)
+			return null; //. ->
+		return Model.StreamChannels_GetOneByTypeID(TypeID); //. ->
+	}
+	
 	public TChannel Model_Channels_GetOneByDescriptor(String UserAccessKey, byte[] ChannelDescriptor) throws Exception {
 		if (UserAccessKey == null)
 			return Model.StreamChannels_GetOneByDescriptor(ChannelDescriptor); //. ->

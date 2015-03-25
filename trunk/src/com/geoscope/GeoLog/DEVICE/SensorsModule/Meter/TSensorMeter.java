@@ -18,6 +18,7 @@ import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 
 public class TSensorMeter extends TCancelableThread {
@@ -154,18 +155,22 @@ public class TSensorMeter extends TCancelableThread {
 	    }
 	}
 	
+	protected TSensorsModule SensorsModule;
+	//.
 	public TSensorMeterDescriptor Descriptor;
 	//.
 	private String 		ProfileFolder;
 	private String 		ProfileFile;
-	private TProfile 	Profile = null;
+	protected TProfile 	Profile;
 	//.
 	private int Status = STATUS_NOTRUNNING;
 	//.
 	private TSensorMeasurement Measurement = null;
 	
-	public TSensorMeter(TSensorMeterDescriptor pDescriptor, Class<?> ProfileClass, String pProfileFolder) throws Exception {
+	public TSensorMeter(TSensorsModule pSensorsModule, TSensorMeterDescriptor pDescriptor, Class<?> ProfileClass, String pProfileFolder) throws Exception {
 		super();
+		//.
+		SensorsModule = pSensorsModule;
 		//.
 		Descriptor = pDescriptor;
 		//.

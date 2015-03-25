@@ -123,6 +123,10 @@ public class TModel {
 		return Stream.Channels_GetOneByID(ChannelID);
 	}
 	
+	public TChannel StreamChannels_GetOneByTypeID(String TypeID) {
+		return Stream.Channels_GetOneByTypeID(TypeID);
+	}
+	
 	public TChannel StreamChannels_GetOneByDescriptor(byte[] ChannelDescriptor) throws Exception {
 		TChannel Result = Stream.Channels_GetOneByDescriptor(ChannelDescriptor);
 		if (Result != null)

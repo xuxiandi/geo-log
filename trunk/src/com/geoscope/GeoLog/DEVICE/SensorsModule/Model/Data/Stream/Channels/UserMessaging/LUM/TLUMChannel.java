@@ -25,7 +25,7 @@ public class TLUMChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller) throws IOException {
+	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws IOException {
 		TStreamChannel.TPacketSubscriber PacketSubscriber  = new TStreamChannel.TPacketSubscriber() {
     		@Override
     		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
@@ -43,8 +43,11 @@ public class TLUMChannel extends TStreamChannel {
     	PacketSubscribers.Subscribe(PacketSubscriber);
     	try {
     		try {
-    			while (!Canceller.flCancel) 
-    				Thread.sleep(100);
+    			if (MaxDuration > 0)
+    				Thread.sleep(MaxDuration);
+    			else
+    				while (!Canceller.flCancel) 
+    					Thread.sleep(100);
     		}
     		catch (InterruptedException IE) {
     		}

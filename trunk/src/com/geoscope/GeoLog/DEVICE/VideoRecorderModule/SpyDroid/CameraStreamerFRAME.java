@@ -27,7 +27,6 @@ import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneCapturingServer;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACEncoder;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264Encoder;
@@ -628,8 +627,6 @@ public class CameraStreamerFRAME extends Camera {
 		//.
 		synchronized (this) {
 	        if (MeasurementDescriptor != null) {
-	        	MeasurementDescriptor.Model = new TModel();
-	        	MeasurementDescriptor.Model.ContainerTypeID = "Audio.AAC-Video.H264I";
 	        	if (flAudio) {
 	        		AACChannel = new TAACChannel();
 	        		AACChannel.ID = TChannel.GetNextID();

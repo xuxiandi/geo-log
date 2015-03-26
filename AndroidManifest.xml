@@ -210,6 +210,16 @@
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsArchive"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessorPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
             android:name=".Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Meters.TSensorsMetersPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" >

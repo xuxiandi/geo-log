@@ -34,16 +34,28 @@ public class TSensorMeasurementDescriptor {
 	public TSensorMeasurementDescriptor() {
 	}
 
-	public boolean IsTypeOf(String TypeIDPrefix) {
+	public String TypeID() {
 		if (Model == null)
-			return false; //. ->
-		return (Model.TypeID.startsWith(TypeIDPrefix));
+			return ""; //. ->
+		return (Model.TypeID);
 	}
 	
-	public boolean IsContainerTypeOf(String ContainerTypeIDPrefix) {
+	public String ContainerTypeID() {
+		if (Model == null)
+			return ""; //. ->
+		return (Model.ContainerTypeID);
+	}
+	
+	public boolean IsTypeOf(String TypeID) {
 		if (Model == null)
 			return false; //. ->
-		return (Model.ContainerTypeID.startsWith(ContainerTypeIDPrefix));
+		return (Model.TypeID.startsWith(TypeID));
+	}
+	
+	public boolean IsContainerTypeOf(String ContainerTypeID) {
+		if (Model == null)
+			return false; //. ->
+		return (Model.ContainerTypeID.startsWith(ContainerTypeID));
 	}
 	
 	public boolean IsStarted() {

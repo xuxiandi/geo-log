@@ -15,6 +15,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.MultiThreading.TCanceller;
 
 
 public class TChannel {
@@ -148,6 +149,9 @@ public class TChannel {
 		return "";
 	}
 	
+	public void Initialize(Object pParameters) throws Exception {
+	}
+	
 	public void Assign(TChannel AChannel) {
 		ID = AChannel.ID;
 		Enabled = AChannel.Enabled;
@@ -159,6 +163,18 @@ public class TChannel {
 		Configuration = AChannel.Configuration;
 		Parameters = AChannel.Parameters;
 		DataTypes = AChannel.DataTypes;
+	}
+	
+	public void Parse() throws Exception {
+	}
+	
+	public void Start() throws IOException {
+	}
+
+	public void Stop() throws IOException {
+	}
+	
+	public void Process(TCanceller Canceller) throws Exception {
 	}
 	
 	public void FromXMLNode(Node ANode) throws Exception {
@@ -320,15 +336,6 @@ public class TChannel {
 	    }
     }
     
-	public void Parse() throws Exception {
-	}
-	
-	public void Start() throws IOException {
-	}
-
-	public void Stop() throws IOException {
-	}
-	
 	public void StartSource() {
 	}
 

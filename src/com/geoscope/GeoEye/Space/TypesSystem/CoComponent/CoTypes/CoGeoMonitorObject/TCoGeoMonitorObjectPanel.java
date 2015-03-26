@@ -76,6 +76,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent.TAlarmModule.TAlarms;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.BusinessModels.TGMO1GeoLogAndroidBusinessModel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsArchive;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneCallPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerViewer;
@@ -656,6 +657,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						Button btnShowVideoRecorderViewer = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer);
 						Button btnShowVideoRecorderArchive = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderArchive);
 						Button btnShowSensorsModuleStream = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleStream);
+						Button btnShowSensorsModuleMeasurementsArchive = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleMeasurementsArchive);
 						Button btnShowSensorsModuleMeters = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleMeters);
 						Button btnShowControlsModuleStream = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowControlsModuleStream);
 						Button btnSendAudioFileMessage = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnSendAudioFileMessage);
@@ -1133,7 +1135,39 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 								}
 							}
 						});
-						btnShowSensorsModuleMeters.setEnabled(DC.SensorsModule.SensorsDataValue.Value != null);
+						btnShowSensorsModuleMeasurementsArchive.setEnabled(true);
+						btnShowSensorsModuleMeasurementsArchive.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+					    		try {
+					    			TGeoScopeServerInfo.TInfo ServersInfo = Server.Info.GetInfo();
+									if (!ServersInfo.IsGeographDataServerValid()) 
+										throw new Exception(TCoGeoMonitorObjectPanel.this.getString(R.string.SInvalidGeographDataServer)); //. =>
+						            Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, TSensorsModuleMeasurementsArchive.class);
+				    	        	intent.putExtra("GeographDataServerAddress",ServersInfo.GeographDataServerAddress);
+				    	        	intent.putExtra("GeographDataServerPort",ServersInfo.GeographDataServerPort);
+				    	        	intent.putExtra("UserID",Server.User.UserID);
+				    	        	intent.putExtra("UserPassword",Server.User.UserPassword);
+						        	switch (ParametersType) {
+						        	
+						        	case PARAMETERS_TYPE_OID:
+										intent.putExtra("ParametersType", TSensorsModuleMeasurementsArchive.PARAMETERS_TYPE_OID);
+										intent.putExtra("ObjectID", ObjectID);
+						        		break; //. >
+						        		
+						        	case PARAMETERS_TYPE_OIDX:
+										intent.putExtra("ParametersType", TSensorsModuleMeasurementsArchive.PARAMETERS_TYPE_OIDX);
+										intent.putExtra("ObjectIndex", ObjectIndex);
+						        		break; //. >
+						        	}
+						            startActivity(intent);
+								} catch (Exception E) {
+							    	Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+							    	return; //. ->
+								}
+							}
+						});
+						btnShowSensorsModuleMeters.setEnabled(true);
 						btnShowSensorsModuleMeters.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {

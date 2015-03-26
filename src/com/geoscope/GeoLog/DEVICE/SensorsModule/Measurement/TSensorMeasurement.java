@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
@@ -46,8 +47,22 @@ public class TSensorMeasurement {
 		Descriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(DatabaseFolder, pMeasurementID, DescriptorClass, ChannelProvider);
 	}
 	
-	public TSensorMeasurement(String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
-		this(TSensorsModuleMeasurements.DataBaseFolder, pMeasurementID, DescriptorClass, ChannelProvider);
+	public TSensorMeasurement(String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
+		this(pDatabaseFolder, pMeasurementID, TSensorMeasurementDescriptor.class, ChannelProvider);
+	}
+	
+	public TSensorMeasurement(String pMeasurementFolder, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+		File MF = new File(pMeasurementFolder);
+		String MeasurementFolder = MF.getParent(); 
+		String MeasurementID = MF.getName();
+		//.
+		DatabaseFolder = MeasurementFolder;
+		//.
+		Descriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(DatabaseFolder, MeasurementID, DescriptorClass, ChannelProvider);
+	}
+	
+	public TSensorMeasurement(String pMeasurementFolder, TChannelProvider ChannelProvider) throws Exception {
+		this(pMeasurementFolder, TSensorMeasurementDescriptor.class, ChannelProvider);
 	}
 	
 	public String Folder() {

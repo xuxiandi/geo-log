@@ -5,7 +5,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ECTLR.Mod
 
 public class TMeasurementDescriptor extends TSensorMeasurementDescriptor {
 
-	public static final String TypeIDPrefix = "Telemetry.ECTLR";
+	public static final String TypeID = "Telemetry.ECTLR";
 	
 	
 	public TMeasurementDescriptor() {

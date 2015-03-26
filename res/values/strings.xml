@@ -1012,5 +1012,6 @@
     <string name="SError1">ERROR</string>
     <string name="SNotRunning">not running</string>
     <string name="SRunning">running &#8230;</string>
+    <string name="SSensorRegistratorArchive">Sensor registrator archive</string>
     
 </resources>

@@ -25,9 +25,9 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 	private String MeasurementDatabaseFolder = null;
 	private String MeasurementID = null;
 	//.
-	private FrameLayout PlayerLayout;
+	private FrameLayout ProcessorLayout;
 	//.
-	private TVideoRecorderServerMyPlayerComponent PlayerComponent = null;
+	private TVideoRecorderServerMyPlayerComponent ProcessorComponent = null;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,10 +44,10 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 		//.
         setContentView(R.layout.video_recorder_server_myplayer);
         //.
-        PlayerLayout = (FrameLayout)findViewById(R.id.VideoRecorderServerMyPlayerLayout);
+        ProcessorLayout = (FrameLayout)findViewById(R.id.VideoRecorderServerMyPlayerLayout);
         //.
         try {
-			PlayerComponent = new TVideoRecorderServerMyPlayerComponent(this, PlayerLayout, new TVideoRecorderServerMyPlayerComponent.TOnSurfaceChangedHandler() {
+			ProcessorComponent = new TVideoRecorderServerMyPlayerComponent(this, ProcessorLayout, new TVideoRecorderServerMyPlayerComponent.TOnSurfaceChangedHandler() {
 				
 				@Override
 				public void DoOnSurfaceChanged(SurfaceHolder surface) {
@@ -64,8 +64,8 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 				
 				@Override
 				public void DoOnProgress(double ProgressFactor) {
-					if (PlayerComponent != null) {
-						MeasurementStartPosition = PlayerComponent.MeasurementDescriptor.Duration()*ProgressFactor; 
+					if (ProcessorComponent != null) {
+						MeasurementStartPosition = ProcessorComponent.MeasurementDescriptor.Duration()*ProgressFactor; 
 					}
 				}
 			});
@@ -89,9 +89,9 @@ public class TVideoRecorderServerMyPlayer extends Activity {
     	flExists = false;
     	//.
     	try {
-    		if (PlayerComponent != null) {
-    			PlayerComponent.Destroy();
-    			PlayerComponent = null;
+    		if (ProcessorComponent != null) {
+    			ProcessorComponent.Destroy();
+    			ProcessorComponent = null;
     		}
 		} catch (Exception E) {
 			String S = E.getMessage();
@@ -138,14 +138,14 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 	}
 	
 	private void Setup() throws Exception {
-		PlayerComponent.Setup(MeasurementDatabaseFolder, MeasurementID);
+		ProcessorComponent.Setup(MeasurementDatabaseFolder, MeasurementID);
 		//.
-		PlayerComponent.SetPosition(MeasurementStartPosition, 0/*Delay, ms*/, false);
+		ProcessorComponent.SetPosition(MeasurementStartPosition, 0/*Delay, ms*/, false);
 	}
 	
 	private void DoOnExit() {
-		if ((PlayerComponent != null) && PlayerComponent.flInitialized) {
-			double MeasurementCurrentPosition = PlayerComponent.MeasurementDescriptor.StartTimestamp+PlayerComponent.MeasurementDescriptor.Duration()*PlayerComponent.MeasurementCurrentPositionFactor;
+		if ((ProcessorComponent != null) && ProcessorComponent.flInitialized) {
+			double MeasurementCurrentPosition = ProcessorComponent.MeasurementDescriptor.StartTimestamp+ProcessorComponent.MeasurementDescriptor.Duration()*ProcessorComponent.MeasurementCurrentPositionFactor;
 	    	Intent intent = getIntent();
 	    	intent.putExtra("MeasurementCurrentPosition",MeasurementCurrentPosition);
 	        //.

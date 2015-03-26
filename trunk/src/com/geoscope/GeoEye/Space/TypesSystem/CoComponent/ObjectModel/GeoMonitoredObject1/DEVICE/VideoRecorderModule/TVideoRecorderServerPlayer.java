@@ -8,11 +8,6 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasu
 
 public class TVideoRecorderServerPlayer {
 
-	public static boolean IsDefaultPlayer(TSensorMeasurementDescriptor MeasurementDescriptor) {
-		return (MeasurementDescriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeIDPrefix));
-	}
-	
-	
 	private String 	MeasurementDatabaseFolder;
 	private String 	MeasurementID;
 	private double	MeasurementStartPosition = 0.0;

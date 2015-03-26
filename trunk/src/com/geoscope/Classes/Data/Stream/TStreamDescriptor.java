@@ -19,6 +19,7 @@ import android.util.Xml;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
+import com.geoscope.Classes.MultiThreading.TCanceller;
 
 public class TStreamDescriptor {
 
@@ -40,6 +41,30 @@ public class TStreamDescriptor {
 	
 	public TStreamDescriptor(byte[] BA) throws Exception {
 		FromByteArray(BA);
+	}
+	
+	public void Initialize(Object Parameters) throws Exception {
+		int Cnt = Channels.size();
+		for (int I = 0; I < Cnt; I++) 
+			Channels.get(I).Initialize(Parameters);
+	}
+	
+	public void Start() throws IOException {
+		int Cnt = Channels.size();
+		for (int I = 0; I < Cnt; I++) 
+			Channels.get(I).Start();
+	}
+	
+	public void Stop() throws IOException {
+		int Cnt = Channels.size();
+		for (int I = 0; I < Cnt; I++) 
+			Channels.get(I).Stop();
+	}
+	
+	public void Process(TCanceller Canceller) throws Exception {
+		int Cnt = Channels.size();
+		for (int I = 0; I < Cnt; I++) 
+			Channels.get(I).Process(Canceller);
 	}
 	
 	public synchronized void FromXMLNode(Node ANode, TChannelProvider pChannelProvider) throws Exception {
@@ -158,18 +183,6 @@ public class TStreamDescriptor {
 	    }
     }
     
-	public void Start() throws IOException {
-		int Cnt = Channels.size();
-		for (int I = 0; I < Cnt; I++) 
-			Channels.get(I).Start();
-	}
-	
-	public void Stop() throws IOException {
-		int Cnt = Channels.size();
-		for (int I = 0; I < Cnt; I++) 
-			Channels.get(I).Stop();
-	}
-	
 	public TChannel Channels_GetOneByID(int ChannelID) {
 		int Cnt = Channels.size();
 		for (int I = 0; I < Cnt; I++) {

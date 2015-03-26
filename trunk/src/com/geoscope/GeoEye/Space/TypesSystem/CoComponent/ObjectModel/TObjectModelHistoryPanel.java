@@ -58,17 +58,15 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectMode
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.THistoryRecord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.TObjectHistoryRecords;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive.TArchiveItem;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsArchive;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerMyPlayerComponent;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerPlayer;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
 
 @SuppressLint("HandlerLeak")
 public class TObjectModelHistoryPanel extends Activity {
@@ -1191,7 +1189,7 @@ public class TObjectModelHistoryPanel extends Activity {
 	//.
 	private TVideoRecorderServerMyPlayerComponent 	VideoViewer = null;
 	private FrameLayout								VideoViewer_Layout = null;
-	private TMeasurementDescriptor					VideoViewer_CurrentMeasurement = null;
+	private TSensorMeasurementDescriptor			VideoViewer_CurrentMeasurement = null;
 	private TAsyncProcessing 						VideoViewer_CurrentMeasurementOpening = null; 
 	private boolean 								VideoViewer_flUpdating = false; 
 	
@@ -1949,10 +1947,10 @@ public class TObjectModelHistoryPanel extends Activity {
 			return; //. ->
 		//.
 		TSensorMeasurementDescriptor Measurement = History.SensorMeasurements.GetMeasurementByTimestamp(Timestamp);
-		if (Measurement instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor) {
-			VideoViewer_CurrentMeasurement = (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor)Measurement;
+		if ((Measurement != null) && Measurement.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeID)) {
+			VideoViewer_CurrentMeasurement = Measurement;
 			//.
-			final TVideoRecorderServerArchive.TArchiveItem Item = new TArchiveItem();
+			final TSensorsModuleMeasurementsArchive.TArchiveItem Item = new TSensorsModuleMeasurementsArchive.TArchiveItem();
 			Item.ID = VideoViewer_CurrentMeasurement.ID;
 			Item.StartTimestamp = VideoViewer_CurrentMeasurement.StartTimestamp;
 			Item.FinishTimestamp = VideoViewer_CurrentMeasurement.FinishTimestamp;
@@ -1977,32 +1975,29 @@ public class TObjectModelHistoryPanel extends Activity {
         			@Override
         			public void DoOnCompleted() throws Exception {
         				if (!Canceller.flCancel) {
-        	    			TVideoRecorderServerArchive.TMeasurementPlayHandler PlayHandler = new TVideoRecorderServerArchive.TMeasurementPlayHandler() {
+        					TSensorsModuleMeasurementsArchive.TMeasurementProcessHandler PlayHandler = new TSensorsModuleMeasurementsArchive.TMeasurementProcessHandler() {
         	    				
         	    				@Override
-        	    				public boolean PlayMeasurement(final TSensorMeasurementDescriptor MeasurementDescriptor, double MeasurementPosition) throws Exception {
+        	    				public boolean ProcessMeasurement(final TSensorMeasurement Measurement, double MeasurementPosition) throws Exception {
                     				if (Canceller.flCancel) 
                     					return true; //. ->
                     				//.
-        	    					if (TVideoRecorderServerPlayer.IsDefaultPlayer(MeasurementDescriptor)) {
-        			    	        	if ((VideoViewer.MeasurementDescriptor == null) || !TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer_CurrentMeasurement.ID, VideoViewer.MeasurementDescriptor.ID)) { 
-        	    		    	        	VideoViewer.Setup(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), MeasurementDescriptor.ID);
-        	    		    	        	if (!VideoViewer.IsVisible())
-        	    		    	        		VideoViewer.Show();
-        			    	        	}
-        	    		    	        //. validation
-        			    	        	VideoViewer_SetCurrentTime(TimeIntervalSlider.CurrentTime, flPause, 0/*Delay*/);
-        			    	        	return true; //. ->
-        	    					}
-        	    					else
-        	    						return false; //. ->
+    			    	        	if ((VideoViewer.MeasurementDescriptor == null) || !TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer_CurrentMeasurement.ID, VideoViewer.MeasurementDescriptor.ID)) { 
+    	    		    	        	VideoViewer.Setup(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Measurement.Descriptor.ID);
+    	    		    	        	if (!VideoViewer.IsVisible())
+    	    		    	        		VideoViewer.Show();
+    			    	        	}
+    	    		    	        //. validation
+    			    	        	VideoViewer_SetCurrentTime(TimeIntervalSlider.CurrentTime, flPause, 0/*Delay*/);
+    			    	        	//.
+        			    	        return true; //. ->
         	    				}
         	    			};
         	    			//.
-        	    			TVideoRecorderServerArchive.StartOpeningItem(Canceller, Item, PlayHandler,0, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, new TVideoRecorderServerArchive.TArchiveItemsListUpdater() {
+        	    			TSensorsModuleMeasurementsArchive.StartOpeningItem(Canceller, Item, PlayHandler,0, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, new TSensorsModuleMeasurementsArchive.TArchiveItemsListUpdater() {
 
         	    				@Override
-        	    				public void DoOnItemsListUpdated(TArchiveItem[] Items) {
+        	    				public void DoOnItemsListUpdated(TSensorsModuleMeasurementsArchive.TArchiveItem[] Items) {
         	    					int Cnt = Items.length;
         	    					for (int I = 0; I < Cnt; I++) 
         	    						if (TSensorMeasurementDescriptor.IDsAreTheSame(Items[I].ID, VideoViewer_CurrentMeasurement.ID)) {
@@ -2097,17 +2092,17 @@ public class TObjectModelHistoryPanel extends Activity {
 			TimeIntervalSlider.SetCurrentTime(_Measurement.StartTimestamp, false, true, true);
 		}
 		final TSensorMeasurementDescriptor Measurement = _Measurement;
-		if (Measurement instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor) {
-			TVideoRecorderServerArchive.TArchiveItem Item = new TArchiveItem();
+		if ((Measurement != null) && Measurement.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeID)) {
+			TSensorsModuleMeasurementsArchive.TArchiveItem Item = new TSensorsModuleMeasurementsArchive.TArchiveItem();
 			Item.ID = Measurement.ID;
 			Item.StartTimestamp = Measurement.StartTimestamp;
 			Item.FinishTimestamp = Measurement.FinishTimestamp;
 			Item.Location = Measurement.Location;
 			Item.Position = (TimeIntervalSlider.CurrentTime-Measurement.StartTimestamp);
-			TVideoRecorderServerArchive.StartOpeningItem(null, Item, null,REQUEST_SHOWVIDEOMEASUREMENT, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, this, new TVideoRecorderServerArchive.TArchiveItemsListUpdater() {
+			TSensorsModuleMeasurementsArchive.StartOpeningItem(null, Item, null,REQUEST_SHOWVIDEOMEASUREMENT, History.BeginTimestamp,History.EndTimestamp, Object, GeographDataServerAddress,GeographDataServerPort, this, new TSensorsModuleMeasurementsArchive.TArchiveItemsListUpdater() {
 
 				@Override
-				public void DoOnItemsListUpdated(TArchiveItem[] Items) {
+				public void DoOnItemsListUpdated(TSensorsModuleMeasurementsArchive.TArchiveItem[] Items) {
 					int Cnt = Items.length;
 					for (int I = 0; I < Cnt; I++) 
 						if (TSensorMeasurementDescriptor.IDsAreTheSame(Items[I].ID, Measurement.ID)) {

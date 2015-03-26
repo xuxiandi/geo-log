@@ -7,6 +7,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
+import com.geoscope.Classes.MultiThreading.TCanceller;
 
 public class TSensorMeasurementModel {
 	
@@ -24,6 +25,22 @@ public class TSensorMeasurementModel {
 	
 	public TSensorMeasurementModel(Node ANode, com.geoscope.Classes.Data.Stream.Channel.TChannelProvider ChannelProvider) throws Exception {
 		FromXMLNode(ANode, ChannelProvider);
+	}
+	
+	public void Initialize(Object Parameters) throws Exception {
+		Stream.Initialize(Parameters);
+	}
+	
+    public void Start() throws IOException {
+    	Stream.Start();
+    }
+
+    public void Stop() throws IOException {
+    	Stream.Stop();
+    }
+
+	public void Process(TCanceller Canceller) throws Exception {
+		Stream.Process(Canceller);
 	}
 	
 	public void FromXMLNode(Node ANode, com.geoscope.Classes.Data.Stream.Channel.TChannelProvider ChannelProvider) throws Exception {
@@ -103,13 +120,5 @@ public class TSensorMeasurementModel {
         if (Stream != null)
         	Stream.ToXMLSerializer(Serializer);
         Serializer.endTag("", "Stream");
-    }
-    
-    public void Start() throws IOException {
-    	Stream.Start();
-    }
-
-    public void Stop() throws IOException {
-    	Stream.Stop();
     }
 }

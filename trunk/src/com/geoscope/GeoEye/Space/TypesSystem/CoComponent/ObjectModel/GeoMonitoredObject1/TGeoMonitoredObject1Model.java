@@ -280,6 +280,8 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 					Result[Idx].StartTimestamp = DVRMs[I].StartTimestamp;
 					Result[Idx].FinishTimestamp = DVRMs[I].FinishTimestamp;
 					//.
+					Result[Idx].Model = DVRMs[I].Model;
+					//.
 					Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_DEVICE;
 					//.
 					Idx++;
@@ -295,6 +297,8 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 					Result[Idx].StartTimestamp = SVRMs[I].StartTimestamp;
 					Result[Idx].FinishTimestamp = SVRMs[I].FinishTimestamp;
 					//.
+					Result[Idx].Model = SVRMs[I].Model;
+					//.
 					Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_SERVER;
 					//.
 					Idx++;
@@ -308,6 +312,8 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				//.
 				Result[Idx].StartTimestamp = CVRMs[I].StartTimestamp;
 				Result[Idx].FinishTimestamp = CVRMs[I].FinishTimestamp;
+				//.
+				Result[Idx].Model = CVRMs[I].Model;
 				//.
 				Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_CLIENT;
 				//.

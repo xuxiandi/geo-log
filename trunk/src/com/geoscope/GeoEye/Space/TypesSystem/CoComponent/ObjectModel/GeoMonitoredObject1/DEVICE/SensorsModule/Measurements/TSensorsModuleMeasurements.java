@@ -5,10 +5,12 @@ import java.io.File;
 import android.app.Activity;
 import android.content.Intent;
 
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerPlayer;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerArchive.TMeasurementPlayHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessorPanel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsArchive.TMeasurementProcessHandler;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerMyPlayer;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TSystemTGeographServerObject;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
 
 public class TSensorsModuleMeasurements {
@@ -82,25 +84,34 @@ public class TSensorsModuleMeasurements {
 		return F.exists();
 	}
 	
-	public static void Context_PlayMeasurementByFolder(TMeasurementPlayHandler PlayHandler, int PlayerRequest, long GeographServerObjectID, String MeasurementFolder, double MeasurementStartPosition, Activity context) throws Exception {
+	public static void Context_ProcessMeasurementByFolder(TMeasurementProcessHandler ProcessHandler, int ProcessorRequest, long GeographServerObjectID, String MeasurementFolder, double MeasurementStartPosition, Activity context) throws Exception {
     	File MF = new File(MeasurementFolder);
     	String MeasurementDatabaseFolder = MF.getParent(); 
     	String MeasurementID = MF.getName();
+		TSensorMeasurement Measurement = new TSensorMeasurement(MeasurementDatabaseFolder,MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
     	//.
-		boolean flPlayAsDefault = true;
-		if (PlayHandler != null) {
-			TSensorMeasurementDescriptor MeasurementDescriptor = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
-			flPlayAsDefault = (!PlayHandler.PlayMeasurement(MeasurementDescriptor, MeasurementStartPosition));
-		}
-		if (flPlayAsDefault) {
-        	TVideoRecorderServerPlayer Player = new TVideoRecorderServerPlayer(MeasurementDatabaseFolder,MeasurementID, MeasurementStartPosition);
-        	Intent PI = Player.GetPlayer(context);
-        	if (PI != null)
-        		context.startActivityForResult(PI, PlayerRequest);	            	
+		boolean flProcessAsDefault = true;
+		if (ProcessHandler != null) 
+			flProcessAsDefault = (!ProcessHandler.ProcessMeasurement(Measurement, MeasurementStartPosition));
+		if (flProcessAsDefault && (Measurement.Descriptor.Model != null)) {
+			if (!Measurement.Descriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeID)) {
+	            Intent ProcessorPanel = new Intent(context, TMeasurementProcessorPanel.class);
+	            ProcessorPanel.putExtra("MeasurementDatabaseFolder",Measurement.DatabaseFolder);
+	            ProcessorPanel.putExtra("MeasurementID",Measurement.Descriptor.ID);
+	            ProcessorPanel.putExtra("MeasurementStartPosition",MeasurementStartPosition);
+        		context.startActivityForResult(ProcessorPanel, ProcessorRequest);	            	
+			}
+			else {
+	            Intent AVProcessorPanel = new Intent(context, TVideoRecorderServerMyPlayer.class);
+	            AVProcessorPanel.putExtra("MeasurementDatabaseFolder",Measurement.DatabaseFolder);
+	            AVProcessorPanel.putExtra("MeasurementID",Measurement.Descriptor.ID);
+	            AVProcessorPanel.putExtra("MeasurementStartPosition",MeasurementStartPosition);
+        		context.startActivityForResult(AVProcessorPanel, ProcessorRequest);	            	
+			}
 		}
 	}
 	
-	public static void Context_PlayMeasurement(TMeasurementPlayHandler PlayHandler, int PlayerRequest, long GeographServerObjectID, String MeasurementID, double MeasurementStartPosition, Activity context) throws Exception {
-		Context_PlayMeasurementByFolder(PlayHandler,PlayerRequest, GeographServerObjectID, Context_GetMeasurementFolder(GeographServerObjectID, MeasurementID), MeasurementStartPosition, context);
+	public static void Context_ProcessMeasurement(TMeasurementProcessHandler PlayHandler, int PlayerRequest, long GeographServerObjectID, String MeasurementID, double MeasurementStartPosition, Activity context) throws Exception {
+		Context_ProcessMeasurementByFolder(PlayHandler,PlayerRequest, GeographServerObjectID, Context_GetMeasurementFolder(GeographServerObjectID, MeasurementID), MeasurementStartPosition, context);
 	}
 }

@@ -1012,5 +1012,6 @@
     <string name="SError1">ОШИБКА</string>
     <string name="SNotRunning">не работает</string>
     <string name="SRunning">работает &#8230;</string>
+    <string name="SSensorRegistratorArchive">Архив сенсор-регистраторов</string>
     
 </resources>

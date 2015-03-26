@@ -8,8 +8,8 @@ public class TMeasurement extends TSensorMeasurement {
 
 	public TTLRChannel TLRChannel;
 	
-	public TMeasurement(String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
-		super(pMeasurementID, TMeasurementDescriptor.class, ChannelProvider);
+	public TMeasurement(String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
+		super(pDatabaseFolder, pMeasurementID, TMeasurementDescriptor.class, ChannelProvider);
 		//.
 		TLRChannel = new TTLRChannel(Folder());
 		Descriptor.Model.Stream.Channels.add(TLRChannel);

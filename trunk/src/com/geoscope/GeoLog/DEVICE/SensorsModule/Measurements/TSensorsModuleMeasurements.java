@@ -283,7 +283,8 @@ public class TSensorsModuleMeasurements {
 		TSensorMeasurementDescriptor Descriptor = (TSensorMeasurementDescriptor)DescriptorClass.newInstance();
 		Descriptor.ID = MeasurementID; 
 		//.
-		String _SFN = DataBaseFolder+"/"+MeasurementID+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
+		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
+		String _SFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
 		File F = new File(_SFN);
 		if (!F.exists())  
 			return Descriptor; //. ->
@@ -316,8 +317,10 @@ public class TSensorsModuleMeasurements {
 			Descriptor.FinishTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("FinishTimestamp").item(0).getFirstChild().getNodeValue());
 			//.
 			Node ModelNode = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"Model");
-			if (ModelNode != null) 
+			if (ModelNode != null) {
 				Descriptor.Model = new TSensorMeasurementModel(ModelNode, ChannelProvider);
+				Descriptor.Model.Initialize(MeasurementFolder);
+			}
 			else
 				Descriptor.Model = null;
 			break; //. >

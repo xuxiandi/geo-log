@@ -6,7 +6,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 
 public class TMeasurementDescriptor extends TSensorMeasurementDescriptor {
 
-	public static final String TypeIDPrefix = "AV";
+	public static final String TypeID = "AV";
 	
 	public static final String AudioFileName = "Audio.rtp";
 	public static final String VideoFileName = "Video.rtp";

@@ -786,7 +786,7 @@
                         style="android:attr/buttonBarButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
+                        android:layout_weight="0.3"
                         android:text="@string/SSensors"
                         android:textSize="18sp"
                         android:textStyle="bold|italic"
@@ -797,8 +797,19 @@
                         style="android:attr/buttonBarButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
+                        android:layout_weight="0.3"
                         android:text="@string/SMeters"
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:typeface="monospace" />
+
+                    <Button
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleMeasurementsArchive"
+                        style="android:attr/buttonBarButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="@string/SArchive"
                         android:textSize="18sp"
                         android:textStyle="bold|italic"
                         android:typeface="monospace" />

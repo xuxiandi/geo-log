@@ -94,7 +94,7 @@ public class TSensorsModuleMeasurements {
 		if (ProcessHandler != null) 
 			flProcessAsDefault = (!ProcessHandler.ProcessMeasurement(Measurement, MeasurementStartPosition));
 		if (flProcessAsDefault && (Measurement.Descriptor.Model != null)) {
-			if (!Measurement.Descriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeID)) {
+			if (!Measurement.Descriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID)) {
 	            Intent ProcessorPanel = new Intent(context, TMeasurementProcessorPanel.class);
 	            ProcessorPanel.putExtra("MeasurementDatabaseFolder",Measurement.DatabaseFolder);
 	            ProcessorPanel.putExtra("MeasurementID",Measurement.Descriptor.ID);

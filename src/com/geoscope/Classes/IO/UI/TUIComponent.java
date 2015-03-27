@@ -4,6 +4,9 @@ package com.geoscope.Classes.IO.UI;
 
 public class TUIComponent {
 
+	public void Destroy() throws Exception {
+	}
+
 	public void Start() throws Exception {
 	}
 

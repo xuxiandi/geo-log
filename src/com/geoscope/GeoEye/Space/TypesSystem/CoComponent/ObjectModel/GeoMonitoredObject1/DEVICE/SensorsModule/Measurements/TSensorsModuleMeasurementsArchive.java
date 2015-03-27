@@ -56,14 +56,20 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 	
 	public static class TArchiveItem {
 		
-		public String ID;
+		public String ID = "";
 		//.
-		public double StartTimestamp;
-		public double FinishTimestamp;
+		public double StartTimestamp = 0.0;
+		public double FinishTimestamp = 0.0;
 		//.
-		public double CPC;
+		public String TypeID = "";
+		public String ContainerTypeID = "";
 		//.
-		public int Location;
+		public String Name = "";
+		public String Info = "";
+		//.
+		public double CPC = 0.0;
+		//.
+		public int Location = TSensorMeasurementDescriptor.LOCATION_DEVICE;
 		//.
 		public double Position = 0.0;
 	}
@@ -171,7 +177,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 				//.
 	    		final CharSequence[] _items;
 	    		int SelectedIdx = -1;
-	    		if ((MeasurementDescriptor != null) && MeasurementDescriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeID)) {
+	    		if ((MeasurementDescriptor != null) && MeasurementDescriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID)) {
 		    		_items = new CharSequence[3];	    		
 		    		_items[0] = getString(R.string.SOpen); 
 		    		_items[1] = getString(R.string.SRemove); 
@@ -439,6 +445,12 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 					Result[Idx].StartTimestamp = DVRMs[I].StartTimestamp;
 					Result[Idx].FinishTimestamp = DVRMs[I].FinishTimestamp;
 					//.
+					Result[Idx].TypeID = DVRMs[I].TypeID();
+					Result[Idx].ContainerTypeID = DVRMs[I].ContainerTypeID();
+					//.
+					Result[Idx].Name = DVRMs[I].Name();
+					Result[Idx].Info = DVRMs[I].Info();
+					//.
 					Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_DEVICE;
 					//.
 					Result[Idx].CPC = 1.0;
@@ -456,6 +468,12 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 					Result[Idx].StartTimestamp = SVRMs[I].StartTimestamp;
 					Result[Idx].FinishTimestamp = SVRMs[I].FinishTimestamp;
 					//.
+					Result[Idx].TypeID = SVRMs[I].TypeID();
+					Result[Idx].ContainerTypeID = SVRMs[I].ContainerTypeID();
+					//.
+					Result[Idx].Name = SVRMs[I].Name();
+					Result[Idx].Info = SVRMs[I].Info();
+					//.
 					Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_SERVER;
 					//.
 					Result[Idx].CPC = ((TGeographDataServerClient.TSensorMeasurementDescriptor)SVRMs[I]).CPC;
@@ -471,6 +489,12 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 				//.
 				Result[Idx].StartTimestamp = CVRMs[I].StartTimestamp;
 				Result[Idx].FinishTimestamp = CVRMs[I].FinishTimestamp;
+				//.
+				Result[Idx].TypeID = CVRMs[I].TypeID();
+				Result[Idx].ContainerTypeID = CVRMs[I].ContainerTypeID();
+				//.
+				Result[Idx].Name = CVRMs[I].Name();
+				Result[Idx].Info = CVRMs[I].Info();
 				//.
 				Result[Idx].Location = TSensorMeasurementDescriptor.LOCATION_CLIENT;
 				//.
@@ -512,6 +536,9 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 				TIS = Integer.toString(TimeInterval)+getString(R.string.SSec);
 			else
 				TIS = Integer.toString((int)(TimeInterval/60))+getString(R.string.SMin)+" "+Integer.toString(TimeInterval % 60)+getString(R.string.SSec);
+			String TypeName = Items[I].Name;
+			if (TypeName.equals(""))
+				TypeName = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.TModel.GetModelTypeName(Items[I].TypeID, this); 
 			String SideS = "";
 			switch (Items[I].Location) {
 			case TSensorMeasurementDescriptor.LOCATION_SERVER:
@@ -522,7 +549,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 				SideS = getString(R.string.SAtClient);
 				break; //. >
 			}
-			String RS = DTS+"   "+TIS+"  "+SideS;
+			String RS = DTS+" ["+TypeName+"]   "+TIS+"  "+SideS;
 			lvItems[I] = RS; 
 			//.
 			if (Items[I].ID.equals(SelectedMeasurementID))

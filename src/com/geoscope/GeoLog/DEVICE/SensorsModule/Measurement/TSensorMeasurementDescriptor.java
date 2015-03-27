@@ -58,6 +58,18 @@ public class TSensorMeasurementDescriptor {
 		return (Model.ContainerTypeID.startsWith(ContainerTypeID));
 	}
 	
+	public String Name() {
+		if (Model == null)
+			return ""; //. ->
+		return (Model.Name);
+	}
+	
+	public String Info() {
+		if (Model == null)
+			return ""; //. ->
+		return (Model.Info);
+	}
+	
 	public boolean IsStarted() {
 		return (StartTimestamp != 0.0);
 	}

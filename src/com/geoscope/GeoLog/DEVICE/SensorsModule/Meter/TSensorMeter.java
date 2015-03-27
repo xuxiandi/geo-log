@@ -65,7 +65,7 @@ public class TSensorMeter extends TCancelableThread {
 			//.
 			flActive = false;
 			//. Measurement 
-			MeasurementMaxDuration = (1.0/(24.0*60.0))*10; //. minutes
+			MeasurementMaxDuration = (1.0/(24.0*60.0))*60; //. minutes
 			MeasurementLifeTime = 1.0*2; //. days
 			MeasurementAutosaveInterval = -1.0; 
 		}

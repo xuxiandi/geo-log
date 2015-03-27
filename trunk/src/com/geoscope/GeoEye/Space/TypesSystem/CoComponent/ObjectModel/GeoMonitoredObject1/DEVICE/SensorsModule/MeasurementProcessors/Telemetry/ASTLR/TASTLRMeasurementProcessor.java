@@ -4,7 +4,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 
 public class TASTLRMeasurementProcessor extends TTLRMeasurementProcessor {
 	
-	public static final String TypeID = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.TMeasurementDescriptor.TypeID;
+	public static final String TypeID = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.Model.TModel.ModelTypeID;
 	
 
 	public TASTLRMeasurementProcessor() {

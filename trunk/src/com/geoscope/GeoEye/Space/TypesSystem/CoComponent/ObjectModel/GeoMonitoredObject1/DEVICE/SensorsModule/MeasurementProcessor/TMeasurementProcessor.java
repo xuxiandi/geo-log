@@ -1,14 +1,15 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor;
 
 import android.app.Activity;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
+import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.ASTLR.TASTLRMeasurementProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.ECTLR.TECTLRMeasurementProcessor;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
 
-public class TMeasurementProcessor {
+public class TMeasurementProcessor extends TUIComponent {
 
 	public static TMeasurementProcessor GetProcessor(TSensorMeasurementDescriptor MeasurementDescriptor) {
 		if (MeasurementDescriptor.IsTypeOf(TECTLRMeasurementProcessor.TypeID))
@@ -24,7 +25,7 @@ public class TMeasurementProcessor {
 	protected double 				MeasurementStartPosition = 0.0;
 	//.
 	protected Activity 		ParentActivity;
-	protected FrameLayout 	ParentLayout;
+	protected LinearLayout 	ParentLayout;
 	//.
 	public boolean flInitialized = false;
 	
@@ -33,8 +34,13 @@ public class TMeasurementProcessor {
 
 	public void Destroy() throws Exception {
 	}
+
+	@Override
+	public boolean IsVisible() {
+		return true;
+	}
 	
-	public void SetLayout(Activity pParentActivity, FrameLayout pParentLayout) {
+	public void SetLayout(Activity pParentActivity, LinearLayout pParentLayout) {
 		ParentActivity = pParentActivity;
 		ParentLayout = pParentLayout;
 	}

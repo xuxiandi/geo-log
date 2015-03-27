@@ -166,7 +166,7 @@ public class TVideoRecorderServerArchive extends Activity {
 				//.
 	    		final CharSequence[] _items;
 	    		int SelectedIdx = -1;
-	    		if ((MeasurementDescriptor != null) && MeasurementDescriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeID)) {
+	    		if ((MeasurementDescriptor != null) && MeasurementDescriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID)) {
 		    		_items = new CharSequence[3];	    		
 		    		_items[0] = getString(R.string.SOpen); 
 		    		_items[1] = getString(R.string.SRemove); 
@@ -368,7 +368,7 @@ public class TVideoRecorderServerArchive extends Activity {
 		//.
 		TSensorMeasurementDescriptor[] DVRMs;
 		try {
-			DVRMs = TSensorMeasurement.Filter(ObjectModel.SensorsModule_Measurements_GetList(BeginTimestamp,EndTimestamp), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeID); 
+			DVRMs = TSensorMeasurement.Filter(ObjectModel.SensorsModule_Measurements_GetList(BeginTimestamp,EndTimestamp), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID); 
 		}
 		catch (Exception E) {
 			DVRMs = null;
@@ -377,14 +377,14 @@ public class TVideoRecorderServerArchive extends Activity {
 		TSensorMeasurementDescriptor[] SVRMs;
 		TGeographDataServerClient GeographDataServerClient = new TGeographDataServerClient(context, GeographDataServerAddress,GeographDataServerPort, Object.Server.User.UserID,Object.Server.User.UserPassword, Object.GeographServerObjectID());
 		try {
-			SVRMs = TSensorMeasurement.Filter(GeographDataServerClient.SERVICE_GETSENSORDATA_GetMeasurementList(BeginTimestamp,EndTimestamp, Canceller), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeID);
+			SVRMs = TSensorMeasurement.Filter(GeographDataServerClient.SERVICE_GETSENSORDATA_GetMeasurementList(BeginTimestamp,EndTimestamp, Canceller), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID);
 		}
 		finally {
 			GeographDataServerClient.Destroy();
 		}
 		//.
 		TSensorMeasurementDescriptor[] CVRMs;
-		CVRMs = TSensorMeasurement.Filter(TSensorsModuleMeasurements.Context_GetMeasurementsList(Object.GeographServerObjectID(), BeginTimestamp,EndTimestamp), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeID); 
+		CVRMs = TSensorMeasurement.Filter(TSensorsModuleMeasurements.Context_GetMeasurementsList(Object.GeographServerObjectID(), BeginTimestamp,EndTimestamp), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID); 
 		//.
 		int DVRMs_Count = 0;
 		if (DVRMs != null)

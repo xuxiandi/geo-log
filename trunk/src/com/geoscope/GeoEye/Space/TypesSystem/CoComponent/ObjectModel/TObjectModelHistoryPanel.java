@@ -1733,7 +1733,7 @@ public class TObjectModelHistoryPanel extends Activity {
 		UserActivitiesComponentListPositioning = null;
 	}
 	
-	private void UserActivitiesComponentList_Finalize() throws InterruptedException {
+	private void UserActivitiesComponentList_Finalize() throws Exception {
 		if (UserActivitiesComponentListPositioning != null) {
 			UserActivitiesComponentListPositioning.Destroy();
 			UserActivitiesComponentListPositioning = null;
@@ -1930,7 +1930,7 @@ public class TObjectModelHistoryPanel extends Activity {
     	VideoViewer_CurrentMeasurementOpening = null; 
 	}
 	
-	private void VideoViewer_Finalize() throws InterruptedException, IOException {
+	private void VideoViewer_Finalize() throws Exception {
 		if (VideoViewer_CurrentMeasurementOpening != null) {
 			VideoViewer_CurrentMeasurementOpening.Destroy();
 			VideoViewer_CurrentMeasurementOpening = null;
@@ -1947,7 +1947,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			return; //. ->
 		//.
 		TSensorMeasurementDescriptor Measurement = History.SensorMeasurements.GetMeasurementByTimestamp(Timestamp);
-		if ((Measurement != null) && Measurement.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeID)) {
+		if ((Measurement != null) && Measurement.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID)) {
 			VideoViewer_CurrentMeasurement = Measurement;
 			//.
 			final TSensorsModuleMeasurementsArchive.TArchiveItem Item = new TSensorsModuleMeasurementsArchive.TArchiveItem();
@@ -2092,7 +2092,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			TimeIntervalSlider.SetCurrentTime(_Measurement.StartTimestamp, false, true, true);
 		}
 		final TSensorMeasurementDescriptor Measurement = _Measurement;
-		if ((Measurement != null) && Measurement.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.TypeID)) {
+		if ((Measurement != null) && Measurement.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID)) {
 			TSensorsModuleMeasurementsArchive.TArchiveItem Item = new TSensorsModuleMeasurementsArchive.TArchiveItem();
 			Item.ID = Measurement.ID;
 			Item.StartTimestamp = Measurement.StartTimestamp;

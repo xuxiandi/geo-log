@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
@@ -27,7 +27,7 @@ public class TMeasurementProcessorPanel extends Activity {
 	private double 				MeasurementStartPosition = 0.0;
 	//.
 	private TMeasurementProcessor 	Processor = null;
-	private FrameLayout 			ProcessorLayout;
+	private LinearLayout 			ProcessorLayout;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +44,7 @@ public class TMeasurementProcessorPanel extends Activity {
     		//.
             setContentView(R.layout.measurement_processor_panel);
             //.
-            ProcessorLayout = (FrameLayout)findViewById(R.id.ProcessorLayout);
+            ProcessorLayout = (LinearLayout)findViewById(R.id.ProcessorLayout);
             //
     		MeasurementPreprocessing = new TAsyncProcessing(this) {
 

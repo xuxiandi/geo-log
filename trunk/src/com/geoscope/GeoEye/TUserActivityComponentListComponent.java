@@ -745,7 +745,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
         flExists = true;
 	}
 
-	public void Destroy() {
+	@Override
+	public void Destroy() throws Exception {
 		flExists = false;
 		//. 
 		if (ComponentTypedDataFileLoading != null) {

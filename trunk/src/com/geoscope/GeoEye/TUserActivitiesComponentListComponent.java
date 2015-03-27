@@ -796,7 +796,8 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		this(pParentActivity,pParentLayout, pUserID, pBeginTimestamp,pEndTimestamp, pListRowSizeID, pComponent, null, pOnListItemClickHandler);
 	}
 	
-	public void Destroy() {
+	@Override
+	public void Destroy() throws Exception {
 		flExists = false;
 		//. 
 		if (ComponentTypedDataFileLoading != null) {

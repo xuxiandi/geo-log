@@ -966,7 +966,8 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		this(pParentActivity, pParentLayout, null, pOnVideoSurfaceChangedHandler, pOnProgressHandler);
 	}
 	
-	public void Destroy() throws IOException, InterruptedException {
+	@Override
+	public void Destroy() throws Exception {
     	flExists = false;
     	//.
 		Finalize();

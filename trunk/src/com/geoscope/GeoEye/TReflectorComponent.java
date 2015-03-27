@@ -7700,6 +7700,7 @@ public class TReflectorComponent extends TUIComponent {
 		flExists = true;
 	}
 
+	@Override
 	public void Destroy() throws Exception {
 		flExists = false;
 		//.

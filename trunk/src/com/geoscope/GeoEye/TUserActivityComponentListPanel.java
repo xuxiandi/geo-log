@@ -48,9 +48,12 @@ public class TUserActivityComponentListPanel extends Activity {
 	protected void onDestroy() {
 		flExists = false;
 		//. 
-		if (ListComponent != null) {
-			ListComponent.Destroy();
-			ListComponent = null;
+		try {
+			if (ListComponent != null) {
+				ListComponent.Destroy();
+				ListComponent = null;
+			}
+		} catch (Exception E) {
 		}
 		//.
 		super.onDestroy();

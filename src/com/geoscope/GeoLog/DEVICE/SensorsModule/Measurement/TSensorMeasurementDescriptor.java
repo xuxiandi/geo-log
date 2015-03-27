@@ -15,10 +15,8 @@ public class TSensorMeasurementDescriptor {
 		}
 	}
 	
-	private static final double MaxMeasurementIDDeviation = 1.0/(24.0*3600.0);
-	//.
 	public static boolean IDsAreTheSame(String ID, String ID1) {
-		return (Math.abs(Double.parseDouble(ID)-Double.parseDouble(ID1)) < MaxMeasurementIDDeviation);
+		return ID.equals(ID1);
 	}
 
 	

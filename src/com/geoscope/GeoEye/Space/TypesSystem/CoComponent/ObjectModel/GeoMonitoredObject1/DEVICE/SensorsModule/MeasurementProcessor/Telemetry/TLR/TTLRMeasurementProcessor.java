@@ -145,6 +145,7 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
     private int			ChannelSamples_Position;
 	//.
 	private int				Graph_ChannelsCount;
+	private double[]		Graph_ChannelsXScales;
 	private int[]			Graph_ChannelsColors;
 	private int             Graph_Width = 0;
 	private int             Graph_Height = 0;
@@ -313,8 +314,10 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
         ChannelSamples_MaxSize = 0;
         for (int I = 0; I < ChannelSamples_ChannelsCount; I++) {
 			TDataType DT = TLRChannel.DataTypes.Items.get(I);
-			if (!(DT.ContainerType instanceof TDoubleContainerType))
+			if (!(DT.ContainerType instanceof TDoubleContainerType)) {
+            	ChannelSamples[I] = new short[0];
 				continue; //. ^
+			}
 			@SuppressWarnings("unchecked")
 			ArrayList<TContainerType> Values = (ArrayList<TContainerType>)DT.Extra;
         	if (Values == null) {
@@ -373,16 +376,21 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	}
 	
 	private void Graph_Init(int Width, int Height) {
-    	Graph_ChannelsCount = TLRChannel.DataTypes.Items.size();
+    	Graph_Width = Width;
+    	Graph_Height = Height;
+    	Graph_ChannelsCount = ChannelSamples_ChannelsCount;
     	//.
         Graph_DisplayMetrics = ParentActivity.getResources().getDisplayMetrics();
-        Graph_XScale = Width/ChannelSamples_MaxSize;
+        Graph_XScale = 1.0;
         Graph_YScale = 1.0;
         Graph_XScale *= Graph_DisplayMetrics.density; 
         Graph_YScale *= Graph_DisplayMetrics.density;
+        //.
+        Graph_ChannelsXScales = new double[Graph_ChannelsCount];
+        for (int I = 0; I < ChannelSamples_ChannelsCount; I++)
+        	if (ChannelSamples[I].length > 0)
+        	Graph_ChannelsXScales[I] = Graph_Width/ChannelSamples[I].length;
     	//.
-    	Graph_Width = Width;
-    	Graph_Height = Height;
     	Graph_Graphics = new Canvas();
     	//.
     	Graph_GraphPaint = new Paint();
@@ -541,7 +549,7 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
             		int Graph_Polyline_Count = 0;
             		for (int I = 0; I < PageSize; I++)
             		{
-            			X = (float)(I*Graph_XScale);
+            			X = (float)(I*Graph_ChannelsXScales[ChannelIndex]*Graph_XScale);
             			Y = (float)(Y0-(ChannelSamples[ChannelIndex][ChannelSamples_Position+I]-Graph_ZeroLevel)*Graph_YScale);
             			if (Y < Yuplimit)
             				Y = Yuplimit;

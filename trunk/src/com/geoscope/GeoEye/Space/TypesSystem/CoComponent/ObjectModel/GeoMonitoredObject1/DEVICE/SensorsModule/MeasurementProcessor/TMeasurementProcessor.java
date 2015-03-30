@@ -27,7 +27,7 @@ public class TMeasurementProcessor extends TUIComponent {
 	protected Activity 		ParentActivity;
 	protected LinearLayout 	ParentLayout;
 	//.
-	public boolean flInitialized = false;
+	public boolean flSetup = false;
 	
 	public TMeasurementProcessor() {
 	}
@@ -56,6 +56,8 @@ public class TMeasurementProcessor extends TUIComponent {
 	public void Setup(TSensorMeasurement pMeasurement, double pMeasurementStartPosition) throws Exception {
 		Finalize();
 		Initialize(pMeasurement, pMeasurementStartPosition);
+		//.
+		flSetup = true;
 	}
 	
 	public void SetPosition(final double Position, final int Delay, final boolean flPaused) throws InterruptedException {

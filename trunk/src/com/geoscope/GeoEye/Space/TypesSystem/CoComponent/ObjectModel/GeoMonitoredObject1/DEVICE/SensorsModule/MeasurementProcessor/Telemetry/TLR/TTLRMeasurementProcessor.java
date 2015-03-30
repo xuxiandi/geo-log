@@ -23,14 +23,23 @@ import android.widget.TextView;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TDoubleContainerType;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 
 public class TTLRMeasurementProcessor extends TMeasurementProcessor implements SurfaceHolder.Callback, OnTouchListener  {
 
+	public static final int BackgroundColor = 0xFFC5C5C5;
+	public static final int TimeIntervalColor = Color.WHITE;
+	public static final int CenterMarkerColor = Color.MAGENTA;
+	public static final int CenterMarkerColorHigh = Color.RED;
+	
 	public static class TOnSurfaceChangedHandler {
 		
 		public void DoOnSurfaceChanged(SurfaceHolder surface) {
@@ -44,6 +53,8 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
     	private boolean flCancel = false;
     	public boolean flProcessing = false;
     	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
+    	//.
+	    private Paint paint = new Paint();
         
     	public TSurfaceUpdating() {
     		_Thread = new Thread(this);
@@ -112,15 +123,54 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 		}
 		
         private void Draw(Canvas canvas) {
-        	if (Graph_Bitmap != null) {
-                canvas.drawBitmap(Graph_Bitmap, 0, 0, null);
-        	}
+			DoOnDraw(canvas, null/* DrawCanceller */, null/* DrawTimeLimit */);
         }
+        
+		protected void DoOnDraw(Canvas canvas, TCanceller Canceller, TTimeLimit TimeLimit) {
+			//. draw background
+			paint.setStrokeWidth(0);
+			paint.setStyle(Paint.Style.FILL);
+			paint.setColor(BackgroundColor);
+			canvas.drawRect(0,0,Width,Height, paint);
+			//.
+			if (!flSetup)
+				return; //. ->
+			//.
+			double Mid = (Width/2.0);
+			double _CurrentTime = OleDate.UTCToLocalTime(CurrentTime);
+			double IntervalBegin = _CurrentTime-(Mid*TimeResolution);
+			double IntervalEnd = _CurrentTime+(Mid*TimeResolution);
+			//. draw TimeInterval
+			double TIB,TIE;
+			double _TimeIntervalBegin = OleDate.UTCToLocalTime(Measurement.Descriptor.StartTimestamp);
+			if (_TimeIntervalBegin >= IntervalBegin) 
+				TIB = _TimeIntervalBegin;
+			else
+				TIB = IntervalBegin;
+			double _TimeIntervalEnd = OleDate.UTCToLocalTime(Measurement.Descriptor.FinishTimestamp);
+			if (_TimeIntervalEnd <= IntervalEnd) 
+				TIE = _TimeIntervalEnd;
+			else 
+				TIE = IntervalEnd;
+			paint.setColor(TimeIntervalColor);
+			canvas.drawRect((float)(Mid+(TIB-_CurrentTime)/TimeResolution),0.0F,(float)(Mid+(TIE-_CurrentTime)/TimeResolution),Height, paint);
+			//. draw center marker
+			paint.setStrokeWidth(3.0F*Graph_DisplayMetrics.density);
+			paint.setColor(CenterMarkerColor);
+			canvas.drawLine((float)Mid,0.0F, (float)Mid,Height, paint);
+			paint.setStrokeWidth(1.0F*Graph_DisplayMetrics.density);
+			paint.setColor(CenterMarkerColorHigh);
+			canvas.drawLine((float)Mid,0.0F, (float)Mid,Height, paint);
+			paint.setColor(CenterMarkerColorHigh);
+			String S = OleDate.Format("yyyy/MM/dd HH:mm:ss",_CurrentTime); 
+			paint.setTextSize(14*Graph_DisplayMetrics.density);
+			canvas.drawText(S, (float)Mid+3.0F*Graph_DisplayMetrics.density,0.0F+paint.getTextSize(), paint);
+		}
     }
     
 	private SurfaceHolder 	surface = null;
-	private int				surface_width;
-	private int				surface_height;
+	private int				Width;
+	private int				Height;
 	//.
 	private SurfaceView 	svProcessor;
 	@SuppressWarnings("unused")
@@ -129,12 +179,27 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	private TSurfaceUpdating SurfaceUpdating = null;
 	//.
 	private TTLRChannel TLRChannel = null;
+	//.
+    private double 			CurrentTime;
+    private double 			TimeResolution;
     //.
     private double 	Pointer0_DownX;
     private double 	Pointer0_DownY;
     private double 	Pointer0_Down_ChannelSamples_Position;
     private float 	Pointer0_Down_ChannelSamples_ShiftY;
     private boolean	Pointer0_Down_ChannelSamples_flMoving = false;
+    //////////////
+    private boolean Pointer0_flMoving;
+    private boolean Pointer0_flTimeSelecting;
+    private double 	Pointer0_LastX;
+	private double 	Pointer0_LastY;
+    private double 	Pointer0_LastDownTime;
+    private boolean Pointer1_flMoving;
+    private double 	Pointer1_LastX;
+    @SuppressWarnings("unused")
+	private double 	Pointer1_LastY;
+    @SuppressWarnings("unused")
+    private double 	Pointer1_LastDownTime;
 	//.
     private int	 		ChannelSamples_ChannelsCount;
     private int			ChannelSamples_MaxSize;
@@ -194,6 +259,8 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	public void Initialize(TSensorMeasurement pMeasurement, double pMeasurementStartPosition) throws Exception {
 		super.Initialize(pMeasurement, pMeasurementStartPosition);
 		//.
+		CurrentTime = Measurement.Descriptor.StartTimestamp;
+		//.
 		SetTLRChannel((TTLRChannel)Measurement.Descriptor.Model.Stream.Channels_GetOneByClass(TTLRChannel.class));
 		//.
 		ChannelSamples_Create();
@@ -221,17 +288,19 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
 		surface = arg0;
-		surface_width = arg2;
-		surface_height = arg3;
+		Width = arg2;
+		Height = arg3;
 		//.
-		Graph_Init(surface_width,surface_height);
+		TimeResolution = (Measurement.Descriptor.FinishTimestamp-Measurement.Descriptor.StartTimestamp)/Width;
+		//.
+		Graph_Init(Width,Height);
 		//.
 		SurfaceUpdating = new TSurfaceUpdating();
 		//.
 		Update();
 	}
 	
-	@Override
+	/*@Override
 	public boolean onTouch(View pView, MotionEvent pEvent) {
 		switch (pEvent.getAction() & MotionEvent.ACTION_MASK) {
 		
@@ -281,8 +350,230 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 				}
 			}
 		}
+	}*/
+	
+	@Override
+	public boolean onTouch(View pView, MotionEvent pEvent) {
+		try {
+			switch (pEvent.getAction() & MotionEvent.ACTION_MASK) {
+
+			case MotionEvent.ACTION_DOWN:
+				Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+				break; // . >
+
+			case MotionEvent.ACTION_POINTER_DOWN:
+				switch (pEvent.getPointerCount()) {
+
+				case 1:
+					Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+					break; // . >
+
+				case 2:
+					Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+					Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
+					break; // . >
+
+				case 3:
+					Pointer0_Down(pEvent.getX(0), pEvent.getY(0));
+					Pointer1_Down(pEvent.getX(1), pEvent.getY(1));
+					Pointer2_Down(pEvent.getX(2), pEvent.getY(2));
+					break; // . >
+				}
+				break; // . >
+
+			case MotionEvent.ACTION_UP:
+				Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+				break; // . >
+
+			case MotionEvent.ACTION_POINTER_UP:
+			case MotionEvent.ACTION_CANCEL:
+				switch (pEvent.getPointerCount()) {
+
+				case 1:
+					Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+					break; // . >
+
+				case 2:
+					Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+					Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
+					break; // . >
+
+				case 3:
+					Pointer0_Up(pEvent.getX(0), pEvent.getY(0));
+					Pointer1_Up(pEvent.getX(1), pEvent.getY(1));
+					Pointer2_Up(pEvent.getX(2), pEvent.getY(2));
+					break; // . >
+				}
+				break; // . >
+
+			case MotionEvent.ACTION_MOVE:
+				switch (pEvent.getPointerCount()) {
+
+				case 1:
+					Pointer0_Move(pEvent.getX(0),
+							pEvent.getY(0));
+					break; // . >
+
+				case 2:
+					Pointer0_Move(pEvent.getX(0),
+							pEvent.getY(0));
+					Pointer1_Move(pEvent.getX(1),
+							pEvent.getY(1));
+					break; // . >
+
+				case 3:
+					Pointer0_Move(pEvent.getX(0),
+							pEvent.getY(0));
+					Pointer1_Move(pEvent.getX(1),
+							pEvent.getY(1));
+					Pointer2_Move(pEvent.getX(2),
+							pEvent.getY(2));
+					break; // . >
+				}
+				break; // . >
+
+			default:
+				return false; // . ->
+			}
+			return true; // . ->
+		} catch (Throwable E) {
+			TGeoLogApplication.Log_WriteError(E);
+			// .
+			return false; // . ->
+		}
+	}
+
+	@SuppressWarnings("unused")
+	protected void Pointer0_Down(double X, double Y) {
+		try {
+			Pointer0_flMoving = true;
+			if (false) /*(Button = Left)*/ {
+				double _CurrentTime = CurrentTime+((X-(Width/2.0))*TimeResolution);
+			  	if (!((Measurement.Descriptor.StartTimestamp <= _CurrentTime) && (_CurrentTime <= Measurement.Descriptor.FinishTimestamp))) 
+			  		return; //. ->
+			  	//.
+			  	Draw();
+			}
+			else
+				Pointer0_flTimeSelecting = true;
+		}
+		finally {
+			Pointer0_LastX = X;
+			Pointer0_LastY = Y;
+			Pointer0_LastDownTime = OleDate.UTCCurrentTimestamp();
+		}
 	}
 	
+	protected void Pointer0_Up(double X, double Y) {
+		if (Pointer0_flMoving && !Pointer1_flMoving && Pointer0_flTimeSelecting) {
+			Move(-(X-Pointer0_LastX));
+			//.
+			///////if (OnTimeChangeHandler != null) 
+				///////OnTimeChangeHandler.DoOnTimeChanged(CurrentTime);
+		}
+		//.
+		Pointer0_flMoving = false;
+		//.
+		Pointer0_flTimeSelecting = false;
+	}
+	
+	protected void Pointer0_Move(double X, double Y) {
+		if (Pointer0_flMoving) {
+			if (!Pointer1_flMoving) {
+				if (Pointer0_flTimeSelecting) {
+					Move(-(X-Pointer0_LastX));
+					//.
+					////////if (OnTimeChangeHandler != null) 
+						/////////////OnTimeChangeHandler.DoOnTimeChanging(CurrentTime, true, true);
+				}
+			}
+			else {
+				double dX0 = Pointer0_LastX-Pointer1_LastX; 
+				double dX1 = X-Pointer1_LastX;
+				if ((dX0 != 0) && (dX1 != 0)) {
+					double Scale = Math.abs(dX0/dX1);
+					ScaleTimeResolution(Scale);
+				}
+			} 
+			//.
+			Pointer0_LastX = X;
+			Pointer0_LastY = Y;
+		}
+	}
+	
+	protected void Pointer1_Down(double X, double Y) {
+		Pointer1_flMoving = true;
+		//.
+		Pointer1_LastX = X;
+		Pointer1_LastY = Y;
+		Pointer1_LastDownTime = OleDate.UTCCurrentTimestamp();
+	}
+	
+	protected void Pointer1_Up(double X, double Y) {
+		Pointer1_flMoving = false;
+	}
+	
+	protected void Pointer1_Move(double X, double Y) {
+		if (Pointer1_flMoving) {
+			if (Pointer0_flMoving) {
+				double dX0 = Pointer1_LastX-Pointer0_LastX; 
+				double dX1 = X-Pointer0_LastX;
+				if ((dX0 != 0) && (dX1 != 0)) {
+					double Scale = Math.abs(dX0/dX1);
+					ScaleTimeResolution(Scale);
+				}
+			} 
+			//.
+			Pointer1_LastX = X;
+			Pointer1_LastY = Y;
+		}
+	}
+	
+	protected void Pointer2_Down(double X, double Y) {
+	}
+	
+	protected void Pointer2_Up(double X, double Y) {
+	}
+
+	protected void Pointer2_Move(double X, double Y) {
+	}
+
+	public void Move(double dX) {
+		double _CurrentTime = CurrentTime+(dX*TimeResolution);
+		if (_CurrentTime < Measurement.Descriptor.StartTimestamp) 
+			_CurrentTime = Measurement.Descriptor.StartTimestamp; 
+		if (_CurrentTime > Measurement.Descriptor.FinishTimestamp) 
+			_CurrentTime = Measurement.Descriptor.FinishTimestamp;
+		if (_CurrentTime == CurrentTime) 
+			return; //. ->
+		//.
+		CurrentTime = _CurrentTime;
+		//.
+		Draw();
+	}
+	
+	private boolean IsTimeUserChanging() {
+		return Pointer0_flMoving;
+	}
+
+	public void ScaleTimeResolution(double pScale) {
+		TimeResolution = TimeResolution*pScale;
+		//.
+		Draw();
+	}
+	
+	public void SetCurrentTime(double pCurrentTime, boolean flChanging, boolean flFireEvent, boolean flEventActionDelayAllowed) {
+		if (IsTimeUserChanging())
+			return; //. ->
+		//.
+		CurrentTime = pCurrentTime;
+		//.
+		Draw();
+		//.
+		///////if (flFireEvent && (OnTimeChangeHandler != null)) 
+			///////OnTimeChangeHandler.DoOnTimeChanging(CurrentTime, flChanging, flEventActionDelayAllowed);
+	}
+
 	private synchronized void SetTLRChannel(TTLRChannel pTLRChannel) {
 		TLRChannel = pTLRChannel;
 	}
@@ -295,6 +586,15 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 		Graph_DrawPage();
 	}
 	
+	public void Draw() {
+		StartDraw();
+	}
+
+	public void StartDraw() {
+		if (SurfaceUpdating != null)
+			SurfaceUpdating.StartUpdate();
+	}
+
 	private void ChannelSamples_Create() throws Exception {
     	TTLRChannel TLRChannel = GetTLRChannel();
     	if (TLRChannel == null) {

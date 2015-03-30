@@ -154,7 +154,7 @@ public class TMeasurementProcessorPanel extends Activity {
 	}
 	
 	private void DoOnExit() {
-		if ((Processor != null) && Processor.flInitialized) {
+		if ((Processor != null) && Processor.flSetup) {
 			double MeasurementCurrentPosition = Processor.Measurement.Descriptor.StartTimestamp+Processor.GetPosition();
 	    	Intent intent = getIntent();
 	    	intent.putExtra("MeasurementCurrentPosition",MeasurementCurrentPosition);

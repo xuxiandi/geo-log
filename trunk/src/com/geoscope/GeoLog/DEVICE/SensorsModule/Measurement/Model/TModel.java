@@ -8,15 +8,15 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementMo
 
 public class TModel extends TSensorMeasurementModel {
 
-	public static String GetModelTypeName(String TypeID, Context context) {
+	public static TTypeInfo GetTypeInfo(String TypeID, Context context) {
 		if (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID.equals(TypeID))
-			return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.GetTypeName(context); //. -> 
+			return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.GetTypeInfo(context); //. -> 
 		if (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ECTLR.Model.TModel.ModelTypeID.equals(TypeID))
-			return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ECTLR.Model.TModel.GetTypeName(context); //. -> 
+			return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ECTLR.Model.TModel.GetTypeInfo(context); //. -> 
 		if (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.Model.TModel.ModelTypeID.equals(TypeID))
-			return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.Model.TModel.GetTypeName(context); //. ->
+			return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.Model.TModel.GetTypeInfo(context); //. ->
 		else
-			return ""; //. ->
+			return null; //. ->
 	}
 
 	public TModel() {

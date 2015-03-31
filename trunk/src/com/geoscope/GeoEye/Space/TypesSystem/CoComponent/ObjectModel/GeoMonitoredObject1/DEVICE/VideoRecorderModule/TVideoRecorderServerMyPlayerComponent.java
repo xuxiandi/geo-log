@@ -13,7 +13,6 @@ import java.nio.channels.FileChannel;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.media.AudioFormat;
@@ -21,36 +20,37 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessor;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 
 @SuppressLint("HandlerLeak")
-public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implements SurfaceHolder.Callback {
+public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor implements SurfaceHolder.Callback {
     
+	public static final String TypeID = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID;
+	
 	public static class TChannelProcessor extends TCancelableThread {
 		
 		protected TVideoRecorderServerMyPlayerComponent Player;
@@ -256,7 +256,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 											int PositionIndex = 0;
 											if (flInitialized) {
 												synchronized (this) {
-													PositionIndex = (int)(AudioFileIndexesCount*(PositionInMs+0.0)/Player.MeasurementDescriptor.DurationInMs());
+													PositionIndex = (int)(AudioFileIndexesCount*(PositionInMs+0.0)/Player.Measurement.Descriptor.DurationInMs());
 												}
 												if (PositionIndex >= AudioFileIndexesCount) 
 													PositionIndex = AudioFileIndexesCount-1;
@@ -365,7 +365,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 				ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
 				inputBuffer.clear();
 				inputBuffer.put(input, input_offset,input_size);
-				Codec.queueInputBuffer(inputBufferIndex, 0,input_size, (long)(1.0*Player.MeasurementDescriptor.DurationInMs()*Index/Count), 0);
+				Codec.queueInputBuffer(inputBufferIndex, 0,input_size, (long)(1.0*Player.Measurement.Descriptor.DurationInMs()*Index/Count), 0);
 			}
 			//.
 			MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
@@ -879,24 +879,11 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 	
 	private boolean flExists = false;
 	//.
-	public boolean flInitialized = false;
-	//.
-	public Activity ParentActivity;
-	//.
-	public FrameLayout ParentLayout;
-	//.
-	public Context context;
-	//.
 	private SurfaceHolder 	surface = null;
 	private int				surface_width;
 	private int				surface_height;
 	//.
-	private String 					MeasurementDatabaseFolder = null;
-	private String 					MeasurementID = null;
-	//.
-	public String 						MeasurementFolder = null;
-	public TSensorMeasurementDescriptor	MeasurementDescriptor = null;
-	public double 						MeasurementCurrentPositionFactor = 0.0;
+	public double 			MeasurementCurrentPositionFactor = 0.0;
 	//.
 	private SurfaceView 	svVideoRecorderServerMyPlayer;
 	private TextView 		lbVideoRecorderServerMyPlayer;
@@ -910,17 +897,29 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 	//.
 	private TAsyncProcessing Positioning = null;
 	//.
-	private TOnSurfaceChangedHandler OnVideoSurfaceChangedHandler;
+	public TOnSurfaceChangedHandler OnVideoSurfaceChangedHandler;
 	//.
-	private TOnProgressHandler OnProgressHandler;
+	public TOnProgressHandler OnProgressHandler;
 	
-	public TVideoRecorderServerMyPlayerComponent(Activity pParentActivity, FrameLayout pParentLayout, Intent MeasurementParameters, TOnSurfaceChangedHandler pOnVideoSurfaceChangedHandler, TOnProgressHandler pOnProgressHandler) throws Exception {
-		ParentActivity = pParentActivity;
-		ParentLayout = pParentLayout;
-		OnVideoSurfaceChangedHandler = pOnVideoSurfaceChangedHandler;
-		OnProgressHandler = pOnProgressHandler;
+	public TVideoRecorderServerMyPlayerComponent() {
+		super();
 		//.
-		context = ParentActivity;
+		flExists = true;
+	}
+
+	@Override
+	public void Destroy() throws Exception {
+    	flExists = false;
+    	//.
+		super.Destroy();
+	}
+	
+	@Override
+	public void SetLayout(Activity pParentActivity, LinearLayout pParentLayout) {
+		super.SetLayout(pParentActivity, pParentLayout);
+		//.
+		LayoutInflater inflater = (LayoutInflater)ParentActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		inflater.inflate(R.layout.video_recorder_server_myplayer_layout, ParentLayout);
         //.
         svVideoRecorderServerMyPlayer = (SurfaceView)ParentLayout.findViewById(R.id.svVideoRecorderServerMyPlayer);
         svVideoRecorderServerMyPlayer.getHolder().addCallback(this);
@@ -938,39 +937,14 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
         	@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				if (fromUser) {
-					if (MeasurementDescriptor != null) {
-						double Position = (MeasurementDescriptor.Duration()*progress/100.0);
+					if (Measurement != null) {
+						double Position = (Measurement.Descriptor.Duration()*progress/100.0);
 						DoSetPosition(Position);
 					}
 				}
 			}
 		});
 		sbVideoRecorderServerMyPlayer.setVisibility(View.GONE);
-        //.
-        if (MeasurementParameters != null) {
-        	String _MeasurementDatabaseFolder = null;
-        	String _MeasurementID = null;
-            Bundle extras = MeasurementParameters.getExtras(); 
-            if (extras != null) {
-            	_MeasurementDatabaseFolder = extras.getString("MeasurementDatabaseFolder");
-            	_MeasurementID = extras.getString("MeasurementID");
-            }
-            //.
-    		Initialize(_MeasurementDatabaseFolder, _MeasurementID);
-        }
-		//.
-		flExists = true;
-	}
-
-	public TVideoRecorderServerMyPlayerComponent(Activity pParentActivity, FrameLayout pParentLayout, TOnSurfaceChangedHandler pOnVideoSurfaceChangedHandler, TOnProgressHandler pOnProgressHandler) throws Exception {
-		this(pParentActivity, pParentLayout, null, pOnVideoSurfaceChangedHandler, pOnProgressHandler);
-	}
-	
-	@Override
-	public void Destroy() throws Exception {
-    	flExists = false;
-    	//.
-		Finalize();
 	}
 	
 	@Override
@@ -992,6 +966,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 			}
 		}
 	}
+	
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
 		surface = arg0;
@@ -1002,17 +977,14 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 			OnVideoSurfaceChangedHandler.DoOnSurfaceChanged(surface);
 	}
 	
-	private void Initialize(String pMeasurementDatabaseFolder, String pMeasurementID) throws Exception {
-		MeasurementDatabaseFolder = pMeasurementDatabaseFolder;
-		MeasurementID = pMeasurementID;
+	@Override
+	public void Initialize(TSensorMeasurement pMeasurement) throws Exception {
+		super.Initialize(pMeasurement);
 		//.
-    	MeasurementFolder = MeasurementDatabaseFolder+"/"+MeasurementID; 
-		MeasurementDescriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
-		//.
-		if (MeasurementDescriptor.Model != null) {
-			int Cnt = MeasurementDescriptor.Model.Stream.Channels.size();
+		if (Measurement.Descriptor.Model != null) {
+			int Cnt = Measurement.Descriptor.Model.Stream.Channels.size();
 			for (int C = 0; C < Cnt; C++) {
-				TChannel Channel = MeasurementDescriptor.Model.Stream.Channels.get(C);
+				TChannel Channel = Measurement.Descriptor.Model.Stream.Channels.get(C);
 				//.
 				if (Channel.getClass() == TAudioAACChannelProcessor.ChannelClass) {
 					flAudio = true;
@@ -1022,11 +994,11 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 							AudioChannelProcessor.Destroy();
 							AudioChannelProcessor = null;
 						}
-						AudioChannelProcessor = new TAudioAACChannelProcessor(this, MeasurementFolder, Channel);
+						AudioChannelProcessor = new TAudioAACChannelProcessor(this, Measurement.Folder(), Channel);
 					}
 				}
 				//.
-				if (Channel.getClass() == TVideoH264IChannelProcessor.ChannelClass) {
+				if ((surface != null) && (Channel.getClass() == TVideoH264IChannelProcessor.ChannelClass)) {
 					flVideo = true;
 					//.
 					synchronized (this) {
@@ -1034,7 +1006,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 							VideoChannelProcessor.Destroy();
 							VideoChannelProcessor = null;
 						}
-						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, MeasurementFolder, Channel, surface,surface_width,surface_height);
+						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, Measurement.Folder(), Channel, surface,surface_width,surface_height);
 					}
 				}
 			}
@@ -1047,6 +1019,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		flInitialized = true;
 	}
 
+	@Override
 	public void Finalize() throws IOException, InterruptedException {
 		flInitialized = false;
 		//.
@@ -1071,13 +1044,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		//.
 		sbVideoRecorderServerMyPlayer.setVisibility(View.GONE);
 		//.
-		MeasurementDescriptor = null;
-	}
-	
-	public void Setup(String pMeasurementDatabaseFolder, String pMeasurementID) throws Exception {
-		Finalize();
-		//.
-		Initialize(pMeasurementDatabaseFolder, pMeasurementID);
+		Measurement = null;
 	}
 	
 	@Override
@@ -1110,7 +1077,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
 		//.
 		sbVideoRecorderServerMyPlayer.setVisibility(View.GONE);
 		//.
-		MeasurementDescriptor = null;
+		Measurement = null;
 	}
 	
 	@Override
@@ -1156,7 +1123,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TUIComponent implemen
         	SB.append(","+ParentActivity.getString(R.string.SAudio));
         else
         	SB.append(","+ParentActivity.getString(R.string.SNoAudio));
-        int Secs = (int)(MeasurementCurrentPositionFactor*MeasurementDescriptor.DurationInMs()/1000);
+        int Secs = (int)(MeasurementCurrentPositionFactor*Measurement.Descriptor.DurationInMs()/1000);
         SB.append(": "+Integer.toString(Secs)+" "+ParentActivity.getString(R.string.SSec1));
         //.
         lbVideoRecorderServerMyPlayer.setText(SB.toString());

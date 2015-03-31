@@ -6,12 +6,15 @@ import android.widget.LinearLayout;
 import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.ASTLR.TASTLRMeasurementProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.ECTLR.TECTLRMeasurementProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerMyPlayerComponent;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
 
 public class TMeasurementProcessor extends TUIComponent {
 
-	public static TMeasurementProcessor GetProcessor(TSensorMeasurementDescriptor MeasurementDescriptor) {
+	public static TMeasurementProcessor GetProcessor(TSensorMeasurementDescriptor MeasurementDescriptor) throws Exception {
+		if (MeasurementDescriptor.IsTypeOf(TVideoRecorderServerMyPlayerComponent.TypeID))
+			return new TVideoRecorderServerMyPlayerComponent(); //. ->
 		if (MeasurementDescriptor.IsTypeOf(TECTLRMeasurementProcessor.TypeID))
 			return new TECTLRMeasurementProcessor(); //. ->
 		if (MeasurementDescriptor.IsTypeOf(TASTLRMeasurementProcessor.TypeID))
@@ -21,18 +24,18 @@ public class TMeasurementProcessor extends TUIComponent {
 	}
 
 	
-	protected TSensorMeasurement 	Measurement = null;
-	protected double 				MeasurementStartPosition = 0.0;
+	public TSensorMeasurement 	Measurement = null;
 	//.
 	protected Activity 		ParentActivity;
 	protected LinearLayout 	ParentLayout;
 	//.
-	public boolean flSetup = false;
+	public boolean flInitialized = false;
 	
 	public TMeasurementProcessor() {
 	}
 
 	public void Destroy() throws Exception {
+		Finalize();
 	}
 
 	@Override
@@ -45,19 +48,19 @@ public class TMeasurementProcessor extends TUIComponent {
 		ParentLayout = pParentLayout;
 	}
 	
-	public void Initialize(TSensorMeasurement pMeasurement, double pMeasurementStartPosition) throws Exception {
+	public void Initialize(TSensorMeasurement pMeasurement) throws Exception {
 		Measurement = pMeasurement;
-		MeasurementStartPosition = pMeasurementStartPosition;
 	}
 	
 	public void Finalize() throws Exception {
+		flInitialized = false;
+		//.
+		Measurement = null;
 	}
 	
-	public void Setup(TSensorMeasurement pMeasurement, double pMeasurementStartPosition) throws Exception {
+	public void Setup(TSensorMeasurement pMeasurement) throws Exception {
 		Finalize();
-		Initialize(pMeasurement, pMeasurementStartPosition);
-		//.
-		flSetup = true;
+		Initialize(pMeasurement);
 	}
 	
 	public void SetPosition(final double Position, final int Delay, final boolean flPaused) throws InterruptedException {

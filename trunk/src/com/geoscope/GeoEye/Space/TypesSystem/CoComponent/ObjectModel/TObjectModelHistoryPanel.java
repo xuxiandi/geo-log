@@ -31,7 +31,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -67,6 +66,7 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel.TTypeInfo;
 
 @SuppressLint("HandlerLeak")
 public class TObjectModelHistoryPanel extends Activity {
@@ -983,7 +983,8 @@ public class TObjectModelHistoryPanel extends Activity {
 			}
 		}
 
-
+		private Context context;
+		//.
 		public int ObjectGeoDatumID;
 		//.
 		public TObjectHistoryRecords Records;
@@ -998,7 +999,8 @@ public class TObjectModelHistoryPanel extends Activity {
 		//.
 		public String[] BusinessModelRecords; 
 		
-		public THistory(int pObjectGeoDatumID, TObjectHistoryRecords pRecords, TSensorMeasurementDescriptor[] pSensorMeasurements) {
+		public THistory(Context pcontext, int pObjectGeoDatumID, TObjectHistoryRecords pRecords, TSensorMeasurementDescriptor[] pSensorMeasurements) {
+			context = pcontext;
 			ObjectGeoDatumID = pObjectGeoDatumID;
 			Records = pRecords;
 			SensorMeasurements = new TSensorMeasurements(pSensorMeasurements);
@@ -1044,7 +1046,18 @@ public class TObjectModelHistoryPanel extends Activity {
 			for (int I = 0; I < Cnt; I++) {
 				TSensorMeasurementDescriptor Measurement = SensorMeasurements.Measurements[I];
 				//.
-				TimeIntervalSliderTimeIntervalMarks[I] = new TTimeIntervalSlider.TTimeIntervalSliderTimeIntervalMark(Measurement.StartTimestamp,Measurement.FinishTimestamp-Measurement.StartTimestamp, Color.BLUE, "video");
+				TTypeInfo TypeInfo = Measurement.TypeInfo(context);
+				int TypeColor;
+				String TypeName;
+				if (TypeInfo != null) {
+					TypeColor = TypeInfo.TypeColor;
+					TypeName = TypeInfo.TypeName;
+				}
+				else {
+					TypeColor = Color.BLUE;
+					TypeName = "video";
+				}
+				TimeIntervalSliderTimeIntervalMarks[I] = new TTimeIntervalSlider.TTimeIntervalSliderTimeIntervalMark(Measurement.StartTimestamp,Measurement.FinishTimestamp-Measurement.StartTimestamp, TypeColor, TypeName);
 			}
 			//.
 			Cnt = Records.BusinessModelRecords.size();
@@ -1181,14 +1194,15 @@ public class TObjectModelHistoryPanel extends Activity {
 	private TAsyncProcessing 						UserActivitiesComponentListPositioning = null;	
 	private boolean 								UserActivitiesComponentList_flUpdating = false;
 	//.
-	private TReflectorComponent ObjectTrackViewer = null;
 	private RelativeLayout 		ObjectTrackViewer_Layout = null;
+	private TReflectorComponent ObjectTrackViewer = null;
 	private	TGeoLocationRecord	ObjectTrackViewer_GeoLocationRecord = null; 
 	private boolean 			ObjectTrackViewer_flTrackIsSet = false;
 	private TAsyncProcessing 	ObjectTrackViewerShowing = null;	
 	//.
+	private LinearLayout 							MeasurementProcessors_Layout = null;
+	private int										MeasurementProcessors_Layout_VisibleCounter = 0;
 	private TVideoRecorderServerMyPlayerComponent 	VideoViewer = null;
-	private FrameLayout								VideoViewer_Layout = null;
 	private TSensorMeasurementDescriptor			VideoViewer_CurrentMeasurement = null;
 	private TAsyncProcessing 						VideoViewer_CurrentMeasurementOpening = null; 
 	private boolean 								VideoViewer_flUpdating = false; 
@@ -1282,7 +1296,7 @@ public class TObjectModelHistoryPanel extends Activity {
     			return; //. ->
     		}
         //.
-        VideoViewer_Layout = (FrameLayout)findViewById(R.id.VideoRecorderServerMyPlayerLayout);
+        MeasurementProcessors_Layout = (LinearLayout)findViewById(R.id.MeasurementProcessorsLayout);
         if (flBigScreen)
             try {
         		VideoViewer_Initialize();
@@ -1425,7 +1439,7 @@ public class TObjectModelHistoryPanel extends Activity {
 											//.
 						    				Canceller.Check();
 											//.
-											_History = new THistory(_ObjectModel.ObjectDatumID(), _HistoryRecords, _SensorMeasurements);
+											_History = new THistory(TObjectModelHistoryPanel.this, _ObjectModel.ObjectDatumID(), _HistoryRecords, _SensorMeasurements);
 											//.
 											DoOnProgress(100);
 										}
@@ -1883,7 +1897,8 @@ public class TObjectModelHistoryPanel extends Activity {
 	private void VideoViewer_Initialize() throws Exception {
 		VideoViewer_Finalize();
 		//.
-		VideoViewer = new TVideoRecorderServerMyPlayerComponent(this, VideoViewer_Layout, new TVideoRecorderServerMyPlayerComponent.TOnSurfaceChangedHandler() {
+		VideoViewer = new TVideoRecorderServerMyPlayerComponent();
+		VideoViewer.OnVideoSurfaceChangedHandler = new TVideoRecorderServerMyPlayerComponent.TOnSurfaceChangedHandler() {
 			
 			@Override
 			public void DoOnSurfaceChanged(SurfaceHolder surface) {
@@ -1898,7 +1913,8 @@ public class TObjectModelHistoryPanel extends Activity {
 				//.
 				TimeIntervalSlider.ValidateCurrentTime(true);
 			}
-		}, new TVideoRecorderServerMyPlayerComponent.TOnProgressHandler() {
+		};
+		VideoViewer.OnProgressHandler = new TVideoRecorderServerMyPlayerComponent.TOnProgressHandler() {
 			
 			private static final double MinTriggerInterval = (1.0/(24.0*3600.0))*1.0; //. seconds
 			
@@ -1923,7 +1939,13 @@ public class TObjectModelHistoryPanel extends Activity {
 	    			}
 				}
 			}
-		});
+		};
+		//.
+        LinearLayout ProcessorLayout = new LinearLayout(this);
+        ProcessorLayout.setOrientation(LinearLayout.VERTICAL);
+        ProcessorLayout.setGravity(1);
+        MeasurementProcessors_Layout.addView(ProcessorLayout);
+		VideoViewer.SetLayout(this, ProcessorLayout);
     	//.
     	VideoViewer_CurrentMeasurement = null;
     	//.
@@ -1962,7 +1984,7 @@ public class TObjectModelHistoryPanel extends Activity {
 				VideoViewer_CurrentMeasurementOpening = null;
 			}
 			//.
-        	if ((VideoViewer.MeasurementDescriptor != null) && TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer.MeasurementDescriptor.ID, VideoViewer_CurrentMeasurement.ID)) 
+        	if ((VideoViewer.Measurement != null) && TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer.Measurement.Descriptor.ID, VideoViewer_CurrentMeasurement.ID)) 
         		VideoViewer.SetPosition(Item.Position, Delay, flPause);
         	else {
         		VideoViewer_CurrentMeasurementOpening = new TAsyncProcessing() {
@@ -1982,10 +2004,15 @@ public class TObjectModelHistoryPanel extends Activity {
                     				if (Canceller.flCancel) 
                     					return true; //. ->
                     				//.
-    			    	        	if ((VideoViewer.MeasurementDescriptor == null) || !TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer_CurrentMeasurement.ID, VideoViewer.MeasurementDescriptor.ID)) { 
-    	    		    	        	VideoViewer.Setup(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Measurement.Descriptor.ID);
-    	    		    	        	if (!VideoViewer.IsVisible())
+    			    	        	if ((VideoViewer.Measurement == null) || !TSensorMeasurementDescriptor.IDsAreTheSame(VideoViewer_CurrentMeasurement.ID, VideoViewer.Measurement.Descriptor.ID)) { 
+    	    		    	        	VideoViewer.Setup(new TSensorMeasurement(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Measurement.Descriptor.ID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance));
+    	    		    	        	if (!VideoViewer.IsVisible()) {
+    	    		    					MeasurementProcessors_Layout_VisibleCounter++;
+    	    		    					if (MeasurementProcessors_Layout_VisibleCounter == 1)
+    	    		    						MeasurementProcessors_Layout.setVisibility(View.VISIBLE);
+    	    		    					//.
     	    		    	        		VideoViewer.Show();
+    	    		    	        	}
     			    	        	}
     	    		    	        //. validation
     			    	        	VideoViewer_SetCurrentTime(TimeIntervalSlider.CurrentTime, flPause, 0/*Delay*/);
@@ -2039,8 +2066,13 @@ public class TObjectModelHistoryPanel extends Activity {
 		else {
     		try {
 				VideoViewer.Stop();
-				if (VideoViewer.IsVisible())
+				if (VideoViewer.IsVisible()) {
 					VideoViewer.Hide();
+					//.
+					MeasurementProcessors_Layout_VisibleCounter--;
+					if (MeasurementProcessors_Layout_VisibleCounter == 0)
+						MeasurementProcessors_Layout.setVisibility(View.GONE);
+				}
 			} catch (Exception E) {
 				String S = E.getMessage();
 				if (S == null)

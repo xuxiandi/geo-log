@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor;
 
 import android.app.Activity;
+import android.view.SurfaceHolder;
 import android.widget.LinearLayout;
 
 import com.geoscope.Classes.IO.UI.TUIComponent;
@@ -23,24 +24,49 @@ public class TMeasurementProcessor extends TUIComponent {
 			return null; //. ->
 	}
 
+	public static class TOnSurfaceChangedHandler {
+		
+		public void DoOnSurfaceChanged(SurfaceHolder surface) {
+		}
+	}
 	
+	public static class TOnProgressHandler {
+		
+		public void DoOnProgress(double ProgressFactor) {
+		}
+	}
+	
+	
+	protected boolean flExists = false;
+	//.
 	public TSensorMeasurement 	Measurement = null;
 	//.
 	protected Activity 		ParentActivity;
 	protected LinearLayout 	ParentLayout;
 	//.
+	public TOnSurfaceChangedHandler OnVideoSurfaceChangedHandler;
+	//.
+	public TOnProgressHandler OnProgressHandler;
+    //.
+	protected int Width;
+	protected int Height;
+	//.
+	protected SurfaceHolder surface = null;
+	//.
 	public boolean flInitialized = false;
 	
 	public TMeasurementProcessor() {
+    	flExists = true;
 	}
 
 	public void Destroy() throws Exception {
+    	flExists = false;
+    	//.
 		Finalize();
 	}
 
-	@Override
-	public boolean IsVisible() {
-		return true;
+	public String GetTypeID() {
+		return "";
 	}
 	
 	public void SetLayout(Activity pParentActivity, LinearLayout pParentLayout) {
@@ -54,8 +80,6 @@ public class TMeasurementProcessor extends TUIComponent {
 	
 	public void Finalize() throws Exception {
 		flInitialized = false;
-		//.
-		Measurement = null;
 	}
 	
 	public void Setup(TSensorMeasurement pMeasurement) throws Exception {

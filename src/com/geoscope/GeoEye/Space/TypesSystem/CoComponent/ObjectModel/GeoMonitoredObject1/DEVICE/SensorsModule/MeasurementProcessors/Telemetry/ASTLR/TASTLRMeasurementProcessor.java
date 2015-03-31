@@ -10,4 +10,9 @@ public class TASTLRMeasurementProcessor extends TTLRMeasurementProcessor {
 	public TASTLRMeasurementProcessor() {
 		super();
 	}
+	
+	@Override
+	public String GetTypeID() {
+		return TypeID;
+	}	
 }

@@ -10,4 +10,9 @@ public class TECTLRMeasurementProcessor extends TTLRMeasurementProcessor {
 	public TECTLRMeasurementProcessor() {
 		super();
 	}
+	
+	@Override
+	public String GetTypeID() {
+		return TypeID;
+	}	
 }

@@ -11,6 +11,18 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 
 public class TSensorMeasurementModel {
 	
+	public static class TTypeInfo {
+		
+		public String 	TypeName;
+		public int		TypeColor;
+		
+		public TTypeInfo(String pTypeName, int pTypeColor) {
+			TypeName = pTypeName;
+			TypeColor = pTypeColor;
+		}
+	}
+	
+
 	public String TypeID = ""; 				//. type
 	public String ContainerTypeID = ""; 	//. container(format) type
 	

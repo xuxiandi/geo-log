@@ -4,12 +4,10 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,17 +17,18 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TDoubleContainerType;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessor;
-import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 
@@ -39,6 +38,16 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	public static final int TimeIntervalColor = Color.WHITE;
 	public static final int CenterMarkerColor = Color.MAGENTA;
 	public static final int CenterMarkerColorHigh = Color.RED;
+	
+	public static class TOnTimeChangeHandler {
+		
+		public void DoOnTimeChanging(double Time, boolean flChanging, boolean flDelayAllowed) {
+		}
+
+		public void DoOnTimeChanged(double Time) {
+			DoOnTimeChanging(Time, false, false);
+		}
+	}
 	
 	public static class TOnSurfaceChangedHandler {
 		
@@ -55,6 +64,7 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
     	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
     	//.
 	    private Paint paint = new Paint();
+		private Path path = new Path();
         
     	public TSurfaceUpdating() {
     		_Thread = new Thread(this);
@@ -123,17 +133,17 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 		}
 		
         private void Draw(Canvas canvas) {
-			DoOnDraw(canvas, null/* DrawCanceller */, null/* DrawTimeLimit */);
+			DoOnDraw(canvas, null/* DrawCanceller */);
         }
         
-		protected void DoOnDraw(Canvas canvas, TCanceller Canceller, TTimeLimit TimeLimit) {
+		protected void DoOnDraw(Canvas canvas, TCanceller Canceller) {
 			//. draw background
 			paint.setStrokeWidth(0);
 			paint.setStyle(Paint.Style.FILL);
 			paint.setColor(BackgroundColor);
 			canvas.drawRect(0,0,Width,Height, paint);
 			//.
-			if (!flSetup)
+			if (!flInitialized)
 				return; //. ->
 			//.
 			double Mid = (Width/2.0);
@@ -155,19 +165,68 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 			paint.setColor(TimeIntervalColor);
 			canvas.drawRect((float)(Mid+(TIB-_CurrentTime)/TimeResolution),0.0F,(float)(Mid+(TIE-_CurrentTime)/TimeResolution),Height, paint);
 			//. draw center marker
-			paint.setStrokeWidth(3.0F*Graph_DisplayMetrics.density);
+			paint.setStrokeWidth(3.0F*DisplayMetrics.density);
 			paint.setColor(CenterMarkerColor);
 			canvas.drawLine((float)Mid,0.0F, (float)Mid,Height, paint);
-			paint.setStrokeWidth(1.0F*Graph_DisplayMetrics.density);
+			paint.setStrokeWidth(1.0F*DisplayMetrics.density);
 			paint.setColor(CenterMarkerColorHigh);
 			canvas.drawLine((float)Mid,0.0F, (float)Mid,Height, paint);
 			paint.setColor(CenterMarkerColorHigh);
 			String S = OleDate.Format("yyyy/MM/dd HH:mm:ss",_CurrentTime); 
-			paint.setTextSize(14*Graph_DisplayMetrics.density);
-			canvas.drawText(S, (float)Mid+3.0F*Graph_DisplayMetrics.density,0.0F+paint.getTextSize(), paint);
+			paint.setTextSize(14*DisplayMetrics.density);
+			canvas.drawText(S, (float)Mid+3.0F*DisplayMetrics.density,0.0F+paint.getTextSize(), paint);
+			//. draw graphs
+            paint.setAntiAlias(true);
+            paint.setTextSize(16*DisplayMetrics.density);
+            paint.setColor(Color.RED);
+            int _EnabledChannelIndex = 0;
+        	for (int ChannelIndex = 0; ChannelIndex < ChannelSamples_ChannelsCount; ChannelIndex++)
+        		if (ChannelSamples_Enabled[ChannelIndex]) {
+            		float Y0 = Graph_OffsetY+Graph_ShiftY+(Graph_ChannelHeight*_EnabledChannelIndex)+Graph_ChannelHeight;
+            		//.
+                    paint.setStyle(Paint.Style.STROKE);
+                    paint.setStrokeWidth(0.5F*DisplayMetrics.density);
+                    canvas.drawLine(0,Y0, Width,Y0, paint);
+            		//.
+                    paint.setStyle(Paint.Style.FILL);
+                    canvas.drawText(ChannelSamples_ChannelNames[ChannelIndex],0,Y0-2, paint);
+                	//.
+                	_EnabledChannelIndex++;
+        		}
+        	//.
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(2.0F*DisplayMetrics.density);
+    		double X0 = (Width/2.0)+(Measurement.Descriptor.StartTimestamp-CurrentTime)/TimeResolution;
+            int EnabledChannelIndex = 0;
+        	for (int ChannelIndex = 0; ChannelIndex < ChannelSamples_ChannelsCount; ChannelIndex++)
+        		if (ChannelSamples_Enabled[ChannelIndex]) {
+            		double Y0 = Graph_OffsetY+Graph_ShiftY+(Graph_ChannelHeight*EnabledChannelIndex)+Graph_ChannelHeight;
+            		int Graph_Polyline_Count = 0;
+            		int Cnt = ChannelSamples[ChannelIndex].length;
+            		if (Cnt > 0) {
+            			double X = X0;
+            			double StepX = ((Measurement.Descriptor.FinishTimestamp-Measurement.Descriptor.StartTimestamp)/Cnt)/TimeResolution; 
+                		for (int I = 0; I < Cnt; I++) {
+                			double Y = (Y0-ChannelSamples[ChannelIndex][I]*Graph_ChannelHeight);
+                			//.
+                			Graph_Polyline_Xs[Graph_Polyline_Count] = (float)X;
+	            			Graph_Polyline_Ys[Graph_Polyline_Count] = (float)Y;
+    	        			Graph_Polyline_Count++;
+    	        			//.
+                			X += StepX;
+                		}
+                		//.
+                		if (Graph_Polyline_Count > 1)
+                			Graph_DrawPolyline(canvas, paint, path, Graph_ChannelsColors[ChannelIndex], Graph_Polyline_Xs,Graph_Polyline_Ys, Graph_Polyline_Count);
+            		}
+            		//.
+            		EnabledChannelIndex++;
+        		}
 		}
     }
     
+    public TOnTimeChangeHandler OnTimeChangeHandler = null;
+    //.
 	private SurfaceHolder 	surface = null;
 	private int				Width;
 	private int				Height;
@@ -176,6 +235,12 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	@SuppressWarnings("unused")
 	private TextView 		lbProcessor;
 	//.
+	private DisplayMetrics 	DisplayMetrics;
+	//.
+	private TAsyncProcessing MeasurementPreprocessing = null;
+	//.
+	private TAsyncProcessing MeasurementPositioning = null;
+	//.
 	private TSurfaceUpdating SurfaceUpdating = null;
 	//.
 	private TTLRChannel TLRChannel = null;
@@ -183,16 +248,12 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
     private double 			CurrentTime;
     private double 			TimeResolution;
     //.
-    private double 	Pointer0_DownX;
-    private double 	Pointer0_DownY;
-    private double 	Pointer0_Down_ChannelSamples_Position;
-    private float 	Pointer0_Down_ChannelSamples_ShiftY;
-    private boolean	Pointer0_Down_ChannelSamples_flMoving = false;
-    //////////////
     private boolean Pointer0_flMoving;
     private boolean Pointer0_flTimeSelecting;
     private double 	Pointer0_LastX;
+    @SuppressWarnings("unused")
 	private double 	Pointer0_LastY;
+    @SuppressWarnings("unused")
     private double 	Pointer0_LastDownTime;
     private boolean Pointer1_flMoving;
     private double 	Pointer1_LastX;
@@ -201,41 +262,21 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
     @SuppressWarnings("unused")
     private double 	Pointer1_LastDownTime;
 	//.
+    private double[][] 	ChannelSamples;
     private int	 		ChannelSamples_ChannelsCount;
-    private int			ChannelSamples_MaxSize;
     private boolean[]	ChannelSamples_Enabled;
     private String[]	ChannelSamples_ChannelNames;
-    private short[][] 	ChannelSamples;
-    private short		ChannelSamples_MaxRange = 100;
-    private int			ChannelSamples_Position;
+    private int 		ChannelSamples_MaxSize;
 	//.
-	private int				Graph_ChannelsCount;
-	private double[]		Graph_ChannelsXScales;
 	private int[]			Graph_ChannelsColors;
-	private int             Graph_Width = 0;
-	private int             Graph_Height = 0;
-	private DisplayMetrics 	Graph_DisplayMetrics;
-	private Bitmap          Graph_Bitmap = null;
-	private Bitmap          Graph_BkgBitmap = null;
-	private Canvas         	Graph_Graphics = null;
-	private Paint         	Graph_Paint = new Paint();
-	private Paint         	Graph_GraphPaint = null;
-	private Paint         	Graph_ScrollBarPaint;
-	private int 			Graph_ScrollBarHeight = 8;
-	private double          Graph_XScale = 1.0;
-	private double          Graph_YScale = 1.0;
-	private int             Graph_ZeroLevel = 0;
 	private int           	Graph_OffsetY = 0;
-	private int             Graph_ChannelHeight = 0;
-	private int 			Graph_ChannelHeightHalf = 0;
-	private int             Graph_ChannelLength = 0;
-	private int             Graph_ChannelSize = 0;
-	private float[]         Graph_Graphics_LastPosX = null;
+	private int           	Graph_ShiftY = 0;
+	private float 			Graph_ChannelHeight = 0;
+	@SuppressWarnings("unused")
+	private float			Graph_ChannelHeightHalf = 0;
 	private float[]	        Graph_Polyline_Xs = null;
 	private float[]	        Graph_Polyline_Ys = null;
 	private int[]           Graph_Polyline_Count = null;
-	private Path           	Graph_Path = new Path();
-	private float           Graph_ShiftY = 0;
 	
 	public TTLRMeasurementProcessor() {
 		super();
@@ -253,25 +294,142 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
         svProcessor.setOnTouchListener(this);
         //.
         lbProcessor = (TextView)ParentLayout.findViewById(R.id.lbProcessor);
+        //.
+        DisplayMetrics = ParentActivity.getResources().getDisplayMetrics();
 	}
 
 	@Override
-	public void Initialize(TSensorMeasurement pMeasurement, double pMeasurementStartPosition) throws Exception {
-		super.Initialize(pMeasurement, pMeasurementStartPosition);
+	public void Initialize(TSensorMeasurement pMeasurement) throws Exception {
+		super.Initialize(pMeasurement);
 		//.
 		CurrentTime = Measurement.Descriptor.StartTimestamp;
 		//.
 		SetTLRChannel((TTLRChannel)Measurement.Descriptor.Model.Stream.Channels_GetOneByClass(TTLRChannel.class));
 		//.
-		ChannelSamples_Create();
+		MeasurementPreprocessing = new TAsyncProcessing() {
+
+			@Override
+			public void Process() throws Exception {
+				ChannelSamples_Create();
+			}
+
+			@Override
+			public void DoOnCompleted() throws Exception {
+				if (Canceller.flCancel)
+					return; //. ->
+				flInitialized = true;
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+				String S = E.getMessage();
+				if (S == null)
+					S = E.getClass().getName();
+				Toast.makeText(ParentActivity, S, Toast.LENGTH_LONG).show();
+			}
+		};
+		MeasurementPreprocessing.Start();
 	}
 	
 	@Override
 	public void Finalize() throws Exception {
+		if (MeasurementPositioning != null)
+			MeasurementPositioning.Cancel();
+		//.
+		if (MeasurementPreprocessing != null)
+			MeasurementPreprocessing.Cancel();
 		//.
 		super.Finalize();
 	}
 
+	@Override
+	public void Start() throws Exception {
+		SetPosition(0.0, 0, true);
+	}
+	
+	@Override
+	public void Stop() throws Exception {
+		flInitialized = false;
+		//.
+		if (MeasurementPositioning != null) {
+			MeasurementPositioning.Cancel();
+			MeasurementPositioning = null;
+		}
+		//.
+		Measurement = null;
+	}
+	
+	@Override
+	public void Pause() {
+	}
+	
+	@Override
+	public void Resume() {
+	}
+	
+	@Override
+	public void Show() {
+		ParentLayout.setVisibility(View.VISIBLE);
+		svProcessor.setVisibility(View.VISIBLE);
+	}
+	
+	@Override
+	public void Hide() {
+		svProcessor.setVisibility(View.GONE);
+		ParentLayout.setVisibility(View.GONE);
+	}
+	
+	@Override
+	public boolean IsVisible() {
+		return ParentLayout.isShown();
+	}
+	
+	@Override
+	public void SetPosition(final double Position, final int Delay, final boolean flPaused) throws InterruptedException {
+		//.
+		if (MeasurementPositioning != null) { 
+			MeasurementPositioning.Cancel();
+			MeasurementPositioning = null;
+		}
+		//.
+		if ((Delay > 0) || !flInitialized) {
+			MeasurementPositioning = new TAsyncProcessing() {
+
+				@Override
+				public void Process() throws Exception {
+					if (Delay > 0)
+						Thread.sleep(Delay);
+					while (!Canceller.flCancel) {
+						if (flInitialized)
+							break; //. >
+						Thread.sleep(10); 
+					}
+				}
+
+				@Override
+				public void DoOnCompleted() throws Exception {
+					if (!Canceller.flCancel) 
+						DoSetPosition(Position, flPaused);
+				}
+				
+				@Override
+				public void DoOnFinished() throws Exception {
+					if (MeasurementPositioning == this)
+						MeasurementPositioning = null;
+				}
+			};
+			MeasurementPositioning.Start();
+		}
+		else
+			DoSetPosition(Position, flPaused);
+	}
+	
+	private void DoSetPosition(double Position, boolean pflPause) {
+		if (Position < 0.0)
+			return; //. ->
+		SetCurrentTime(Measurement.Descriptor.StartTimestamp+Position, false, true, false);
+	}
+	
 	@Override
 	public void surfaceCreated(SurfaceHolder arg0) {
 	}
@@ -297,60 +455,8 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 		//.
 		SurfaceUpdating = new TSurfaceUpdating();
 		//.
-		Update();
+		Draw();
 	}
-	
-	/*@Override
-	public boolean onTouch(View pView, MotionEvent pEvent) {
-		switch (pEvent.getAction() & MotionEvent.ACTION_MASK) {
-		
-		case MotionEvent.ACTION_DOWN:
-			Pointer0_Down(pEvent.getX(0),pEvent.getY(0));
-			break; //. >
-			
-		case MotionEvent.ACTION_UP:
-			Pointer0_Up(pEvent.getX(0),pEvent.getY(0));
-			break; //. >
-			
-		case MotionEvent.ACTION_MOVE:
-			Pointer0_Move(pEvent.getX(0),pEvent.getY(0));
-			break; //. >
-		}
-		return true;
-	}
-	
-    private void Pointer0_Down(double X, double Y) {
-    	Pointer0_DownX = X;
-    	Pointer0_DownY = Y;
-    	//.
-		Pointer0_Down_ChannelSamples_flMoving = true;
-    	Pointer0_Down_ChannelSamples_Position = ChannelSamples_Position; 
-    	Pointer0_Down_ChannelSamples_ShiftY = Graph_ShiftY; 
-	}
-
-	private void Pointer0_Up(double X, double Y) {
-		Pointer0_Down_ChannelSamples_flMoving = false;
-	}
-	
-	private void Pointer0_Move(double X, double Y) {
-		if (Pointer0_Down_ChannelSamples_flMoving) {
-			double dX = X-Pointer0_DownX;
-			double dY = Y-Pointer0_DownY;
-			if (Math.abs(dX) > Math.abs(dY)) {
-				if (Math.abs(dX) > 2) {
-					double Delta = (dX/Graph_XScale);
-					int Position = (int)(Pointer0_Down_ChannelSamples_Position-Delta);
-					ChannelSamples_SetPosition(Position);
-				}
-			}
-			else {
-				if (Math.abs(dY) > 2) {
-					float Value = (float)(Pointer0_Down_ChannelSamples_ShiftY+dY);
-					Graph_SetShiftY(Value);
-				}
-			}
-		}
-	}*/
 	
 	@Override
 	public boolean onTouch(View pView, MotionEvent pEvent) {
@@ -468,8 +574,8 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 		if (Pointer0_flMoving && !Pointer1_flMoving && Pointer0_flTimeSelecting) {
 			Move(-(X-Pointer0_LastX));
 			//.
-			///////if (OnTimeChangeHandler != null) 
-				///////OnTimeChangeHandler.DoOnTimeChanged(CurrentTime);
+			if (OnTimeChangeHandler != null) 
+				OnTimeChangeHandler.DoOnTimeChanged(CurrentTime);
 		}
 		//.
 		Pointer0_flMoving = false;
@@ -483,8 +589,8 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 				if (Pointer0_flTimeSelecting) {
 					Move(-(X-Pointer0_LastX));
 					//.
-					////////if (OnTimeChangeHandler != null) 
-						/////////////OnTimeChangeHandler.DoOnTimeChanging(CurrentTime, true, true);
+					if (OnTimeChangeHandler != null) 
+						OnTimeChangeHandler.DoOnTimeChanging(CurrentTime, true, true);
 				}
 			}
 			else {
@@ -570,8 +676,8 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 		//.
 		Draw();
 		//.
-		///////if (flFireEvent && (OnTimeChangeHandler != null)) 
-			///////OnTimeChangeHandler.DoOnTimeChanging(CurrentTime, flChanging, flEventActionDelayAllowed);
+		if (flFireEvent && (OnTimeChangeHandler != null)) 
+			OnTimeChangeHandler.DoOnTimeChanging(CurrentTime, flChanging, flEventActionDelayAllowed);
 	}
 
 	private synchronized void SetTLRChannel(TTLRChannel pTLRChannel) {
@@ -580,10 +686,6 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	
 	private synchronized TTLRChannel GetTLRChannel() {
 		return TLRChannel;
-	}
-	
-	private void Update() {
-		Graph_DrawPage();
 	}
 	
 	public void Draw() {
@@ -610,293 +712,107 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 			ChannelSamples_ChannelNames[I] = DT.TypeID;
 			ChannelSamples_Enabled[I] = (DT.ContainerType instanceof TDoubleContainerType);
 		};
-        ChannelSamples = new short[ChannelSamples_ChannelsCount][];
+        ChannelSamples = new double[ChannelSamples_ChannelsCount][];
         ChannelSamples_MaxSize = 0;
         for (int I = 0; I < ChannelSamples_ChannelsCount; I++) {
 			TDataType DT = TLRChannel.DataTypes.Items.get(I);
-			if (!(DT.ContainerType instanceof TDoubleContainerType)) {
-            	ChannelSamples[I] = new short[0];
-				continue; //. ^
+			if (DT.ContainerType instanceof TDoubleContainerType) {
+				@SuppressWarnings("unchecked")
+				ArrayList<TContainerType> Values = (ArrayList<TContainerType>)DT.Extra;
+	        	if (Values != null) {
+		        	int Size = Values.size();
+		        	ChannelSamples[I] = new double[Size];
+		        	double MinValue = Double.MAX_VALUE;
+		        	double MaxValue = Double.MIN_VALUE;
+		        	for (int J = 0; J < Size; J++) {
+		        		short V = ((Double)Values.get(J).GetValue()).shortValue();
+		        		ChannelSamples[I][J] = V;
+		        		if (V < MinValue)
+		        			MinValue = V;
+		        		if (V > MaxValue)
+		        			MaxValue = V;
+		        	}
+		        	double Range = (MaxValue-MinValue);
+		        	if (Range > 0)
+		            	for (int J = 0; J < Size; J++) {
+		            		double V = ChannelSamples[I][J];
+		            		V = ((V-MinValue)/Range);
+		            		ChannelSamples[I][J] = V;
+		            	}
+		        	else
+		            	for (int J = 0; J < Size; J++) {
+		            		double V = ChannelSamples[I][J];
+		            		V = (V-MinValue);
+		            		ChannelSamples[I][J] = V;
+		            	}
+		        	//.
+		        	if (Size > ChannelSamples_MaxSize)
+		        		ChannelSamples_MaxSize = Size;
+	        	}
+	        	else 
+	            	ChannelSamples[I] = new double[0];
 			}
-			@SuppressWarnings("unchecked")
-			ArrayList<TContainerType> Values = (ArrayList<TContainerType>)DT.Extra;
-        	if (Values == null) {
-            	ChannelSamples[I] = new short[0];
-        		continue; //. ^
-        	}
-        	int Size = Values.size();
-        	ChannelSamples[I] = new short[Size];
-        	short MinValue = Short.MAX_VALUE;
-        	short MaxValue = Short.MIN_VALUE;
-        	for (int J = 0; J < Size; J++) {
-        		short V = ((Double)Values.get(J).GetValue()).shortValue();
-        		ChannelSamples[I][J] = V;
-        		if (V < MinValue)
-        			MinValue = V;
-        		if (V > MaxValue)
-        			MaxValue = V;
-        	}
-        	int Range = (MaxValue-MinValue);
-        	if (Range > 0)
-            	for (int J = 0; J < Size; J++) {
-            		short V = ChannelSamples[I][J];
-            		V = (short)((V-MinValue)*ChannelSamples_MaxRange/Range);
-            		ChannelSamples[I][J] = V;
-            	}
-        	else
-            	for (int J = 0; J < Size; J++) {
-            		short V = ChannelSamples[I][J];
-            		V = (short)(V-MinValue);
-            		ChannelSamples[I][J] = V;
-            	}
-        	if (Size > ChannelSamples_MaxSize)
-        		ChannelSamples_MaxSize = Size;
+			else 
+            	ChannelSamples[I] = new double[0];
         }
         if (ChannelSamples_MaxSize == 0)
         	throw new Exception("there is no data to process"); //. =>
 	}
 	
-	private int ChannelSamples_GetPageSize(int PageSize, int ChannelIndex) {
-		int Result = PageSize;
-		int PS = ChannelSamples[ChannelIndex].length-ChannelSamples_Position;
-		if (PS < Result)
-			Result = PS;
-		return Result;
-	}
-	
-	private void ChannelSamples_SetPosition(int Position) {
-		ChannelSamples_Position = Position;
-		int Limit = ChannelSamples_MaxSize-Graph_ChannelSize;
-		if (ChannelSamples_Position > Limit)
-			ChannelSamples_Position = Limit;
-		if (ChannelSamples_Position < 0)
-			ChannelSamples_Position = 0;
-		//.
-		Graph_DrawPage();
-	}
-	
 	private void Graph_Init(int Width, int Height) {
-    	Graph_Width = Width;
-    	Graph_Height = Height;
-    	Graph_ChannelsCount = ChannelSamples_ChannelsCount;
-    	//.
-        Graph_DisplayMetrics = ParentActivity.getResources().getDisplayMetrics();
-        Graph_XScale = 1.0;
-        Graph_YScale = 1.0;
-        Graph_XScale *= Graph_DisplayMetrics.density; 
-        Graph_YScale *= Graph_DisplayMetrics.density;
-        //.
-        Graph_ChannelsXScales = new double[Graph_ChannelsCount];
-        for (int I = 0; I < ChannelSamples_ChannelsCount; I++)
-        	if (ChannelSamples[I].length > 0)
-        	Graph_ChannelsXScales[I] = Graph_Width/ChannelSamples[I].length;
-    	//.
-    	Graph_Graphics = new Canvas();
-    	//.
-    	Graph_GraphPaint = new Paint();
-    	Graph_GraphPaint.setDither(false);   
-    	Graph_GraphPaint.setStyle(Paint.Style.STROKE);
-    	Graph_GraphPaint.setAntiAlias(false);
-    	//.
-    	Graph_ScrollBarPaint = new Paint();
-    	//.
-        Graph_Bitmap = Bitmap.createBitmap(Width, Height, Bitmap.Config.RGB_565);
-        Graph_Graphics.setBitmap(Graph_Bitmap);
-        Graph_BkgBitmap = Bitmap.createBitmap(Width, Height, Bitmap.Config.RGB_565);
-        //.
         Graph_OffsetY = 0;
         //.
+        Graph_ChannelHeight = Height/ChannelSamples_ChannelsCount;
+        //.
         int EnabledChannelsCount = 0;
-        for (int I = 0; I < Graph_ChannelsCount; I++)
+        for (int I = 0; I < ChannelSamples_ChannelsCount; I++)
         	if (ChannelSamples_Enabled[I])
         		EnabledChannelsCount++;
         if (EnabledChannelsCount != 0)
-        	Graph_ChannelHeight = (int)((Graph_Bitmap.getHeight()-Graph_OffsetY)/EnabledChannelsCount);
+            Graph_ChannelHeight = Height/EnabledChannelsCount;
         else
         	Graph_ChannelHeight = 0;
         Graph_ChannelHeightHalf = Graph_ChannelHeight/2;  
-        Graph_ChannelLength = Graph_Width;
-        Graph_ChannelSize = (int)(Graph_ChannelLength/Graph_XScale);
-        //.
-    	Graph_Graphics_LastPosX = new float[Graph_ChannelsCount];
-    	for (int I = 0; I < Graph_ChannelsCount; I++)
-    		Graph_Graphics_LastPosX[I] = -1.0F;
     	//.
-    	int L = Graph_ChannelSize+1;
-        Graph_Polyline_Xs = new float[L];
-        Graph_Polyline_Ys = new float[L];
-        Graph_Polyline_Count = new int[Graph_ChannelsCount];
-    	for (int I = 0; I < Graph_ChannelsCount; I++)
+        Graph_Polyline_Xs = new float[ChannelSamples_MaxSize];
+        Graph_Polyline_Ys = new float[ChannelSamples_MaxSize];
+        Graph_Polyline_Count = new int[ChannelSamples_ChannelsCount];
+    	for (int I = 0; I < ChannelSamples_ChannelsCount; I++)
     		Graph_Polyline_Count[I] = 0;
         //.
-        Graph_ChannelsColors = new int[Graph_ChannelsCount];
-        for (int I = 0; I < Graph_ChannelsCount; I++)
-        	Graph_ChannelsColors[I] = Color.WHITE;
+        Graph_ChannelsColors = new int[ChannelSamples_ChannelsCount];
+        for (int I = 0; I < ChannelSamples_ChannelsCount; I++)
+        	Graph_ChannelsColors[I] = Color.BLUE;
         int CI = 0;
-        if (Graph_ChannelsCount > CI)
-        	Graph_ChannelsColors[CI] = Color.WHITE;
+        if (ChannelSamples_ChannelsCount > CI)
+        	Graph_ChannelsColors[CI] = Color.BLACK;
         CI++;
-        if (Graph_ChannelsCount > CI)
-        	Graph_ChannelsColors[CI] = Color.YELLOW;
-        CI++;
-        if (Graph_ChannelsCount > CI)
-        	Graph_ChannelsColors[CI] = Color.MAGENTA;
-        CI++;
-        if (Graph_ChannelsCount > CI)
-        	Graph_ChannelsColors[CI] = Color.GREEN;
-        CI++;
-        if (Graph_ChannelsCount > CI)
-        	Graph_ChannelsColors[CI] = Color.LTGRAY;
-        CI++;
-        if (Graph_ChannelsCount > CI)
+        if (ChannelSamples_ChannelsCount > CI)
         	Graph_ChannelsColors[CI] = Color.BLUE;
         CI++;
-        if (Graph_ChannelsCount > CI)
-        	Graph_ChannelsColors[CI] = Color.CYAN;
-        //.
-        Graph_BkgBitmap_Init();
-        Graph_Bitmap_Clear();
+        if (ChannelSamples_ChannelsCount > CI)
+        	Graph_ChannelsColors[CI] = Color.BLACK;
+        CI++;
+        if (ChannelSamples_ChannelsCount > CI)
+        	Graph_ChannelsColors[CI] = Color.BLUE;
+        CI++;
+        if (ChannelSamples_ChannelsCount > CI)
+        	Graph_ChannelsColors[CI] = Color.BLACK;
+        CI++;
+        if (ChannelSamples_ChannelsCount > CI)
+        	Graph_ChannelsColors[CI] = Color.BLUE;
+        CI++;
+        if (ChannelSamples_ChannelsCount > CI)
+        	Graph_ChannelsColors[CI] = Color.BLACK;
     }
 
-    private void Graph_BkgBitmap_Init() {
-    	Canvas canvas = new Canvas();	
-    	canvas.setBitmap(Graph_BkgBitmap);
-    	Graph_Paint.setColor(Color.rgb(0,0,70));
-    	canvas.drawRect(0,0, Graph_Bitmap.getWidth(),Graph_Bitmap.getHeight(), Graph_Paint);
-    	Graph_Paint.setColor(Color.rgb(0,0,150));
-        Graph_Paint.setStrokeWidth(1.0F);
-    	int MeshStep = 48;
-    	int X = 0;
-    	int Y = Graph_OffsetY;
-    	int W = Graph_BkgBitmap.getWidth();
-    	int H = Graph_BkgBitmap.getHeight()-Graph_OffsetY;
-    	int CntX = (int)(W/MeshStep)+1; 
-    	int CntY = (int)(H/MeshStep)+1;
-    	for (int I = 0; I < CntY; I++) {
-    		canvas.drawLine(0,Y, W,Y, Graph_Paint);
-    		Y += MeshStep;
-    	}
-    	for (int I = 0; I < CntX; I++) {
-    		canvas.drawLine(X,Graph_OffsetY, X,Graph_OffsetY+H, Graph_Paint);
-    		X += MeshStep;
-    	}
-    }
-    
-    private void Graph_Bitmap_Clear() {
-    	Graph_Graphics.drawBitmap(Graph_BkgBitmap, 0,0, Graph_Paint);
-    }
-    
-    private void Graph_ClearRectangle(Canvas G, float X0, float Y0, float W, float H) {
-        Rect R = new Rect((int)X0,(int)Y0,(int)(X0+W),(int)(Y0+H));
-        G.drawBitmap(Graph_BkgBitmap, R, R, Graph_Paint);
-    }
-    
-    
-    public void Graph_DrawPolyline(Canvas G, int PenColor, float[] Xs,float[] Ys, int Count) {
-        Graph_GraphPaint.setColor(PenColor);
-        Graph_GraphPaint.setStrokeWidth(2.5F);
-        Graph_Path.rewind();
-        Graph_Path.moveTo(Xs[0],Ys[0]);
+    public void Graph_DrawPolyline(Canvas G, Paint paint, Path path, int PenColor, float[] Xs,float[] Ys, int Count) {
+        paint.setColor(PenColor);
+        paint.setStrokeWidth(2.5F);
+        path.rewind();
+        path.moveTo(Xs[0],Ys[0]);
         for (int I = 1; I < Count; I++) 
-            Graph_Path.lineTo(Xs[I],Ys[I]);
-        G.drawPath(Graph_Path,Graph_GraphPaint);
-    }
-    
-    private void Graph_DrawPage() {
-    	TTLRChannel TLRChannel = GetTLRChannel();
-        if ((Graph_Bitmap != null) && (TLRChannel != null)) 
-        {
-            Graph_ClearRectangle(Graph_Graphics,0,Graph_OffsetY,Graph_Width,Graph_Height-Graph_OffsetY);
-            //.
-        	Paint paint = new Paint();
-            paint.setAntiAlias(true);
-            paint.setTextSize(24*Graph_DisplayMetrics.density);
-            paint.setColor(Color.RED);
-            int _EnabledChannelIndex = 0;
-        	for (int ChannelIndex = 0; ChannelIndex < Graph_ChannelsCount; ChannelIndex++)
-        		if (ChannelSamples_Enabled[ChannelIndex]) {
-            		float Y0 = Graph_OffsetY+Graph_ShiftY+(Graph_ChannelHeight*_EnabledChannelIndex)+Graph_ChannelHeightHalf;
-            		//.
-                    paint.setStyle(Paint.Style.STROKE);
-                    Graph_Paint.setStrokeWidth(0.1F);
-                    Graph_Graphics.drawLine(0,Y0, Graph_Width,Y0, paint);
-            		//.
-                    paint.setStyle(Paint.Style.FILL);
-                    Graph_Graphics.drawText(ChannelSamples_ChannelNames[ChannelIndex],0,Y0-2, paint);
-                	//.
-                	_EnabledChannelIndex++;
-        		}
-        	//.
-        	int MaxPageSize = 0;
-        	float Yuplimit = Graph_OffsetY+1; 
-            int EnabledChannelIndex = 0;
-        	for (int ChannelIndex = 0; ChannelIndex < Graph_ChannelsCount; ChannelIndex++)
-        		if (ChannelSamples_Enabled[ChannelIndex]) {
-                	int PageSize = Graph_ChannelSize;
-                	PageSize = ChannelSamples_GetPageSize(PageSize, ChannelIndex);
-                	if (PageSize == 0) {
-                		EnabledChannelIndex++;
-                		continue; //. ^
-                	}
-                	if (PageSize > MaxPageSize)
-                		MaxPageSize = PageSize;
-                	//.
-            		float X;
-            		float Y0;
-            		float Y;
-            		//.
-            		Y0 = Graph_OffsetY+Graph_ShiftY+(Graph_ChannelHeight*EnabledChannelIndex)+Graph_ChannelHeightHalf;
-            		int Graph_Polyline_Count = 0;
-            		for (int I = 0; I < PageSize; I++)
-            		{
-            			X = (float)(I*Graph_ChannelsXScales[ChannelIndex]*Graph_XScale);
-            			Y = (float)(Y0-(ChannelSamples[ChannelIndex][ChannelSamples_Position+I]-Graph_ZeroLevel)*Graph_YScale);
-            			if (Y < Yuplimit)
-            				Y = Yuplimit;
-            			//.
-            			if ((Graph_Polyline_Count > 0) && ((int)Graph_Polyline_Xs[Graph_Polyline_Count-1] == (int)X)) {
-	            			Graph_Polyline_Ys[Graph_Polyline_Count-1] = (Graph_Polyline_Ys[Graph_Polyline_Count-1]+Y)/2.0F;
-            			}
-            			else {
-                			Graph_Polyline_Xs[Graph_Polyline_Count] = X;
-	            			Graph_Polyline_Ys[Graph_Polyline_Count] = Y;
-    	        			Graph_Polyline_Count++;                        
-            			}
-            		}
-            		//.
-            		if (Graph_Polyline_Count > 1)
-            			Graph_DrawPolyline(Graph_Graphics, Graph_ChannelsColors[ChannelIndex], Graph_Polyline_Xs,Graph_Polyline_Ys, Graph_Polyline_Count);
-            		//.
-            		EnabledChannelIndex++;
-        		}
-        	//.
-        	Graph_ScrollBar(MaxPageSize);
-        }
-        SurfaceUpdating.StartUpdate();
-    }
-    
-    public void Graph_ScrollBar(int PageSize) {
-        if (PageSize >= ChannelSamples_MaxSize)
-        	return; //. ->
-    	float Pos = ((ChannelSamples_Position+0.0F)/ChannelSamples_MaxSize)*Graph_Width;
-    	float W = 16;
-    	if (PageSize > 0) 
-    		W = ((PageSize+0.0F)/ChannelSamples_MaxSize)*Graph_Width;
-    	//.
-        Graph_ScrollBarPaint.setColor(Color.GRAY);
-		Graph_Graphics.drawRect(0,Graph_Height-Graph_ScrollBarHeight, Graph_Width,Graph_Height, Graph_ScrollBarPaint);
-		Graph_ScrollBarPaint.setColor(Color.WHITE);
-		Graph_Graphics.drawRect(Pos,Graph_Height-Graph_ScrollBarHeight+2, Pos+W,Graph_Height-2, Graph_ScrollBarPaint);
-    }
-    
-    public void Graph_SetShiftY(float Value) {
-    	Graph_ShiftY = Value;
-    	int DownLimit = Graph_Bitmap.getHeight();
-    	if (Graph_ShiftY > DownLimit)
-    		Graph_ShiftY = DownLimit;
-    	int UpLimit = -Graph_Bitmap.getHeight();
-    	if (Graph_ShiftY < UpLimit)
-    		Graph_ShiftY = UpLimit;
-    	Graph_DrawPage();
+        	path.lineTo(Xs[I],Ys[I]);
+        G.drawPath(path,paint);
     }
 }

@@ -61,8 +61,12 @@ public class TMeasurementProcessorPanel extends Activity {
     	            Processor = TMeasurementProcessor.GetProcessor(Measurement.Descriptor);
     	            if (Processor == null)
     	            	throw new Exception("there is no handler for a type: "+Measurement.Descriptor.TypeID()); //. ->
+    	            //.
     	            Processor.SetLayout(TMeasurementProcessorPanel.this, ProcessorLayout);
-    	            Processor.Setup(Measurement, MeasurementStartPosition);
+    	            //.
+    	            Processor.Setup(Measurement);
+    	            //.
+    	            Processor.SetPosition(MeasurementStartPosition, 100, true);
     			}
     			
     			@Override
@@ -154,7 +158,7 @@ public class TMeasurementProcessorPanel extends Activity {
 	}
 	
 	private void DoOnExit() {
-		if ((Processor != null) && Processor.flSetup) {
+		if ((Processor != null) && Processor.flInitialized) {
 			double MeasurementCurrentPosition = Processor.Measurement.Descriptor.StartTimestamp+Processor.GetPosition();
 	    	Intent intent = getIntent();
 	    	intent.putExtra("MeasurementCurrentPosition",MeasurementCurrentPosition);

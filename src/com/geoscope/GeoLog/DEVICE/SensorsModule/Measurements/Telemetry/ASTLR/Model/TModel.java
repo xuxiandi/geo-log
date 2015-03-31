@@ -3,14 +3,17 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.Mo
 import org.w3c.dom.Node;
 
 import android.content.Context;
+import android.graphics.Color;
 
 public class TModel extends com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.TModel {
 
 	public static final String ModelTypeID = "Telemetry.ASTLR";
 	//.
 	private static final String ModelTypeName = "Device state";
-	public static String		GetTypeName(Context context) {
-		return ModelTypeName;
+	private static final int	ModelTypeColor = Color.DKGRAY;
+	//.
+	public static TTypeInfo 	GetTypeInfo(Context context) {
+		return new TTypeInfo(ModelTypeName, ModelTypeColor);
 	}
 	
 	

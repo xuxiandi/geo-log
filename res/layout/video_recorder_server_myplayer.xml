@@ -1,27 +1,8 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/VideoRecorderServerMyPlayerLayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@android:color/white" >
+    android:background="@android:color/white"
+    android:orientation="vertical" >
 
-    <SurfaceView
-        android:id="@+id/svVideoRecorderServerMyPlayer"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
-
-    <TextView
-        android:id="@+id/lbVideoRecorderServerMyPlayer"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="12sp"
-        android:visibility="visible" />
-
-    <SeekBar
-        android:id="@+id/sbVideoRecorderServerMyPlayer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:max="100"
-        android:progress="0" />
-
-</FrameLayout>
+</LinearLayout>

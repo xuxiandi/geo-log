@@ -537,8 +537,11 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 			else
 				TIS = Integer.toString((int)(TimeInterval/60))+getString(R.string.SMin)+" "+Integer.toString(TimeInterval % 60)+getString(R.string.SSec);
 			String TypeName = Items[I].Name;
-			if (TypeName.equals(""))
-				TypeName = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.TModel.GetModelTypeName(Items[I].TypeID, this); 
+			if (TypeName.equals("")) {
+				com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.TModel.TTypeInfo TypeInfo = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.TModel.GetTypeInfo(Items[I].TypeID, this);
+				if (TypeInfo != null)
+					TypeName = TypeInfo.TypeName;
+			}
 			String SideS = "";
 			switch (Items[I].Location) {
 			case TSensorMeasurementDescriptor.LOCATION_SERVER:

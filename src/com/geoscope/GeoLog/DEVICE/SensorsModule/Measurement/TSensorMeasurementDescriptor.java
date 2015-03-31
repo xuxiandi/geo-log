@@ -1,5 +1,9 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement;
 
+import android.content.Context;
+
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel.TTypeInfo;
+
 
 public class TSensorMeasurementDescriptor {
 	
@@ -36,6 +40,12 @@ public class TSensorMeasurementDescriptor {
 		if (Model == null)
 			return ""; //. ->
 		return (Model.TypeID);
+	}
+	
+	public TTypeInfo TypeInfo(Context context) {
+		if (Model == null)
+			return null; //. ->
+		return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.TModel.GetTypeInfo(Model.TypeID, context);
 	}
 	
 	public String ContainerTypeID() {

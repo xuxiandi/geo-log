@@ -7,10 +7,11 @@ import android.os.Bundle;
 import android.view.SurfaceHolder;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorderServerMyPlayer extends Activity {
@@ -25,7 +26,7 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 	private String MeasurementDatabaseFolder = null;
 	private String MeasurementID = null;
 	//.
-	private FrameLayout ProcessorLayout;
+	private LinearLayout ProcessorLayout;
 	//.
 	private TVideoRecorderServerMyPlayerComponent ProcessorComponent = null;
 	
@@ -44,10 +45,11 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 		//.
         setContentView(R.layout.video_recorder_server_myplayer);
         //.
-        ProcessorLayout = (FrameLayout)findViewById(R.id.VideoRecorderServerMyPlayerLayout);
+        ProcessorLayout = (LinearLayout)findViewById(R.id.VideoRecorderServerMyPlayerLayout);
         //.
         try {
-			ProcessorComponent = new TVideoRecorderServerMyPlayerComponent(this, ProcessorLayout, new TVideoRecorderServerMyPlayerComponent.TOnSurfaceChangedHandler() {
+			ProcessorComponent = new TVideoRecorderServerMyPlayerComponent();
+			ProcessorComponent.OnVideoSurfaceChangedHandler = new TVideoRecorderServerMyPlayerComponent.TOnSurfaceChangedHandler() {
 				
 				@Override
 				public void DoOnSurfaceChanged(SurfaceHolder surface) {
@@ -60,15 +62,17 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 						Toast.makeText(TVideoRecorderServerMyPlayer.this, S, Toast.LENGTH_LONG).show();
 					}
 				}
-			}, new TVideoRecorderServerMyPlayerComponent.TOnProgressHandler() {
+			};
+			ProcessorComponent.OnProgressHandler = new TVideoRecorderServerMyPlayerComponent.TOnProgressHandler() {
 				
 				@Override
 				public void DoOnProgress(double ProgressFactor) {
 					if (ProcessorComponent != null) {
-						MeasurementStartPosition = ProcessorComponent.MeasurementDescriptor.Duration()*ProgressFactor; 
+						MeasurementStartPosition = ProcessorComponent.Measurement.Descriptor.Duration()*ProgressFactor; 
 					}
 				}
-			});
+			};
+			ProcessorComponent.SetLayout(this, ProcessorLayout);
 		} catch (Exception E) {
 			String S = E.getMessage();
 			if (S == null)
@@ -138,14 +142,14 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 	}
 	
 	private void Setup() throws Exception {
-		ProcessorComponent.Setup(MeasurementDatabaseFolder, MeasurementID);
+		ProcessorComponent.Setup(new TSensorMeasurement(MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance));
 		//.
 		ProcessorComponent.SetPosition(MeasurementStartPosition, 0/*Delay, ms*/, false);
 	}
 	
 	private void DoOnExit() {
 		if ((ProcessorComponent != null) && ProcessorComponent.flInitialized) {
-			double MeasurementCurrentPosition = ProcessorComponent.MeasurementDescriptor.StartTimestamp+ProcessorComponent.MeasurementDescriptor.Duration()*ProcessorComponent.MeasurementCurrentPositionFactor;
+			double MeasurementCurrentPosition = ProcessorComponent.Measurement.Descriptor.StartTimestamp+ProcessorComponent.Measurement.Descriptor.Duration()*ProcessorComponent.MeasurementCurrentPositionFactor;
 	    	Intent intent = getIntent();
 	    	intent.putExtra("MeasurementCurrentPosition",MeasurementCurrentPosition);
 	        //.

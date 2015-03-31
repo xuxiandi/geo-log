@@ -4,6 +4,8 @@ package com.geoscope.Classes.IO.UI;
 
 public class TUIComponent {
 
+	protected boolean flVisible = false;
+	
 	public void Destroy() throws Exception {
 	}
 
@@ -20,12 +22,14 @@ public class TUIComponent {
 	}
 	
 	public void Show() {
+		flVisible = true;
 	}
 	
 	public void Hide() {
+		flVisible = false;
 	}
 	
 	public boolean IsVisible() {
-		return false;
+		return flVisible;
 	}
 }

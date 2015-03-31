@@ -30,6 +30,8 @@ public class TSensorMeasurementModel {
     public String Info = "";
     //.
     public TStreamDescriptor Stream;
+    //.
+    public boolean flProcessed = false;
     
 	public TSensorMeasurementModel() {
 		Stream = new TStreamDescriptor();
@@ -53,6 +55,8 @@ public class TSensorMeasurementModel {
 
 	public void Process(TCanceller Canceller) throws Exception {
 		Stream.Process(Canceller);
+		//.
+		flProcessed = true;
 	}
 	
 	public void FromXMLNode(Node ANode, com.geoscope.Classes.Data.Stream.Channel.TChannelProvider ChannelProvider) throws Exception {

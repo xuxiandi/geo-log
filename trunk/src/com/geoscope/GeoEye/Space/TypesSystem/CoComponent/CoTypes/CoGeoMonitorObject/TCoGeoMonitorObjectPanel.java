@@ -1167,16 +1167,11 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 								}
 							}
 						});
-						btnShowSensorsModuleMeters.setEnabled(true);
+						btnShowSensorsModuleMeters.setEnabled(DC.SensorsModule.SensorsDataValue.Value != null);
 						btnShowSensorsModuleMeters.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
 					            try {
-									if ((DC.SensorsModule.SensorsDataValue.Value == null) || (DC.SensorsModule.SensorsDataValue.Value.length == 0)) {
-								    	Toast.makeText(TCoGeoMonitorObjectPanel.this, R.string.SThereAreNoSensors, Toast.LENGTH_LONG).show();
-										return; //. ->
-									}
-									//.
 						            Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Meters.TSensorsMetersPanel.class);
 						            long _ObjectID = 0;
 						        	switch (ParametersType) {

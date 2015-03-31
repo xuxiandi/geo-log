@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.Telemetry.TLR;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import android.app.Activity;
 import android.content.Context;
@@ -46,12 +47,6 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 
 		public void DoOnTimeChanged(double Time) {
 			DoOnTimeChanging(Time, false, false);
-		}
-	}
-	
-	public static class TOnSurfaceChangedHandler {
-		
-		public void DoOnSurfaceChanged(SurfaceHolder surface) {
 		}
 	}
 	
@@ -225,11 +220,9 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 		}
     }
     
+	private Hashtable<String, TSensorMeasurement> MeasurementCache = null;
+	//.
     public TOnTimeChangeHandler OnTimeChangeHandler = null;
-    //.
-	private SurfaceHolder 	surface = null;
-	private int				Width;
-	private int				Height;
 	//.
 	private SurfaceView 	svProcessor;
 	@SuppressWarnings("unused")
@@ -302,14 +295,24 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	public void Initialize(TSensorMeasurement pMeasurement) throws Exception {
 		super.Initialize(pMeasurement);
 		//.
-		CurrentTime = Measurement.Descriptor.StartTimestamp;
-		//.
-		SetTLRChannel((TTLRChannel)Measurement.Descriptor.Model.Stream.Channels_GetOneByClass(TTLRChannel.class));
-		//.
+		TSensorMeasurement CachedMeasurement = null;
+		if (MeasurementCache != null) 
+			CachedMeasurement = MeasurementCache.get(Measurement.Descriptor.ID);
+		final boolean flUseCache = (CachedMeasurement != null);
+		if (flUseCache)
+			Measurement = CachedMeasurement;
+		final TSensorMeasurement TheMeasurement = Measurement; 
 		MeasurementPreprocessing = new TAsyncProcessing() {
 
 			@Override
 			public void Process() throws Exception {
+				Canceller.Check();
+				//.
+				if (!flUseCache)
+					TheMeasurement.Descriptor.Model.Process(Canceller);
+				//.
+				SetTLRChannel((TTLRChannel)TheMeasurement.Descriptor.Model.Stream.Channels_GetOneByClass(TTLRChannel.class));
+				//.
 				ChannelSamples_Create();
 			}
 
@@ -317,6 +320,15 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 			public void DoOnCompleted() throws Exception {
 				if (Canceller.flCancel)
 					return; //. ->
+				//.
+				CurrentTime = Measurement.Descriptor.StartTimestamp;
+				//. caching 
+				if (!flUseCache) {
+					if (MeasurementCache == null)
+						MeasurementCache = new Hashtable<String, TSensorMeasurement>();
+					MeasurementCache.put(TheMeasurement.Descriptor.ID, TheMeasurement);
+				}
+				//.
 				flInitialized = true;
 			}
 			
@@ -355,8 +367,6 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 			MeasurementPositioning.Cancel();
 			MeasurementPositioning = null;
 		}
-		//.
-		Measurement = null;
 	}
 	
 	@Override
@@ -371,17 +381,16 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	public void Show() {
 		ParentLayout.setVisibility(View.VISIBLE);
 		svProcessor.setVisibility(View.VISIBLE);
+		//.
+		super.Show();
 	}
 	
 	@Override
 	public void Hide() {
+		super.Hide();
+		//.
 		svProcessor.setVisibility(View.GONE);
 		ParentLayout.setVisibility(View.GONE);
-	}
-	
-	@Override
-	public boolean IsVisible() {
-		return ParentLayout.isShown();
 	}
 	
 	@Override
@@ -449,13 +458,19 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 		Width = arg2;
 		Height = arg3;
 		//.
-		TimeResolution = (Measurement.Descriptor.FinishTimestamp-Measurement.Descriptor.StartTimestamp)/Width;
+		if (Measurement != null)
+			TimeResolution = (Measurement.Descriptor.FinishTimestamp-Measurement.Descriptor.StartTimestamp)/Width;
+		else
+			TimeResolution = 1.0;
 		//.
 		Graph_Init(Width,Height);
 		//.
 		SurfaceUpdating = new TSurfaceUpdating();
 		//.
 		Draw();
+		//.
+		if (OnVideoSurfaceChangedHandler != null) 
+			OnVideoSurfaceChangedHandler.DoOnSurfaceChanged(surface);
 	}
 	
 	@Override
@@ -762,7 +777,8 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	private void Graph_Init(int Width, int Height) {
         Graph_OffsetY = 0;
         //.
-        Graph_ChannelHeight = Height/ChannelSamples_ChannelsCount;
+        if (ChannelSamples_ChannelsCount > 0)
+        	Graph_ChannelHeight = Height/ChannelSamples_ChannelsCount;
         //.
         int EnabledChannelsCount = 0;
         for (int I = 0; I < ChannelSamples_ChannelsCount; I++)

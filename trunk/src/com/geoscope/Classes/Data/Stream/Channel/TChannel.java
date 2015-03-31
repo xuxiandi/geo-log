@@ -149,6 +149,10 @@ public class TChannel {
 		return "";
 	}
 	
+	public boolean IsTypeOf(String TypeID) {
+		return (GetTypeID().startsWith(TypeID));
+	}
+	
 	public void Initialize(Object pParameters) throws Exception {
 	}
 	

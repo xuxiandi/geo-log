@@ -17,6 +17,6 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 		if (TTLRChannel.TypeID.equals(pTypeID))
 			return (new TTLRChannel()); // =>
 		else
-			return null; //. ->
+			return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance.GetChannel(pTypeID); //. ->
 	}	
 }

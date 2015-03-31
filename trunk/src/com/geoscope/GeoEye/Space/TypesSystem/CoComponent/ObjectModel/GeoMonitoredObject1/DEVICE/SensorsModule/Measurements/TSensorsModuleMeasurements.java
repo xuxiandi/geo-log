@@ -88,7 +88,7 @@ public class TSensorsModuleMeasurements {
     	File MF = new File(MeasurementFolder);
     	String MeasurementDatabaseFolder = MF.getParent(); 
     	String MeasurementID = MF.getName();
-		TSensorMeasurement Measurement = new TSensorMeasurement(MeasurementDatabaseFolder,MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+		TSensorMeasurement Measurement = new TSensorMeasurement(MeasurementDatabaseFolder,MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
     	//.
 		boolean flProcessAsDefault = true;
 		if (ProcessHandler != null) 

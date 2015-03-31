@@ -135,7 +135,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	
 	public static class TAudioAACChannelProcessor extends TChannelProcessor {
 		
-		public static final Class<?> ChannelClass = TAACChannel.class;
+		public static final String TypeID = TAACChannel.TypeID;
 		
 		private static final String CodecTypeName = "audio/mp4a-latm";
 		private static final int 	CodecLatency = 10000; //. microseconds
@@ -402,7 +402,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	
 	public static class TVideoH264IChannelProcessor extends TChannelProcessor {
 		
-		public static final Class<?> ChannelClass = TH264IChannel.class;
+		public static final String TypeID = TH264IChannel.TypeID;
 		
 		private static final String CodecTypeName = "video/avc";
 		private static final int 	CodecLatency = 1000; //. microseconds
@@ -793,18 +793,6 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 		}		
 	}
 	
-	public static class TOnSurfaceChangedHandler {
-		
-		public void DoOnSurfaceChanged(SurfaceHolder surface) {
-		}
-	}
-	
-	public static class TOnProgressHandler {
-		
-		public void DoOnProgress(double ProgressFactor) {
-		}
-	}
-	
 	private static final int MESSAGE_SHOWEXCEPTION 					= 1;
 	private static final int MESSAGE_AUDIOCHANNELPROCESSOR_ISREADY 	= 2;
 	private static final int MESSAGE_VIDEOCHANNELPROCESSOR_ISREADY 	= 3;
@@ -877,12 +865,6 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 		}
 	};
 	
-	private boolean flExists = false;
-	//.
-	private SurfaceHolder 	surface = null;
-	private int				surface_width;
-	private int				surface_height;
-	//.
 	public double 			MeasurementCurrentPositionFactor = 0.0;
 	//.
 	private SurfaceView 	svVideoRecorderServerMyPlayer;
@@ -896,22 +878,14 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	private TChannelProcessor	VideoChannelProcessor = null;
 	//.
 	private TAsyncProcessing Positioning = null;
-	//.
-	public TOnSurfaceChangedHandler OnVideoSurfaceChangedHandler;
-	//.
-	public TOnProgressHandler OnProgressHandler;
 	
 	public TVideoRecorderServerMyPlayerComponent() {
 		super();
-		//.
-		flExists = true;
 	}
 
 	@Override
-	public void Destroy() throws Exception {
-    	flExists = false;
-    	//.
-		super.Destroy();
+	public String GetTypeID() {
+		return TypeID;
 	}
 	
 	@Override
@@ -970,8 +944,8 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
 		surface = arg0;
-		surface_width = arg2;
-		surface_height = arg3;
+		Width = arg2;
+		Height = arg3;
 		//.
 		if (OnVideoSurfaceChangedHandler != null) 
 			OnVideoSurfaceChangedHandler.DoOnSurfaceChanged(surface);
@@ -986,7 +960,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 			for (int C = 0; C < Cnt; C++) {
 				TChannel Channel = Measurement.Descriptor.Model.Stream.Channels.get(C);
 				//.
-				if (Channel.getClass() == TAudioAACChannelProcessor.ChannelClass) {
+				if (Channel.IsTypeOf(TAudioAACChannelProcessor.TypeID)) {
 					flAudio = true;
 					//.
 					synchronized (this) {
@@ -998,7 +972,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 					}
 				}
 				//.
-				if ((surface != null) && (Channel.getClass() == TVideoH264IChannelProcessor.ChannelClass)) {
+				if ((surface != null) && Channel.IsTypeOf(TVideoH264IChannelProcessor.TypeID)) {
 					flVideo = true;
 					//.
 					synchronized (this) {
@@ -1006,7 +980,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 							VideoChannelProcessor.Destroy();
 							VideoChannelProcessor = null;
 						}
-						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, Measurement.Folder(), Channel, surface,surface_width,surface_height);
+						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, Measurement.Folder(), Channel, surface, Width,Height);
 					}
 				}
 			}
@@ -1043,8 +1017,6 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 		}
 		//.
 		sbVideoRecorderServerMyPlayer.setVisibility(View.GONE);
-		//.
-		Measurement = null;
 	}
 	
 	@Override
@@ -1076,8 +1048,6 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 		}
 		//.
 		sbVideoRecorderServerMyPlayer.setVisibility(View.GONE);
-		//.
-		Measurement = null;
 	}
 	
 	@Override
@@ -1100,17 +1070,16 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	public void Show() {
 		ParentLayout.setVisibility(View.VISIBLE);
 		svVideoRecorderServerMyPlayer.setVisibility(View.VISIBLE);
+		//.
+		super.Show();
 	}
 	
 	@Override
 	public void Hide() {
+		super.Hide();
+		//.
 		svVideoRecorderServerMyPlayer.setVisibility(View.GONE);
 		ParentLayout.setVisibility(View.GONE);
-	}
-	
-	@Override
-	public boolean IsVisible() {
-		return ParentLayout.isShown();
 	}
 	
 	private void ShowInfo() {

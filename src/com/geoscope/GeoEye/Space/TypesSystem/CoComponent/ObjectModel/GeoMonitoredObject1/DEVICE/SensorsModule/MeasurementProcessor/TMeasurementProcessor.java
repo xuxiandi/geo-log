@@ -48,6 +48,8 @@ public class TMeasurementProcessor extends TUIComponent {
 	//.
 	public TOnProgressHandler OnProgressHandler;
     //.
+    public boolean flStandalone = false;
+    //.
 	protected int Width;
 	protected int Height;
 	//.

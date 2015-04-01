@@ -5,7 +5,9 @@ import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -22,6 +24,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
@@ -75,8 +78,8 @@ public class TObjectModelHistoryPanel extends Activity {
 	//.
 	public static final int ObjectTrackViewer_SetPositionDelay = 500; //. ms
 	//.
-	public static final int MeasurementProcessor_SetPositionDelay 		 = 1000; //. ms
-	public static final int MeasurementProcessor_MeasurementOpeningDelay = 2000; //. ms
+	public static final int MeasurementProcessor_SetPositionDelay 		 = 500; //. ms
+	public static final int MeasurementProcessor_MeasurementOpeningDelay = 500; //. ms
 	
 	public static class TTimeIntervalSlider extends SurfaceView implements OnTouchListener {
 		
@@ -305,11 +308,11 @@ public class TObjectModelHistoryPanel extends Activity {
 	    private double TimeResolution;
 	    private double TimeIntervalBegin;
 	    private double TimeIntervalEnd;
-	    private TTimeIntervalSliderTimeMark[] TimeMarks 	= null;
-	    private TTimeIntervalSliderTimeMark[] TimeMarks1 	= null;
+	    private ArrayList<TTimeIntervalSliderTimeMark> TimeMarks 	= null;
+	    private ArrayList<TTimeIntervalSliderTimeMark> TimeMarks1 	= null;
 	    //.
-	    private TTimeIntervalSliderTimeIntervalMark[] TimeIntervalMarks;
-	    private TTimeIntervalSliderTimeMarkInterval[] TimeMarkIntervals;
+	    private ArrayList<TTimeIntervalSliderTimeIntervalMark> TimeIntervalMarks;
+	    private ArrayList<TTimeIntervalSliderTimeMarkInterval> TimeMarkIntervals;
 	    private TOnTimeChangeHandler OnTimeChangeHandler;
 	    private TOnIntervalSelectedHandler OnIntervalSelectedHandler;
 	    private TTimeInterval SelectedInterval;
@@ -371,7 +374,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			DoOnSizeChanged(Width, Height);
 		}
 
-		public void Setup(TObjectModelHistoryPanel pHistoryPanel, double pCurrentTime, double pTimeResolution, double pTimeIntervalBegin, double pTimeIntervalEnd, TTimeIntervalSliderTimeMark[] pTimeMarks, TTimeIntervalSliderTimeIntervalMark[] pTimeIntervalMarks, TOnTimeChangeHandler pDoOnTimeChangeHandler) {
+		public void Setup(TObjectModelHistoryPanel pHistoryPanel, double pCurrentTime, double pTimeResolution, double pTimeIntervalBegin, double pTimeIntervalEnd, ArrayList<TTimeIntervalSliderTimeMark> pTimeMarks, ArrayList<TTimeIntervalSliderTimeIntervalMark> pTimeIntervalMarks, TOnTimeChangeHandler pDoOnTimeChangeHandler) {
 			CurrentTime = pCurrentTime;
 			TimeResolution = pTimeResolution;
 			TimeIntervalBegin = pTimeIntervalBegin;
@@ -431,6 +434,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			paint.setStrokeWidth(0);
 			paint.setStyle(Paint.Style.FILL);
 			paint.setColor(BackgroundColor);
+		    paint.setAlpha(255);
 			canvas.drawRect(0,0,Width,Height, paint);
 			//.
 			if (!flSetup)
@@ -453,6 +457,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			else 
 				TIE = IntervalEnd;
 			paint.setColor(TimeIntervalColor);
+		    paint.setAlpha(255);
 			canvas.drawRect((float)(Mid+(TIB-_CurrentTime)/TimeResolution),0.0F,(float)(Mid+(TIE-_CurrentTime)/TimeResolution),Height, paint);
 			double X,Y,L;
 			double MinSpacing = 8*metrics.density;
@@ -464,6 +469,7 @@ public class TObjectModelHistoryPanel extends Activity {
 				L = (SelectedInterval.Duration/TimeResolution);
 				//.
 				paint.setColor(Color.RED);
+			    paint.setAlpha(255);
 				canvas.drawRect((float)X,(float)Y,(float)(X+L),Height, paint);
 				//.
 				String S = OleDate.Format("HH:mm:ss",OleDate.UTCToLocalTime(SelectedInterval.Time)); 
@@ -475,13 +481,13 @@ public class TObjectModelHistoryPanel extends Activity {
 			//. draw TimeIntervalMarks
 			int Cnt = 0;
 			if (TimeIntervalMarks != null)
-				Cnt = TimeIntervalMarks.length;
+				Cnt = TimeIntervalMarks.size();
 			if (Cnt > 0) {
 				paint.setStrokeWidth(0.0F);
 				Y = (Height*(17.0/32));
 				double Y1 = (Height*(27.0/32))-1;
 				for (int I = 0; I < Cnt; I++) {
-					TTimeIntervalSliderTimeIntervalMark Item = TimeIntervalMarks[I]; 
+					TTimeIntervalSliderTimeIntervalMark Item = TimeIntervalMarks.get(I); 
 				    X = (Mid+(OleDate.UTCToLocalTime(Item.Time)-_CurrentTime)/TimeResolution);
 				    L = (Item.Duration/TimeResolution);
 				    RectF Rect = new RectF((float)X,(float)Y, (float)(X+L),(float)Y1);
@@ -491,6 +497,7 @@ public class TObjectModelHistoryPanel extends Activity {
 						//.
 						paint.setStyle(Paint.Style.FILL);
 					    paint.setColor(Item.Color);
+					    paint.setAlpha(128);
 						canvas.drawRect(Rect, paint);
 						//.
 						paint.setTextSize(Rect.height()*0.50F);
@@ -500,6 +507,7 @@ public class TObjectModelHistoryPanel extends Activity {
 							float TX = Rect.left+((Rect.right-Rect.left)-TW)/2.0F;
 							float TY = Rect.top+((Rect.bottom-Rect.top)+TH)/2.0F;
 						    paint.setColor(Color.WHITE);
+						    paint.setAlpha(192);
 							canvas.drawText(Item.Text, TX,TY, paint);
 						}
 					}
@@ -511,16 +519,18 @@ public class TObjectModelHistoryPanel extends Activity {
 			//. draw TimeMarks
 			Cnt = 0;
 			if (TimeMarks != null)
-				Cnt = TimeMarks.length;
+				Cnt = TimeMarks.size();
 			if (Cnt > 0) {
 				paint.setStrokeWidth(0.0F);
+			    paint.setAlpha(255);
 				Y = (Height*(14.0/16));
 				double Y1 = (Height*(15.0/16))-1;
 				double MarkWidth = 3.0*metrics.density;
 				for (int I = 0; I < Cnt; I++) {
-				    X = (Mid+(OleDate.UTCToLocalTime(TimeMarks[I].Time)-_CurrentTime)/TimeResolution);
+					TTimeIntervalSliderTimeMark Mark = TimeMarks.get(I);
+				    X = (Mid+(OleDate.UTCToLocalTime(Mark.Time)-_CurrentTime)/TimeResolution);
 				    if ((0 < X) && (X < Width)) {
-						paint.setColor(TimeMarks[I].Color);
+						paint.setColor(Mark.Color);
 						canvas.drawRect((float)X,(float)Y, (float)(X+MarkWidth),(float)Y1, paint);
 				    }
 				}
@@ -528,17 +538,19 @@ public class TObjectModelHistoryPanel extends Activity {
 			//. draw TimeMarks1
 			Cnt = 0;
 			if (TimeMarks1 != null)
-				Cnt = TimeMarks1.length;
+				Cnt = TimeMarks1.size();
 			if (Cnt > 0) {
 				paint.setStrokeWidth(0.0F);
+			    paint.setAlpha(255);
 				Y = (Height*(13.0/16));
 				double Y1 = (Height*(14.0/16))-1;
 				double Yc = (Y+Y1)/2.0;
 				double R = (Y1-Y)/2.0;
 				for (int I = 0; I < Cnt; I++) {
-				    X = (Mid+(OleDate.UTCToLocalTime(TimeMarks1[I].Time)-_CurrentTime)/TimeResolution);
+					TTimeIntervalSliderTimeMark Mark = TimeMarks1.get(I);
+				    X = (Mid+(OleDate.UTCToLocalTime(Mark.Time)-_CurrentTime)/TimeResolution);
 				    if ((0 < X) && (X < Width)) {
-						paint.setColor(TimeMarks1[I].Color);
+						paint.setColor(Mark.Color);
 						canvas.drawCircle((float)X,(float)Yc, (float)R, paint);
 				    }
 				}
@@ -546,6 +558,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			//. draw Day marks
 			paint.setStrokeWidth(1.0F*metrics.density);
 			paint.setColor(TimeMarkerColor);
+		    paint.setAlpha(255);
 			double DY = (Height*(1.0/4));
 			double DLLP = -Double.MAX_VALUE;
 			double Day = Math.floor(IntervalBegin/DayDelta)*DayDelta;
@@ -615,6 +628,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			//. draw center marker
 			paint.setStrokeWidth(3.0F*metrics.density);
 			paint.setColor(CenterMarkerColor);
+		    paint.setAlpha(255);
 			canvas.drawLine((float)Mid,0.0F, (float)Mid,Height, paint);
 			paint.setStrokeWidth(1.0F*metrics.density);
 			paint.setColor(CenterMarkerColorHigh);
@@ -626,14 +640,15 @@ public class TObjectModelHistoryPanel extends Activity {
 			//.
 			Cnt = 0;
 			if (TimeMarkIntervals != null)
-				Cnt = TimeMarkIntervals.length;
+				Cnt = TimeMarkIntervals.size();
 			if (Cnt > 0) {
 				paint.setStrokeWidth(0.0F);
 				Y = (Height*(15.0/16));
 				for (int I = 0; I < Cnt; I++) {
-				    X = (Mid+(OleDate.UTCToLocalTime(TimeMarkIntervals[I].Time)-_CurrentTime)/TimeResolution);
-				    L = (TimeMarkIntervals[I].Duration/TimeResolution);
-					paint.setColor(TimeMarkIntervals[I].Color);
+					TTimeIntervalSliderTimeMarkInterval Mark = TimeMarkIntervals.get(I); 
+				    X = (Mid+(OleDate.UTCToLocalTime(Mark.Time)-_CurrentTime)/TimeResolution);
+				    L = (Mark.Duration/TimeResolution);
+					paint.setColor(Mark.Color);
 					canvas.drawRect((float)X,(float)Y, (float)(X+L),Height, paint);
 				}
 			}
@@ -929,7 +944,10 @@ public class TObjectModelHistoryPanel extends Activity {
 			public double										BeginTimestamp;
 			public double										EndTimestamp;
 			//.
-			public ArrayList<TSensorMeasurementDescriptor> MeasurementTypes;
+			public ArrayList<TSensorMeasurementDescriptor> 	MeasurementTypes;
+			public boolean[] 								MeasurementTypes_Enabled;
+			//.
+			public TSensorMeasurementDescriptor[] 				EnabledMeasurements;
 			
 			public TSensorMeasurements(TSensorMeasurementDescriptor[] pMeasurements) {
 				Measurements = pMeasurements;
@@ -938,8 +956,6 @@ public class TObjectModelHistoryPanel extends Activity {
 			}
 			
 			private void Update() {
-				MeasurementTypes = GetMeasurementTypes();
-				//.
 				BeginTimestamp = Double.MAX_VALUE;
 				EndTimestamp = -Double.MAX_VALUE;
 				int Cnt = Measurements.length;
@@ -952,16 +968,24 @@ public class TObjectModelHistoryPanel extends Activity {
 							EndTimestamp = Measurement.FinishTimestamp;
 					}
 				}
+				//.
+				MeasurementTypes = GetMeasurementTypes();
+				MeasurementTypes_Enabled = new boolean[MeasurementTypes.size()];
+				Cnt = MeasurementTypes.size();
+				for (int I = 0; I < Cnt; I++)
+					MeasurementTypes_Enabled[I] = true;
+				//.
+				EnabledMeasurements = Measurements;
 			}
 
 			private ArrayList<TSensorMeasurementDescriptor> GetMeasurementTypes() {
 				ArrayList<TSensorMeasurementDescriptor> Result = new ArrayList<TSensorMeasurementDescriptor>();
-				int CntI = Measurements.length;
-				for (int I = 0; I < CntI; I++) {
+				int ICnt = Measurements.length;
+				for (int I = 0; I < ICnt; I++) {
 					TSensorMeasurementDescriptor Measurement = Measurements[I];
 					boolean flFound = false;
-					int CntJ = Result.size();
-					for (int J = 0; J < CntJ; J++) 
+					int JCnt = Result.size();
+					for (int J = 0; J < JCnt; J++) 
 						if (Result.get(J).Model.TypeID.equals(Measurement.Model.TypeID)) {
 							flFound = true;
 							break; //. >
@@ -972,14 +996,35 @@ public class TObjectModelHistoryPanel extends Activity {
 				return Result;
 			}
 			
+			public void EnabledMeasurements_Update() {
+				int ICnt = Measurements.length;
+				ArrayList<TSensorMeasurementDescriptor> _Result = new ArrayList<TSensorMeasurementDescriptor>(ICnt);
+				for (int I = 0; I < ICnt; I++) {
+					TSensorMeasurementDescriptor Measurement = Measurements[I]; 
+					//.
+					int JCnt = MeasurementTypes.size();
+					for (int J = 0; J < JCnt; J++) {
+						TSensorMeasurementDescriptor _Measurement = MeasurementTypes.get(J);
+						if (_Measurement.IsTypeOf(Measurement.TypeID()) && MeasurementTypes_Enabled[J]) {
+							_Result.add(Measurement);
+							break; //. >
+						}
+					}
+				}
+				ICnt = _Result.size();
+				EnabledMeasurements = new TSensorMeasurementDescriptor[ICnt]; 
+				for (int I = 0; I < ICnt; I++) 
+					EnabledMeasurements[I] = _Result.get(I);
+			}
+			
 			public double Measurements_CentralTimestamp() {
 				return (BeginTimestamp+EndTimestamp)/2.0;
 			}
 			
 			public TSensorMeasurementDescriptor GetMeasurementByTimestamp(double Timestamp) {
-				int Cnt = Measurements.length;
+				int Cnt = EnabledMeasurements.length;
 				for (int I = 0; I < Cnt; I++) {
-					TSensorMeasurementDescriptor Measurement = Measurements[I];
+					TSensorMeasurementDescriptor Measurement = EnabledMeasurements[I];
 					if ((Measurement.StartTimestamp <= Timestamp) && (Timestamp < Measurement.FinishTimestamp))
 						return Measurement; //. ->
 				}
@@ -987,9 +1032,9 @@ public class TObjectModelHistoryPanel extends Activity {
 			}
 
 			public TSensorMeasurementDescriptor GetTypedMeasurementByTimestamp(String TypeID, double Timestamp) {
-				int Cnt = Measurements.length;
+				int Cnt = EnabledMeasurements.length;
 				for (int I = 0; I < Cnt; I++) {
-					TSensorMeasurementDescriptor Measurement = Measurements[I];
+					TSensorMeasurementDescriptor Measurement = EnabledMeasurements[I];
 					if (((Measurement.StartTimestamp <= Timestamp) && (Timestamp < Measurement.FinishTimestamp)) && Measurement.IsTypeOf(TypeID))
 						return Measurement; //. ->
 				}
@@ -998,10 +1043,10 @@ public class TObjectModelHistoryPanel extends Activity {
 
 			public TSensorMeasurementDescriptor GetNearestMeasurementToTimestamp(double Timestamp, TSensorMeasurementDescriptor ExceptMeasurement) {
 				TSensorMeasurementDescriptor Result = null;
-				int Cnt = Measurements.length;
+				int Cnt = EnabledMeasurements.length;
 				double MinDistance = Double.MAX_VALUE;
 				for (int I = 0; I < Cnt; I++) {
-					TSensorMeasurementDescriptor Measurement = Measurements[I];
+					TSensorMeasurementDescriptor Measurement = EnabledMeasurements[I];
 					if (Measurement != ExceptMeasurement) {
 						double Distance = (Measurement.StartTimestamp-Timestamp);
 						if ((Distance > 0) && (Distance < MinDistance)) {
@@ -1026,8 +1071,8 @@ public class TObjectModelHistoryPanel extends Activity {
 		public double						BeginTimestamp;
 		public double						EndTimestamp;
 		//.
-		public TTimeIntervalSlider.TTimeIntervalSliderTimeMark[]			TimeIntervalSliderTimeMarks = null;
-		public TTimeIntervalSlider.TTimeIntervalSliderTimeIntervalMark[]	TimeIntervalSliderTimeIntervalMarks = null;
+		public ArrayList<TTimeIntervalSlider.TTimeIntervalSliderTimeMark>			TimeIntervalSliderTimeMarks = new ArrayList<TTimeIntervalSlider.TTimeIntervalSliderTimeMark>();
+		public ArrayList<TTimeIntervalSlider.TTimeIntervalSliderTimeIntervalMark>	TimeIntervalSliderTimeIntervalMarks = new ArrayList<TTimeIntervalSlider.TTimeIntervalSliderTimeIntervalMark>();
 		//.
 		public String[] BusinessModelRecords; 
 		
@@ -1043,8 +1088,40 @@ public class TObjectModelHistoryPanel extends Activity {
 		private void Update() {
 			BeginTimestamp = Double.MAX_VALUE;
 			EndTimestamp = -Double.MAX_VALUE;
+			//. object model records
 			int Cnt = Records.ObjectModelRecords.size();
-			TimeIntervalSliderTimeMarks = new TTimeIntervalSlider.TTimeIntervalSliderTimeMark[Cnt]; 
+			for (int I = 0; I < Cnt; I++) {
+				THistoryRecord Record = Records.ObjectModelRecords.get(I);
+				if (Record.Timestamp < BeginTimestamp)
+					BeginTimestamp = Record.Timestamp; 
+				if (Record.Timestamp > EndTimestamp)
+					EndTimestamp = Record.Timestamp;
+			}
+			//. business model records
+			Cnt = Records.BusinessModelRecords.size();
+			BusinessModelRecords = new String[Cnt];
+			for (int I = 0; I < Cnt; I++) {
+				THistoryRecord Record = Records.BusinessModelRecords.get(Cnt-I-1); 
+				if (Record.Timestamp < BeginTimestamp)
+					BeginTimestamp = Record.Timestamp; 
+				if (Record.Timestamp > EndTimestamp)
+					EndTimestamp = Record.Timestamp;
+				//.
+				String S = OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(Record.Timestamp))+": "+Record.GetString(1/*only message*/);
+				BusinessModelRecords[I] = S;
+			}
+			//. measurements
+			if (SensorMeasurements.BeginTimestamp < BeginTimestamp)
+				BeginTimestamp = SensorMeasurements.BeginTimestamp; 
+			if (SensorMeasurements.EndTimestamp > EndTimestamp)
+				EndTimestamp = SensorMeasurements.EndTimestamp;
+			//.
+			TimeIntervalSlider_Update();
+		}
+
+		public void TimeIntervalSlider_Update() {
+			int Cnt = Records.ObjectModelRecords.size();
+			TimeIntervalSliderTimeMarks.clear();
 			for (int I = 0; I < Cnt; I++) {
 				THistoryRecord Record = Records.ObjectModelRecords.get(I);
 				if (Record.Timestamp < BeginTimestamp)
@@ -1058,25 +1135,13 @@ public class TObjectModelHistoryPanel extends Activity {
 					if (GeoLocationRecord.Speed > 0)
 						MarkColor = TGeoLocationRecord.SpeedColorer.GetColor(GeoLocationRecord.Speed);
 				}
-				TimeIntervalSliderTimeMarks[I] = new TTimeIntervalSlider.TTimeIntervalSliderTimeMark(Record.Timestamp,MarkColor);
+				TimeIntervalSliderTimeMarks.add(new TTimeIntervalSlider.TTimeIntervalSliderTimeMark(Record.Timestamp,MarkColor));
 			}
-			Cnt = Records.BusinessModelRecords.size();
+			//.
+			Cnt = SensorMeasurements.EnabledMeasurements.length;
+			TimeIntervalSliderTimeIntervalMarks.clear(); 
 			for (int I = 0; I < Cnt; I++) {
-				THistoryRecord Record = Records.BusinessModelRecords.get(I);
-				if (Record.Timestamp < BeginTimestamp)
-					BeginTimestamp = Record.Timestamp; 
-				if (Record.Timestamp > EndTimestamp)
-					EndTimestamp = Record.Timestamp;
-			}
-			if (SensorMeasurements.BeginTimestamp < BeginTimestamp)
-				BeginTimestamp = SensorMeasurements.BeginTimestamp; 
-			if (SensorMeasurements.EndTimestamp > EndTimestamp)
-				EndTimestamp = SensorMeasurements.EndTimestamp; 
-			//. sensor measurements 
-			Cnt = SensorMeasurements.Measurements.length;
-			TimeIntervalSliderTimeIntervalMarks = new TTimeIntervalSlider.TTimeIntervalSliderTimeIntervalMark[Cnt]; 
-			for (int I = 0; I < Cnt; I++) {
-				TSensorMeasurementDescriptor Measurement = SensorMeasurements.Measurements[I];
+				TSensorMeasurementDescriptor Measurement = SensorMeasurements.EnabledMeasurements[I];
 				//.
 				TTypeInfo TypeInfo = Measurement.TypeInfo(context);
 				int TypeColor;
@@ -1087,20 +1152,12 @@ public class TObjectModelHistoryPanel extends Activity {
 				}
 				else {
 					TypeColor = Color.BLUE;
-					TypeName = "video";
+					TypeName = "";
 				}
-				TimeIntervalSliderTimeIntervalMarks[I] = new TTimeIntervalSlider.TTimeIntervalSliderTimeIntervalMark(Measurement.StartTimestamp,Measurement.FinishTimestamp-Measurement.StartTimestamp, TypeColor, TypeName);
-			}
-			//.
-			Cnt = Records.BusinessModelRecords.size();
-			BusinessModelRecords = new String[Cnt];
-			for (int I = 0; I < Cnt; I++) {
-				THistoryRecord Record = Records.BusinessModelRecords.get(Cnt-I-1); 
-				String S = OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(Record.Timestamp))+": "+Record.GetString(1/*only message*/);
-				BusinessModelRecords[I] = S;
+				TimeIntervalSliderTimeIntervalMarks.add(new TTimeIntervalSlider.TTimeIntervalSliderTimeIntervalMark(Measurement.StartTimestamp,Measurement.FinishTimestamp-Measurement.StartTimestamp, TypeColor, TypeName));
 			}
 		}
-
+		
 		public double CentralTimestamp() {
 			return (BeginTimestamp+EndTimestamp)/2.0;
 		}
@@ -1185,6 +1242,7 @@ public class TObjectModelHistoryPanel extends Activity {
 	
 	private static class TMeasurementProcessorItem {
 		
+		public boolean 							flEnabled = true;
 		public TMeasurementProcessor 			Processor = null;
 		public TSensorMeasurementDescriptor		CurrentMeasurement = null;
 		public TAsyncProcessing 				CurrentMeasurementOpening = null; 
@@ -1214,6 +1272,8 @@ public class TObjectModelHistoryPanel extends Activity {
 	private THistory History;
 	//.
 	private TTimeIntervalSlider TimeIntervalSlider;
+	//.
+	private Button btnFilterMeasurementsByType;
 	//.
 	private Button btnShowCurrentTimeInReflector;
 	private Button btnShowCurrentTimeMeasurementViewer;
@@ -1271,11 +1331,25 @@ public class TObjectModelHistoryPanel extends Activity {
         }
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //.
         setContentView(R.layout.objectmodel_history_panel);
         //.
         TimeIntervalSlider = (TTimeIntervalSlider)findViewById(R.id.svTimeIntervalSlider);
         TimeIntervalSlider.Initialize(this);
+        //.
+        btnFilterMeasurementsByType = (Button)findViewById(R.id.btnFilterMeasurementsByType);
+        btnFilterMeasurementsByType.setOnClickListener(new OnClickListener() {
+        	
+			@Override
+            public void onClick(View v) {
+				try {
+					Measurements_FilterByType();
+				} catch (Exception E) {
+					Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
+            }
+        });
         //.
         lvBusinessModelRecords = (ListView)findViewById(R.id.lvBusinessModelRecords);
         lvBusinessModelRecords.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -1293,6 +1367,19 @@ public class TObjectModelHistoryPanel extends Activity {
             	}
             }
         });        
+        //.
+        btnFilterMeasurementsByType = (Button)findViewById(R.id.btnFilterMeasurementsByType);
+        btnFilterMeasurementsByType.setOnClickListener(new OnClickListener() {
+        	
+			@Override
+            public void onClick(View v) {
+				try {
+					Measurements_FilterByType();
+				} catch (Exception E) {
+					Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
+            }
+        });
         //.
         btnShowCurrentTimeInReflector = (Button)findViewById(R.id.btnShowCurrentTimeInReflector);
         btnShowCurrentTimeInReflector.setOnClickListener(new OnClickListener() {
@@ -1375,14 +1462,12 @@ public class TObjectModelHistoryPanel extends Activity {
             @Override
             public void onClick(View v) {
             	if (cbShowMeasurementViewer.isChecked()) {
-            		///////MeasurementProcessor.Processor.Show();
             		cbTimeAnimation.setEnabled(true);
             	}
             	else {
             		MeasurementProcessors_Pause();
                 	//.
             		cbTimeAnimation.setEnabled(false);
-            		///////MeasurementProcessor.Processor.Hide();
             	}
             	//. validation
             	TimeIntervalSlider.ValidateCurrentTime(true);
@@ -1748,10 +1833,10 @@ public class TObjectModelHistoryPanel extends Activity {
 			public void DoOnItemsLoaded(TComponents ActivitiesComponents) {
 				if ((ActivitiesComponents != null) && (ActivitiesComponents.Items != null)) {
 					int Cnt = ActivitiesComponents.Items.length;
-					TTimeIntervalSlider.TTimeIntervalSliderTimeMark[] TimeIntervalSliderTimeMarks = new TTimeIntervalSlider.TTimeIntervalSliderTimeMark[Cnt]; 
+					ArrayList<TTimeIntervalSlider.TTimeIntervalSliderTimeMark> TimeIntervalSliderTimeMarks = new ArrayList<TTimeIntervalSlider.TTimeIntervalSliderTimeMark>(); 
 					int MarkColor = Color.RED;
 					for (int I = 0; I < Cnt; I++) 
-						TimeIntervalSliderTimeMarks[I] = new TTimeIntervalSlider.TTimeIntervalSliderTimeMark(ActivitiesComponents.Items[I].Timestamp,MarkColor);
+						TimeIntervalSliderTimeMarks.add(new TTimeIntervalSlider.TTimeIntervalSliderTimeMark(ActivitiesComponents.Items[I].Timestamp,MarkColor));
 					//.
 					TimeIntervalSlider.TimeMarks1 = TimeIntervalSliderTimeMarks;
 					TimeIntervalSlider.Validate();
@@ -1923,6 +2008,65 @@ public class TObjectModelHistoryPanel extends Activity {
 	    	}
 	}
 	
+	private boolean[] Measurements_GetEnabledTypes() {
+		return History.SensorMeasurements.MeasurementTypes_Enabled.clone();
+	}
+	
+	private void Measurements_SetEnabledTypes(boolean[] EnabledTypes) throws Exception {
+		if (EnabledTypes.length != History.SensorMeasurements.MeasurementTypes.size())
+			throw new Exception("enabled types list size is differ than types list"); //. =>
+		//.
+		History.SensorMeasurements.MeasurementTypes_Enabled = EnabledTypes;
+		//. validate measurements
+		History.SensorMeasurements.EnabledMeasurements_Update();
+		//.
+		History.TimeIntervalSlider_Update();
+		//.
+		TimeIntervalSlider.ValidateCurrentTime();
+	}
+	
+	private void Measurements_FilterByType() {
+    	CharSequence[] _items = new CharSequence[History.SensorMeasurements.MeasurementTypes.size()];
+    	int Cnt = History.SensorMeasurements.MeasurementTypes.size();
+    	for (int I = 0; I < Cnt; I++) {
+    		TSensorMeasurementDescriptor Measurement = History.SensorMeasurements.MeasurementTypes.get(I);
+    		TTypeInfo TypeInfo = Measurement.TypeInfo(this);
+    		if (TypeInfo != null)
+    			_items[I] = TypeInfo.TypeName;
+    		else
+    			_items[I] = Measurement.TypeID();
+    	}
+    	final boolean[] Mask = Measurements_GetEnabledTypes();
+    	//.
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	builder.setTitle(R.string.SFilterByType);
+    	builder.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				try {
+					Measurements_SetEnabledTypes(Mask);
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+					Toast.makeText(TObjectModelHistoryPanel.this, S, Toast.LENGTH_LONG).show();
+				}
+			}
+		});
+    	builder.setNegativeButton(R.string.SClose,null);
+    	builder.setMultiChoiceItems(_items, Mask, new DialogInterface.OnMultiChoiceClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface arg0, int arg1, boolean arg2) {
+				Mask[arg1] = arg2;
+			}
+			
+    	});
+    	AlertDialog alert = builder.create();
+    	alert.show();
+	}
+	
 	private void MeasurementProcessor_Initialize(final TMeasurementProcessorItem MeasurementProcessor) throws Exception {
 		MeasurementProcessor.Processor.OnVideoSurfaceChangedHandler = new TVideoRecorderServerMyPlayerComponent.TOnSurfaceChangedHandler() {
 			
@@ -1992,7 +2136,10 @@ public class TObjectModelHistoryPanel extends Activity {
 	}
 	
 	private void MeasurementProcessor_SetCurrentTime(final TMeasurementProcessorItem MeasurementProcessor, double Timestamp, final boolean flPause, final int Delay) throws IOException, InterruptedException {
-		TSensorMeasurementDescriptor AMeasurement = History.SensorMeasurements.GetTypedMeasurementByTimestamp(MeasurementProcessor.Processor.GetTypeID(), Timestamp);
+		TSensorMeasurementDescriptor AMeasurement = null;
+		if (MeasurementProcessor.flEnabled)
+			AMeasurement = History.SensorMeasurements.GetTypedMeasurementByTimestamp(MeasurementProcessor.Processor.GetTypeID(), Timestamp);
+		//.
 		if (AMeasurement != null) {
 			MeasurementProcessor.CurrentMeasurement = AMeasurement;
 			//.
@@ -2015,7 +2162,7 @@ public class TObjectModelHistoryPanel extends Activity {
 
         			@Override
         			public void Process() throws Exception {
-        				Thread.sleep(Delay);
+        				Thread.sleep(MeasurementProcessor_MeasurementOpeningDelay);
         			}
 
         			@Override

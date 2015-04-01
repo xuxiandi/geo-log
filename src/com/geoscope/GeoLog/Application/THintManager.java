@@ -12,9 +12,10 @@ import com.geoscope.GeoEye.R;
 
 public class THintManager {
 	
-	public static final int HINT__Long_click_to_show_an_item_Location 		= R.string.SLongClickToShowItemLocation;
+	public static final int HINT__Long_click_to_show_an_item_location 		= R.string.SLongClickToShowItemLocation;
 	public static final int HINT__Long_click_to_show_an_object_panel 		= R.string.SLongClickToShowAnObjectPanel;
 	public static final int HINT__Long_click_to_show_a_place			 	= R.string.SLongClickToShowAPlace;
+	public static final int HINT__Long_click_to_edit_item_properties		= R.string.SLongClickToEditItemProperties;
 	
 	public static String GetHint(int HintID, Context context) {
 		try {

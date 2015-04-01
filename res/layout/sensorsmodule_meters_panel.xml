@@ -40,7 +40,6 @@
             android:text="@string/SDeviceSensorMeters"
             android:textColor="@android:color/black"
             android:textSize="24sp" />
-
     </LinearLayout>
 
     <LinearLayout
@@ -55,12 +54,30 @@
             android:layout_weight="1" >
         </ListView>
 
+        <TextView
+            android:id="@+id/lbListHint"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#E7C04A"
+            android:gravity="left"
+            android:textColor="#ff000000"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white" >
 
             <Button
+                android:id="@+id/btnUpdate"
+                style="@style/Theme.DefaultTransparent"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/SUpdate2"
+                android:textSize="18sp" />
+            <Button
                 android:id="@+id/btnApplyChanges"
                 style="@style/Theme.DefaultTransparent"
                 android:layout_width="0dip"

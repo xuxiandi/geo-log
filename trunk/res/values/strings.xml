@@ -290,9 +290,9 @@
     <string name="SRecordingIsStarted">"Recording is started, visor on address: "</string>
     <string name="SMeasurementUpdatingError">"error of updating measurement, "</string>
     <string name="SDataServerConnectionError">"error of connecting data server, RC: "</string>
-    <string name="SVideoRegistratorIsOn">Video-registrator is started.</string>
-    <string name="SVideoRegistratorFinalizationError">"Error of finalizing Video-registrator, "</string>
-    <string name="SVideoRecorderInitializationError">"Error of initializing Video-registrator, "</string>
+    <string name="SVideoRegistratorIsOn">Video-recorder is started.</string>
+    <string name="SVideoRegistratorFinalizationError">"Error of finalizing Video-recorder, "</string>
+    <string name="SVideoRecorderInitializationError">"Error of initializing Video-recorder, "</string>
     <string name="SRecordingIsStopped">Recording is stopped.</string>
     <string name="SCameraIsOn">Camera is on</string>
     <string name="SCameraMode">", Mode: "</string>
@@ -1007,11 +1007,22 @@
     <string name="SDataTransmitterIsDisabled">data transmitter is disabled</string>
     <string name="SDataTransmitterIsBusy">data transmitter is busy</string>
     <string name="SApplyChanges">Apply changes</string>
-    <string name="SDeviceSensorMeters">Device sensor registrators</string>
-    <string name="SMeters">Registrators</string>
+    <string name="SDeviceSensorMeters">Device sensor recorders</string>
+    <string name="SMeters">Recorders</string>
     <string name="SError1">ERROR</string>
     <string name="SNotRunning">not running</string>
     <string name="SRunning">running &#8230;</string>
-    <string name="SSensorRegistratorArchive">Sensor registrator archive</string>
+    <string name="SSensorRegistratorArchive">Sensor recorder archive</string>
+    <string name="SFilter">Filter &#8230;</string>
+    <string name="SFilterByType">Filter records by type</string>
+    <string name="SLongClickToEditItemProperties">long click to edit an item properties</string>
+    <string name="SEnabled1">Enabled</string>
+    <string name="SActive2">Active</string>
+    <string name="SRecorder">Recorder: </string>
+    <string name="SMeasurement">Measurement</string>
+    <string name="SMaxDuration">Max durations, seconds</string>
+    <string name="SLifeTime">Life time, days</string>
+    <string name="SAutosaveInterval">Autosave interval, days</string>
+    <string name="SUpdate2">Update</string>
     
 </resources>

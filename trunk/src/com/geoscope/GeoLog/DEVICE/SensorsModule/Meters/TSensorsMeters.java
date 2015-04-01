@@ -71,6 +71,8 @@ public class TSensorsMeters {
 				SB.append(","+Meter.Descriptor.ContainerTypeID);
 				SB.append(","+Meter.Descriptor.Name);
 				SB.append(","+Meter.Descriptor.Info);
+				SB.append(","+Meter.Descriptor.Configuration);
+				SB.append(","+Meter.Descriptor.Parameters);
 				SB.append(","+(Meter.IsEnabled() ? "1" : "0"));
 				SB.append(","+(Meter.IsActive() ? "1" : "0"));
 				SB.append(","+Integer.toString(Meter.GetStatus()));

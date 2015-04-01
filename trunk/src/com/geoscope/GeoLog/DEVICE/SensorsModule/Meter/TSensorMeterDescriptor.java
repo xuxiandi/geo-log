@@ -9,6 +9,9 @@ public class TSensorMeterDescriptor {
 	//.
 	public String Name;
 	public String Info;
+	//.
+	public String Configuration = "";
+	public String Parameters = "";
 	
 	public TSensorMeterDescriptor() {
 		ID = "";

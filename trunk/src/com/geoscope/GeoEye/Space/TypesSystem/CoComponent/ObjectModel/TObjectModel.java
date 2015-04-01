@@ -485,14 +485,14 @@ public class TObjectModel {
 		return new TObjectHistoryRecords(ObjectModelRecords,BusinessModelRecords);
 	}
 	
-	public TSensorMeterInfo[] Sensors_Meters_GetList() throws Exception {
+	public void Sensors_Meter_SetProfile(String MeterID, byte[] Profile) throws IOException, Exception {
+	}
+	
+	public byte[] Sensors_Meter_GetProfile(String MeterID) throws Exception {
 		return null;
 	}
 	
-	public void Sensors_Meters_SetProfile(String MeterID, byte[] Profile) throws IOException, Exception {
-	}
-	
-	public byte[] Sensors_Meters_GetProfile(String MeterID) throws Exception {
+	public TSensorMeterInfo[] Sensors_Meters_GetList() throws Exception {
 		return null;
 	}
 	

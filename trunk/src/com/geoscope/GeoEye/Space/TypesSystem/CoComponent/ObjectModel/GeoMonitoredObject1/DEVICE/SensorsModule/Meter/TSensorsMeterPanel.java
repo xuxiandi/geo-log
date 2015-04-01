@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Meters;
+package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Meter;
 
 import java.io.IOException;
 
@@ -7,19 +7,15 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,20 +28,24 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectMode
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
-import com.geoscope.GeoLog.Application.THintManager;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterInfo;
 
 @SuppressLint("HandlerLeak")
-public class TSensorsMetersPanel extends Activity {
+public class TSensorsMeterPanel extends Activity {
 
 	private long 			ObjectID = -1;
     private TObjectModel 	ObjectModel = null; 
 	//.
-	private TSensorMeterInfo[] MetersInfo = null;
+	private String 					MeterID;
+	private String 					MeterName;
+	private TSensorMeter.TProfile 	MeterProfile = null;
 	//.
-	private ListView lvMeters;	
-	private Button btnUpdate;
+	private TextView lbName;
+	private CheckBox cbEnabled;
+	private CheckBox cbActive;
+	private EditText edMeasurementMaxDuration;
+	private EditText edMeasurementLifeTime;
+	private EditText edMeasurementAutosaveInterval;
 	private Button btnApplyChanges;
 	//.
 	private TUpdating	Updating = null;
@@ -54,41 +54,28 @@ public class TSensorsMetersPanel extends Activity {
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		//.
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-        	ObjectID = extras.getLong("ObjectID");
-        }
-		//.
+        //.
+        Bundle extras = getIntent().getExtras(); 
+    	ObjectID = extras.getLong("ObjectID");
+    	MeterID = extras.getString("MeterID");
+    	MeterName = extras.getString("MeterName");
+        //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
-        setContentView(R.layout.sensorsmodule_meters_panel);
+        setContentView(R.layout.sensorsmodule_meter_panel);
         //.
-        lvMeters = (ListView)findViewById(R.id.lvMeters);
-        lvMeters.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        lvMeters.setOnItemLongClickListener(new OnItemLongClickListener() {
-        	
-			@Override
-			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				if (MetersInfo == null)
-					return false; //. ->
-				Intent intent = new Intent(TSensorsMetersPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Meter.TSensorsMeterPanel.class);
-				intent.putExtra("ObjectID", ObjectID);
-				intent.putExtra("MeterID", MetersInfo[arg2].Descriptor.ID);
-				intent.putExtra("MeterName", MetersInfo[arg2].Descriptor.Name);
-		        startActivity(intent);
-				return true;
-			}
-		});
+        lbName = (TextView)findViewById(R.id.lbName);
+        lbName.setText(getString(R.string.SRecorder)+" "+MeterName);
         //.
-        btnUpdate = (Button)findViewById(R.id.btnUpdate);
-        btnUpdate.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-        		StartUpdating();
-            }
-        });
+        cbEnabled = (CheckBox)findViewById(R.id.cbEnabled);
+        //.
+        cbActive = (CheckBox)findViewById(R.id.cbActive);
+        //.
+        edMeasurementMaxDuration = (EditText)findViewById(R.id.edMeasurementMaxDuration);
+        //.
+        edMeasurementLifeTime = (EditText)findViewById(R.id.edMeasurementLifeTime);
+        //.
+        edMeasurementAutosaveInterval = (EditText)findViewById(R.id.edMeasurementAutosaveInterval);
         //.
         btnApplyChanges = (Button)findViewById(R.id.btnApplyChanges);
         btnApplyChanges.setOnClickListener(new OnClickListener() {
@@ -96,35 +83,14 @@ public class TSensorsMetersPanel extends Activity {
         	@Override
             public void onClick(View v) {
             	try {
-            		ApplyChanges();
+            		ApplyChangesAndExit();
 				} catch (Exception E) {
-					Toast.makeText(TSensorsMetersPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					Toast.makeText(TSensorsMeterPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 				}
             }
         });
-        //.
-        final int HintID = THintManager.HINT__Long_click_to_edit_item_properties;
-        final TextView lbListHint = (TextView)findViewById(R.id.lbListHint);
-        String Hint = THintManager.GetHint(HintID, this);
-        if (Hint != null) {
-        	lbListHint.setText(Hint);
-            lbListHint.setOnLongClickListener(new OnLongClickListener() {
-            	
-    			@Override
-    			public boolean onLongClick(View v) {
-    				THintManager.SetHintAsDisabled(HintID);
-    	        	lbListHint.setVisibility(View.GONE);
-    	        	//.
-    				return true;
-    			}
-    		});
-            //.
-        	lbListHint.setVisibility(View.VISIBLE);
-        }
-        else
-        	lbListHint.setVisibility(View.GONE);
     }
-    
+
     @Override
     protected void onDestroy() {
 		if (ObjectModel != null) {
@@ -166,8 +132,9 @@ public class TSensorsMetersPanel extends Activity {
     	
         private ProgressDialog progressDialog;
         //.
-        private TObjectModel ObjectModel = null; 
-        private TSensorMeterInfo[] MetersInfo = null;
+        private TObjectModel ObjectModel = null;
+        //.
+    	private TSensorMeter.TProfile MeterProfile = null;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
     		super();
@@ -207,7 +174,8 @@ public class TSensorsMetersPanel extends Activity {
 		    							TGeographServerObjectController GSOC = Object.GeographServerObjectController();
 										ObjectModel.SetObjectController(GSOC, true);
 		    							//.
-		    							MetersInfo = ObjectModel.Sensors_Meters_GetList(); 
+										MeterProfile = new TSensorMeter.TProfile();
+										MeterProfile.FromByteArray(ObjectModel.Sensors_Meter_GetProfile(MeterID)); 
 		    						}
 		    					}
 		    				}
@@ -249,7 +217,7 @@ public class TSensorsMetersPanel extends Activity {
 		            	if (Canceller.flCancel)
 			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TSensorsMetersPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TSensorsMeterPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
@@ -257,26 +225,26 @@ public class TSensorsMetersPanel extends Activity {
 		            	if (Canceller.flCancel)
 			            	break; //. >
 		            	//.
-						if (TSensorsMetersPanel.this.ObjectModel != null)
-							TSensorsMetersPanel.this.ObjectModel.Destroy();
-		            	TSensorsMetersPanel.this.ObjectModel = ObjectModel;
+						if (TSensorsMeterPanel.this.ObjectModel != null)
+							TSensorsMeterPanel.this.ObjectModel.Destroy();
+		            	TSensorsMeterPanel.this.ObjectModel = ObjectModel;
 		            	//.
-		            	TSensorsMetersPanel.this.MetersInfo = MetersInfo;
+		            	TSensorsMeterPanel.this.MeterProfile = MeterProfile;
 	           		 	//.
-		            	TSensorsMetersPanel.this.Update();
+		            	TSensorsMeterPanel.this.Update();
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_FINISHED:
 		            	if (Canceller.flCancel)
 			            	break; //. >
-		            	TSensorsMetersPanel.this.Updating = null;
+		            	TSensorsMeterPanel.this.Updating = null;
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_PROGRESSBAR_SHOW:
-		            	progressDialog = new ProgressDialog(TSensorsMetersPanel.this);    
-		            	progressDialog.setMessage(TSensorsMetersPanel.this.getString(R.string.SLoading));    
+		            	progressDialog = new ProgressDialog(TSensorsMeterPanel.this);    
+		            	progressDialog.setMessage(TSensorsMeterPanel.this.getString(R.string.SLoading));    
 		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 		            	progressDialog.setIndeterminate(true); 
 		            	progressDialog.setCancelable(true);
@@ -286,16 +254,16 @@ public class TSensorsMetersPanel extends Activity {
 								Cancel();
 								//.
 								if (flClosePanelOnCancel)
-									TSensorsMetersPanel.this.finish();
+									TSensorsMeterPanel.this.finish();
 							}
 						});
-		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TSensorsMetersPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TSensorsMeterPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
 		            		@Override 
 		            		public void onClick(DialogInterface dialog, int which) { 
 								Cancel();
 								//.
 								if (flClosePanelOnCancel)
-									TSensorsMetersPanel.this.finish();
+									TSensorsMeterPanel.this.finish();
 		            		} 
 		            	}); 
 		            	//.
@@ -325,22 +293,15 @@ public class TSensorsMetersPanel extends Activity {
     private void Update() {
     	flUpdate = true; 
     	try {
-    		if (MetersInfo != null) {
-    			String[] lvItems = new String[MetersInfo.length];
-    			for (int I = 0; I < MetersInfo.length; I++) {
-    				lvItems[I] = MetersInfo[I].Descriptor.Name;
-    				if (MetersInfo[I].Descriptor.Info.length() > 0)
-    					lvItems[I] += " "+"/"+MetersInfo[I].Descriptor.Info+"/"; 
-					lvItems[I] += "  "+TSensorMeter.STATUS_GetString(MetersInfo[I].Status, this); 
-    			}
-    			ArrayAdapter<String> lvItemsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvItems);             
-    			lvMeters.setAdapter(lvItemsAdapter);
-    			for (int I = 0; I < MetersInfo.length; I++)
-    				lvMeters.setItemChecked(I,MetersInfo[I].flActive);
-    		}
-    		else {
-    			lvMeters.setAdapter(null);
-    		}
+    		cbEnabled.setChecked(MeterProfile.flEnabled);
+    		//.
+    		cbActive.setChecked(MeterProfile.flActive);
+    		//.
+    		edMeasurementMaxDuration.setText(Integer.toString((int)(MeterProfile.MeasurementMaxDuration*24.0*3600.0)));
+    		//.
+    		edMeasurementLifeTime.setText(Integer.toString((int)MeterProfile.MeasurementLifeTime));
+    		//.
+    		edMeasurementAutosaveInterval.setText(Integer.toString((int)MeterProfile.MeasurementAutosaveInterval));
     	}
     	finally {
     		flUpdate = false;
@@ -353,36 +314,38 @@ public class TSensorsMetersPanel extends Activity {
     	Updating = new TUpdating(true,true);
     }    
     
-    private void ApplyChanges() {
-    	if ((MetersInfo == null) || (ObjectModel == null))
+    private void ApplyChangesAndExit() {
+    	if ((MeterProfile == null) || (ObjectModel == null))
     		return; //. ->
-    	StringBuilder SB = new StringBuilder();
-		for (int I = 0; I < MetersInfo.length; I++)
-			if (lvMeters.isItemChecked(I)) {
-				if (I != 0)
-					SB.append(","+MetersInfo[I].Descriptor.ID);
-				else
-					SB.append(MetersInfo[I].Descriptor.ID);
-			}
-		final String MeterIDs = SB.toString();
+    	MeterProfile.flEnabled = cbEnabled.isChecked();
+    	//.
+    	MeterProfile.flActive = cbActive.isChecked();
+    	//.
+    	MeterProfile.MeasurementMaxDuration = Double.parseDouble(edMeasurementMaxDuration.getText().toString())/(24.0*3600.0);
+    	//.
+    	MeterProfile.MeasurementLifeTime = Double.parseDouble(edMeasurementLifeTime.getText().toString());
+    	//.
+    	MeterProfile.MeasurementAutosaveInterval = Double.parseDouble(edMeasurementAutosaveInterval.getText().toString())/(24.0*3600.0);
     	//.
 		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
 			
-			private TObjectModel _ObjectModel = TSensorsMetersPanel.this.ObjectModel;
+			private TObjectModel _ObjectModel = TSensorsMeterPanel.this.ObjectModel;
 			
 			@Override
 			public void Process() throws Exception {
-				_ObjectModel.Sensors_Meters_ValidateActivity(MeterIDs);
+		    	byte[] MeterProfileBA = MeterProfile.ToByteArray();
+		    	//.
+				_ObjectModel.Sensors_Meter_SetProfile(MeterID, MeterProfileBA);
 			}
 			
 			@Override 
 			public void DoOnCompleted() throws Exception {
-				StartUpdating();
+        		TSensorsMeterPanel.this.finish();
 			}
 			
 			@Override
 			public void DoOnException(Exception E) {
-				Toast.makeText(TSensorsMetersPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				Toast.makeText(TSensorsMeterPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		};
 		Processing.Start();

@@ -1012,6 +1012,17 @@
     <string name="SError1">ОШИБКА</string>
     <string name="SNotRunning">не работает</string>
     <string name="SRunning">работает &#8230;</string>
-    <string name="SSensorRegistratorArchive">Архив сенсор-регистраторов</string>
+    <string name="SSensorRegistratorArchive">Архив регистраторов</string>
+    <string name="SFilter">Фильтр &#8230;</string>
+    <string name="SFilterByType">Фильтровать записи по типу</string>
+    <string name="SLongClickToEditItemProperties">долгое нажатие - показать свойства регистратора</string>
+    <string name="SEnabled1">Доступен</string>
+    <string name="SActive2">Активный</string>
+    <string name="SRecorder">Регистратор: </string>
+    <string name="SMeasurement">Измерение</string>
+    <string name="SMaxDuration">Макс. длительность, сек.</string>
+    <string name="SLifeTime">Время жизни, дни</string>
+    <string name="SAutosaveInterval">Период автосохранения, дни</string>
+    <string name="SUpdate2">Обновить</string>
     
 </resources>

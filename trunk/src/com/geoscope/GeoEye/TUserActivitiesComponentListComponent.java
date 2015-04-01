@@ -768,7 +768,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
         //.
         ProgressBar = ParentLayout.findViewById(R.id.pbProgress);
         //.
-        final int HintID = THintManager.HINT__Long_click_to_show_an_item_Location;
+        final int HintID = THintManager.HINT__Long_click_to_show_an_item_location;
         final TextView lbListHint = (TextView)ParentLayout.findViewById(R.id.lbListHint);
         String Hint = THintManager.GetHint(HintID, ParentActivity);
         if (Hint != null) {

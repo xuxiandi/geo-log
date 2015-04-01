@@ -1,0 +1,128 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:scrollbars="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/lbName"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text=""
+            android:textColor="#ff000000"
+            android:textSize="18sp" />
+
+        <CheckBox
+            android:id="@+id/cbEnabled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/SEnabled1"
+            android:textSize="16sp" />
+
+        <CheckBox
+            android:id="@+id/cbActive"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/SActive2"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999"
+            android:gravity="center"
+            android:text="@string/SMeasurement"
+            android:textColor="#ff000000"
+            android:textSize="16sp" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/lbMeasurementMaxDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="@string/SMaxDuration"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/edMeasurementMaxDuration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/lbMeasurementMaxDuration"
+                android:ems="10"
+                android:inputType="number"
+                android:textSize="16sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/lbMeasurementLifeTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="@string/SLifeTime"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/edMeasurementLifeTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/lbMeasurementLifeTime"
+                android:ems="10"
+                android:inputType="number|numberDecimal"
+                android:textSize="16sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/lbMeasurementAutosaveInterval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="@string/SAutosaveInterval"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/edMeasurementAutosaveInterval"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/lbMeasurementAutosaveInterval"
+                android:ems="10"
+                android:inputType="number|numberSigned|numberDecimal"
+                android:textSize="16sp" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/btnApplyChanges"
+                style="@style/Theme.DefaultTransparent"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/SApplyChanges"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

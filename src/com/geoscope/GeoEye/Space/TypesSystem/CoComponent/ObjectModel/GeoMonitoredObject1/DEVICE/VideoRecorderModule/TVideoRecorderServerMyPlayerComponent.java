@@ -952,7 +952,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	}
 	
 	@Override
-	public void Initialize(TSensorMeasurement pMeasurement) throws Exception {
+	protected void Initialize(TSensorMeasurement pMeasurement) throws Exception {
 		super.Initialize(pMeasurement);
 		//.
 		if (Measurement.Descriptor.Model != null) {
@@ -994,7 +994,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	}
 
 	@Override
-	public void Finalize() throws IOException, InterruptedException {
+	protected void Finalize() throws IOException, InterruptedException {
 		flInitialized = false;
 		//.
 		if (Positioning != null) {

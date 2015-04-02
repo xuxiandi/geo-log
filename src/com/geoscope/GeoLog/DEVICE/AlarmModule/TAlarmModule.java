@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -431,7 +432,7 @@ public class TAlarmModule extends TModule {
 					AlarmTimestamp = OleDate.UTCCurrentTimestamp();
 					AlarmSeverity = SignallingLevel.Severity;
 					AlarmID = SignallingLevel.ID;
-					AlarmValue = String.format("%.1f",(Double)Value)+" "+ValueUnit;
+					AlarmValue = String.format(Locale.getDefault(),"%.1f",(Double)Value)+" "+ValueUnit;
 					AlarmNotification = SignallingLevel.Notification;
 					//. update result AlarmData
 					AlarmModule.Alarmers_CommitAlarmData();
@@ -515,7 +516,7 @@ public class TAlarmModule extends TModule {
 						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
 						AlarmSeverity = "Minor";
 						AlarmID = "BatteryLevelLow";
-						AlarmValue = String.format("%.1f",V)+" %";
+						AlarmValue = String.format(Locale.getDefault(),"%.1f",V)+" %";
 						AlarmNotification = "Visual";
 						break; //. >
 
@@ -523,7 +524,7 @@ public class TAlarmModule extends TModule {
 						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
 						AlarmSeverity = "Major";
 						AlarmID = "BatteryLevelMajorLow";
-						AlarmValue = String.format("%.1f",V)+" %";
+						AlarmValue = String.format(Locale.getDefault(),"%.1f",V)+" %";
 						AlarmNotification = "Visual";
 						break; //. >
 
@@ -531,7 +532,7 @@ public class TAlarmModule extends TModule {
 						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
 						AlarmSeverity = "Critical";
 						AlarmID = "BatteryLevelCriticalLow";
-						AlarmValue = String.format("%.1f",V)+" %";
+						AlarmValue = String.format(Locale.getDefault(),"%.1f",V)+" %";
 						AlarmNotification = "Visual";
 						break; //. >
 					}
@@ -689,7 +690,7 @@ public class TAlarmModule extends TModule {
 						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
 						AlarmSeverity = "Major";
 						AlarmID = "CellularSignalMajorLow";
-						AlarmValue = String.format("%.1f",V)+" %";
+						AlarmValue = String.format(Locale.getDefault(),"%.1f",V)+" %";
 						AlarmNotification = "Visual";
 						break; //. >
 
@@ -697,7 +698,7 @@ public class TAlarmModule extends TModule {
 						AlarmTimestamp = OleDate.UTCCurrentTimestamp();
 						AlarmSeverity = "Critical";
 						AlarmID = "CellularSignalCriticalLow";
-						AlarmValue = String.format("%.1f",V)+" %";
+						AlarmValue = String.format(Locale.getDefault(),"%.1f",V)+" %";
 						AlarmNotification = "Visual";
 						break; //. >
 					}

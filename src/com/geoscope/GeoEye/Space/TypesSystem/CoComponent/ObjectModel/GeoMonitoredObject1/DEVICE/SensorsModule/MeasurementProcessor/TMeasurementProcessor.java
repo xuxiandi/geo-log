@@ -55,7 +55,9 @@ public class TMeasurementProcessor extends TUIComponent {
 	//.
 	protected SurfaceHolder surface = null;
 	//.
-	public boolean flInitialized = false;
+	protected boolean flInitialized = false;
+	//.
+	private boolean flSetup = false;
 	
 	public TMeasurementProcessor() {
     	flExists = true;
@@ -76,17 +78,29 @@ public class TMeasurementProcessor extends TUIComponent {
 		ParentLayout = pParentLayout;
 	}
 	
-	public void Initialize(TSensorMeasurement pMeasurement) throws Exception {
+	protected void Initialize(TSensorMeasurement pMeasurement) throws Exception {
 		Measurement = pMeasurement;
 	}
 	
-	public void Finalize() throws Exception {
+	protected void Finalize() throws Exception {
 		flInitialized = false;
 	}
 	
 	public void Setup(TSensorMeasurement pMeasurement) throws Exception {
 		Finalize();
 		Initialize(pMeasurement);
+		//.
+		flSetup = true;
+	}
+	
+	public void Reset() throws Exception {
+		flSetup = false;
+		//.
+		Finalize();
+	}
+	
+	public boolean IsSetup() {
+		return flSetup;
 	}
 	
 	public void SetPosition(final double Position, final int Delay, final boolean flPaused) throws InterruptedException {

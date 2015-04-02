@@ -28,19 +28,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <Button
-            android:id="@+id/btnFilterMeasurementsByType"
-            style="@style/Theme.DefaultTransparent"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="@string/SFilter"
-            android:textSize="18sp" />
-
         <LinearLayout
             android:id="@+id/llBigScreenControls"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:visibility="gone" >
+            android:visibility="visible" >
 
             <CheckBox
                 android:id="@+id/cbShowUserActivitiesComponentList"
@@ -61,6 +53,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="@string/SViewer2" />
+
+            <Button
+                android:id="@+id/btnFilterMeasurementsByType"
+                style="@style/Theme.DefaultTransparent"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/SFilter"
+                android:textSize="18sp" />
 
             <CheckBox
                 android:id="@+id/cbTimeAnimation"
@@ -182,7 +182,7 @@
             android:id="@+id/MeasurementProcessorsLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1.0"
+            android:layout_weight="0.5"
             android:background="@color/fulltransparent"
             android:orientation="horizontal"
             android:visibility="gone" >

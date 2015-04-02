@@ -148,7 +148,7 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 	}
 	
 	private void DoOnExit() {
-		if ((ProcessorComponent != null) && ProcessorComponent.flInitialized) {
+		if ((ProcessorComponent != null) && ProcessorComponent.IsSetup()) {
 			double MeasurementCurrentPosition = ProcessorComponent.Measurement.Descriptor.StartTimestamp+ProcessorComponent.Measurement.Descriptor.Duration()*ProcessorComponent.MeasurementCurrentPositionFactor;
 	    	Intent intent = getIntent();
 	    	intent.putExtra("MeasurementCurrentPosition",MeasurementCurrentPosition);

@@ -3,11 +3,13 @@ package com.geoscope.Classes.Data.Stream.Channel.ContainerTypes;
 import java.io.IOException;
 import java.util.Locale;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 
+@SuppressLint("DefaultLocale")
 public class TDoubleContainerType extends TContainerType {
 	
 	public static String ID() {
@@ -45,7 +47,7 @@ public class TDoubleContainerType extends TContainerType {
 	
 	@Override
 	public String GetValueString(Context context) {
-		return String.format(Locale.ENGLISH,"%.2f",Value);
+		return String.format(Locale.getDefault(),"%.2f",Value);
 	}
 	
 	@Override

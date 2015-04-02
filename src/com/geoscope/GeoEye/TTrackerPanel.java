@@ -85,6 +85,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIImageValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOITextValue;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleConsole;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMetersPanel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -581,6 +582,7 @@ public class TTrackerPanel extends Activity {
 	private ToggleButton tbAlarm;
     private CheckBox cbVideoRecorderModuleRecording;
     private Button btnVideoRecorderModulePanel;	
+    private Button btnSensorsModuleMetersPanel;
     private CheckBox cbDataStreamerModuleActive;
     private Button btnDataStreamerModulePanel;	
     private EditText edConnectorInfo;
@@ -645,12 +647,14 @@ public class TTrackerPanel extends Activity {
         tbTrackerIsOn.setTextOff(getString(R.string.STrackerIsOff));
         tbTrackerIsOn.setChecked(TTracker.TrackerIsEnabled());
         tbTrackerIsOn.setOnClickListener(new OnClickListener() {
+        	
 			@Override
 			public void onClick(View arg0) {
 				((ToggleButton)arg0).setChecked(!((ToggleButton)arg0).isChecked());
 			}
 		});
-        tbTrackerIsOn.setOnLongClickListener(new OnLongClickListener() {			
+        tbTrackerIsOn.setOnLongClickListener(new OnLongClickListener() {
+        	
 			@Override
 			public boolean onLongClick(View arg0) {
 				final ToggleButton TB = (ToggleButton)arg0;
@@ -666,6 +670,7 @@ public class TTrackerPanel extends Activity {
 				    	alert.setView(input);
 				    	//.
 				    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+				    		
 				    		@Override
 				        	public void onClick(DialogInterface dialog, int whichButton) {
 				    			//. hide keyboard
@@ -682,6 +687,7 @@ public class TTrackerPanel extends Activity {
 				    	});
 				    	//.
 				    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+				    		
 				    		@Override
 				    		public void onClick(DialogInterface dialog, int whichButton) {
 				    			//. hide keyboard
@@ -701,6 +707,7 @@ public class TTrackerPanel extends Activity {
 		});
         btnLock = (Button)findViewById(R.id.btnLock);
         btnLock.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
             	try {
@@ -716,6 +723,7 @@ public class TTrackerPanel extends Activity {
         edFixPrecision = (EditText)findViewById(R.id.edFixPrecision);
         btnObtainCurrentFix = (Button)findViewById(R.id.btnObtainCurrentFix);
         btnObtainCurrentFix.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
             	StartObtainingCurrentFix();
@@ -723,6 +731,7 @@ public class TTrackerPanel extends Activity {
         });
         btnInterfacePanel = (Button)findViewById(R.id.btnInterfacePanel);
         btnInterfacePanel.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
 				try {
@@ -738,6 +747,7 @@ public class TTrackerPanel extends Activity {
         });
         btnShowLocation = (Button)findViewById(R.id.btnShowLocation);
         btnShowLocation.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
             	StartObtainingCurrentPosition();
@@ -745,6 +755,7 @@ public class TTrackerPanel extends Activity {
         });
         btnNewPOI = (Button)findViewById(R.id.btnNewPOI);
         btnNewPOI.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
         		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOIPanel.class);
@@ -753,7 +764,8 @@ public class TTrackerPanel extends Activity {
         });
         cbPOIDataName = (CheckBox)findViewById(R.id.cbPOIDataName);
         cbPOIDataName.setChecked(Configuration.GPSModuleConfiguration.MapPOI_flDataName);
-        cbPOIDataName.setOnClickListener(new OnClickListener(){
+        cbPOIDataName.setOnClickListener(new OnClickListener() {
+        	
             @Override
             public void onClick(View v) {
                 boolean checked = ((CheckBox)v).isChecked();
@@ -765,6 +777,7 @@ public class TTrackerPanel extends Activity {
         btnAddPOIText = (Button)findViewById(R.id.btnAddPOIText);
         btnAddPOIText.setEnabled(false);
         btnAddPOIText.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
         		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOITextPanel.class);
@@ -774,6 +787,7 @@ public class TTrackerPanel extends Activity {
         btnAddPOIImage = (Button)findViewById(R.id.btnAddPOIImage);
         btnAddPOIImage.setEnabled(false);
         btnAddPOIImage.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
       		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -784,6 +798,7 @@ public class TTrackerPanel extends Activity {
         btnAddPOIVideo = (Button)findViewById(R.id.btnAddPOIVideo);
         btnAddPOIVideo.setEnabled(false);
         btnAddPOIVideo.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
       		    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
@@ -792,6 +807,7 @@ public class TTrackerPanel extends Activity {
             }
         });
         btnAddPOIVideo.setOnLongClickListener(new OnLongClickListener() {
+        	
 			@Override
 			public boolean onLongClick(View v) {
         		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOIVideoPanel.class);
@@ -802,6 +818,7 @@ public class TTrackerPanel extends Activity {
         btnAddPOIDrawing = (Button)findViewById(R.id.btnAddPOIDrawing);
         btnAddPOIDrawing.setEnabled(false);
         btnAddPOIDrawing.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
 				Intent intent = new Intent(TTrackerPanel.this, TDrawingEditor.class);
@@ -815,6 +832,7 @@ public class TTrackerPanel extends Activity {
         btnAddPOIFile = (Button)findViewById(R.id.btnAddPOIFile);
         btnAddPOIFile.setEnabled(false);
         btnAddPOIFile.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
 		    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TTrackerPanel.this)
@@ -855,12 +873,14 @@ public class TTrackerPanel extends Activity {
         tbAlarm = (ToggleButton)findViewById(R.id.tbAlarm);
         tbAlarm.setChecked(GetAlarm() > 0);
         tbAlarm.setOnClickListener(new OnClickListener() {
+        	
 			@Override
 			public void onClick(View arg0) {
 				((ToggleButton)arg0).setChecked(!((ToggleButton)arg0).isChecked());
 			}
 		});
         tbAlarm.setOnLongClickListener(new OnLongClickListener() {			
+        	
 			@Override
 			public boolean onLongClick(View arg0) {
     			try {
@@ -875,12 +895,14 @@ public class TTrackerPanel extends Activity {
 		});
         cbVideoRecorderModuleRecording =  (CheckBox)findViewById(R.id.cbVideoRecorderModuleRecording);
         cbVideoRecorderModuleRecording.setOnClickListener(new OnClickListener() {
+        	
 			@Override
 			public void onClick(View arg0) {
 				((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
 			}
 		});
-        cbVideoRecorderModuleRecording.setOnLongClickListener(new OnLongClickListener() {			
+        cbVideoRecorderModuleRecording.setOnLongClickListener(new OnLongClickListener() {	
+        	
 			@Override
 			public boolean onLongClick(View arg0) {
             	try {
@@ -909,6 +931,7 @@ public class TTrackerPanel extends Activity {
 		});
         btnVideoRecorderModulePanel = (Button)findViewById(R.id.btnVideoRecorderModulePanel);
         btnVideoRecorderModulePanel.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
             	try {
@@ -926,14 +949,33 @@ public class TTrackerPanel extends Activity {
             	}
             }
         });
+        btnSensorsModuleMetersPanel = (Button)findViewById(R.id.btnSensorsModuleMetersPanel);
+        btnSensorsModuleMetersPanel.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+            	try {
+    				Intent intent = new Intent(TTrackerPanel.this, TSensorsMetersPanel.class);
+    		        startActivity(intent);
+            	}
+            	catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+            	}
+            }
+        }); 
         cbDataStreamerModuleActive =  (CheckBox)findViewById(R.id.cbDataStreamerModuleActive);
         cbDataStreamerModuleActive.setOnClickListener(new OnClickListener() {
+        	
 			@Override
 			public void onClick(View arg0) {
 				((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
 			}
 		});
-        cbDataStreamerModuleActive.setOnLongClickListener(new OnLongClickListener() {			
+        cbDataStreamerModuleActive.setOnLongClickListener(new OnLongClickListener() {	
+        	
 			@Override
 			public boolean onLongClick(View arg0) {
             	try {
@@ -955,6 +997,7 @@ public class TTrackerPanel extends Activity {
 		});
         btnDataStreamerModulePanel = (Button)findViewById(R.id.btnDataStreamerModulePanel);
         btnDataStreamerModulePanel.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
             	try {
@@ -975,6 +1018,7 @@ public class TTrackerPanel extends Activity {
         edConnectorInfo = (EditText)findViewById(R.id.edConnectorInfo);
         btnConnectorCommands = (Button)findViewById(R.id.btnConnectorCommands);
         btnConnectorCommands.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
         		final CharSequence[] _items;
@@ -1024,12 +1068,14 @@ public class TTrackerPanel extends Activity {
         edPositionReadInterval = (EditText)findViewById(R.id.edPositionReadInterval);
         cbIgnoreImpulseModeSleepingOnMovement =  (CheckBox)findViewById(R.id.cbIgnoreImpulseModeSleepingOnMovement);
         cbIgnoreImpulseModeSleepingOnMovement.setOnClickListener(new OnClickListener() {
+        	
 			@Override
 			public void onClick(View arg0) {
 				((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
 			}
 		});
-        cbIgnoreImpulseModeSleepingOnMovement.setOnLongClickListener(new OnLongClickListener() {			
+        cbIgnoreImpulseModeSleepingOnMovement.setOnLongClickListener(new OnLongClickListener() {	
+        	
 			@Override
 			public boolean onLongClick(View arg0) {
             	try {
@@ -1053,6 +1099,7 @@ public class TTrackerPanel extends Activity {
         edOpQueue = (EditText)findViewById(R.id.edOpQueue);
         btnOpQueueCommands = (Button)findViewById(R.id.btnOpQueueCommands);
         btnOpQueueCommands.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
         		final CharSequence[] _items;
@@ -1065,6 +1112,7 @@ public class TTrackerPanel extends Activity {
         		builder.setTitle(R.string.SQueueOperations);
         		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
         		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+        			
         			@Override
         			public void onClick(DialogInterface arg0, int arg1) {
 	                	try {
@@ -1132,6 +1180,7 @@ public class TTrackerPanel extends Activity {
         edComponentFileStreaming = (EditText)findViewById(R.id.edComponentFileStreaming);
         btnComponentFileStreamingCommands = (Button)findViewById(R.id.btnComponentFileStreamingCommands);
         btnComponentFileStreamingCommands.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
         		final CharSequence[] _items;
@@ -1145,6 +1194,7 @@ public class TTrackerPanel extends Activity {
         		builder.setTitle(R.string.SQueueOperations);
         		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
         		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+        			
         			@Override
         			public void onClick(DialogInterface arg0, int arg1) {
 	                	try {

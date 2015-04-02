@@ -1536,6 +1536,14 @@ public class TVideoRecorderModule extends TModule {
 		PostUpdateRecorderState();
     }
     
+    public void SetRecorderState(boolean Recording) {
+    	SetRecorderState(Recording, false);
+    }
+    
+    public boolean IsRecording() {
+    	return Recording.BooleanValue();
+    }
+    
     public void ShowPropsPanel(Context context) {
     	Intent intent = new Intent(Device.context,TVideoRecorderPropsPanel.class);
     	context.startActivity(intent);

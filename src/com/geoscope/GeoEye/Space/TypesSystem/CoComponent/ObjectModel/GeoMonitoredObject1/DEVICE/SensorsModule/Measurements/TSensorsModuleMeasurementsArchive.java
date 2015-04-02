@@ -741,7 +741,8 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 							public void onCancel(DialogInterface arg0) {
 								Cancel();
 								//.
-								TSensorsModuleMeasurementsArchive.this.finish();
+								if (Items == null)
+									TSensorsModuleMeasurementsArchive.this.finish();
 							}
 						});
 		            	//.

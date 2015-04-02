@@ -63,7 +63,7 @@ public class T3DoubleContainerType extends TContainerType {
 	
 	@Override
 	public String GetValueString(Context context) {
-		return String.format(Locale.ENGLISH,"%.2f",Value.Value)+", "+String.format(Locale.ENGLISH,"%.2f",Value.Value1)+", "+String.format(Locale.ENGLISH,"%.2f",Value.Value2);
+		return String.format(Locale.getDefault(),"%.2f",Value.Value)+", "+String.format(Locale.getDefault(),"%.2f",Value.Value1)+", "+String.format(Locale.getDefault(),"%.2f",Value.Value2);
 	}
 	
 	@Override

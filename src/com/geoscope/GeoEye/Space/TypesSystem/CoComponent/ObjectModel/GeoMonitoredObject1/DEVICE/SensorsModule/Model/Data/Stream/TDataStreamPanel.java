@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -236,19 +237,19 @@ public class TDataStreamPanel extends Activity {
 			ADSChannel.OnBatteryVoltageHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					PostTextViewValueMessage(edBatteryVoltage,String.format("%.2f",Value/1000.0)+" V");
+					PostTextViewValueMessage(edBatteryVoltage,String.format(Locale.getDefault(),"%.2f",Value/1000.0)+" V");
 				}
 			};
 			ADSChannel.OnBatteryTemperatureHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					PostTextViewValueMessage(edBatteryTemperature,String.format("%.2f",Value/10.0)+" C");
+					PostTextViewValueMessage(edBatteryTemperature,String.format(Locale.getDefault(),"%.2f",Value/10.0)+" C");
 				}
 			};
 			ADSChannel.OnBatteryLevelHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					PostTextViewValueMessage(edBatteryLevel,String.format("%.1f",Value+0.0)+" %");
+					PostTextViewValueMessage(edBatteryLevel,String.format(Locale.getDefault(),"%.1f",Value+0.0)+" %");
 				}
 			};
 			ADSChannel.OnBatteryHealthHandler = new TADSChannel.TDoOnInt32ValueHandler() {
@@ -325,7 +326,7 @@ public class TDataStreamPanel extends Activity {
 			ADSChannel.OnCellularConnectorSignalStrengthHandler = new TADSChannel.TDoOnInt32ValueHandler() {
 				@Override
 				public void DoOnValue(int Value) {
-					PostTextViewValueMessage(edCellularConnectorSignalStrength,String.format("%.2f",100.0*Value/31.0)+" %");
+					PostTextViewValueMessage(edCellularConnectorSignalStrength,String.format(Locale.getDefault(),"%.2f",100.0*Value/31.0)+" %");
 				}
 			};
 			//.
@@ -343,19 +344,19 @@ public class TDataStreamPanel extends Activity {
 			ENVCChannel.OnTemperatureHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					PostTextViewValueMessage(edTemperature,String.format("%.2f",Value)+" C");
+					PostTextViewValueMessage(edTemperature,String.format(Locale.getDefault(),"%.2f",Value)+" C");
 				}
 			};
 			ENVCChannel.OnPressureHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					PostTextViewValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
+					PostTextViewValueMessage(edPressure,String.format(Locale.getDefault(),"%.2f",Value)+" mbar");
 				}
 			};
 			ENVCChannel.OnHumidityHandler = new TENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					PostTextViewValueMessage(edHumidity,String.format("%.2f",Value)+" %");
+					PostTextViewValueMessage(edHumidity,String.format(Locale.getDefault(),"%.2f",Value)+" %");
 				}
 			};
 			//.
@@ -377,43 +378,43 @@ public class TDataStreamPanel extends Activity {
 			XENVCChannel.OnTemperatureHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					PostTextViewValueMessage(edTemperature,String.format("%.2f",Value)+" C");
+					PostTextViewValueMessage(edTemperature,String.format(Locale.getDefault(),"%.2f",Value)+" C");
 				}
 			};
 			XENVCChannel.OnPressureHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					PostTextViewValueMessage(edPressure,String.format("%.2f",Value)+" mbar");
+					PostTextViewValueMessage(edPressure,String.format(Locale.getDefault(),"%.2f",Value)+" mbar");
 				}
 			};
 			XENVCChannel.OnRelativeHumidityHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					PostTextViewValueMessage(edRelativeHumidity,String.format("%.2f",Value)+" %");
+					PostTextViewValueMessage(edRelativeHumidity,String.format(Locale.getDefault(),"%.2f",Value)+" %");
 				}
 			};
 			XENVCChannel.OnLightHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					PostTextViewValueMessage(edLight,String.format("%.2f",Value)+" lx");
+					PostTextViewValueMessage(edLight,String.format(Locale.getDefault(),"%.2f",Value)+" lx");
 				}
 			};
 			XENVCChannel.OnAccelerationHandler = new TXENVCChannel.TDoOnValueHandler() {
 				@Override
 				public void DoOnValue(double Value) {
-					PostTextViewValueMessage(edAcceleration,String.format("%.2f",Value)+" m/s^2");
+					PostTextViewValueMessage(edAcceleration,String.format(Locale.getDefault(),"%.2f",Value)+" m/s^2");
 				}
 			};
 			XENVCChannel.OnMagneticFieldHandler = new TXENVCChannel.TDoOn3ValueHandler() {
 				@Override
 				public void DoOn3Value(double Value, double Value1, double Value2) {
-					PostTextViewValueMessage(edMagneticField,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") mT");
+					PostTextViewValueMessage(edMagneticField,"(X: "+String.format(Locale.getDefault(),"%.2f",Value)+", Y: "+String.format(Locale.getDefault(),"%.2f",Value1)+", Z: "+String.format(Locale.getDefault(),"%.2f",Value2)+") mT");
 				}
 			};
 			XENVCChannel.OnGyroscopeHandler = new TXENVCChannel.TDoOn3ValueHandler() {
 				@Override
 				public void DoOn3Value(double Value, double Value1, double Value2) {
-					PostTextViewValueMessage(edGyroscope,"(X: "+String.format("%.2f",Value)+", Y: "+String.format("%.2f",Value1)+", Z: "+String.format("%.2f",Value2)+") rad/s");
+					PostTextViewValueMessage(edGyroscope,"(X: "+String.format(Locale.getDefault(),"%.2f",Value)+", Y: "+String.format(Locale.getDefault(),"%.2f",Value1)+", Z: "+String.format(Locale.getDefault(),"%.2f",Value2)+") rad/s");
 				}
 			};
 			//.

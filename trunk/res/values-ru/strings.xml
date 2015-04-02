@@ -852,8 +852,8 @@
     <string name="SUSB">USB</string>
     <string name="SVoiceCommands">Голосовое управление</string>
     <string name="SCloseThePanel">Закрыть панель?</string>
-    <string name="SVideoRecordingAndStreaming">ВИДЕО ЗАПИСЬ И ТРАНСЛЯЦИЯ</string>
-    <string name="SRecording1">Запись</string>
+    <string name="SRecordingAndStreaming">ЗАПИСЬ И ТРАНСЛЯЦИЯ</string>
+    <string name="SRecording1">Видео запись</string>
     <string name="SStreaming">Трансляция</string>
     <string name="SPanel">Панель</string>
     <string name="SFinishRecording">Закончить ?</string>
@@ -977,7 +977,7 @@
     <string name="SCellularSignal1">"Сигнал сети: "</string>
     <string name="SMe1">"Я"</string>
     <string name="SMap1">Карта</string>
-    <string name="SViewer2">Просмотрщик</string>
+    <string name="SViewer2">Записи</string>
     <string name="SAnimation">Анимация</string>
     <string name="SEvents">События</string>
     <string name="SUserActivityesComponentList">Активность</string>
@@ -1024,5 +1024,6 @@
     <string name="SLifeTime">Время жизни, дни</string>
     <string name="SAutosaveInterval">Период автосохранения, дни</string>
     <string name="SUpdate2">Обновить</string>
+    <string name="SRecorders">Регистраторы</string>
     
 </resources>

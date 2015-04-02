@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterInfo;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.AV.TAVMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ASTLR.TASTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TECTLRMeter;
 
@@ -40,8 +43,9 @@ public class TSensorsMeters {
 	}
 
 	private void CreateMeters() throws Exception {
-		TECTLRMeter ECTLRMeter = new TECTLRMeter(SensorsModule, ProfileFolder); AddItem(ECTLRMeter);
-		TASTLRMeter ASTLRMeter = new TASTLRMeter(SensorsModule, ProfileFolder); AddItem(ASTLRMeter);
+		TAVMeter 	AVMeter		= new TAVMeter(SensorsModule, ProfileFolder); AddItem(AVMeter);
+		TECTLRMeter ECTLRMeter 	= new TECTLRMeter(SensorsModule, ProfileFolder); AddItem(ECTLRMeter);
+		TASTLRMeter ASTLRMeter 	= new TASTLRMeter(SensorsModule, ProfileFolder); AddItem(ASTLRMeter);
 	}
 	
 	private void AddItem(TSensorMeter Meter) {
@@ -86,6 +90,30 @@ public class TSensorsMeters {
 		}
 	}
 
+	public TSensorMeterInfo[] GetItemsList() {
+		int Cnt = Items.size();
+		TSensorMeterInfo[] Result = new TSensorMeterInfo[Cnt];
+		for (int I = 0; I < Cnt; I++) {
+			TSensorMeter Meter = Items.get(I);
+			//.
+			TSensorMeterDescriptor Descriptor = new TSensorMeterDescriptor();
+			//.
+			Descriptor.ID = Meter.Descriptor.ID;
+			//.
+			Descriptor.TypeID = Meter.Descriptor.TypeID;
+			Descriptor.ContainerTypeID = Meter.Descriptor.ContainerTypeID;
+			//.
+			Descriptor.Name = Meter.Descriptor.Name;
+			Descriptor.Info = Meter.Descriptor.Info;
+			//.
+			Descriptor.Configuration = Meter.Descriptor.Configuration;
+			Descriptor.Parameters = Meter.Descriptor.Parameters;
+			//.
+			Result[I] = new TSensorMeterInfo(Descriptor, Meter.IsEnabled(), Meter.IsActive(), Meter.GetStatus());
+		}
+		return Result;
+	}
+	
 	public void ValidateItemsActivity(String[] MeterIDs) throws Exception {
 		int Cnt = Items.size();
 		for (int I = 0; I < Cnt; I++) {

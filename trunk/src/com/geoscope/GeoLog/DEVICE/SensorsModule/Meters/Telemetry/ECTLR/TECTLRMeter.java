@@ -12,7 +12,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telem
 
 public class TECTLRMeter extends TSensorMeter {
 
-	public static final String ID = "Telemetry.ECTLR.1";
+	public static final String ID = "Telemetry.ECTLR.0";
 	//.
 	public static final String TypeID = "Telemetry.TLR";
 	public static final String ContainerTypeID = "";

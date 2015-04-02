@@ -89,7 +89,7 @@ public class TTimestampedInt166DoubleContainerType extends TContainerType {
 	
 	@Override
 	public String GetValueString(Context context) {
-		return String.format(Locale.ENGLISH,"%.2f",Value.Value1)+"; "+String.format(Locale.ENGLISH,"%.2f",Value.Value2)+"; "+String.format(Locale.ENGLISH,"%.2f",Value.Value3)+";  "+String.format(Locale.ENGLISH,"%.2f",Value.Value4)+"; "+String.format(Locale.ENGLISH,"%.2f",Value.Value5)+"; "+String.format(Locale.ENGLISH,"%.2f",Value.Value6);
+		return String.format(Locale.getDefault(),"%.2f",Value.Value1)+"; "+String.format(Locale.getDefault(),"%.2f",Value.Value2)+"; "+String.format(Locale.getDefault(),"%.2f",Value.Value3)+";  "+String.format(Locale.getDefault(),"%.2f",Value.Value4)+"; "+String.format(Locale.getDefault(),"%.2f",Value.Value5)+"; "+String.format(Locale.getDefault(),"%.2f",Value.Value6);
 	}
 	
 	@Override

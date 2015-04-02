@@ -852,8 +852,8 @@
     <string name="SUSB">USB</string>
     <string name="SVoiceCommands">Voice commands</string>
     <string name="SCloseThePanel">Close the panel ?</string>
-    <string name="SVideoRecordingAndStreaming">VIDEO RECORDING AND STREAMING</string>
-    <string name="SRecording1">Recording</string>
+    <string name="SRecordingAndStreaming">RECORDING AND STREAMING</string>
+    <string name="SRecording1">Video recording</string>
     <string name="SStreaming">Streaming</string>
     <string name="SPanel">Panel</string>
     <string name="SFinishRecording">Finish ?</string>
@@ -977,7 +977,7 @@
     <string name="SCellularSignal1">"Cellular signal: "</string>
     <string name="SMe1">"Me"</string>
     <string name="SMap1">Map</string>
-    <string name="SViewer2">Viewer</string>
+    <string name="SViewer2">Records</string>
     <string name="SAnimation">Animation</string>
     <string name="SEvents">Events</string>
     <string name="SUserActivityesComponentList">User activity</string>
@@ -1024,5 +1024,6 @@
     <string name="SLifeTime">Life time, days</string>
     <string name="SAutosaveInterval">Autosave interval, days</string>
     <string name="SUpdate2">Update</string>
+    <string name="SRecorders">Recorders</string>
     
 </resources>

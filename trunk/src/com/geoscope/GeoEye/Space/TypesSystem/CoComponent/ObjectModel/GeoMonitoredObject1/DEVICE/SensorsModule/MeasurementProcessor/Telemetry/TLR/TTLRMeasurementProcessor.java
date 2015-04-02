@@ -2,7 +2,9 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Locale;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,6 +12,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.os.Handler;
+import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -25,6 +29,7 @@ import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TDoubleContainerType;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
@@ -34,6 +39,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 
+@SuppressLint("HandlerLeak")
 public class TTLRMeasurementProcessor extends TMeasurementProcessor implements SurfaceHolder.Callback, OnTouchListener  {
 
 	public static final int BackgroundColor = 0xFFC5C5C5;
@@ -98,13 +104,12 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 					flProcessing = false;
 				}
 			}
+        	catch (InterruptedException E) {
+        	}
+        	catch (CancelException CE) {
+        	}
 			catch (Throwable E) {
-				try {
-					Thread.sleep(0);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
 			}
 		}
 		
@@ -134,17 +139,19 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
     		Join();
 		}
 		
-        private void Draw(Canvas canvas) {
+        private void Draw(Canvas canvas) throws CancelException {
 			DoOnDraw(canvas, null/* DrawCanceller */);
         }
         
-		protected void DoOnDraw(Canvas canvas, TCanceller Canceller) {
+		protected void DoOnDraw(Canvas canvas, TCanceller Canceller) throws CancelException {
 			//. draw background
         	canvas.drawBitmap(Graph_BkgBitmap, 0,0, paint);
 			//.
 			if (!flInitialized) {
 				if (MeasurementInitializing != null) {
 	    			paint.setColor(Color.RED);
+	    			paint.setAlpha(255);
+                    paint.setStyle(Paint.Style.FILL);
 	    			String S = ParentActivity.getString(R.string.SLoading); 
 	    			paint.setTextSize(14*DisplayMetrics.density);
 	    			canvas.drawText(S, 3.0F*DisplayMetrics.density,0.0F+paint.getTextSize(), paint);
@@ -168,23 +175,19 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 				TIE = _TimeIntervalEnd;
 			else 
 				TIE = IntervalEnd;
-            paint.setStyle(Paint.Style.FILL);
 			paint.setColor(TimeIntervalColor);
 			paint.setAlpha(64);
+            paint.setStyle(Paint.Style.FILL);
 			canvas.drawRect((float)(Mid+(TIB-_CurrentTime)/TimeResolution),0.0F,(float)(Mid+(TIE-_CurrentTime)/TimeResolution),Height, paint);
 			//. draw center marker
             paint.setStyle(Paint.Style.STROKE);
 			paint.setAlpha(255);
-			if (flStandalone) {
-				paint.setStrokeWidth(3.0F*DisplayMetrics.density);
-				paint.setColor(CenterMarkerColor);
-				canvas.drawLine((float)Mid,0.0F, (float)Mid,Height, paint);
-			}
 			paint.setStrokeWidth(1.0F*DisplayMetrics.density);
 			paint.setColor(CenterMarkerColorHigh);
 			canvas.drawLine((float)Mid,0.0F, (float)Mid,Height, paint);
 			if (flStandalone) {
     			paint.setColor(CenterMarkerColorHigh);
+                paint.setStyle(Paint.Style.FILL);
     			String S = OleDate.Format("yyyy/MM/dd HH:mm:ss",_CurrentTime); 
     			paint.setTextSize(14*DisplayMetrics.density);
     			canvas.drawText(S, (float)Mid+3.0F*DisplayMetrics.density,0.0F+paint.getTextSize(), paint);
@@ -195,6 +198,7 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
                 paint.setAntiAlias(true);
                 paint.setTextSize(12*DisplayMetrics.density);
                 paint.setColor(Color.RED);
+				paint.setAlpha(192);
                 int _EnabledChannelIndex = 0;
             	for (int ChannelIndex = 0; ChannelIndex < ChannelSamples_ChannelsCount; ChannelIndex++)
             		if (ChannelSamples_Enabled[ChannelIndex]) {
@@ -212,7 +216,8 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
             	//.
                 paint.setStyle(Paint.Style.STROKE);
                 paint.setStrokeWidth(2.0F*DisplayMetrics.density);
-        		double X0 = (Width/2.0)+(Measurement.Descriptor.StartTimestamp-CurrentTime)/TimeResolution;
+				paint.setAlpha(255);
+        		double X0 = Mid+(Measurement.Descriptor.StartTimestamp-CurrentTime)/TimeResolution;
                 int EnabledChannelIndex = 0;
             	for (int ChannelIndex = 0; ChannelIndex < ChannelSamples_ChannelsCount; ChannelIndex++)
             		if (ChannelSamples_Enabled[ChannelIndex]) {
@@ -238,6 +243,46 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
                 		//.
                 		EnabledChannelIndex++;
             		}
+            	//.
+        		if (true) {
+                    paint.setStyle(Paint.Style.FILL);
+    				float R = 2.0F*DisplayMetrics.density;
+                    EnabledChannelIndex = 0;
+                	for (int ChannelIndex = 0; ChannelIndex < ChannelSamples_ChannelsCount; ChannelIndex++)
+                		if (ChannelSamples_Enabled[ChannelIndex]) {
+                    		int SamplesCount = ChannelSamples[ChannelIndex].length;
+                    		double IndexValue = SamplesCount*((CurrentTime-Measurement.Descriptor.StartTimestamp)/(Measurement.Descriptor.FinishTimestamp-Measurement.Descriptor.StartTimestamp));
+                    		int Index = (int)IndexValue;
+                    		if (Index >= 0) {
+                        		if (Index < SamplesCount) {
+                        			double Value;
+                        			int Index1 = Index+1;
+                        			if (Index1 < SamplesCount) {
+                        				double Y0 = ChannelSamples[ChannelIndex][Index];
+                        				double Y1 = ChannelSamples[ChannelIndex][Index1];
+                        				Value = Y0+(IndexValue-Index)*(Y1-Y0);
+                        			}
+                        			else 
+                        				Value = ChannelSamples[ChannelIndex][Index];
+                        			double RealValue = Value*ChannelSamples_Ranges[ChannelIndex]+ChannelSamples_MinValues[ChannelIndex];
+                        			//.
+                            		double Y0 = Graph_OffsetY+Graph_ShiftY+(Graph_ChannelHeight*EnabledChannelIndex)+Graph_ChannelHeight;
+                        			double Y = (Y0-Value*Graph_ChannelHeight);
+                        			//.
+                    				paint.setColor(Graph_ChannelsColors[ChannelIndex]);
+                    				paint.setAlpha(255);
+                    				canvas.drawCircle((float)Mid,(float)Y, R, paint);
+                    				//.
+                    				paint.setAlpha(255);
+                        			String S = String.format(Locale.getDefault(),"%.2f",RealValue)+" "+ChannelSamples_Units[ChannelIndex]; 
+                        			paint.setTextSize(12*DisplayMetrics.density);
+                        			canvas.drawText(S, (float)Mid+3.0F*DisplayMetrics.density,(float)(Y+paint.getTextSize()/2.0), paint);
+                        		}
+                    		}
+                    		//.
+                    		EnabledChannelIndex++;
+                		}
+        		}
     		}
 		}
     }
@@ -278,10 +323,13 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
     private double 	Pointer1_LastDownTime;
 	//.
     private Object 		ChannelSamples_Lock = new Object();
-    private double[][] 	ChannelSamples;
     private int	 		ChannelSamples_ChannelsCount;
+    private double[][] 	ChannelSamples;
+    private double[]	ChannelSamples_MinValues;
+    private double[]	ChannelSamples_Ranges;
     private boolean[]	ChannelSamples_Enabled;
     private String[]	ChannelSamples_ChannelNames;
+    private String[]	ChannelSamples_Units;
     private int 		ChannelSamples_MaxSize;
 	//.
 	private int[]			Graph_ChannelsColors;
@@ -335,7 +383,7 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	}
 
 	@Override
-	public void Initialize(TSensorMeasurement pMeasurement) throws Exception {
+	protected void Initialize(TSensorMeasurement pMeasurement) throws Exception {
 		super.Initialize(pMeasurement);
 		//.
 		TSensorMeasurement CachedMeasurement = null;
@@ -357,14 +405,16 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 				SetTLRChannel((TTLRChannel)TheMeasurement.Descriptor.Model.Stream.Channels_GetOneByClass(TTLRChannel.class));
 				//.
 				ChannelSamples_Create();
-				//.
-				Graph_Initialize();
 			}
 
 			@Override
 			public void DoOnCompleted() throws Exception {
 				if (Canceller.flCancel)
 					return; //. ->
+				if (MeasurementInitializing == this)
+					MeasurementInitializing = null;
+				//.
+				Graph_Initialize();
 				//.
 				CurrentTime = Measurement.Descriptor.StartTimestamp;
 				//. caching 
@@ -375,6 +425,8 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 				}
 				//.
 				flInitialized = true;
+				//. 
+				Draw();
 			}
 			
 			@Override
@@ -391,7 +443,7 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	}
 	
 	@Override
-	public void Finalize() throws Exception {
+	protected void Finalize() throws Exception {
 		flInitialized = false;
 		//.
 		if (MeasurementPositioning != null)
@@ -776,9 +828,15 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 				ChannelSamples_Enabled[I] = (DT.ContainerType instanceof TDoubleContainerType);
 			};
 	        ChannelSamples = new double[ChannelSamples_ChannelsCount][];
+	        ChannelSamples_MinValues = new double[ChannelSamples_ChannelsCount];
+	        ChannelSamples_Ranges = new double[ChannelSamples_ChannelsCount];
+	        ChannelSamples_Units = new String[ChannelSamples_ChannelsCount];
 	        ChannelSamples_MaxSize = 0;
 	        for (int I = 0; I < ChannelSamples_ChannelsCount; I++) {
 				TDataType DT = TLRChannel.DataTypes.Items.get(I);
+				//.
+	        	ChannelSamples_Units[I] = DT.ValueUnit;				
+				//.
 				if (DT.ContainerType instanceof TDoubleContainerType) {
 					@SuppressWarnings("unchecked")
 					ArrayList<TContainerType> Values = (ArrayList<TContainerType>)DT.Extra;
@@ -796,6 +854,10 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 			        			MaxValue = V;
 			        	}
 			        	double Range = (MaxValue-MinValue);
+			        	//.
+			        	ChannelSamples_MinValues[I] = MinValue;
+			        	ChannelSamples_Ranges[I] = Range;
+			        	//.
 			        	if (Range > 0)
 			            	for (int J = 0; J < Size; J++) {
 			            		double V = ChannelSamples[I][J];
@@ -920,4 +982,27 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
         	path.lineTo(Xs[I],Ys[I]);
         G.drawPath(path,paint);
     }
+
+	private static final int MESSAGE_EXCEPTION = -1;
+
+	private Handler MessageHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+        	try {
+	            switch (msg.what) {
+	            
+	            case MESSAGE_EXCEPTION:
+					if (!flExists)
+		            	break; //. >
+	            	Exception E = (Exception)msg.obj;
+	                Toast.makeText(TTLRMeasurementProcessor.this.ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	//.
+	            	break; //. >
+	            }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
+        }
+    };
 }

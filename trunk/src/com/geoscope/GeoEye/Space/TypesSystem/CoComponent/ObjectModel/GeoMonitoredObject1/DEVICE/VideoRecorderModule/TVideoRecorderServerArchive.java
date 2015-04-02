@@ -706,7 +706,8 @@ public class TVideoRecorderServerArchive extends Activity {
 							public void onCancel(DialogInterface arg0) {
 								Cancel();
 								//.
-								TVideoRecorderServerArchive.this.finish();
+								if (Items == null)
+									TVideoRecorderServerArchive.this.finish();
 							}
 						});
 		            	//.

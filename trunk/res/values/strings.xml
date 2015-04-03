@@ -1020,7 +1020,7 @@
     <string name="SActive2">Active</string>
     <string name="SRecorder">Recorder: </string>
     <string name="SMeasurement">Measurement</string>
-    <string name="SMaxDuration">Max durations, seconds</string>
+    <string name="SMaxDuration">Max duration, seconds</string>
     <string name="SLifeTime">Life time, days</string>
     <string name="SAutosaveInterval">Autosave interval, days</string>
     <string name="SUpdate2">Update</string>

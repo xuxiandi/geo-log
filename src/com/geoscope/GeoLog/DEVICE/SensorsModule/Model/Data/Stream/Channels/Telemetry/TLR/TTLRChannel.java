@@ -27,7 +27,19 @@ public class TTLRChannel extends TStreamChannel {
 	
 	@Override
 	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws IOException {
+		final long 		FinishTimestamp;
+		final Object 	FinishSignal;
+		if (MaxDuration > 0) { 
+			FinishSignal = new Object();
+			FinishTimestamp = System.currentTimeMillis()+MaxDuration;
+		}
+		else {
+			FinishSignal = null;
+			FinishTimestamp = 0;
+		}
+		//.
 		TStreamChannel.TPacketSubscriber PacketSubscriber  = new TStreamChannel.TPacketSubscriber() {
+			
     		@Override
     		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
     			try {
@@ -37,13 +49,20 @@ public class TTLRChannel extends TStreamChannel {
     			catch (Exception E) {
     				Canceller.Cancel();
     			}
+    			//.
+    			if ((FinishTimestamp > 0) && (System.currentTimeMillis() > FinishTimestamp))  
+    				synchronized (FinishSignal) {
+    					FinishSignal.notify();
+					}
     		}
     	};
     	PacketSubscribers.Subscribe(PacketSubscriber);
     	try {
     		try {
-    			if (MaxDuration > 0)
-    				Thread.sleep(MaxDuration);
+    			if (FinishTimestamp > 0)
+    				synchronized (FinishSignal) {
+    					FinishSignal.wait();
+					}
     			else
     				while (!Canceller.flCancel) 
     					Thread.sleep(100);

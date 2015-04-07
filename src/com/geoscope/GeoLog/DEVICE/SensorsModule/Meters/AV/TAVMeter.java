@@ -24,6 +24,11 @@ public class TAVMeter extends TSensorMeter {
 	}
 	
 	@Override
+	public String GetTypeID() {
+		return TypeID;
+	}
+	
+	@Override
 	public void run() {
 		try {
 			SetStatus(STATUS_RUNNING);

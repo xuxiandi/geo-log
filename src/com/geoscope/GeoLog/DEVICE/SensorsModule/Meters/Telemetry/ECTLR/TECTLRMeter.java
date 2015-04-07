@@ -14,7 +14,7 @@ public class TECTLRMeter extends TSensorMeter {
 
 	public static final String ID = "Telemetry.ECTLR.0";
 	//.
-	public static final String TypeID = "Telemetry.TLR";
+	public static final String TypeID = "Telemetry.ECTLR";
 	public static final String ContainerTypeID = "";
 	//.
 	public static final String Name = "Environmental conditions";
@@ -25,6 +25,11 @@ public class TECTLRMeter extends TSensorMeter {
 	
 	public TECTLRMeter(TSensorsModule pSensorsModule, String pProfileFolder) throws Exception {
 		super(pSensorsModule, new TSensorMeterDescriptor(ID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
+	}
+	
+	@Override
+	public String GetTypeID() {
+		return TypeID;
 	}
 	
 	@Override

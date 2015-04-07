@@ -261,7 +261,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 			return; //. ->
     	Intent intent = new Intent(TReflectorElectedPlacesPanel.this, TUserListPanel.class);
 		intent.putExtra("ComponentID", Component.ID);
-    	intent.putExtra("Mode",TUserListPanel.MODE_FORLOCATION);    	
+    	intent.putExtra("Mode",TUserListComponent.MODE_FORLOCATION);    	
     	startActivityForResult(intent,REQUEST_SELECT_USER);		
 	}
 	

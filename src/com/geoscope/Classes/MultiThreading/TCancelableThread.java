@@ -9,15 +9,15 @@ public class TCancelableThread implements Runnable {
 	
 	public TCancelableThread() {
 		_Thread = null;
-		Canceller = new TCanceller();
+		Canceller = new TCanceller(this);
 	}
 	
 	public TCancelableThread(TCanceller pCanceller) {
 		_Thread = null;
-		if (pCanceller != null)
+		if (pCanceller != null) 
 			Canceller = pCanceller;
 		else
-			Canceller = new TCanceller();
+			Canceller = new TCanceller(this);
 	}
 	
 	public void Destroy() throws Exception {

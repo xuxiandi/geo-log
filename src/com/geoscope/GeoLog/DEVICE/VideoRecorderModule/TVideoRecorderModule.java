@@ -85,9 +85,8 @@ public class TVideoRecorderModule extends TModule {
 
 	public static final boolean 	RecorderIsHidden = false;
 	public static final int 		RecorderWatcherInterval = 1000*60; //. seconds
-	public static final int 		RecorderMeasurementFlashCounter = 2; //. minutes
+	public static final int 		RecorderMeasurementFlushCounter = 2; //. minutes
 	public static final int 		RecorderMeasurementCheckCounter = 1; //. minutes
-	public static final int 		RecorderMeasurementRemovingCounter = 60; //. minutes
 	
 	public static final int MESSAGE_OPERATION_COMPLETED 					= 1;
     public static final int MESSAGE_OPERATION_ERROR 						= 2;
@@ -1194,36 +1193,14 @@ public class TVideoRecorderModule extends TModule {
         	CompletionHandler.obtainMessage(MESSAGE_CHECKRECORDERMEASUREMENT).sendToTarget();
         }
         
-        public void RemoveOldRecorderMeasurements() throws IOException {
-            	ArrayList<String> MIDs = TVideoRecorderMeasurements.GetMeasurementsIDs();
-            	if (MIDs == null)
-            		return; //. ->
-            	double MinTimestamp = TVideoRecorderMeasurements.GetCurrentTime()-MeasurementConfiguration.LifeTime;
-            	for (int I = 0; I < MIDs.size(); I++) {
-            		String MeasurementID = MIDs.get(I); 
-            		double MTID = Double.parseDouble(MeasurementID);
-            		if (MTID < MinTimestamp) 
-            			TVideoRecorderMeasurements.DeleteMeasurement(MeasurementID);
-            	}
-        }
-        
         public void run() {
         	UpdateRecorderState();
         	//.
-        	if ((TicksCounter % RecorderMeasurementFlashCounter) == 0)
+        	if ((TicksCounter % RecorderMeasurementFlushCounter) == 0)
         		FlashRecorderMeasurement();
         	//.
         	if ((TicksCounter % RecorderMeasurementCheckCounter) == 0)
         		CheckRecorderMeasurement();
-        	//.
-        	try {
-				if (((TicksCounter % RecorderMeasurementRemovingCounter) == 0) && (Camera.CurrentCamera_IsSaving()/*remove on saving only*/))
-					RemoveOldRecorderMeasurements();
-        	}
-        	catch (Throwable E) {
-        		Throwable EE = new Error("error while removing videorecorder old measurements, "+E.getMessage());
-        		Device.Log.WriteError("VideoRecorderModule",EE.getMessage());
-        	}
         	//.
         	TicksCounter++;
         }

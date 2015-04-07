@@ -1,8 +1,11 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterInfo;
@@ -12,11 +15,34 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TECTLRMet
 
 public class TSensorsMeters {
 
+	private static final int OldMeasurementRemovingInterval = 1000*3600*1; //. hours
+	
+    private static class TOldMeasurementRemovingTask extends TimerTask {
+    	
+    	private TSensorsMeters SensorsMeters;
+    	
+    	public TOldMeasurementRemovingTask(TSensorsMeters pSensorsMeters) {
+    		SensorsMeters = pSensorsMeters;
+    	}
+    	
+        public void run() {
+        	try {
+        		SensorsMeters.RemoveOldMeasurements();
+        	}
+        	catch (Throwable E) {
+        		Throwable EE = new Error("error while removing old measurements, "+E.getMessage());
+        		SensorsMeters.SensorsModule.Device.Log.WriteError("SensorsMeters",EE.getMessage());
+        	}
+        }
+    }
+
 	private TSensorsModule SensorsModule;
 	//.
 	public String ProfileFolder;
 	//.
 	public ArrayList<TSensorMeter> Items = new ArrayList<TSensorMeter>();
+	//.
+	private Timer OldMeasurementRemoving;
 	
 	public TSensorsMeters(TSensorsModule pSensorsModule, String pProfileFolder) {
 		SensorsModule = pSensorsModule;
@@ -33,9 +59,17 @@ public class TSensorsMeters {
 		int Cnt = Items.size();
 		for (int I = 0; I < Cnt; I++)
 			Items.get(I).Initialize();
+    	//.
+		OldMeasurementRemoving = new Timer();
+		OldMeasurementRemoving.schedule(new TOldMeasurementRemovingTask(this),OldMeasurementRemovingInterval,OldMeasurementRemovingInterval);
 	}
 	
 	public void Finalize() throws Exception {
+		if (OldMeasurementRemoving != null) {
+			OldMeasurementRemoving.cancel();
+			OldMeasurementRemoving = null;
+		}
+		//.
 		int Cnt = Items.size();
 		for (int I = 0; I < Cnt; I++)
 			Items.get(I).Destroy();
@@ -43,9 +77,9 @@ public class TSensorsMeters {
 	}
 
 	private void CreateMeters() throws Exception {
-		TAVMeter 	AVMeter		= new TAVMeter(SensorsModule, ProfileFolder); AddItem(AVMeter);
-		TECTLRMeter ECTLRMeter 	= new TECTLRMeter(SensorsModule, ProfileFolder); AddItem(ECTLRMeter);
-		TASTLRMeter ASTLRMeter 	= new TASTLRMeter(SensorsModule, ProfileFolder); AddItem(ASTLRMeter);
+		TAVMeter 	AVMeter		= new TAVMeter(SensorsModule, ProfileFolder); 		AddItem(AVMeter);
+		TECTLRMeter ECTLRMeter 	= new TECTLRMeter(SensorsModule, ProfileFolder); 	AddItem(ECTLRMeter);
+		TASTLRMeter ASTLRMeter 	= new TASTLRMeter(SensorsModule, ProfileFolder); 	AddItem(ASTLRMeter);
 	}
 	
 	private void AddItem(TSensorMeter Meter) {
@@ -135,4 +169,15 @@ public class TSensorsMeters {
 			}
 		}
 	}
+
+	private void RemoveOldMeasurements() throws Exception {
+    	ArrayList<String> MIDs = TSensorsModuleMeasurements.GetMeasurementsIDs();
+    	if (MIDs == null)
+    		return; //. ->
+		int Cnt = Items.size();
+		for (int I = 0; I < Cnt; I++) {
+			TSensorMeter Meter = Items.get(I);
+			Meter.RemoveOldMeasurements(MIDs);
+		}
+	}	
 }

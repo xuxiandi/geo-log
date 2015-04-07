@@ -414,7 +414,7 @@ public class TReflectorCoGeoMonitorObjectsPanel extends Activity  {
 			return; //. ->
     	Intent intent = new Intent(this, TUserListPanel.class);
 		intent.putExtra("ComponentID", Component.ID);
-    	intent.putExtra("Mode",TUserListPanel.MODE_FORGEOMONITOROBJECT);    	
+    	intent.putExtra("Mode",TUserListComponent.MODE_FORGEOMONITOROBJECT);    	
     	startActivityForResult(intent,REQUEST_SELECT_USER);		
 	}
 	

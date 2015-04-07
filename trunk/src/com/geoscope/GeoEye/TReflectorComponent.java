@@ -3306,7 +3306,7 @@ public class TReflectorComponent extends TUIComponent {
 					case BUTTON_USERSEARCH:
 						intent = new Intent(Reflector.context, TUserListPanel.class);
 						intent.putExtra("ComponentID", Reflector.ID);
-						intent.putExtra("Mode", TUserListPanel.MODE_UNKNOWN);
+						intent.putExtra("Mode", TUserListComponent.MODE_UNKNOWN);
 						Reflector.ParentActivity.startActivityForResult(intent, REQUEST_OPEN_USERSEARCH);
 						//.
 						break; // . >

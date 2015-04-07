@@ -371,9 +371,9 @@
     <string name="SSend">Send</string>
     <string name="SMe">Me</string>
     <string name="SSending">Sending &#8230;</string>
-    <string name="SSelectUserForLocationSending">Select user for location sending</string>
-    <string name="SSelectUserForChat">Select user for chat</string>
-    <string name="SSelectUser">"Select user "</string>
+    <string name="SSelectUserForLocationSending">Select a user for location sending</string>
+    <string name="SSelectUserForChat">Select a user for chat</string>
+    <string name="SSelectUser">"Select a user "</string>
     <string name="SUpdatingContactUser">error of updating contact user, </string>
     <string name="SMyPlaces">My Places</string>
     <string name="SMyObjects">My Objects</string>
@@ -435,7 +435,7 @@
     <string name="SConstructNew">Construct new object &#8230;</string>
     <string name="STrackerServerAddress">Tracker Server Address</string>
     <string name="SSendingObjects">Sending objects &#8230;</string>
-    <string name="SSelectUserForObjectsSending">Select user for objects sending</string>
+    <string name="SSelectUserForObjectsSending">Select a user for objects sending</string>
     <string name="SObjectsHaveBeenSentToUser">Object(s) have been sent to user</string>
     <string name="SSendObjectToUser">Send to user &#8230;</string>
     <string name="SRemoveInactiveObjects">Remove inactive objects ?</string>

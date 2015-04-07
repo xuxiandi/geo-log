@@ -1,70 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/TableLayout"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llParent"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/lbUserListTitle"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff999999"
-        android:gravity="center"
-        android:text=""
-        android:textColor="#ff000000"
-        android:textSize="16sp" />
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff999999"
-        android:text="@string/SSearchByName"
-        android:textSize="16sp" />
-
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ff999999" >
-
-        <Button
-            android:id="@+id/btnCloseUserListPanel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:text="@string/SCloseBtn"
-            android:textSize="16.0dip"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/btnSearchUsersByName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:text="@string/SSearchUsersByName"
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/edUserListNameContext"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/btnSearchUsersByName"
-            android:inputType="text"
-            android:textSize="16sp" />
-
-    </RelativeLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/SSearchResult"
-        android:textSize="16sp" />
-
-    <ListView
-        android:id="@+id/lvUserList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:cacheColorHint="#00000000"
-        android:scrollbarStyle="outsideInset"
-        android:scrollbars="vertical" />
-
-</TableLayout>
+</LinearLayout>

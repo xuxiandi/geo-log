@@ -14,7 +14,7 @@ public class TASTLRMeter extends TSensorMeter {
 
 	public static final String ID = "Telemetry.ASTLR.0";
 	//.
-	public static final String TypeID = "Telemetry.TLR";
+	public static final String TypeID = "Telemetry.ASTLR";
 	public static final String ContainerTypeID = "";
 	//.
 	public static final String Name = "Android state";
@@ -25,6 +25,11 @@ public class TASTLRMeter extends TSensorMeter {
 	
 	public TASTLRMeter(TSensorsModule pSensorsModule, String pProfileFolder) throws Exception {
 		super(pSensorsModule, new TSensorMeterDescriptor(ID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
+	}
+	
+	@Override
+	public String GetTypeID() {
+		return TypeID;
 	}
 	
 	@Override

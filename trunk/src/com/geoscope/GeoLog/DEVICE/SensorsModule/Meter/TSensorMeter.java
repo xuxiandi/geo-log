@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,10 +19,13 @@ import android.content.Context;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.TMeasurement;
 
 public class TSensorMeter extends TCancelableThread {
 
@@ -52,9 +56,9 @@ public class TSensorMeter extends TCancelableThread {
 		//.
 		public boolean flActive;
 		//.
-		public double MeasurementMaxDuration;
-		public double MeasurementLifeTime;
-		public double MeasurementAutosaveInterval; 
+		public volatile double MeasurementMaxDuration;
+		public volatile double MeasurementLifeTime;
+		public volatile double MeasurementAutosaveInterval; 
 		
 		public TProfile() {
 			SetDefaults();
@@ -198,6 +202,10 @@ public class TSensorMeter extends TCancelableThread {
 		ProfileFile = ProfileFolder+"/"+Descriptor.ID+".xml";
 	}
 	
+	public String GetTypeID() {
+		return "";
+	}
+	
 	public void Initialize() throws Exception {
 		LoadProfile();
 	}
@@ -311,4 +319,23 @@ public class TSensorMeter extends TCancelableThread {
 	public synchronized TSensorMeasurement GetMeasurement() {
 		return Measurement;
 	}
+	
+    public void RemoveOldMeasurements(ArrayList<String> MIDs) throws Exception {
+    	double MinTimestamp = OleDate.UTCCurrentTimestamp()-Profile.MeasurementLifeTime;
+    	for (int I = 0; I < MIDs.size(); I++) {
+    		String MeasurementID = MIDs.get(I); 
+			TMeasurement Measurement = new TMeasurement(TSensorsModuleMeasurements.DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+			if (Measurement.Descriptor.IsTypeOf(GetTypeID())) {
+				if (Measurement.Descriptor.IsValid()) {
+					if (Measurement.Descriptor.FinishTimestamp < MinTimestamp)
+						TSensorsModuleMeasurements.DeleteMeasurement(MeasurementID);
+				}
+				else
+					if (Measurement.Descriptor.IsStarted()) {
+						if (Measurement.Descriptor.StartTimestamp < MinTimestamp)
+							TSensorsModuleMeasurements.DeleteMeasurement(MeasurementID);
+					}
+			}
+    	}
+    }
 }

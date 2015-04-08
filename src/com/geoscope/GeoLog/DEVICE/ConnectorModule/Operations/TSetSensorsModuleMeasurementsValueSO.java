@@ -24,6 +24,7 @@ public class TSetSensorsModuleMeasurementsValueSO extends TDeviceSetComponentDat
 	public static final int OperationErrorCode_DataIsLocked 			= TGeographServerServiceOperation.ErrorCode_CustomOperationError-2;
 	public static final int OperationErrorCode_ServerSaverIsDisabled 	= TGeographServerServiceOperation.ErrorCode_CustomOperationError-3;
 	public static final int OperationErrorCode_ServerSaverIsBusy 		= TGeographServerServiceOperation.ErrorCode_CustomOperationError-4;
+	public static final int OperationErrorCode_ServerSaverIsNotReady 	= TGeographServerServiceOperation.ErrorCode_CustomOperationError-5;
 	
     public TSetSensorsModuleMeasurementsValueSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short pSession, short[] pSubAddress, byte[] pAddressData)
     {

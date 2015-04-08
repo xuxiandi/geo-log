@@ -2,11 +2,11 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
-import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetVideoRecorderMeasurementDataValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleMeasurementsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMeters;
 
 public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
 
@@ -61,11 +61,10 @@ public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
     		if (MIDs.equals(""))
     			break; //. >
     		//.
-    		TVideoRecorderModule.TServerSaver Saver = SensorsModule.Device.VideoRecorderModule.GetServerSaver(); 
+    		TSensorsMeters.TMeasurementSaver Saver = SensorsModule.Meters.Measurements_GetSaver(); 
     		if (Saver == null)
-    			throw new OperationException(TSetVideoRecorderMeasurementDataValueSO.OperationErrorCode_ServerSaverIsDisabled); //. =>
-    		if (Saver.IsProcessingMeasurement())
-    			throw new OperationException(TSetVideoRecorderMeasurementDataValueSO.OperationErrorCode_ServerSaverIsBusy); //. =>
+    			throw new OperationException(TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_ServerSaverIsNotReady); //. =>
+    		//.
     		Saver.StartProcess(MIDs);
     		//.
             break; //. >

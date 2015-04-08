@@ -320,7 +320,7 @@ public class TSensorMeter extends TCancelableThread {
 		return Measurement;
 	}
 	
-    public void RemoveOldMeasurements(ArrayList<String> MIDs) throws Exception {
+    public void Measurements_RemoveOld(ArrayList<String> MIDs) throws Exception {
     	double MinTimestamp = OleDate.UTCCurrentTimestamp()-Profile.MeasurementLifeTime;
     	for (int I = 0; I < MIDs.size(); I++) {
     		String MeasurementID = MIDs.get(I); 

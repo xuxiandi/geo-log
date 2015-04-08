@@ -177,7 +177,7 @@ public class TSensorsMetersPanel extends Activity {
     		        		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     		        	Device = Tracker.GeoLog;
     		        	//.
-    		        	MetersInfo = Device.SensorsModule.Meters.GetItemsList();
+    		        	MetersInfo = Device.SensorsModule.Meters.Items_GetList();
 					}
 					finally {
 						if (flShowProgress)
@@ -328,7 +328,7 @@ public class TSensorsMetersPanel extends Activity {
 			
 			@Override
 			public void Process() throws Exception {
-				Device.SensorsModule.Meters.ValidateItemsActivity(MeterIDs);
+				Device.SensorsModule.Meters.Items_ValidateActivity(MeterIDs);
 			}
 			
 			@Override 

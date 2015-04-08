@@ -148,7 +148,7 @@ public class TSensorsMeterPanel extends Activity {
     		        	Device = Tracker.GeoLog;
 						//.
 						MeterProfile = new TSensorMeter.TProfile();
-						MeterProfile.FromByteArray(Device.SensorsModule.Meters.GetItem(MeterID).Profile.ToByteArray()); 
+						MeterProfile.FromByteArray(Device.SensorsModule.Meters.Items_GetItem(MeterID).Profile.ToByteArray()); 
 					}
 					finally {
 						if (flShowProgress)
@@ -297,7 +297,7 @@ public class TSensorsMeterPanel extends Activity {
 			public void Process() throws Exception {
 		    	byte[] MeterProfileBA = MeterProfile.ToByteArray();
 		    	//.
-				Device.SensorsModule.Meters.GetItem(MeterID).SetProfile(MeterProfileBA, true);
+				Device.SensorsModule.Meters.Items_GetItem(MeterID).SetProfile(MeterProfileBA, true);
 			}
 			
 			@Override 

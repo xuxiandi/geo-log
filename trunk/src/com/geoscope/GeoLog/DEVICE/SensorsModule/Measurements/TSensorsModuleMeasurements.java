@@ -280,18 +280,18 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
+		String _DFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
+		File F = new File(_DFN);
+		if (!F.exists())  
+			return null; //. ->
+		//.
 		TSensorMeasurementDescriptor Descriptor = (TSensorMeasurementDescriptor)DescriptorClass.newInstance();
 		Descriptor.ID = MeasurementID; 
 		//.
-		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
-		String _SFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
-		File F = new File(_SFN);
-		if (!F.exists())  
-			return Descriptor; //. ->
-		//.
 		byte[] XML;
     	long FileSize = F.length();
-    	FileInputStream FIS = new FileInputStream(_SFN);
+    	FileInputStream FIS = new FileInputStream(_DFN);
     	try {
     		XML = new byte[(int)FileSize];
     		FIS.read(XML);

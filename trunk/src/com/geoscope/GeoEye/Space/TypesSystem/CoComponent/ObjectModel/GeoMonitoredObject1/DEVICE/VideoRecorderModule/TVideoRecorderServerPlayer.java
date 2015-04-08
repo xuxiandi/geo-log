@@ -24,7 +24,7 @@ public class TVideoRecorderServerPlayer {
 	
 	public Intent GetPlayer(Activity context) throws Exception {
 		Intent Result = null;
-		if (MeasurementDescriptor.Model != null) {
+		if ((MeasurementDescriptor != null) && (MeasurementDescriptor.Model != null)) {
             Result = new Intent(context, TVideoRecorderServerMyPlayer.class);
             Result.putExtra("MeasurementDatabaseFolder",MeasurementDatabaseFolder);
             Result.putExtra("MeasurementID",MeasurementID);

@@ -22,7 +22,7 @@ public class TSensorMeasurement {
 			}
 		}
 	}
-
+	
 	public static TSensorMeasurementDescriptor[] Filter(TSensorMeasurementDescriptor[] Descriptors, String TypeIDPrefix) {
 		int Cnt = Descriptors.length;
 		ArrayList<TSensorMeasurementDescriptor> _Result = new ArrayList<TSensorMeasurementDescriptor>(Cnt);
@@ -44,7 +44,7 @@ public class TSensorMeasurement {
 	public TSensorMeasurement(String pDatabaseFolder, String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
 		DatabaseFolder = pDatabaseFolder;
 		//.
-		Descriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(DatabaseFolder, pMeasurementID, DescriptorClass, ChannelProvider);
+		Descriptor = GetMeasurementDescriptor(DatabaseFolder, pMeasurementID, DescriptorClass, ChannelProvider);
 	}
 	
 	public TSensorMeasurement(String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
@@ -58,7 +58,7 @@ public class TSensorMeasurement {
 		//.
 		DatabaseFolder = MeasurementFolder;
 		//.
-		Descriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(DatabaseFolder, MeasurementID, DescriptorClass, ChannelProvider);
+		Descriptor = GetMeasurementDescriptor(DatabaseFolder, MeasurementID, DescriptorClass, ChannelProvider);
 	}
 	
 	public TSensorMeasurement(String pMeasurementFolder, TChannelProvider ChannelProvider) throws Exception {
@@ -69,6 +69,15 @@ public class TSensorMeasurement {
 		return (DatabaseFolder+"/"+Descriptor.ID);
 	}
 	
+	public TSensorMeasurementDescriptor GetMeasurementDescriptor(String pDatabaseFolder, String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+		TSensorMeasurementDescriptor _Descriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(pDatabaseFolder, pMeasurementID, DescriptorClass, ChannelProvider);
+		if (_Descriptor == null) {
+			_Descriptor = (TSensorMeasurementDescriptor)DescriptorClass.newInstance();
+			_Descriptor.ID = pMeasurementID; 
+		}
+		return _Descriptor;
+	}
+
 	public void Start() throws Exception {
 		Descriptor.StartTimestamp = OleDate.UTCCurrentTimestamp();
 		TSensorsModuleMeasurements.SetMeasurementDescriptor(DatabaseFolder, Descriptor.ID, Descriptor);

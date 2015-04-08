@@ -1526,15 +1526,16 @@ public class TConnectorModule extends TModule implements Runnable{
                             TIndex OperationMessageOrigin = new TIndex();
                             TOperationSession OperationSession = new TOperationSession();
                             //.
+                    		Device.Log.WriteInfo("ConnectorModule","receiving configuration ...");
+                            ReceiveConfiguration();
+                            //. 
+                    		Device.Log.WriteInfo("ConnectorModule","transmitting configuration ...");
+                            TransmitConfiguration();
+                            //.
                         	ImmediateReconnectCounter = ImmediateReconnectCount;
+                        	//.
                             flProcessing = true;
-                            try
-                            {
-                        		Device.Log.WriteInfo("ConnectorModule","receiving configuration ...");
-                                ReceiveConfiguration();
-                                //. 
-                        		Device.Log.WriteInfo("ConnectorModule","transmitting configuration ...");
-                                TransmitConfiguration();
+                            try {
                                 //. processing ...
                         		Device.Log.WriteInfo("ConnectorModule","processing ...");
                                 long OutgoingSetOperations_LastTime = 0;

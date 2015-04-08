@@ -771,7 +771,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 
     public static class TDeviceMeasurementDownloadingAndProcessing extends TCancelableThread {
 
-    	public static final int CheckCompletionInterval = 1000*15; //. seconds
+    	public static final int CheckCompletionInterval = 1000*5; //. seconds
     	
     	private static final int MESSAGE_SHOWEXCEPTION 			= 0;
     	private static final int MESSAGE_SUCCESSLOCALLY 		= 1;
@@ -863,16 +863,23 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
         					boolean flDone = false;
         					TArchiveItem[] _Items = ArchiveItemsProvider.GetItemsList(Canceller);
         					for (int I = 0; I < _Items.length; I++)
-        						if ((_Items[I].Location == TSensorMeasurementDescriptor.LOCATION_SERVER) && TSensorMeasurementDescriptor.IDsAreTheSame(_Items[I].ID, MeasurementID)) {
-        							flFound = true;
-        							if (_Items[I].CPC >= 1.0) {
-        								MeasurementID = _Items[I].ID;
-        								flDone = true;
-        								break; //. ->
+        						if (TSensorMeasurementDescriptor.IDsAreTheSame(_Items[I].ID, MeasurementID)) {
+        							if (_Items[I].Location == TSensorMeasurementDescriptor.LOCATION_SERVER) {
+            							flFound = true;
+            							if (_Items[I].CPC >= 1.0) {
+            								MeasurementID = _Items[I].ID;
+            								flDone = true;
+            								break; //. ->
+            							}
+            							else
+            				    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(int)(_Items[I].CPC*100.0)).sendToTarget();
         							}
         							else
-        				    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(int)(_Items[I].CPC*100.0)).sendToTarget();
-        							
+            							if (_Items[I].Location == TSensorMeasurementDescriptor.LOCATION_CLIENT) { 
+            			        			MessageHandler.obtainMessage(MESSAGE_SUCCESSLOCALLY,MeasurementFolder).sendToTarget();
+            			    				//.
+            			    				return; //. ->
+            							}
         						}
         	    			MessageHandler.obtainMessage(MESSAGE_DOONITEMSISUPDATED,_Items).sendToTarget();
         					if (flDone)

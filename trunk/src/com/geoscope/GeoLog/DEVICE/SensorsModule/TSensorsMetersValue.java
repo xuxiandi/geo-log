@@ -49,7 +49,7 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
         	case 1: //. set profile
             	String MeterID = SA[2];
             	//.
-            	TSensorMeter Meter = SensorsModule.Meters.GetItem(MeterID);
+            	TSensorMeter Meter = SensorsModule.Meters.Items_GetItem(MeterID);
             	if (Meter != null) 
                 	Meter.SetProfile(Value);
         		break; //. >
@@ -61,7 +61,7 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
             	case 1: //. set meters activity = true
             		int Cnt = SA.length;
             		for (int I = 3; I < Cnt; I++) {
-                    	Meter = SensorsModule.Meters.GetItem(SA[I]);
+                    	Meter = SensorsModule.Meters.Items_GetItem(SA[I]);
                     	if (Meter != null) 
                         	Meter.SetActive(true);
             		}
@@ -70,7 +70,7 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
             	case 2: //. set meters activity = false
             		Cnt = SA.length;
             		for (int I = 3; I < Cnt; I++) {
-                    	Meter = SensorsModule.Meters.GetItem(SA[I]);
+                    	Meter = SensorsModule.Meters.Items_GetItem(SA[I]);
                     	if (Meter != null) 
                         	Meter.SetActive(false);
             		}
@@ -82,10 +82,10 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
                 		String[] MeterIDs = new String[Cnt];
                 		for (int I = 0; I < Cnt; I++) 
                 			MeterIDs[I] = SA[I+3];
-                		SensorsModule.Meters.ValidateItemsActivity(MeterIDs);
+                		SensorsModule.Meters.Items_ValidateActivity(MeterIDs);
             		}
             		else 
-            			SensorsModule.Meters.ValidateItemsActivity(new String[0]);
+            			SensorsModule.Meters.Items_ValidateActivity(new String[0]);
             		break; //. >
             	}            	
         		break; //. >
@@ -123,7 +123,7 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
         	case 1: //. get profile
             	String MeterID = SA[2];
             	//.
-            	TSensorMeter Meter = SensorsModule.Meters.GetItem(MeterID);
+            	TSensorMeter Meter = SensorsModule.Meters.Items_GetItem(MeterID);
         		Timestamp = OleDate.UTCCurrentTimestamp();
         		if (Meter != null)
         			Value = Meter.GetProfile();
@@ -136,7 +136,7 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
             	int SubVersion = Integer.parseInt(SA[2]);
             	//.
         		Timestamp = OleDate.UTCCurrentTimestamp();
-        		String _Value = SensorsModule.Meters.GetItemsList(SubVersion);
+        		String _Value = SensorsModule.Meters.Items_GetList(SubVersion);
         		if (_Value != null)
         			Value = _Value.getBytes("windows-1251");
         		else

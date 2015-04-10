@@ -2606,7 +2606,7 @@ public class TTrackerPanel extends Activity {
 			String DrawingFileName = (String)Data;
 			//.
     		double Timestamp = OleDate.UTCCurrentTimestamp();
-    		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_Drawing"+"."+TDrawingDefines.FileExtension;
+    		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+DataName+"."+TDrawingDefines.FileExtension;
     		File NF = new File(NFN);
     		if (!(new File(DrawingFileName)).renameTo(NF))
     			throw new IOException("could not rename file: "+DrawingFileName); //. =>
@@ -2626,7 +2626,7 @@ public class TTrackerPanel extends Activity {
 			String FileName = (String)Data;
 			//.
 	    	double Timestamp = OleDate.UTCCurrentTimestamp();
-			String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+"_File"+"."+TFileSystem.FileName_GetExtension(FileName);
+			String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+DataName+"."+TFileSystem.FileName_GetExtension(FileName);
 			File NF = new File(NFN);
 			TFileSystem.CopyFile(new File(FileName), NF);
 			FileName = NFN;

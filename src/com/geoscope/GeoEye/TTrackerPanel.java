@@ -2829,6 +2829,7 @@ public class TTrackerPanel extends Activity {
         tbAlarm.setEnabled(flEnabled);
         cbVideoRecorderModuleRecording.setEnabled(flEnabled);
         btnVideoRecorderModulePanel.setEnabled(flEnabled);
+        btnSensorsModuleMetersPanel.setEnabled(flEnabled);
         cbDataStreamerModuleActive.setEnabled(flEnabled);
         btnDataStreamerModulePanel.setEnabled(flEnabled);
         edConnectorInfo.setEnabled(flEnabled);

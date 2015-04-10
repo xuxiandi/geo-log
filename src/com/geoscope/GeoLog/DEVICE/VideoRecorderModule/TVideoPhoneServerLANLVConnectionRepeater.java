@@ -161,7 +161,12 @@ public class TVideoPhoneServerLANLVConnectionRepeater extends TLANLocalVirtualCo
 
 					case ClientCommand_CheckSessionStatus:
 						SessionStatus = Session.GetStatus();
-						WriteDescriptor(SessionStatus);
+						try {
+							WriteDescriptor(SessionStatus);
+						}
+						catch (IOException IOE) {
+							return; //. ->
+						}
 						break; //. >
 						
 					default:

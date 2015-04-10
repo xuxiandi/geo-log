@@ -792,8 +792,10 @@ public class CameraStreamerFRAME extends Camera {
 				if (MeasurementDescriptor != null) {
 					MeasurementDescriptor.FinishTimestamp = FinishTimestamp;
 					//.
-					AACChannel.Packets = AudioSampleEncoderPackets;
-					H264IChannel.Packets = VideoFrameEncoderPackets;
+					if (AACChannel != null)
+						AACChannel.Packets = AudioSampleEncoderPackets;
+					if (H264IChannel != null)
+						H264IChannel.Packets = VideoFrameEncoderPackets;
 					//. 
 					MeasurementDescriptor.AudioPackets = AudioSampleEncoderPackets;
 					MeasurementDescriptor.VideoPackets = VideoFrameEncoderPackets;
@@ -833,8 +835,10 @@ public class CameraStreamerFRAME extends Camera {
 		//.
 		MeasurementDescriptor.FinishTimestamp = OleDate.UTCCurrentTimestamp();
 		//.
-		AACChannel.Packets = AudioSampleEncoderPackets;
-		H264IChannel.Packets = VideoFrameEncoderPackets;
+		if (AACChannel != null)
+			AACChannel.Packets = AudioSampleEncoderPackets;
+		if (H264IChannel != null)
+			H264IChannel.Packets = VideoFrameEncoderPackets;
 		//. 
 		MeasurementDescriptor.AudioPackets = AudioSampleEncoderPackets;
 		MeasurementDescriptor.VideoPackets = VideoFrameEncoderPackets;

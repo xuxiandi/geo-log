@@ -194,7 +194,7 @@ public class TReflectorComponent extends TUIComponent {
 		// .
 		public boolean flChanged = false;
 		// .
-		public boolean Application_flQuitAbility = false;
+		public boolean Application_flQuitAbility = true;
 		// .
 		public String ServerAddress = "89.108.122.51";
 		public int ServerPort = 80;
@@ -297,7 +297,7 @@ public class TReflectorComponent extends TUIComponent {
 					Application_flQuitAbility = (Integer.parseInt(NL.item(0)
 							.getFirstChild().getNodeValue()) != 0);
 				} catch (Exception E) {
-					Application_flQuitAbility = false;
+					Application_flQuitAbility = true;
 				}
 				// .
 				NL = XmlDoc.getDocumentElement().getElementsByTagName(
@@ -7969,7 +7969,7 @@ public class TReflectorComponent extends TUIComponent {
 			Y += ButtonHeight;
 			Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "?", Color.GREEN);
 			Y += ButtonHeight;
-			Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "<<", Color.GREEN);
+			Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "<", Color.GREEN);
 			Y += ButtonHeight;
 			Buttons[BUTTON_CREATINGGALLERY] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "G", Color.RED);
 			Y += ButtonHeight;

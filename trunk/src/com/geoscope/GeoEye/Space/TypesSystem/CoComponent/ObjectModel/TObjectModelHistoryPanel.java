@@ -2109,7 +2109,7 @@ public class TObjectModelHistoryPanel extends Activity {
 		    			//.
 	    				MeasurementProcessor.flUpdating = true;
 			    		try {
-			    			TimeIntervalSlider.SetCurrentTime(Timestamp, true, true, false);
+			    			TimeIntervalSlider.SetCurrentTime(Timestamp, false, true, false);
 			    		}
 			    		finally {
 			    			MeasurementProcessor.flUpdating = false;
@@ -2163,7 +2163,7 @@ public class TObjectModelHistoryPanel extends Activity {
 				MeasurementProcessor.CurrentMeasurementOpening = null;
 			}
 			//.
-        	if (MeasurementProcessor.Processor.IsSetup() && TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementProcessor.Processor.Measurement.Descriptor.ID, MeasurementProcessor.CurrentMeasurement.ID)) 
+        	if (MeasurementProcessor.Processor.IsSetup() && (MeasurementProcessor.CurrentMeasurement != null) && TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementProcessor.Processor.Measurement.Descriptor.ID, MeasurementProcessor.CurrentMeasurement.ID)) 
         		MeasurementProcessor.Processor.SetPosition(Item.Position, Delay, flPause);
         	else {
         		MeasurementProcessor.CurrentMeasurementOpening = new TAsyncProcessing() {
@@ -2186,7 +2186,7 @@ public class TObjectModelHistoryPanel extends Activity {
                     				if (Canceller.flCancel) 
                     					return true; //. ->
                     				//.
-    			    	        	if (!MeasurementProcessor.Processor.IsSetup() || !TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementProcessor.CurrentMeasurement.ID, MeasurementProcessor.Processor.Measurement.Descriptor.ID)) { 
+    			    	        	if (!MeasurementProcessor.Processor.IsSetup() || !((MeasurementProcessor.CurrentMeasurement != null) && TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementProcessor.CurrentMeasurement.ID, MeasurementProcessor.Processor.Measurement.Descriptor.ID))) { 
     			    	        		MeasurementProcessor.Processor.Setup(Measurement);
     	    		    	        	if (!MeasurementProcessor.Processor.IsVisible()) {
     	    		    					MeasurementProcessors_VisibleCounter++;
@@ -2210,6 +2210,8 @@ public class TObjectModelHistoryPanel extends Activity {
 
         	    				@Override
         	    				public void DoOnItemsListUpdated(TSensorsModuleMeasurementsArchive.TArchiveItem[] Items) {
+        	    					if (MeasurementProcessor.CurrentMeasurement == null)
+        	    						return; //. ->
         	    					int Cnt = Items.length;
         	    					for (int I = 0; I < Cnt; I++) 
         	    						if (TSensorMeasurementDescriptor.IDsAreTheSame(Items[I].ID, MeasurementProcessor.CurrentMeasurement.ID)) {
@@ -2222,7 +2224,7 @@ public class TObjectModelHistoryPanel extends Activity {
         						
         						@Override
         						public void DoOnLocationUpdated(String MeasurementID, int Location) {
-    	    						if (TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementID, MeasurementProcessor.CurrentMeasurement.ID)) {
+        	    					if ((MeasurementProcessor.CurrentMeasurement != null) && TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementID, MeasurementProcessor.CurrentMeasurement.ID)) {
     	    							MeasurementProcessor.CurrentMeasurement.Location = Location;
     	    							return; //. ->
     	    						}
@@ -2357,20 +2359,6 @@ public class TObjectModelHistoryPanel extends Activity {
 		final TSensorMeasurementDescriptor Measurement = _Measurement;
 		//.
 		if ((Measurement != null) && Measurement.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID)) {
-			//.
-			TMeasurementProcessorItem _Processor = null;
-			int Cnt = MeasurementProcessors.size();
-			for (int I = 0; I < Cnt; I++) {
-				TMeasurementProcessorItem __Processor = MeasurementProcessors.get(I);
-				if (Measurement.IsTypeOf(__Processor.Processor.GetTypeID())) {
-					_Processor = __Processor;
-					break; //. >
-				}
-			}
-			if (_Processor == null)
-				return; //. ->
-			final TMeasurementProcessorItem Processor = _Processor;
-			//.
 			TSensorsModuleMeasurementsArchive.TArchiveItem Item = new TSensorsModuleMeasurementsArchive.TArchiveItem();
 			Item.ID = Measurement.ID;
 			Item.StartTimestamp = Measurement.StartTimestamp;
@@ -2393,7 +2381,7 @@ public class TObjectModelHistoryPanel extends Activity {
 				@Override
 				public void DoOnLocationUpdated(String MeasurementID, int Location) {
 					if (TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementID, Measurement.ID)) {
-						Processor.CurrentMeasurement.Location = Location;
+						Measurement.Location = Location;
 						return; //. ->
 					}
 				}

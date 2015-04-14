@@ -115,6 +115,19 @@ public class SpaceDefines {
 		return (Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_AVI) || Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_WMV) || Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_MPEG) || Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_MPEG1) || Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_3GP) || Format.equals(TYPEDDATAFILE_TYPE_Video_FORMAT_MP4));
 	}
 	//.
+	public static final String TYPEDDATAFILE_TYPE_Measurement_String(Context context) {
+		return context.getString(R.string.SMeasurement1);   
+	}
+	public static final int TYPEDDATAFILE_TYPE_MeasurementName 	= 600;   
+	public static final int TYPEDDATAFILE_TYPE_MeasurementBrief = 650;   
+	public static final int TYPEDDATAFILE_TYPE_Measurement 		= 699;
+	//.
+	public static final String TYPEDDATAFILE_TYPE_Measurement_FORMAT_SMR = ".SMR";
+	//.
+	public static boolean TYPEDDATAFILE_TYPE_Measurement_CheckFormat(String Format) {
+		return (Format.equals(TYPEDDATAFILE_TYPE_Measurement_FORMAT_SMR));
+	}
+	//.
 	public static String TYPEDDATAFILE_TYPE_String(int Type, Context context) {
 		if ((TYPEDDATAFILE_TYPE_AllName <= Type) && (Type <= (TYPEDDATAFILE_TYPE_AllName+TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)))
 			return TYPEDDATAFILE_TYPE_All_String(context); //. ->
@@ -131,7 +144,10 @@ public class SpaceDefines {
 						if ((TYPEDDATAFILE_TYPE_VideoName <= Type) && (Type <= (TYPEDDATAFILE_TYPE_VideoName+TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)))
 							return TYPEDDATAFILE_TYPE_Video_String(context); //. ->
 						else 
-							return "?";
+							if ((TYPEDDATAFILE_TYPE_MeasurementName <= Type) && (Type <= (TYPEDDATAFILE_TYPE_MeasurementName+TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)))
+								return TYPEDDATAFILE_TYPE_Measurement_String(context); //. ->
+							else 
+								return "?"; //. ->
 	}
 	//.
 	public static class TTypedDataFileDescriptor {
@@ -167,6 +183,9 @@ public class SpaceDefines {
 					else
 						if (TYPEDDATAFILE_TYPE_Video_CheckFormat(DataFormat))
 							DataType = TYPEDDATAFILE_TYPE_Video; 
+						else
+							if (TYPEDDATAFILE_TYPE_Measurement_CheckFormat(DataFormat))
+								DataType = TYPEDDATAFILE_TYPE_Measurement; 
 		}
 		
 		public File GetFile() {
@@ -292,6 +311,10 @@ public class SpaceDefines {
 				
 			case SpaceDefines.TYPEDDATAFILE_TYPE_Video:
 				Result = R.drawable.user_activity_component_list_placeholder_video;
+				break; //. >
+				
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Measurement:
+				Result = R.drawable.user_activity_component_list_placeholder_measurement;
 				break; //. >
 				
 			default:

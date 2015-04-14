@@ -5,7 +5,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 
 public class TMeasurement extends TSensorMeasurement {
 
-	public TMeasurement(String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
-		super(pDatabaseFolder, pMeasurementID, TMeasurementDescriptor.class, ChannelProvider);
+	public TMeasurement(long pGeographServerObjectID, String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
+		super(pGeographServerObjectID, pDatabaseFolder, pMeasurementID, TMeasurementDescriptor.class, ChannelProvider);
 	}
 }

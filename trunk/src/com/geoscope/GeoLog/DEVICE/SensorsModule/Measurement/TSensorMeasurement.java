@@ -1,17 +1,33 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.zip.Deflater;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 
 public class TSensorMeasurement {
 	
-	public static Object LastIDLock = new Object();
-	public static String LastID = "";
+	public static final String DataFileFormat = SpaceDefines.TYPEDDATAFILE_TYPE_Measurement_FORMAT_SMR;
 	
+	private static Object LastIDLock = new Object();
+	private static String LastID = "";
+	//.
 	public static String GetNewID() throws InterruptedException {
 		while (true) {
 			String NewID = Double.toString(OleDate.UTCCurrentTimestamp());
@@ -20,6 +36,68 @@ public class TSensorMeasurement {
 					return NewID; //. ->
 				Thread.sleep(10);
 			}
+		}
+	}
+	
+	public static TSensorMeasurement FromByteArray(byte[] BA, String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider, TCanceller Canceller) throws Exception {
+		String MeasurementFolder = pDatabaseFolder+"/"+pMeasurementID;
+		File MF = new File(MeasurementFolder);
+		MF.mkdirs();
+		//.
+		ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+		try {
+			ZipInputStream ZipStream = new ZipInputStream(BIS);		
+			try {
+				ZipEntry theEntry;
+				while ((theEntry = ZipStream.getNextEntry()) != null) {
+					String fileName = theEntry.getName();
+					if (!fileName.equals("")) {
+						File F = new File(MeasurementFolder+"/"+fileName);
+						FileOutputStream out = new FileOutputStream(F);
+						try {
+							int size = 65535;
+							byte[] _data = new byte[size];
+							while (true) {
+								size = ZipStream.read(_data, 0,_data.length);
+								if (size > 0) 
+									out.write(_data, 0,size);
+								else 
+									break; //. >
+								//.
+								Canceller.Check();
+							}
+						}
+						finally {
+							out.close();
+						}
+					}
+				}
+			}
+			finally {
+				ZipStream.close();
+			}
+		}
+		finally {
+			BIS.close();
+		}
+		return (new TSensorMeasurement(pDatabaseFolder, pMeasurementID, ChannelProvider));
+	}
+	
+	public static TSensorMeasurement FromDataFile(String DataFile, String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider, TCanceller Canceller) throws Exception {
+		File F = new File(DataFile);
+		if (!F.exists()) 
+			return null; //. ->
+		//.
+    	FileInputStream FIS = new FileInputStream(F);
+    	try {
+    			byte[] BA = new byte[(int)F.length()];
+    			FIS.read(BA);
+    			//.
+    			return FromByteArray(BA, pDatabaseFolder, pMeasurementID, ChannelProvider, Canceller); //. ->    	
+    	}
+		finally
+		{
+			FIS.close(); 
 		}
 	}
 	
@@ -37,21 +115,27 @@ public class TSensorMeasurement {
 	}
 	
 	
+	protected long GeographServerObjectID = 0;
+	//.
 	public String DatabaseFolder;
 	//.
 	public TSensorMeasurementDescriptor Descriptor;
 	
-	public TSensorMeasurement(String pDatabaseFolder, String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+	public TSensorMeasurement(long pGeographServerObjectID, String pDatabaseFolder, String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+		GeographServerObjectID = pGeographServerObjectID;
+		//.
 		DatabaseFolder = pDatabaseFolder;
 		//.
 		Descriptor = GetMeasurementDescriptor(DatabaseFolder, pMeasurementID, DescriptorClass, ChannelProvider);
 	}
 	
 	public TSensorMeasurement(String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
-		this(pDatabaseFolder, pMeasurementID, TSensorMeasurementDescriptor.class, ChannelProvider);
+		this(0, pDatabaseFolder, pMeasurementID, TSensorMeasurementDescriptor.class, ChannelProvider);
 	}
 	
-	public TSensorMeasurement(String pMeasurementFolder, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+	public TSensorMeasurement(long pGeographServerObjectID, String pMeasurementFolder, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+		GeographServerObjectID = pGeographServerObjectID;
+		//.
 		File MF = new File(pMeasurementFolder);
 		String MeasurementFolder = MF.getParent(); 
 		String MeasurementID = MF.getName();
@@ -61,8 +145,8 @@ public class TSensorMeasurement {
 		Descriptor = GetMeasurementDescriptor(DatabaseFolder, MeasurementID, DescriptorClass, ChannelProvider);
 	}
 	
-	public TSensorMeasurement(String pMeasurementFolder, TChannelProvider ChannelProvider) throws Exception {
-		this(pMeasurementFolder, TSensorMeasurementDescriptor.class, ChannelProvider);
+	public TSensorMeasurement(long pGeographServerObjectID, String pMeasurementFolder, TChannelProvider ChannelProvider) throws Exception {
+		this(pGeographServerObjectID, pMeasurementFolder, TSensorMeasurementDescriptor.class, ChannelProvider);
 	}
 	
 	public String Folder() {
@@ -88,7 +172,60 @@ public class TSensorMeasurement {
 	public void Finish() throws Exception {
 		Descriptor.Model.Stop();
 		//.
+		Descriptor.GeographServerObjectID = GeographServerObjectID;
+		Descriptor.GUID = TUIDGenerator.GenerateWithTimestamp();
 		Descriptor.FinishTimestamp = OleDate.UTCCurrentTimestamp();
+		//.
 		TSensorsModuleMeasurements.SetMeasurementDescriptor(DatabaseFolder, Descriptor.ID, Descriptor);
+	}
+	
+	public byte[] ToByteArray() throws IOException {
+		ByteArrayOutputStream OutStream = new ByteArrayOutputStream();
+	    try {
+	    	BufferedOutputStream BufferedOutStream = new BufferedOutputStream(OutStream);
+	    	try {
+		    	ZipOutputStream ZipOutStream = new ZipOutputStream(BufferedOutStream);
+		    	try {
+		    		ZipOutStream.setLevel(Deflater.BEST_SPEED);
+		    		//.
+		    		int BUFFER = 65535;
+			    	byte data[] = new byte[BUFFER];        
+			    	File MF = new File(Folder());
+					File[] Files = MF.listFiles();
+					int Cnt = Files.length;
+					for (int I = 0; I < Cnt; I++)
+						if (!Files[I].isDirectory()) {
+							File ContentFile = Files[I];
+				    		FileInputStream InStream = new FileInputStream(ContentFile);
+				    		try {
+				    			BufferedInputStream BufferedInStream = new BufferedInputStream(InStream, BUFFER);
+					    		try {
+					    			ZipEntry entry = new ZipEntry(ContentFile.getName());         
+					    			ZipOutStream.putNextEntry(entry);         
+					    			int count;         
+					    			while ((count = BufferedInStream.read(data, 0, BUFFER)) != -1) 
+					    				ZipOutStream.write(data, 0, count);
+					    		}
+					    		finally {
+					    			BufferedInStream.close();       
+					    		}
+				    		}
+				    		finally {
+				    			InStream.close();
+				    		}
+						}
+		    	}
+		    	finally {
+		    		ZipOutStream.close(); 	
+		    	}
+	    	}
+	    	finally {
+	    		BufferedOutStream.close();
+	    	}
+	    	return OutStream.toByteArray(); //. =>
+	    }
+	    finally {
+	    	OutStream.close();	    	
+	    }
 	}
 }

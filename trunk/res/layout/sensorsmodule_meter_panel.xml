@@ -32,6 +32,13 @@
             android:text="@string/SActive2"
             android:textSize="16sp" />
 
+        <CheckBox
+            android:id="@+id/cbCreateDataFile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/SCreateDataFile1"
+            android:textSize="16sp" />
+
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

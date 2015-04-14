@@ -116,6 +116,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObj
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectTrack;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessorPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
@@ -9024,6 +9025,23 @@ public class TReflectorComponent extends TUIComponent {
 				return; // . ->
 			}
 			break; // . >
+
+		case SpaceDefines.TYPEDDATAFILE_TYPE_Measurement:
+			try {
+				String MeasurementID = Integer.toString(ComponentTypedDataFile.DataComponentType)+":"+Long.toString(ComponentTypedDataFile.DataComponentID);
+				//. open appropriate extent
+	            Intent ProcessorPanel = new Intent(ParentActivity, TMeasurementProcessorPanel.class);
+	            ProcessorPanel.putExtra("MeasurementDatabaseFolder",TGeoLogApplication.GetTempFolder());
+	            ProcessorPanel.putExtra("MeasurementID",MeasurementID);
+	            ProcessorPanel.putExtra("MeasurementDataFile",ComponentTypedDataFile.GetFile().getAbsolutePath());
+	            ProcessorPanel.putExtra("MeasurementStartPosition",0);
+	            ParentActivity.startActivity(ProcessorPanel);
+	            //.
+				return; // . ->
+			} catch (Exception E) {
+				Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SErrorOfPreparingDataFile)+ComponentTypedDataFile.FileName(), Toast.LENGTH_SHORT).show();
+				return; // . ->
+			}
 
 		default:
 			Toast.makeText(context, R.string.SUnknownDataFileFormat,

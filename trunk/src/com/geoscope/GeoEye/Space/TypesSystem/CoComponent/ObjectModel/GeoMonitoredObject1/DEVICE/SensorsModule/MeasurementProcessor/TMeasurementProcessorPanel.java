@@ -22,6 +22,9 @@ public class TMeasurementProcessorPanel extends Activity {
 	@SuppressWarnings("unused")
 	private boolean IsInFront = false;
 	//.
+	private String 				MeasurementDatabaseFolder;
+	private String 				MeasurementID;
+	private String 				MeasurementDataFile = null;
 	private TSensorMeasurement 	Measurement = null;
 	private TAsyncProcessing 	MeasurementPreprocessing = null; 
 	private double 				MeasurementStartPosition = 0.0;
@@ -34,10 +37,11 @@ public class TMeasurementProcessorPanel extends Activity {
         //.
         try {
             Bundle extras = getIntent().getExtras(); 
-        	String MeasurementDatabaseFolder = extras.getString("MeasurementDatabaseFolder");
-        	String MeasurementID = extras.getString("MeasurementID");
-			Measurement = new TSensorMeasurement(MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+        	MeasurementDatabaseFolder = extras.getString("MeasurementDatabaseFolder");
+        	MeasurementID = extras.getString("MeasurementID");
+        	MeasurementDataFile = extras.getString("MeasurementDataFile");
         	MeasurementStartPosition = extras.getDouble("MeasurementStartPosition");
+        	//.
             //.
     		requestWindowFeature(Window.FEATURE_NO_TITLE);
     		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -48,9 +52,16 @@ public class TMeasurementProcessorPanel extends Activity {
             //
     		MeasurementPreprocessing = new TAsyncProcessing(this) {
 
+    			private TSensorMeasurement _Measurement = null;
+    			
     			@Override
     			public void Process() throws Exception {
-    				Measurement.Descriptor.Model.Process(Canceller);
+    	        	if (MeasurementDataFile == null)
+    	        		_Measurement = new TSensorMeasurement(MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+    	        	else
+    	        		_Measurement = TSensorMeasurement.FromDataFile(MeasurementDataFile, MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance, Canceller);
+    	        	//.
+    				_Measurement.Descriptor.Model.Process(Canceller);
     			}
 
     			@Override
@@ -58,6 +69,8 @@ public class TMeasurementProcessorPanel extends Activity {
     				if (Canceller.flCancel)
     					return; //. ->
     	            //.
+    				Measurement = _Measurement;
+    				//.
     	            Processor = TMeasurementProcessor.GetProcessor(Measurement.Descriptor);
     	            if (Processor == null)
     	            	throw new Exception("there is no handler for a type: "+Measurement.Descriptor.TypeID()); //. ->

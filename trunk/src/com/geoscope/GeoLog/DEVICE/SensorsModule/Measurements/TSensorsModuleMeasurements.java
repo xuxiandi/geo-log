@@ -241,6 +241,14 @@ public class TSensorsModuleMeasurements {
             serializer.startTag("", "Version");
             serializer.text(Integer.toString(Version));
             serializer.endTag("", "Version");
+	        //. ServerID
+            serializer.startTag("", "ServerID");
+            serializer.text(Integer.toString(Descriptor.ServerID));
+            serializer.endTag("", "ServerID");
+	        //. GeographServerObjectID
+            serializer.startTag("", "GeographServerObjectID");
+            serializer.text(Long.toString(Descriptor.GeographServerObjectID));
+            serializer.endTag("", "GeographServerObjectID");
 	        //. ID
             String SID = MeasurementID;
             //. if (Descriptor.ID != null)
@@ -248,6 +256,10 @@ public class TSensorsModuleMeasurements {
             serializer.startTag("", "ID");
             serializer.text(SID);
             serializer.endTag("", "ID");
+	        //. GUID
+            serializer.startTag("", "GUID");
+            serializer.text(Descriptor.GUID);
+            serializer.endTag("", "GUID");
 	        //. StartTimestamp
             serializer.startTag("", "StartTimestamp");
             serializer.text(Double.toString(Descriptor.StartTimestamp));
@@ -313,6 +325,29 @@ public class TSensorsModuleMeasurements {
 		int Version = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
 		switch (Version) {
 		case 1:
+			Node node = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"ServerID");
+			if (node != null) 
+				Descriptor.ServerID = Integer.parseInt(node.getFirstChild().getNodeValue());
+			else
+				Descriptor.ServerID = 0;
+			//.
+			node = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"GeographServerObjectID");
+			if (node != null) 
+				Descriptor.GeographServerObjectID = Long.parseLong(node.getFirstChild().getNodeValue());
+			else
+				Descriptor.GeographServerObjectID = 0;
+			//.
+			node = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"GeographServerObjectID");
+			if (node != null) {
+				node = node.getFirstChild();
+				if (node != null) 
+					Descriptor.GUID = node.getNodeValue();
+				else
+					Descriptor.GUID = "";
+			}
+			else
+				Descriptor.GUID = "";
+			//.
 			Descriptor.StartTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("StartTimestamp").item(0).getFirstChild().getNodeValue());
 			Descriptor.FinishTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("FinishTimestamp").item(0).getFirstChild().getNodeValue());
 			//.

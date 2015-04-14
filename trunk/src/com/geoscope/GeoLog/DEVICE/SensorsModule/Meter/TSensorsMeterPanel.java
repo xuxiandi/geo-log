@@ -42,6 +42,7 @@ public class TSensorsMeterPanel extends Activity {
 	private EditText edMeasurementLifeTime;
 	private EditText edMeasurementAutosaveInterval;
 	private Button btnApplyChanges;
+	private CheckBox cbCreateDataFile;
 	//.
 	private TUpdating	Updating = null;
 	@SuppressWarnings("unused")
@@ -70,6 +71,8 @@ public class TSensorsMeterPanel extends Activity {
         edMeasurementLifeTime = (EditText)findViewById(R.id.edMeasurementLifeTime);
         //.
         edMeasurementAutosaveInterval = (EditText)findViewById(R.id.edMeasurementAutosaveInterval);
+        //.
+        cbCreateDataFile = (CheckBox)findViewById(R.id.cbCreateDataFile);
         //.
         btnApplyChanges = (Button)findViewById(R.id.btnApplyChanges);
         btnApplyChanges.setOnClickListener(new OnClickListener() {
@@ -264,6 +267,8 @@ public class TSensorsMeterPanel extends Activity {
     		edMeasurementLifeTime.setText(Integer.toString((int)MeterProfile.MeasurementLifeTime));
     		//.
     		edMeasurementAutosaveInterval.setText(Integer.toString((int)MeterProfile.MeasurementAutosaveInterval));
+    		//.
+    		cbCreateDataFile.setChecked(MeterProfile.flCreateDataFile);
     	}
     	finally {
     		flUpdate = false;
@@ -288,6 +293,8 @@ public class TSensorsMeterPanel extends Activity {
     	MeterProfile.MeasurementLifeTime = Double.parseDouble(edMeasurementLifeTime.getText().toString());
     	//.
     	MeterProfile.MeasurementAutosaveInterval = Double.parseDouble(edMeasurementAutosaveInterval.getText().toString())/(24.0*3600.0);
+    	//.
+    	MeterProfile.flCreateDataFile = cbCreateDataFile.isChecked();
     	//.
 		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
 			

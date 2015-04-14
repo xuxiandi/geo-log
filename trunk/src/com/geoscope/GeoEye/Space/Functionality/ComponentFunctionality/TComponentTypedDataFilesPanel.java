@@ -57,6 +57,7 @@ import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessorPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
@@ -412,6 +413,10 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					
 				case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
 					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_video));
+					break; //. >
+					
+				case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
+					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_measurement));
 					break; //. >
 					
 				default:
@@ -1214,6 +1219,23 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					return; // . ->
 				}
 				break; // . >
+
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Measurement:
+				try {
+					String MeasurementID = Integer.toString(ComponentTypedDataFile.DataComponentType)+":"+Long.toString(ComponentTypedDataFile.DataComponentID);
+					//. open appropriate extent
+		            Intent ProcessorPanel = new Intent(this, TMeasurementProcessorPanel.class);
+		            ProcessorPanel.putExtra("MeasurementDatabaseFolder",TGeoLogApplication.GetTempFolder());
+		            ProcessorPanel.putExtra("MeasurementID",MeasurementID);
+		            ProcessorPanel.putExtra("MeasurementDataFile",ComponentTypedDataFile.GetFile().getAbsolutePath());
+		            ProcessorPanel.putExtra("MeasurementStartPosition",0);
+		            startActivity(ProcessorPanel);	            	
+		  		    //.
+					return; // . ->
+				} catch (Exception E) {
+					Toast.makeText(this, getString(R.string.SErrorOfPreparingDataFile)+ComponentTypedDataFile.FileName(), Toast.LENGTH_SHORT).show();
+					return; // . ->
+				}
 
 			default:
 				Toast.makeText(TComponentTypedDataFilesPanel.this, R.string.SUnknownDataFileFormat,

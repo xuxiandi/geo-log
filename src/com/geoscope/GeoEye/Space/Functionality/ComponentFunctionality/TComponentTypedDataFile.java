@@ -6,8 +6,7 @@ import java.io.IOException;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-
-import android.os.Environment;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 public class TComponentTypedDataFile {
 
@@ -26,7 +25,7 @@ public class TComponentTypedDataFile {
 	}
 	
 	public String FileName() {
-		return (DataName+DataFormat);
+		return (DataName+"("+Integer.toString(DataComponentType)+":"+Long.toString(DataComponentID)+")"+DataFormat);
 	}
 
 	public boolean DataIsNull() {
@@ -118,9 +117,8 @@ public class TComponentTypedDataFile {
 	}
 	
 	public File GetTempFile() {
-		File TempFolder = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"Temp");
-		TempFolder.mkdirs();
-		return (new File(TempFolder.getAbsolutePath()+"/"+"Data"+DataFormat));	
+		File TempFolder = new File(TGeoLogApplication.GetTempFolder());
+		return (new File(TempFolder.getAbsolutePath()+"/"+DataName+"("+Integer.toString(DataComponentType)+":"+Long.toString(DataComponentID)+")"+DataFormat));	
 	}
 	
 	private File CreateTempFile() throws Exception {

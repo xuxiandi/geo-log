@@ -20,7 +20,7 @@ public class TGeoScopeServerUserDataFile {
 
 	private static final int PrototypeID = 10; //. built into the project
 	
-	private TGeoScopeServerUser User;
+	private TGeoScopeServerUser User = null;
 	//.
 	private double Timestamp;
 	private String DataFileName;
@@ -30,6 +30,10 @@ public class TGeoScopeServerUserDataFile {
 		//.
 		Timestamp = pTimestamp;
 		DataFileName = pDataFileName;
+	}
+	
+	public TGeoScopeServerUserDataFile(double pTimestamp, String pDataFileName) {
+		this(null, pTimestamp, pDataFileName);	
 	}
 	
 	public void Destroy() {
@@ -133,7 +137,7 @@ public class TGeoScopeServerUserDataFile {
         byte[] AddressData = Params.getBytes("windows-1251");
 		//.
         TMapPOIDataFileValue MapPOIDataFile = new TMapPOIDataFileValue(Timestamp,DataFileName);
-        TObjectSetGetMapPOIDataFileSO SO = new TObjectSetGetMapPOIDataFileSO(Device.ConnectorModule,(int)User.UserID,User.UserPassword, Device.ObjectID, null, AddressData);
+        TObjectSetGetMapPOIDataFileSO SO = new TObjectSetGetMapPOIDataFileSO(Device.ConnectorModule,(int)Device.UserID,Device.UserPassword, Device.ObjectID, null, AddressData);
         SO.setValue(MapPOIDataFile);
         //. enqueue the data-file
         Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);

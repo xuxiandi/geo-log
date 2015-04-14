@@ -24,7 +24,13 @@ public class TSensorMeasurementDescriptor {
 	}
 
 	
+	public int ServerID = 0;
+	//.
+	public long GeographServerObjectID = 0;
+	//.
 	public String ID = "";
+	//.
+	public String GUID = "";
 	//.
 	public double StartTimestamp = 0.0;
 	public double FinishTimestamp = 0.0;

@@ -1025,5 +1025,7 @@
     <string name="SAutosaveInterval">Autosave interval, days</string>
     <string name="SUpdate2">Update</string>
     <string name="SRecorders">Recorders</string>
+    <string name="SCreateDataFile1">Create data-file</string>
+    <string name="SMeasurement1">Measurement</string>
     
 </resources>

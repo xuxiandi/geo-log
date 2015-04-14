@@ -59,6 +59,12 @@ public class TGeoLogApplication {
 		F.mkdirs();
 		return Result;
 	}
+	public static void EmptyTempFolder() {
+		String Result = TempFolder;
+		File F = new File(Result);
+		TFileSystem.RemoveFolder(F);
+		F.mkdirs();
+	}
 	//.
 	public static final String Help_FolderName = "HELP";
 	public static final String Help_Path = TGeoLogApplication.ApplicationFolderName+"/"+Help_FolderName;
@@ -413,6 +419,8 @@ public class TGeoLogApplication {
 		TGeoLogInstallator.CheckInstallation(context);
 		//.
 		GarbageCollector = new TGarbageCollector();
+		//.
+		EmptyTempFolder();
 	}
 	
 	public void Destroy() {

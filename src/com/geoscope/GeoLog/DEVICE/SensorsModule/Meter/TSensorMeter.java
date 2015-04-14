@@ -22,10 +22,13 @@ import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUserDataFile;
+import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.TMeasurement;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentFileStreaming;
 
 public class TSensorMeter extends TCancelableThread {
 
@@ -58,7 +61,9 @@ public class TSensorMeter extends TCancelableThread {
 		//.
 		public volatile double MeasurementMaxDuration;
 		public volatile double MeasurementLifeTime;
-		public volatile double MeasurementAutosaveInterval; 
+		public volatile double MeasurementAutosaveInterval;
+		//.
+		public boolean flCreateDataFile;
 		
 		public TProfile() {
 			SetDefaults();
@@ -71,7 +76,9 @@ public class TSensorMeter extends TCancelableThread {
 			//. Measurement 
 			MeasurementMaxDuration = (1.0/(24.0*60.0))*60; //. minutes
 			MeasurementLifeTime = 1.0*2; //. days
-			MeasurementAutosaveInterval = -1.0; 
+			MeasurementAutosaveInterval = -1.0;
+			//.
+			flCreateDataFile = false;
 		}
 		
 		protected synchronized void FromXMLNode(Node ANode) throws Exception {
@@ -97,6 +104,13 @@ public class TSensorMeter extends TCancelableThread {
 	    			node = TMyXML.SearchNode(MeasurementNode,"AutosaveInterval").getFirstChild();
 	    			if (node != null)
 	    				MeasurementAutosaveInterval = Double.parseDouble(node.getNodeValue());
+    			}
+    			//.
+    			node = TMyXML.SearchNode(ANode,"CreateDataFile");
+    			if (node != null) {
+    				node = node.getFirstChild();
+        			if (node != null) 
+        				flCreateDataFile = (Integer.parseInt(node.getNodeValue()) != 0);
     			}
 			}
 			catch (Exception E) {
@@ -133,6 +147,14 @@ public class TSensorMeter extends TCancelableThread {
 	        Serializer.text(Double.toString(MeasurementAutosaveInterval));
 	        Serializer.endTag("", "AutosaveInterval");
 	        Serializer.endTag("", "Measurement");
+	        //. 
+	        Serializer.startTag("", "CreateDataFile");
+	        if (flCreateDataFile)
+	        	SV = "1";
+	        else
+	        	SV = "0";
+	        Serializer.text(SV);
+	        Serializer.endTag("", "CreateDataFile");
 		}
 		
 		public void FromByteArray(byte[] BA) throws Exception {
@@ -319,12 +341,55 @@ public class TSensorMeter extends TCancelableThread {
 	public synchronized TSensorMeasurement GetMeasurement() {
 		return Measurement;
 	}
+
+	private void SendMeasurementAsDataFile(TSensorMeasurement Measurement) throws Exception {
+		String DataName = Measurement.Descriptor.TypeID(); 
+		//.
+    	if ((DataName != null) && (DataName.length() > 0))
+    		DataName = "@"+TComponentFileStreaming.EncodeFileNameString(DataName);
+    	else
+    		DataName = "";
+    	//.
+    	byte[] Data = Measurement.ToByteArray();
+    	double Timestamp = OleDate.UTCCurrentTimestamp();
+		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Measurement.Descriptor.GUID+DataName+TSensorMeasurement.DataFileFormat;
+		File NF = new File(NFN);
+		FileOutputStream FOS = new FileOutputStream(NF);
+		try {
+			FOS.write(Data);
+		}
+		finally {
+			FOS.close();
+		}
+		//. prepare and send data-file
+    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(Timestamp,NFN);
+    	DataFile.SendViaDevice(SensorsModule.Device);
+	}
+	
+	protected void DoOnMeasurementFinish(final TSensorMeasurement Measurement) throws Exception {
+		Thread Processing = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					if (Profile.flCreateDataFile)
+						SendMeasurementAsDataFile(Measurement);
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+					SensorsModule.Device.Log.WriteError("Sensors meter: "+GetTypeID(),S);
+				}
+			}
+		});
+		Processing.start();
+	}
 	
     public void Measurements_RemoveOld(ArrayList<String> MIDs) throws Exception {
     	double MinTimestamp = OleDate.UTCCurrentTimestamp()-Profile.MeasurementLifeTime;
     	for (int I = 0; I < MIDs.size(); I++) {
     		String MeasurementID = MIDs.get(I); 
-			TMeasurement Measurement = new TMeasurement(TSensorsModuleMeasurements.DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+			TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 			if (Measurement.Descriptor.IsTypeOf(GetTypeID())) {
 				if (Measurement.Descriptor.IsValid()) {
 					if (Measurement.Descriptor.FinishTimestamp < MinTimestamp)

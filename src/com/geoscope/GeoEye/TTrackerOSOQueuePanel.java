@@ -39,6 +39,7 @@ import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines.TTypedDataFile;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessorPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -695,6 +696,23 @@ public class TTrackerOSOQueuePanel extends Activity {
 					return; // . ->
 				}
 				break; // . >
+
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Measurement:
+				try {
+					String MeasurementID = TypedDataFile.Descriptor.GetFile().getName();
+					//. open appropriate extent
+		            Intent ProcessorPanel = new Intent(this, TMeasurementProcessorPanel.class);
+		            ProcessorPanel.putExtra("MeasurementDatabaseFolder",TGeoLogApplication.GetTempFolder());
+		            ProcessorPanel.putExtra("MeasurementID",MeasurementID);
+		            ProcessorPanel.putExtra("MeasurementDataFile",TypedDataFile.Descriptor.GetFile().getAbsolutePath());
+		            ProcessorPanel.putExtra("MeasurementStartPosition",0);
+		            startActivity(ProcessorPanel);
+		            //.
+					return; // . ->
+				} catch (Exception E) {
+					Toast.makeText(this, getString(R.string.SErrorOfPreparingDataFile)+TypedDataFile.Descriptor.GetFile().getAbsolutePath(), Toast.LENGTH_SHORT).show();
+					return; // . ->
+				}
 
 			default:
 				Toast.makeText(TTrackerOSOQueuePanel.this,R.string.SUnknownDataFileFormat,Toast.LENGTH_LONG).show();

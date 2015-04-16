@@ -76,6 +76,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	
 	private static final int 	MESSAGE_TYPEDDATAFILE_LOADED = 1;
 	
+	public static final int REQUEST_ADD_COMPONENT = 1;
+	
 	private static class TComponentListItem {
 		
 		public TGeoScopeServer Server;
@@ -639,6 +641,17 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		super.onPause();
 	}
 	
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {        
+
+        case REQUEST_ADD_COMPONENT: 
+        	if (resultCode == RESULT_OK)   
+        	    setResult(RESULT_OK);
+        	break; //. >
+        }
+    }
+	
 	private class TUpdating extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION = -1;
@@ -1163,11 +1176,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 											P.RW.X3 = PF._X3; P.RW.Y3 = PF._Y3;
 											P.RW.BeginTimestamp = PF._Timestamp; P.RW.EndTimestamp = PF._Timestamp;
 											P.RW.Normalize();
-											/*//. last version: Reflector.SetReflectionWindowByLocation(P);
-											//.
-									        setResult(RESULT_OK);
-									        //.
-											finish();*/
 											intent = new Intent(TComponentTypedDataFilesPanel.this,TReflector.class);
 											intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATIONWINDOW);
 											intent.putExtra("LocationWindow", P.ToByteArray());
@@ -1319,6 +1327,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
     	Intent intent = new Intent(this, TComponentCreatingPanel.class);
 		intent.putExtra("idTOwner", RootItem.DataComponentType);
 		intent.putExtra("idOwner", RootItem.DataComponentID);
-    	startActivity(intent);
+    	startActivityForResult(intent, REQUEST_ADD_COMPONENT);
 	}
 }

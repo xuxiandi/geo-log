@@ -174,6 +174,8 @@ public class TComponentCreatingPanel extends Activity {
             }
         });
         //.
+        setResult(RESULT_CANCELED);
+        //.
         flExists = true;
 	}
 
@@ -695,6 +697,8 @@ public class TComponentCreatingPanel extends Activity {
 			break; //. >
 		}
 		}
+        //.
+        setResult(RESULT_OK);
     }
     
     protected File getImageTempFile(Context context) {

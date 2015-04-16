@@ -20,6 +20,7 @@ import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUserDataFile;
@@ -211,6 +212,8 @@ public class TSensorMeter extends TCancelableThread {
 	private int Status = STATUS_NOTRUNNING;
 	//.
 	private TSensorMeasurement Measurement = null;
+	//.
+	private Thread OnMeasurementFinishProcessing = null;
 	
 	public TSensorMeter(TSensorsModule pSensorsModule, TSensorMeterDescriptor pDescriptor, Class<?> ProfileClass, String pProfileFolder) throws Exception {
 		super();
@@ -334,7 +337,48 @@ public class TSensorMeter extends TCancelableThread {
 		Start();
 	}
 
-	public synchronized void SetMeasurement(TSensorMeasurement Value) {
+	@Override
+	public void run() {
+		try {
+			DoOnStart();
+			try {
+				DoProcess();
+			}
+			finally {
+				DoOnFinish();
+			}
+		}
+		catch (InterruptedException IE) {
+		} 
+		catch (CancelException CE) {
+		}
+    	catch (Throwable E) {
+			SetStatus(STATUS_ERROR);
+			//.
+			String S = E.getMessage();
+			if (S == null)
+				S = E.getClass().getName();
+			SensorsModule.Device.Log.WriteError("Sensors meter: "+GetTypeID(),S);
+    	}
+	}
+	
+	protected void DoOnStart() throws Exception {
+		SetStatus(STATUS_RUNNING);
+		//.
+		OnMeasurementFinishProcessing = null;
+	}
+	
+	protected void DoOnFinish() throws Exception {
+		if (OnMeasurementFinishProcessing != null) 
+			OnMeasurementFinishProcessing.join();
+		//.
+		SetStatus(STATUS_NOTRUNNING);
+	}
+	
+	protected void DoProcess() throws Exception {
+	}
+	
+	protected synchronized void SetMeasurement(TSensorMeasurement Value) {
 		Measurement = Value;
 	}
 	
@@ -342,8 +386,8 @@ public class TSensorMeter extends TCancelableThread {
 		return Measurement;
 	}
 
-	private void SendMeasurementAsDataFile(TSensorMeasurement Measurement) throws Exception {
-		String DataName = Measurement.Descriptor.TypeID(); 
+	private void CreateMeasurementAsDataFile(TSensorMeasurement Measurement) throws Exception {
+		String DataName = Measurement.Descriptor.TypeID()+"("+OleDate.Format("yyyy-MM-dd HH:mm:ss",OleDate.UTCToLocalTime(Measurement.Descriptor.StartTimestamp))+")"; 
 		//.
     	if ((DataName != null) && (DataName.length() > 0))
     		DataName = "@"+TComponentFileStreaming.EncodeFileNameString(DataName);
@@ -363,17 +407,19 @@ public class TSensorMeter extends TCancelableThread {
 		}
 		//. prepare and send data-file
     	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(Timestamp,NFN);
-    	DataFile.SendViaDevice(SensorsModule.Device);
+    	DataFile.Create(SensorsModule.Device);
 	}
 	
 	protected void DoOnMeasurementFinish(final TSensorMeasurement Measurement) throws Exception {
-		Thread Processing = new Thread(new Runnable() {
+		if (OnMeasurementFinishProcessing != null)
+			OnMeasurementFinishProcessing.join();
+		OnMeasurementFinishProcessing = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
 				try {
 					if (Profile.flCreateDataFile)
-						SendMeasurementAsDataFile(Measurement);
+						CreateMeasurementAsDataFile(Measurement);
 				} catch (Exception E) {
 					String S = E.getMessage();
 					if (S == null)
@@ -382,7 +428,7 @@ public class TSensorMeter extends TCancelableThread {
 				}
 			}
 		});
-		Processing.start();
+		OnMeasurementFinishProcessing.start();
 	}
 	
     public void Measurements_RemoveOld(ArrayList<String> MIDs) throws Exception {

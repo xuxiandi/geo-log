@@ -931,7 +931,7 @@ public class TMyUserPanel extends Activity {
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
-	    	DataFile.SendViaDevice(Tracker.GeoLog);
+	    	DataFile.Create(Tracker.GeoLog);
 	    	//.
     		Toast.makeText(this, getString(R.string.STextIsAdded)+Integer.toString(DataFileSize), Toast.LENGTH_LONG).show();
 			break; //. >
@@ -1028,7 +1028,7 @@ public class TMyUserPanel extends Activity {
 		    	if (Tracker == null)
 		    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 		    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
-		    	DataFile.SendViaDevice(Tracker.GeoLog);
+		    	DataFile.Create(Tracker.GeoLog);
 		    	//.
 	        	Toast.makeText(this, getString(R.string.SImageIsAdded)+Integer.toString(DataFileSize), Toast.LENGTH_LONG).show();
 			}
@@ -1087,7 +1087,7 @@ public class TMyUserPanel extends Activity {
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
-	    	DataFile.SendViaDevice(Tracker.GeoLog);
+	    	DataFile.Create(Tracker.GeoLog);
 	    	//.
     		Toast.makeText(this, getString(R.string.SDataIsAdded)+Integer.toString((int)(DataFileSize/1024))+getString(R.string.SKb), Toast.LENGTH_LONG).show();
 			break; //. >
@@ -1133,7 +1133,7 @@ public class TMyUserPanel extends Activity {
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
-	    	DataFile.SendViaDevice(Tracker.GeoLog);
+	    	DataFile.Create(Tracker.GeoLog);
 	    	//.
     		Toast.makeText(this, getString(R.string.SDrawingIsAdded)+Long.toString(DataFileSize), Toast.LENGTH_LONG).show();
 			break; //. >
@@ -1178,7 +1178,7 @@ public class TMyUserPanel extends Activity {
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
-	    	DataFile.SendViaDevice(Tracker.GeoLog);
+	    	DataFile.Create(Tracker.GeoLog);
 	    	//.
 			Toast.makeText(this, getString(R.string.SFileIsAdded)+Long.toString(DataFileSize), Toast.LENGTH_LONG).show();
 			break; //. >

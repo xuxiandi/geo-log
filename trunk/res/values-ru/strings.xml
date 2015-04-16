@@ -1025,5 +1025,10 @@
     <string name="SAutosaveInterval">Период автосохранения, дни</string>
     <string name="SUpdate2">Обновить</string>
     <string name="SRecorders">Регистраторы</string>
+    <string name="SCreateDataFile1">Создавать файлы данных</string>
+    <string name="SMeasurement1">Исследование</string>
+    <string name="SCreateNewItem">Создать новый элемент</string>
+    <string name="SAttachDataFile">Прикрепить файл данных</string>
+    <string name="SContent1">Содержимое</string>
     
 </resources>

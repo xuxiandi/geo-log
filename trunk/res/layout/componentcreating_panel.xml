@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#ff999999"
+    android:scrollbars="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/TextView1"
+                android:layout_width="234dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/cbDataName"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:gravity="center"
+                android:text="@string/SAttachDataFile"
+                android:textColor="#ff000000"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/cbDataName"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="false"
+                android:layout_centerVertical="true"
+                android:checked="false"
+                android:scaleX="0.8"
+                android:scaleY="0.8"
+                android:text="@string/SAttachName"
+                android:textColor="#ffffffff"
+                android:textSize="16sp" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999" >
+
+            <Button
+                android:id="@+id/btnAddTextDataFile"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SAddPOIText"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnAddImageDataFile"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SAddPOIImage"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnAddVideoDataFile"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SAddPOIVideo"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff999999" >
+
+            <Button
+                android:id="@+id/btnAddDrawingDataFile"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SAddPOIDrawing"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnAddFileDataFile"
+                style="android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/SAddPOIFile"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

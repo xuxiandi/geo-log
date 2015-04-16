@@ -149,42 +149,42 @@ public class TADSChannel extends TStreamChannel {
 		return Result;
 	}
 	
-	public void DoOnTimestamp(double Timestamp) throws IOException {
+	public void DoOnTimestamp(double Timestamp) throws Exception {
 		byte[] BA = Timestamp_ToByteArray(Timestamp);
 		PacketSubscribers.DoOnPacket(BA);
 	}
 
-	public void DoOnBatteryVoltage(int BatteryVoltage) throws IOException {
+	public void DoOnBatteryVoltage(int BatteryVoltage) throws Exception {
 		byte[] BA = BatteryVoltage_ToByteArray(BatteryVoltage);
 		PacketSubscribers.DoOnPacket(BA);
 	}
 
-	public void DoOnBatteryTemperature(int BatteryTemperature) throws IOException {
+	public void DoOnBatteryTemperature(int BatteryTemperature) throws Exception {
 		byte[] BA = BatteryTemperature_ToByteArray(BatteryTemperature);
 		PacketSubscribers.DoOnPacket(BA);
 	}
 
-	public void DoOnBatteryLevel(int BatteryLevel) throws IOException {
+	public void DoOnBatteryLevel(int BatteryLevel) throws Exception {
 		byte[] BA = BatteryLevel_ToByteArray(BatteryLevel);
 		PacketSubscribers.DoOnPacket(BA);
 	}
 
-	public void DoOnBatteryHealth(int BatteryHealth) throws IOException {
+	public void DoOnBatteryHealth(int BatteryHealth) throws Exception {
 		byte[] BA = BatteryHealth_ToByteArray(BatteryHealth);
 		PacketSubscribers.DoOnPacket(BA);
 	}
 
-	public void DoOnBatteryStatus(int BatteryStatus) throws IOException {
+	public void DoOnBatteryStatus(int BatteryStatus) throws Exception {
 		byte[] BA = BatteryStatus_ToByteArray(BatteryStatus);
 		PacketSubscribers.DoOnPacket(BA);
 	}
 
-	public void DoOnBatteryPlugType(int BatteryPlugType) throws IOException {
+	public void DoOnBatteryPlugType(int BatteryPlugType) throws Exception {
 		byte[] BA = BatteryPlugType_ToByteArray(BatteryPlugType);
 		PacketSubscribers.DoOnPacket(BA);
 	}
 
-	public void DoOnCellularConnectorSignalStrength(int CellularConnectorSignalStrength) throws IOException {
+	public void DoOnCellularConnectorSignalStrength(int CellularConnectorSignalStrength) throws Exception {
 		byte[] BA = CellularConnectorSignalStrength_ToByteArray(CellularConnectorSignalStrength);
 		PacketSubscribers.DoOnPacket(BA);
 	}

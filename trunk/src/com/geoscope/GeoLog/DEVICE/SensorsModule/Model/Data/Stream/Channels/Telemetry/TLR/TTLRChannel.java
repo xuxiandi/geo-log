@@ -59,13 +59,22 @@ public class TTLRChannel extends TStreamChannel {
     	PacketSubscribers.Subscribe(PacketSubscriber);
     	try {
     		try {
-    			if (FinishTimestamp > 0)
-    				synchronized (FinishSignal) {
-    					FinishSignal.wait();
-					}
-    			else
-    				while (!Canceller.flCancel) 
-    					Thread.sleep(100);
+        		boolean flSuspended = IsSuspended();
+        		if (flSuspended)
+        			Resume();
+    			try {
+        			if (FinishTimestamp > 0)
+        				synchronized (FinishSignal) {
+        					FinishSignal.wait();
+    					}
+        			else
+        				while (!Canceller.flCancel) 
+        					Thread.sleep(100);
+    			}
+    			finally {
+            		if (flSuspended)
+            			Suspend();
+    			}
     		}
     		catch (InterruptedException IE) {
     		}

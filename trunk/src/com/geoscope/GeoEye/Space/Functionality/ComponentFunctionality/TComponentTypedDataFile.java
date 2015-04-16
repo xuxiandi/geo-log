@@ -25,7 +25,7 @@ public class TComponentTypedDataFile {
 	}
 	
 	public String FileName() {
-		return (DataName+"("+Integer.toString(DataComponentType)+":"+Long.toString(DataComponentID)+")"+DataFormat);
+		return ("DataFile"+Long.toString(DataComponentID)+DataFormat);
 	}
 
 	public boolean DataIsNull() {
@@ -118,7 +118,7 @@ public class TComponentTypedDataFile {
 	
 	public File GetTempFile() {
 		File TempFolder = new File(TGeoLogApplication.GetTempFolder());
-		return (new File(TempFolder.getAbsolutePath()+"/"+DataName+"("+Integer.toString(DataComponentType)+":"+Long.toString(DataComponentID)+")"+DataFormat));	
+		return (new File(TempFolder.getAbsolutePath()+"/"+"DataFile"+Long.toString(DataComponentID)+DataFormat));	
 	}
 	
 	private File CreateTempFile() throws Exception {

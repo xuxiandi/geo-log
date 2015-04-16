@@ -3,6 +3,7 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
@@ -46,8 +47,12 @@ public class TStreamChannel extends TChannel {
 		
 		private TStreamChannel Channel;
 		//.
+		protected ReentrantLock Lock = new ReentrantLock();
+		//.
 		private ArrayList<TPacketSubscriber> 	Items = new ArrayList<TPacketSubscriber>();
 		private TItemsNotifier 					ItemsNotifier = null;
+		//.
+		public int SuspendCounter = 0;
 		
 		public TPacketSubscribers(TStreamChannel pChannel) {
 			Channel = pChannel;
@@ -63,8 +68,14 @@ public class TStreamChannel extends TChannel {
 			}
 		}
 		
-		private synchronized void ClearSubscribers() {
-			Items.clear();
+		private void ClearSubscribers() {
+			Lock.lock();
+			try {
+				Items.clear();
+			}
+			finally {
+				Lock.unlock();
+			}
 		}
 		
 		public void Subscribe(TPacketSubscriber Subscriber) {
@@ -74,11 +85,15 @@ public class TStreamChannel extends TChannel {
 			}
 			//.
 			boolean flStartSources;
-			synchronized (this) {
+			Lock.lock();
+			try {
 				flStartSources = (Items.size() == 0);
 				//.
 				Items.add(Subscriber);
 				Subscriber.Channel = Channel;
+			}
+			finally {
+				Lock.unlock();
 			}
 			//.
 			if (flStartSources)
@@ -97,12 +112,16 @@ public class TStreamChannel extends TChannel {
 			}
 			//.
 			boolean flStopSources;
-			synchronized (this) {
+			Lock.lock();
+			try {
 				Subscriber.Channel = null;
 				//.
 				Items.remove(Subscriber);
 				//.
 				flStopSources = (Items.size() == 0); 
+			}
+			finally {
+				Lock.unlock();
 			}
 			//.
 			if (flStopSources)
@@ -114,25 +133,93 @@ public class TStreamChannel extends TChannel {
 			}
 		}
 
-		public synchronized int Count() {
-			return Items.size();
+		public int Count() {
+			Lock.lock();
+			try {
+				return Items.size(); //. ->
+			}
+			finally {
+				Lock.unlock();
+			}
 		}
 		
-		public synchronized void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
-			int Cnt = Items.size();
-			for (int I = 0; I < Cnt; I++)
-				Items.get(I).DoOnPacket(Packet,PacketSize);
+		public int Suspend() {
+			Lock.lock();
+			try {
+				SuspendCounter++;
+				return SuspendCounter; //. ->  
+			}
+			finally {
+				Lock.unlock();
+			}
+		}
+		
+		public int Resume() {
+			Lock.lock();
+			try {
+				SuspendCounter--;
+				return SuspendCounter; //. ->  
+			}
+			finally {
+				Lock.unlock();
+			}
+		}
+		
+		public boolean IsSuspended() {
+			Lock.lock();
+			try {
+				return (SuspendCounter > 0); //. ->  
+			}
+			finally {
+				Lock.unlock();
+			}
+		}
+		
+		private void WaitForResume() throws InterruptedException {
+			while (SuspendCounter > 0) {
+				Lock.unlock();
+				try {
+					Thread.sleep(10);
+				}
+				finally {
+					Lock.lock();
+				}
+			}
+		}
+		
+		public void DoOnPacket(byte[] Packet) throws Exception {
+			Lock.lock();
+			try {
+				WaitForResume();
+				//.
+				int Cnt = Items.size();
+				int PacketSize = Packet.length;
+				for (int I = 0; I < Cnt; I++)
+					Items.get(I).DoOnPacket(Packet,PacketSize);
+			}
+			finally {
+				Lock.unlock();
+			}
 		}
 
-		public void DoOnPacket(byte[] Packet) throws IOException {
-			DoOnPacket(Packet,Packet.length);
+		public void DoOnPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
+			Lock.lock();
+			try {
+				WaitForResume();
+				//.
+				Subscriber.DoOnPacket(Packet,Packet.length);
+			}
+			finally {
+				Lock.unlock();
+			}
 		}
 	}
 
 
 	public TSensorsModule SensorsModule;
 	
-	public ArrayList<TChannel> SourceChannels = new ArrayList<TChannel>();
+	public ArrayList<TChannel> 	SourceChannels = new ArrayList<TChannel>();
+	protected int 				SourceChannels_StartCounter = 0;
 	//.
 	public TPacketSubscribers PacketSubscribers = new TPacketSubscribers(this);
 	
@@ -154,17 +241,23 @@ public class TStreamChannel extends TChannel {
 	
 	public void SourceChannels_Start() {
 		synchronized (SourceChannels) {
-			int Cnt = SourceChannels.size();
-			for (int I = 0; I < Cnt; I++)
-				SourceChannels.get(I).StartSource();
+			SourceChannels_StartCounter++;
+			if (SourceChannels_StartCounter == 1) {
+				int Cnt = SourceChannels.size();
+				for (int I = 0; I < Cnt; I++)
+					SourceChannels.get(I).StartSource();
+			}
 		}
 	}
 	
 	public void SourceChannels_Stop() {
 		synchronized (SourceChannels) {
-			int Cnt = SourceChannels.size();
-			for (int I = 0; I < Cnt; I++)
-				SourceChannels.get(I).StopSource();
+			SourceChannels_StartCounter--;
+			if (SourceChannels_StartCounter == 0) {
+				int Cnt = SourceChannels.size();
+				for (int I = 0; I < Cnt; I++)
+					SourceChannels.get(I).StopSource();
+			}
 		}
 	}
 	
@@ -184,19 +277,29 @@ public class TStreamChannel extends TChannel {
 		return null;
 	}
 
+	public int Suspend() {
+		return PacketSubscribers.Suspend();
+	}
+	
+	public int Resume() {
+		return PacketSubscribers.Resume();
+	}
+	
+	public boolean IsSuspended() {
+		return PacketSubscribers.IsSuspended();
+	}
+	
 	protected byte[] DataType_ToByteArray(TDataType DataType) throws IOException {
 		return null;
 	}
 	
-	public void DoOnData(TDataType DataType) throws IOException {
+	public void DoOnData(TDataType DataType) throws Exception {
 		byte[] BA = DataType_ToByteArray(DataType);
 		PacketSubscribers.DoOnPacket(BA);
 	}
 
-	public void DoOnData(TDataType DataType, TPacketSubscriber Subscriber) throws IOException {
+	public void DoOnData(TDataType DataType, TPacketSubscriber Subscriber) throws Exception {
 		byte[] BA = DataType_ToByteArray(DataType);
-		synchronized (PacketSubscribers) {
-			Subscriber.DoOnPacket(BA);
-		}
+		PacketSubscribers.DoOnPacket(BA, Subscriber);
 	}
 }

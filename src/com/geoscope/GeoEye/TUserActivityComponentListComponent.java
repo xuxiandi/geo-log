@@ -90,6 +90,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	
 	private static final int 	MESSAGE_TYPEDDATAFILE_LOADED = 1;
 	
+	public static final int REQUEST_COMPONENT_CONTENT = 1;
+	
 	public static class TOnListItemClickHandler {
 		
 		public void DoOnListItemClick(TComponent Component) {
@@ -567,7 +569,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 								intent.putExtra("ComponentID", Component.ID);
 								intent.putExtra("DataFiles", ActivityComponents.Items[arg2].TypedDataFiles.ToByteArrayV0());
 								//.
-								ParentActivity.startActivity(intent);
+								ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
 							}
 							else {
 								TComponentTypedDataFile ComponentTypedDataFile = ActivityComponents.Items[arg2].TypedDataFiles.Items[0];
@@ -631,7 +633,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		    								intent.putExtra("ComponentID", Component.ID);
 		    								intent.putExtra("DataFiles", _Component.TypedDataFiles.ToByteArrayV0());
 		    								//.
-		    								ParentActivity.startActivity(intent);
+		    								ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
 	    								}
 			    						//.
 			        		    		arg0.dismiss();

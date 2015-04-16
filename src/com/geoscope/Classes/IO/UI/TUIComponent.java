@@ -15,6 +15,11 @@ public class TUIComponent {
 	public void Stop() throws Exception {
 	}
 	
+	public void Restart() throws Exception {
+		Stop();
+		Start();
+	}
+	
 	public void Resume() {
 	}
 	

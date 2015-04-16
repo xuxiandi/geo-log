@@ -88,8 +88,10 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	public static final int LIST_ROW_SIZE_SMALL_ID 	= 1;
 	public static final int LIST_ROW_SIZE_NORMAL_ID = 2;
 	public static final int LIST_ROW_SIZE_BIG_ID 	= 3;
-	
+
 	private static final int 	MESSAGE_TYPEDDATAFILE_LOADED = 1;
+	
+	public static final int REQUEST_COMPONENT_CONTENT = 1;
 	
 	public static class TOnItemsLoadedHandler {
 		
@@ -587,7 +589,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 								intent.putExtra("ComponentID", Component.ID);
 								intent.putExtra("DataFiles", ActivitiesComponents.Items[arg2].TypedDataFiles.ToByteArrayV0());
 								//.
-								ParentActivity.startActivity(intent);
+								ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
 							}
 							else {
 								TComponentTypedDataFile ComponentTypedDataFile = ActivitiesComponents.Items[arg2].TypedDataFiles.Items[0];
@@ -654,7 +656,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		    								intent.putExtra("ComponentID", Component.ID);
 		    								intent.putExtra("DataFiles", _Component.TypedDataFiles.ToByteArrayV0());
 		    								//.
-		    								ParentActivity.startActivity(intent);
+		    								ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
 	    								}
 			    						//.
 			        		    		arg0.dismiss();

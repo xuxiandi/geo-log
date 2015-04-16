@@ -387,7 +387,7 @@ public class TSensorMeter extends TCancelableThread {
 	}
 
 	private void CreateMeasurementAsDataFile(TSensorMeasurement Measurement) throws Exception {
-		String DataName = Measurement.Descriptor.TypeID()+"("+OleDate.Format("yyyy-MM-dd HH:mm:ss",OleDate.UTCToLocalTime(Measurement.Descriptor.StartTimestamp))+")"; 
+		String DataName = Measurement.Descriptor.TypeID()+"("+OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(Measurement.Descriptor.StartTimestamp))+")"; 
 		//.
     	if ((DataName != null) && (DataName.length() > 0))
     		DataName = "@"+TComponentFileStreaming.EncodeFileNameString(DataName);

@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
 import android.widget.LinearLayout;
@@ -58,4 +59,18 @@ public class TUserActivityComponentListPanel extends Activity {
 		//.
 		super.onDestroy();
 	}
+	
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {        
+
+        case TUserActivityComponentListComponent.REQUEST_COMPONENT_CONTENT: 
+        	if (resultCode == RESULT_OK)
+				try {
+					ListComponent.Restart();
+				} catch (Exception E) {
+				}
+        	break; //. >
+        }
+    }
 }

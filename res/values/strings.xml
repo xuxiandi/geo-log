@@ -1027,5 +1027,8 @@
     <string name="SRecorders">Recorders</string>
     <string name="SCreateDataFile1">Create data-file</string>
     <string name="SMeasurement1">Measurement</string>
+    <string name="SCreateNewItem">Create a new item</string>
+    <string name="SAttachDataFile">Attach a data file</string>
+    <string name="SContent1">Content</string>
     
 </resources>

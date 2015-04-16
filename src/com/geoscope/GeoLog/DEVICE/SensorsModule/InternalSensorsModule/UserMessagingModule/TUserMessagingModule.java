@@ -1,6 +1,5 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessagingModule;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
@@ -225,7 +224,7 @@ public class TUserMessagingModule extends TModule {
 						_UserMessaging.OutChannel.UserStatus.SetContainerTypeValue(Status);
 						try {
 							_UserMessaging.OutChannel.DoOnData(_UserMessaging.OutChannel.UserStatus, Subscriber);
-						} catch (IOException E) {
+						} catch (Exception E) {
 						}
 					}
 				};

@@ -2,7 +2,6 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR;
 
 import java.io.IOException;
 
-import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ECTLR.TMeasurement;
@@ -33,19 +32,22 @@ public class TECTLRMeter extends TSensorMeter {
 	}
 	
 	@Override
-	public void run() {
+	protected void DoProcess() throws Exception {
+		if (SensorsModule.InternalSensorsModule.ECTLRChannel == null)
+			throw new IOException("no origin channel"); //. =>
+		TTLRChannel SourceChannel = (TTLRChannel)SensorsModule.InternalSensorsModule.ECTLRChannel.DestinationChannel_Get(); 	
+		if (SourceChannel == null)
+			throw new IOException("no source channel"); //. =>
+		//.
+		SourceChannel.Suspend();
 		try {
-			SetStatus(STATUS_RUNNING);
+			SourceChannel.SourceChannels_Start();
 			try {
-				if (SensorsModule.InternalSensorsModule.ECTLRChannel == null)
-					throw new IOException("no origin channel"); //. =>
-				TTLRChannel SourceChannel = (TTLRChannel)SensorsModule.InternalSensorsModule.ECTLRChannel.DestinationChannel_Get(); 	
-				if (SourceChannel == null)
-					throw new IOException("no source channel"); //. =>
 				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 				while (!Canceller.flCancel) {
 					TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 					Measurement.TLRChannel.Assign(SourceChannel);
+					//.
 					Measurement.Start();
 					try {
 						SourceChannel.DoStreaming(Measurement.TLRChannel.DestrinationStream, Canceller, MeasurementMaxDuration);
@@ -58,20 +60,11 @@ public class TECTLRMeter extends TSensorMeter {
 				}
 			}
 			finally {
-				SetStatus(STATUS_NOTRUNNING);
+				SourceChannel.SourceChannels_Stop();
 			}
 		}
-		catch (InterruptedException IE) {
-		} 
-		catch (CancelException CE) {
+		finally {
+			SourceChannel.Resume();
 		}
-    	catch (Throwable E) {
-			SetStatus(STATUS_ERROR);
-			//.
-			String S = E.getMessage();
-			if (S == null)
-				S = E.getClass().getName();
-			SensorsModule.Device.Log.WriteError("Sensors meter: "+GetTypeID(),S);
-    	}
 	}
 }

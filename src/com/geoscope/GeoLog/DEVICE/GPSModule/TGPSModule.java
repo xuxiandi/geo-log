@@ -1314,7 +1314,7 @@ public class TGPSModule extends TModule implements Runnable
 	        			GPSChannel.GPSStatus.SetContainerTypeValue(DestinationChannel_GPSStatus);
 	        			GPSChannel.DoOnData(GPSChannel.GPSStatus, Subscriber);
 	    			}
-				} catch (IOException E) {
+				} catch (Exception E) {
 				}
 			};
 		});
@@ -1336,7 +1336,7 @@ public class TGPSModule extends TModule implements Runnable
     	return ((DestinationChannel != null) && DestinationChannel.DestinationChannel_IsConnected());
     }
     
-    public void DestinationChannel_ProcessForMode(short pMode) throws IOException {
+    public void DestinationChannel_ProcessForMode(short pMode) throws Exception {
     	TGPSChannel GPSChannel = null;
     	synchronized (this) {
         	if (DestinationChannel_Active()) 
@@ -1354,7 +1354,7 @@ public class TGPSModule extends TModule implements Runnable
 		}
     }
     
-    public void DestinationChannel_ProcessForStatus(short pStatus) throws IOException {
+    public void DestinationChannel_ProcessForStatus(short pStatus) throws Exception {
     	TGPSChannel GPSChannel = null;
     	synchronized (this) {
         	if (DestinationChannel_Active()) 
@@ -1372,7 +1372,7 @@ public class TGPSModule extends TModule implements Runnable
 		}
     }
     
-    public void DestinationChannel_ProcessForFix(TGPSFixValue pGPSFix) throws IOException {
+    public void DestinationChannel_ProcessForFix(TGPSFixValue pGPSFix) throws Exception {
     	TGPSChannel GPSChannel = null;
     	synchronized (this) {
         	if (DestinationChannel_Active()) 

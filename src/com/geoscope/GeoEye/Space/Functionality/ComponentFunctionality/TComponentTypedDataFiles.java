@@ -35,6 +35,12 @@ public class TComponentTypedDataFiles {
 		return Items.length;
 	}
 
+	public TComponentTypedDataFile GetRootItem() {
+		if (Items.length == 0)
+			return null; //. ->
+		return Items[0];
+	}
+	
 	public boolean DataIsNull() {
 		for (int I = 0; I < Items.length; I++) 
 			if (Items[I].DataIsNull())

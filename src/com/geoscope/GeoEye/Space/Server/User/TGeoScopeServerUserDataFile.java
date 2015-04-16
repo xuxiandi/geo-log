@@ -18,7 +18,8 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 
 public class TGeoScopeServerUserDataFile {
 
-	private static final int PrototypeID = 10; //. built into the project
+	private static final int PrototypeID 				= 10; 	//. built into the project
+	private static final int PrototypeForComponentID 	= 329; 	//. built into the project
 	
 	private TGeoScopeServerUser User = null;
 	//.
@@ -39,7 +40,7 @@ public class TGeoScopeServerUserDataFile {
 	public void Destroy() {
 	}
 	
-	private String PrepareSendURL(String DataType, TUserLocation UserLocation) {
+	private String PrepareCreateViaUserAgentURL(String DataType, TUserLocation UserLocation) {
 		String URL1 = User.Server.Address;
 		//. add command path
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(User.UserID);
@@ -73,7 +74,7 @@ public class TGeoScopeServerUserDataFile {
 	}
 	
 	@SuppressWarnings("unused")
-	private void Send(TDEVICEModule Device) throws Exception {
+	private void CreateViaUserAgent(TDEVICEModule Device) throws Exception {
 		TGPSFixValue GPSFix = null;
         if (!Device.GPSModule.flProcessingIsDisabled) {
             GPSFix = Device.GPSModule.GetCurrentFix();
@@ -90,7 +91,7 @@ public class TGeoScopeServerUserDataFile {
         //.
         String DataType = TFileSystem.FileName_GetExtension(DataFileName);
         //.
-		String CommandURL = PrepareSendURL(DataType, UserLocation);
+		String CommandURL = PrepareCreateViaUserAgentURL(DataType, UserLocation);
 		//.
 		HttpURLConnection Connection = User.Server.OpenConnection(CommandURL);
 		try {
@@ -115,7 +116,7 @@ public class TGeoScopeServerUserDataFile {
 		}
 	}
 	
-	public void SendViaDevice(TDEVICEModule Device) throws Exception {
+	public void Create(TDEVICEModule Device) throws Exception {
 		TGPSFixValue GPSFix = null;
         if (!Device.GPSModule.flProcessingIsDisabled) {
             GPSFix = Device.GPSModule.GetCurrentFix();
@@ -133,6 +134,36 @@ public class TGeoScopeServerUserDataFile {
         }
         else
             Params = "2"/*Version*/+","+Integer.toString(PrototypeID);
+        //.
+        byte[] AddressData = Params.getBytes("windows-1251");
+		//.
+        TMapPOIDataFileValue MapPOIDataFile = new TMapPOIDataFileValue(Timestamp,DataFileName);
+        TObjectSetGetMapPOIDataFileSO SO = new TObjectSetGetMapPOIDataFileSO(Device.ConnectorModule,(int)Device.UserID,Device.UserPassword, Device.ObjectID, null, AddressData);
+        SO.setValue(MapPOIDataFile);
+        //. enqueue the data-file
+        Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
+        Device.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
+        Device.BackupMonitor.BackupImmediate();
+	}
+
+	public void CreateAsComponent(int idTOwner, long idOwner, TDEVICEModule Device) throws Exception {
+		TGPSFixValue GPSFix = null;
+        if (!Device.GPSModule.flProcessingIsDisabled) {
+            GPSFix = Device.GPSModule.GetCurrentFix();
+            if (!(GPSFix.flSet && GPSFix.IsAvailable())) 
+            	GPSFix = null;
+        }
+        //.
+        String Params;
+        if (GPSFix != null) {
+        	TUserLocation UserLocation = new TUserLocation();
+        	UserLocation.Datum = TGPSModule.DatumID;
+        	UserLocation.AssignFromGPSFix(GPSFix);
+        	//.
+            Params = "5"/*Version*/+","+Integer.toString(idTOwner)+","+Long.toString(idOwner)+","+Integer.toString(PrototypeForComponentID)+","+UserLocation.ToFixString();
+        }
+        else
+            Params = "4"/*Version*/+","+Integer.toString(idTOwner)+","+Long.toString(idOwner)+","+Integer.toString(PrototypeForComponentID);
         //.
         byte[] AddressData = Params.getBytes("windows-1251");
 		//.

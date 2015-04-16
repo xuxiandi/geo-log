@@ -141,6 +141,12 @@
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name=".Space.Functionality.ComponentFunctionality.TComponentCreatingPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
             android:name=".Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape"

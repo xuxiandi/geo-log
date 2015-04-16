@@ -34,6 +34,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -441,7 +442,11 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	private TextView lbName;
 	private View ProgressBar;
 	//.
+	private Button btnUpdate;
+	private Button btnCreateNewComponent;
+	//.
 	private TUpdating	Updating = null;
+	private int			UpdatingCount = 0;
 	//.
 	private TComponentTypedDataFileLoading ComponentTypedDataFileLoading = null;
 	
@@ -473,19 +478,19 @@ public class TComponentTypedDataFilesPanel extends Activity {
         lvDataFiles.setOnItemClickListener(new OnItemClickListener() {         
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				if ((DataFiles == null) || (DataFiles.Count() <= 1))
+				if ((DataFiles == null) || (DataFiles.Count() == 0))
 					return; //. ->
-				TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2+1];
+				TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2];
 				ComponentTypedDataFile_Process(ComponentTypedDataFile);
         	}              
         });         
         lvDataFiles.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				if ((DataFiles == null) || (DataFiles.Count() <= 1))
+				if ((DataFiles == null) || (DataFiles.Count() == 0))
 					return false; //. ->
             	//.
-				final TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2+1];
+				final TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2];
 				//.
 	    		final CharSequence[] _items;
 	    		int SelectedIdx = -1;
@@ -582,11 +587,27 @@ public class TComponentTypedDataFilesPanel extends Activity {
         //.
         ProgressBar = findViewById(R.id.pbProgress);
         //.
+        btnUpdate = (Button)findViewById(R.id.btnUpdate);
+        btnUpdate.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+        		StartUpdating();
+            }
+        });
+        //.
+        btnCreateNewComponent = (Button)findViewById(R.id.btnCreateNewComponent);
+        btnCreateNewComponent.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+        		CreateNewComponent();
+            }
+        });
+        //.
         setResult(RESULT_CANCELED);
         //.
         flExists = true;
-        //.
-        StartUpdating();
 	}
 
 	@Override
@@ -609,12 +630,12 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+        //.
+        StartUpdating();
 	}
 	
 	@Override
 	protected void onPause() {
-		finish();
-		//.
 		super.onPause();
 	}
 	
@@ -628,14 +649,17 @@ public class TComponentTypedDataFilesPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 4;
     	private static final int MESSAGE_PROGRESSBAR_MESSAGE = 5;
     	
+    	private TComponentTypedDataFiles _DataFiles;
+    	//.
     	private boolean flShowProgress = false;
     	private boolean flClosePanelOnCancel = false;
     	
         private ProgressDialog progressDialog;
     	
-    	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    	public TUpdating(TComponentTypedDataFiles pDataFiles, boolean pflShowProgress, boolean pflClosePanelOnCancel) {
     		super();
     		//.
+    		_DataFiles = pDataFiles;
     		flShowProgress = pflShowProgress;
     		flClosePanelOnCancel = pflClosePanelOnCancel;
     		//.
@@ -647,15 +671,25 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		public void run() {
 			try {
 				try {
-					TComponentTypedDataFiles _DataFiles;
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-	    	        	_DataFiles = new TComponentTypedDataFiles(TComponentTypedDataFilesPanel.this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION);
-	    	        	_DataFiles.FromByteArrayV0(DataFilesBA);
-	    	        	//.
-	    	        	Thread.sleep(100);
-					}
+	    				if (_DataFiles == null) {
+		    	        	_DataFiles = new TComponentTypedDataFiles(TComponentTypedDataFilesPanel.this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
+		    	        	_DataFiles.FromByteArrayV0(DataFilesBA);
+		    	        	//.
+		    	        	Thread.sleep(100);
+	    				}
+	    				else {
+	    					TComponentTypedDataFile RootItem = _DataFiles.GetRootItem();
+	    					if (RootItem == null)
+	    						throw new Exception("there is no a root element of the data files"); //. =>
+		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+		    				if (UserAgent == null)
+		    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+	    					_DataFiles.PrepareForComponent(RootItem.DataComponentType,RootItem.DataComponentID, true, UserAgent.Server);
+	    				}
+	    			}
 					finally {
 						if (flShowProgress)
 							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
@@ -695,7 +729,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						if (!flExists)
 			            	break; //. >
 						TComponentTypedDataFilesPanel.this.DataFiles = (TComponentTypedDataFiles)msg.obj;
-	           		 	//.
+						TComponentTypedDataFilesPanel.this.UpdatingCount++;
+						//.
 	           		 	TComponentTypedDataFilesPanel.this.Update();
 		            	//.
 		            	break; //. >
@@ -780,9 +815,9 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		if (UserAgent == null)
 			throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		//.
-		TComponentListItem[] Items = new TComponentListItem[DataFiles.Items.length-1];
+		TComponentListItem[] Items = new TComponentListItem[DataFiles.Items.length];
 		for (int I = 0; I < Items.length; I++) {
-			TComponentTypedDataFile DataFile = DataFiles.Items[I+1]; 
+			TComponentTypedDataFile DataFile = DataFiles.Items[I]; 
 			String Name = DataFile.DataName+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataFile.DataType,this)+"/";
 			TComponent _Component = new TComponent(0, DataFile.DataComponentType,DataFile.DataComponentID, 0.0);
 			_Component.TypedDataFiles = new TComponentTypedDataFiles(this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);
@@ -796,7 +831,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
     private void StartUpdating() {
     	if (Updating != null)
     		Updating.Cancel();
-    	Updating = new TUpdating(true,false);
+    	Updating = new TUpdating(DataFiles, true, false);
     }    
     
 	private class TComponentTypedDataFileLoading extends TCancelableThread {
@@ -1251,7 +1286,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		}
 	}
 
-	public final Handler MessageHandler = new Handler() {
+	public Handler MessageHandler = new Handler() {
+		
 		@Override
 		public void handleMessage(Message msg) {
         	try {
@@ -1272,4 +1308,17 @@ public class TComponentTypedDataFilesPanel extends Activity {
         	}
 		}
 	};
+	
+	private void CreateNewComponent() {
+		if (DataFiles == null)
+			return; //. ->
+		TComponentTypedDataFile RootItem = DataFiles.GetRootItem();
+		if (RootItem == null)
+			return; //. ->
+		//.
+    	Intent intent = new Intent(this, TComponentCreatingPanel.class);
+		intent.putExtra("idTOwner", RootItem.DataComponentType);
+		intent.putExtra("idOwner", RootItem.DataComponentID);
+    	startActivity(intent);
+	}
 }

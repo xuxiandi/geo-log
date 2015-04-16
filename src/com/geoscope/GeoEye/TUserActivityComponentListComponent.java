@@ -594,10 +594,11 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 					//.
 		    		final CharSequence[] _items;
 		    		int SelectedIdx = -1;
-		    		_items = new CharSequence[3];
+		    		_items = new CharSequence[4];
 		    		_items[0] = ParentActivity.getString(R.string.SOpen); 
-		    		_items[1] = ParentActivity.getString(R.string.SShowGeoLocation); 
-		    		_items[2] = ParentActivity.getString(R.string.SRemove); 
+		    		_items[1] = ParentActivity.getString(R.string.SContent1); 
+		    		_items[2] = ParentActivity.getString(R.string.SShowGeoLocation); 
+		    		_items[3] = ParentActivity.getString(R.string.SRemove); 
 		    		//.
 		    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		    		builder.setTitle(R.string.SSelect);
@@ -610,19 +611,10 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		    		    		
 		    		    		case 0: //. open
 		    						try {
-		    							if ((Component != null) && (_Component.TypedDataFiles.Count() > 1)) {
-		    								Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
-		    								intent.putExtra("ComponentID", Component.ID);
-		    								intent.putExtra("DataFiles", _Component.TypedDataFiles.ToByteArrayV0());
-		    								//.
-		    								ParentActivity.startActivity(intent);
-		    							}
-		    							else {
-		    								if (_Component.TypedDataFiles.Count() > 0) {
-			    								TComponentTypedDataFile ComponentTypedDataFile = _Component.TypedDataFiles.Items[0];
-			    								ComponentTypedDataFile_Process(ComponentTypedDataFile);
-		    								}
-		    							}
+	    								if (_Component.TypedDataFiles.Count() > 0) {
+		    								TComponentTypedDataFile ComponentTypedDataFile = _Component.TypedDataFiles.Items[0];
+		    								ComponentTypedDataFile_Process(ComponentTypedDataFile);
+	    								}
 			    						//.
 			        		    		arg0.dismiss();
 		    						}
@@ -632,7 +624,25 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 1: //. show location
+		    		    		case 1: //. content
+		    						try {
+	    								if (_Component.TypedDataFiles.Count() > 0) {
+		    								Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
+		    								intent.putExtra("ComponentID", Component.ID);
+		    								intent.putExtra("DataFiles", _Component.TypedDataFiles.ToByteArrayV0());
+		    								//.
+		    								ParentActivity.startActivity(intent);
+	    								}
+			    						//.
+			        		    		arg0.dismiss();
+		    						}
+		    						catch (Exception E) {
+		    			                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+		    						}
+		        		    		//.
+		    		    			break; //. >
+		    		    			
+		    		    		case 2: //. show location
 		    						if (_Component.GeoLocation != null)
 		    							ShowComponentGeoLocation(_Component);
 		    						else
@@ -642,7 +652,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 2: //. remove component
+		    		    		case 3: //. remove component
 		    		    			AlertDialog.Builder alert = new AlertDialog.Builder(ParentActivity);
 		    		    			//.
 		    		    			alert.setTitle(R.string.SRemoval);

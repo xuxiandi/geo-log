@@ -1313,9 +1313,6 @@ public class TDEVICEModule extends TModule
 													//.
 													Thread.sleep(StreamingAttemptSleepTime);
 													//.
-													if (Canceller.flCancel)
-														return; //. ->
-													//.
 													continue; //. ^
 												}
 											}
@@ -1328,7 +1325,7 @@ public class TDEVICEModule extends TModule
 										}
 										if (Canceller.flCancel)
 											return; //. ->
-										}
+									}
 									finally {
 										flStreamingComponent = false;
 									}

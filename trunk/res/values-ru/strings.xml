@@ -1028,7 +1028,8 @@
     <string name="SCreateDataFile1">Создавать файлы данных</string>
     <string name="SMeasurement1">Исследование</string>
     <string name="SCreateNewItem">Создать новый элемент</string>
-    <string name="SAttachDataFile">Прикрепить файл данных</string>
+    <string name="SAttachDataFile">Прикрепление файла данных</string>
     <string name="SContent1">Содержимое</string>
+    <string name="SAddComponentToLastAddedData">добавить компонент к ранее прикреплённым данным</string>
     
 </resources>

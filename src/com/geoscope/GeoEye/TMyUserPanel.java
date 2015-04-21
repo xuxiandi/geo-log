@@ -57,7 +57,9 @@ import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
+import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoLocation;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentCreatingPanel;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity;
@@ -268,6 +270,7 @@ public class TMyUserPanel extends Activity {
 	private Button btnUserCurrentActivityAddVideoDataFile;
 	private Button btnUserCurrentActivityAddDrawingDataFile;
 	private Button btnUserCurrentActivityAddFileDataFile;
+	private Button btnUserCurrentActivityAddComponentToTheLastDataFile;
 	private Button btnUserCurrentActivityComponentList;
 	private Button btnUserLastActivities;
 	//.
@@ -434,6 +437,18 @@ public class TMyUserPanel extends Activity {
             public void onClick(View v) {
         		try {
     				AddDataFile(ACTIVITY_DATAFILE_TYPE_FILE);
+				}
+				catch (Exception E) {
+        			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+				}
+            }
+        });
+        btnUserCurrentActivityAddComponentToTheLastDataFile = (Button)findViewById(R.id.btnUserCurrentActivityAddComponentToTheLastDataFile);
+        btnUserCurrentActivityAddComponentToTheLastDataFile.setOnClickListener(new OnClickListener() {
+        	@Override
+            public void onClick(View v) {
+        		try {
+    				AddComponentToLastDataFile();
 				}
 				catch (Exception E) {
         			Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -1184,6 +1199,13 @@ public class TMyUserPanel extends Activity {
 			break; //. >
 		}
 		}
+    }
+    
+    private void AddComponentToLastDataFile() {
+    	Intent intent = new Intent(this, TComponentCreatingPanel.class);
+		intent.putExtra("idTOwner", SpaceDefines.idTDATAFile);
+		intent.putExtra("idOwner", 0/*An owner will be set by the server to the last created data-file*/);
+    	startActivity(intent);
     }
     
     protected File getImageTempFile(Context context) {

@@ -1022,13 +1022,14 @@
     <string name="SMeasurement">Measurement</string>
     <string name="SMaxDuration">Max duration, seconds</string>
     <string name="SLifeTime">Life time, days</string>
-    <string name="SAutosaveInterval">Autosave interval, days</string>
+    <string name="SAutosaveInterval">Auto-save interval, days</string>
     <string name="SUpdate2">Update</string>
     <string name="SRecorders">Recorders</string>
     <string name="SCreateDataFile1">Create data-file</string>
     <string name="SMeasurement1">Measurement</string>
     <string name="SCreateNewItem">Create a new item</string>
-    <string name="SAttachDataFile">Attach a data file</string>
+    <string name="SAttachDataFile">Attaching a data file</string>
     <string name="SContent1">Content</string>
+    <string name="SAddComponentToLastAddedData">add a component to the last attached data</string>
     
 </resources>

@@ -49,7 +49,6 @@
                     android:paddingLeft="2dp"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -76,7 +75,6 @@
                     android:paddingLeft="2dp"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
-
             </LinearLayout>
         </LinearLayout>
 
@@ -103,7 +101,6 @@
                 android:paddingLeft="2dp"
                 android:textColor="#ffffffff"
                 android:textSize="18sp" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -136,7 +133,6 @@
                     android:paddingLeft="2dp"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -190,7 +186,6 @@
                     android:paddingLeft="2dp"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" >
-
                 </EditText>
             </LinearLayout>
 
@@ -218,7 +213,6 @@
                     android:paddingLeft="2dp"
                     android:textColor="#ffffffff"
                     android:textSize="18sp" >
-
                 </EditText>
             </LinearLayout>
         </LinearLayout>
@@ -279,7 +273,6 @@
                 android:paddingLeft="2dp"
                 android:textColor="#ffffffff"
                 android:textSize="18sp" />
-
         </RelativeLayout>
 
         <TextView
@@ -409,6 +402,14 @@
                 android:text="@string/SAddPOIFile"
                 android:textSize="18sp" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/btnUserCurrentActivityAddComponentToTheLastDataFile"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/SAddComponentToLastAddedData"
+            android:textSize="16sp" />
 
         <TextView
             android:layout_width="fill_parent"

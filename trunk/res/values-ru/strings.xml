@@ -1031,5 +1031,7 @@
     <string name="SAttachDataFile">Прикрепление файла данных</string>
     <string name="SContent1">Содержимое</string>
     <string name="SAddComponentToLastAddedData">добавить компонент к ранее прикреплённым данным</string>
+    <string name="STextHasBeenSaved">Текст сохранён</string>
+    <string name="SPictureHasBeenSaved">Картинка сохранена</string>
     
 </resources>

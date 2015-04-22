@@ -425,6 +425,9 @@ public class TReflectorConfigurationPanel extends Activity {
             		cbTMSOption.setChecked(false);
             		//.
                 	Save();
+                	//. reset current user current activity
+            		TMyUserPanel.ResetUserCurrentActivity();
+            		//.
                     setResult(Activity.RESULT_OK);
                 	//.
         		    new AlertDialog.Builder(TReflectorConfigurationPanel.this)
@@ -536,6 +539,8 @@ public class TReflectorConfigurationPanel extends Activity {
                 	spPOIMapIDGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByPOIMapID(MapID));
             		//.
                 	Save();
+                	//. reset the current user current activity
+            		TMyUserPanel.ResetUserCurrentActivity();
                 	//.
                     setResult(Activity.RESULT_OK);
                     finish();
@@ -587,6 +592,8 @@ public class TReflectorConfigurationPanel extends Activity {
 			    			@Override 
 			    			public void DoOnCompleted() throws Exception {
 			    				TReflector.GetReflector().finish();
+			                	//. reset current user current activity
+			            		TMyUserPanel.ResetUserCurrentActivity();
 			    				//.
 					        	TGeoLogApplication.SetProfileName(TheCurrentProfileName, getApplicationContext());
 					    		//.
@@ -650,6 +657,8 @@ public class TReflectorConfigurationPanel extends Activity {
 		    			@Override 
 		    			public void DoOnCompleted() throws Exception {
 		    				TReflector.GetReflector().finish();
+		                	//. reset current user current activity
+		            		TMyUserPanel.ResetUserCurrentActivity();
 		        			//. set as current
 				        	TGeoLogApplication.SetProfileName(NewProfileName, getApplicationContext());
 				    		//.

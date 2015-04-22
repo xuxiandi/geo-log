@@ -3,6 +3,7 @@ package com.geoscope.GeoEye;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -67,6 +69,9 @@ public class TUserChatPanel extends Activity {
 	public static final int MessageIsProcessedDelay = 1000*1; //. seconds
 	//.
 	public static final int CameraImageMaxSize = 1024;
+	
+	public static final String MessageTextFileName 		= "MessagePicture.txt";
+	public static final String MessagePictureFileName 	= "MessageText.png";
 	
 	private static final int MESSAGE_SENT 				= 1;
 	private static final int MESSAGE_RECEIVED 			= 2;
@@ -540,9 +545,24 @@ public class TUserChatPanel extends Activity {
                 	try {
                 		Drawings.LoadFromByteArray(DataMessage.Data,0);
                 		byte[] BMPData = Drawings.SaveAsBitmapData("png"); 
-                    	Bitmap BMP = BitmapFactory.decodeByteArray(BMPData, 0,BMPData.length);
+                    	final Bitmap BMP = BitmapFactory.decodeByteArray(BMPData, 0,BMPData.length);
                     	ImageView ivMessage = new ImageView(this);
                     	ivMessage.setImageBitmap(BMP);
+                    	ivMessage.setOnLongClickListener(new OnLongClickListener() {
+							
+							@Override
+							public boolean onLongClick(View v) {
+								try {
+									String FN = SaveMessagePicture(BMP);
+									//.
+					                Toast.makeText(TUserChatPanel.this, getString(R.string.SPictureHasBeenSaved)+": "+FN, Toast.LENGTH_LONG).show();
+								}
+								catch (Exception E) {
+					                Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+								}
+								return true;
+							}
+						});
                     	llUserChatArea.addView(ivMessage);
                     	ivMessage.setVisibility(View.VISIBLE);
                 	}
@@ -552,9 +572,24 @@ public class TUserChatPanel extends Activity {
             	}
             	else
                 	if (DataMessage.DataType.equals("png") || DataMessage.DataType.equals("jpg") || DataMessage.DataType.equals("jpeg") || DataMessage.DataType.equals("gif") || DataMessage.DataType.equals("bmp")) {
-                    	Bitmap BMP = BitmapFactory.decodeByteArray(DataMessage.Data, 0,DataMessage.Data.length);
+                    	final Bitmap BMP = BitmapFactory.decodeByteArray(DataMessage.Data, 0,DataMessage.Data.length);
                     	ImageView ivMessage = new ImageView(this);
                     	ivMessage.setImageBitmap(BMP);
+                    	ivMessage.setOnLongClickListener(new OnLongClickListener() {
+							
+							@Override
+							public boolean onLongClick(View v) {
+								try {
+									String FN = SaveMessagePicture(BMP);
+									//.
+					                Toast.makeText(TUserChatPanel.this, getString(R.string.SPictureHasBeenSaved)+": "+FN, Toast.LENGTH_LONG).show();
+								}
+								catch (Exception E) {
+					                Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+								}
+								return true;
+							}
+						});
                     	llUserChatArea.addView(ivMessage);
                     	ivMessage.setVisibility(View.VISIBLE);
                 	}
@@ -562,7 +597,8 @@ public class TUserChatPanel extends Activity {
     	}
     	else {
         	TextView tvMessage = new TextView(this);
-        	tvMessage.setText((new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(Message.Timestamp)).GetDateTime())+" "+SenderName+": "+Message.Message);
+        	final String Text = (new SimpleDateFormat("HH:mm:ss",Locale.US)).format((new OleDate(Message.Timestamp)).GetDateTime())+" "+SenderName+": "+Message.Message; 
+        	tvMessage.setText(Text);
         	LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         	tvMessage.setLayoutParams(LP);
         	tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_DIP,18);
@@ -570,6 +606,21 @@ public class TUserChatPanel extends Activity {
         		tvMessage.setTextColor(Color.BLACK);
         	else
         		tvMessage.setTextColor(Color.LTGRAY);
+        	tvMessage.setOnLongClickListener(new OnLongClickListener() {
+				
+				@Override
+				public boolean onLongClick(View v) {
+					try {
+						String FN = SaveMessageText(Text);
+						//.
+		                Toast.makeText(TUserChatPanel.this, getString(R.string.STextHasBeenSaved)+": "+FN, Toast.LENGTH_LONG).show();
+					}
+					catch (Exception E) {
+		                Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+					return true;
+				}
+			});
         	llUserChatArea.addView(tvMessage);
         	tvMessage.setVisibility(View.VISIBLE);
     	}
@@ -584,6 +635,30 @@ public class TUserChatPanel extends Activity {
             	}
     	    }
 		},100);
+    }
+    
+    private String SaveMessageText(String Text) throws IOException {
+		String FN = TGeoLogApplication.GetTempFolder()+"/"+MessageTextFileName;
+		FileOutputStream FOS = new FileOutputStream(FN);
+		try {
+			FOS.write(Text.getBytes("UTF-8"));
+		}
+		finally {
+			FOS.close();
+		}
+		return FN;
+    }
+    
+    private String SaveMessagePicture(Bitmap Picture) throws IOException {
+		String FN = TGeoLogApplication.GetTempFolder()+"/"+MessagePictureFileName;
+		FileOutputStream FOS = new FileOutputStream(FN);
+		try {
+			Picture.compress(CompressFormat.PNG, 100, FOS);
+		}
+		finally {
+			FOS.close();
+		}
+		return FN;
     }
     
     private class TMessageSending extends TCancelableThread {

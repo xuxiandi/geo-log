@@ -1031,5 +1031,7 @@
     <string name="SAttachDataFile">Attaching a data file</string>
     <string name="SContent1">Content</string>
     <string name="SAddComponentToLastAddedData">add a component to the last attached data</string>
+    <string name="STextHasBeenSaved">Text has been saved</string>
+    <string name="SPictureHasBeenSaved">Picture has been saved</string>
     
 </resources>

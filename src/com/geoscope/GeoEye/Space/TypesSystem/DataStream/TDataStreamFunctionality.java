@@ -18,6 +18,7 @@ import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
+import com.geoscope.GeoEye.Space.URL.TURL;
 
 public class TDataStreamFunctionality extends TComponentFunctionality {
 
@@ -55,6 +56,11 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 		Result.putExtra("idComponent",idComponent);
 		//.
 		return (new TPropsPanel(idTComponent(),idComponent,Result));
+	}
+	
+	@Override
+	public TURL GetDefaultURL() throws Exception {
+		return (new com.geoscope.GeoEye.Space.URLs.TypesSystem.DataStream.PropsPanel.TURL(idComponent));
 	}
 	
 	public byte[] GetDescriptorData() throws Exception {

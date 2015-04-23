@@ -1034,5 +1034,6 @@
     <string name="STextHasBeenSaved">Текст сохранён</string>
     <string name="SPictureHasBeenSaved">Картинка сохранена</string>
     <string name="SURLFileNameHasBeenSaved">"URL файл сохранён в "</string>
+    <string name="SGetURLFile">Получить URL-файл</string>
     
 </resources>

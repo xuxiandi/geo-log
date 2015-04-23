@@ -418,7 +418,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 				public boolean onLongClick(View v) {
 	            	try {
 	            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
-	            		com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.PropsPanel.TURL.ConstructURLFile(Object.ID,Object.Name, URLFN);
+	            		com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.PropsPanel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.PropsPanel.TURL(Object.ID,Object.Name);
+	            		URL.ConstructURLFile(URLFN);
 	            		//.
 	            		Toast.makeText(TCoGeoMonitorObjectPanel.this, TCoGeoMonitorObjectPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
 	            	}

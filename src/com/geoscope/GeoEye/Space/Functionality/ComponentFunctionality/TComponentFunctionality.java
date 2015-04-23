@@ -21,10 +21,12 @@ import com.geoscope.GeoEye.Space.Functionality.TFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.BaseVisualizationFunctionality.TBase2DVisualizationFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem.TContextCache;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
+import com.geoscope.GeoEye.Space.URL.TURL;
 
 public class TComponentFunctionality extends TFunctionality {
 	
@@ -79,6 +81,10 @@ public class TComponentFunctionality extends TFunctionality {
 			TypeFunctionality.Release();
 			TypeFunctionality = null;
 		}
+	}
+	
+	public TGeoScopeServerUser User() {
+		return Server.User;
 	}
 	
 	public TTypesSystem TypesSystem() {
@@ -390,6 +396,10 @@ public class TComponentFunctionality extends TFunctionality {
 		finally {
 			HttpConnection.disconnect();
 		}
+	}
+	
+	public TURL GetDefaultURL() throws Exception {
+		return (new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL(idTComponent(),idComponent));
 	}
 	
 	public TComponentDescriptor GetVisualizationComponent() throws Exception {

@@ -1,7 +1,10 @@
 package com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality;
 
+import java.io.IOException;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xmlpull.v1.XmlSerializer;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
@@ -25,10 +28,22 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.TURL {
 	public int	idTComponent;
 	public long idComponent;
 	
+	public TURL(int	pidTComponent, long pidComponent) {
+		super();
+		//.
+		idTComponent = pidTComponent;
+		idComponent = pidComponent;
+	}
+	
 	public TURL(TGeoScopeServerUser pUser, Element pXMLDocumentRootNode) throws Exception {
 		super(pUser,pXMLDocumentRootNode);
 	}
 
+	@Override
+	public String GetTypeID() {
+		return TypeID;
+	}
+	
 	@Override
 	protected void Parse() throws Exception {
 		super.Parse();
@@ -61,5 +76,17 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.TURL {
 		default:
 			throw new Exception("unknown URL data version, version: "+Integer.toString(URLVersion)); //. =>
 		}
+	}
+	
+	@Override
+	protected void ToXMLSerializer(XmlSerializer Serializer) throws IOException {
+        //. idTComponent
+        Serializer.startTag("", "idTComponent");
+        Serializer.text(Integer.toString(idTComponent));
+        Serializer.endTag("", "idTComponent");
+        //. idComponent
+        Serializer.startTag("", "idComponent");
+        Serializer.text(Long.toString(idComponent));
+        Serializer.endTag("", "idComponent");
 	}
 }

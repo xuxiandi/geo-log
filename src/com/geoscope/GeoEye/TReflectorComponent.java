@@ -4824,7 +4824,7 @@ public class TReflectorComponent extends TUIComponent {
 									MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 						}
 						//.
-						ComponentTypedDataFile.PrepareFullFromFile(CFN);
+						ComponentTypedDataFile.PrepareAsFullFromFile(CFN);
 						//.
 						Canceller.Check();
 						//.
@@ -8911,8 +8911,7 @@ public class TReflectorComponent extends TUIComponent {
 					// . open appropriate extent
 					intent = new Intent();
 					intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");
-				} else if (ComponentTypedDataFile.DataFormat.toUpperCase(
-						Locale.ENGLISH).equals(".XML")) {
+				} else if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
 					final TComponentFunctionality CF = User.Space.TypesSystem
 							.TComponentFunctionality_Create(Server,
 									ComponentTypedDataFile.DataComponentType,

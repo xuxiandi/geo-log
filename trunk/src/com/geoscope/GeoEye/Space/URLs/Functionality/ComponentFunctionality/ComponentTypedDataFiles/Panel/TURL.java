@@ -1,14 +1,9 @@
 package com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import org.w3c.dom.Element;
-import org.xmlpull.v1.XmlSerializer;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Xml;
 import android.widget.Toast;
 
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
@@ -29,53 +24,20 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 		return (new TURL(pUser,pXMLDocumentRootNode)); //. ->
 	}
 	
-	public static void ConstructURLFile(int idTComponent, long idComponent, String URLFileName) throws IOException {
-	    XmlSerializer Serializer = Xml.newSerializer();
-	    FileOutputStream FOS = new FileOutputStream(URLFileName);
-	    try {
-	        Serializer.setOutput(FOS,"UTF-8");
-	        Serializer.startDocument("UTF-8",true);
-	        Serializer.startTag("", "ROOT");
-	        //. Version
-			int Version = 1;
-	        Serializer.startTag("", "Version");
-	        Serializer.text(Integer.toString(Version));
-	        Serializer.endTag("", "Version");
-	        //. TypeID
-	        Serializer.startTag("", "TypeID");
-	        Serializer.text(TypeID);
-	        Serializer.endTag("", "TypeID");
-	        //. URL
-	        Serializer.startTag("", "URL");
-	        //. Version
-			Version = 1;
-	        Serializer.startTag("", "Version");
-	        Serializer.text(Integer.toString(Version));
-	        Serializer.endTag("", "Version");
-	        //. idTComponent
-	        Serializer.startTag("", "idTComponent");
-	        Serializer.text(Integer.toString(idTComponent));
-	        Serializer.endTag("", "idTComponent");
-	        //. idComponent
-	        Serializer.startTag("", "idComponent");
-	        Serializer.text(Long.toString(idComponent));
-	        Serializer.endTag("", "idComponent");
-	        //.
-	        Serializer.endTag("", "URL");
-	        //.
-	        Serializer.endTag("", "ROOT");
-	        Serializer.endDocument();
-	    }
-	    finally {
-	    	FOS.close();
-	    }
+	
+	public TURL(int	pidTComponent, long pidComponent) {
+		super(pidTComponent,pidComponent);
 	}
-
 	
 	public TURL(TGeoScopeServerUser pUser, Element pXMLDocumentRootNode) throws Exception {
 		super(pUser,pXMLDocumentRootNode);
 	}
-	
+
+	@Override
+	public String GetTypeID() {
+		return TypeID;
+	}
+
 	@Override
 	public void Open(Context context) throws Exception {
 		TAsyncProcessing Opening = new TAsyncProcessing(context) {

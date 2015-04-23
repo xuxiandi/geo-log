@@ -71,7 +71,8 @@ public class TDataStreamPropsPanel extends Activity {
 			public boolean onLongClick(View v) {
             	try {
             		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
-            		com.geoscope.GeoEye.Space.URLs.TypesSystem.DataStream.PropsPanel.TURL.ConstructURLFile(idComponent, URLFN);
+            		com.geoscope.GeoEye.Space.URLs.TypesSystem.DataStream.PropsPanel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.DataStream.PropsPanel.TURL(idComponent);
+            		URL.ConstructURLFile(URLFN);
             		//.
             		Toast.makeText(TDataStreamPropsPanel.this, getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
             	}

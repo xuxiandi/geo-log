@@ -3,9 +3,15 @@ package com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.util.Locale;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 public class TComponentTypedDataFile {
@@ -22,6 +28,20 @@ public class TComponentTypedDataFile {
 	
 	public TComponentTypedDataFile(TComponentTypedDataFiles pTypedDataFiles) {
 		TypedDataFiles = pTypedDataFiles;
+	}
+	
+	public TComponentTypedDataFile Clone() {
+		TComponentTypedDataFile _Clone = new TComponentTypedDataFile(TypedDataFiles);
+		//.
+		_Clone.DataComponentType = DataComponentType;
+		_Clone.DataComponentID = DataComponentID;
+		_Clone.DataType = DataType;
+		_Clone.DataFormat = DataFormat;
+		_Clone.DataName = DataName;
+		_Clone.Data = Data;
+		_Clone.DataFileName = DataFileName;
+		//.
+		return _Clone;
 	}
 	
 	public String FileName() {
@@ -45,7 +65,7 @@ public class TComponentTypedDataFile {
 		DataComponentID = TDataConverter.ConvertLEByteArrayToInt64(BA,Idx); Idx += 8; //. native ComponentID is Int64
 		DataType = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
 		byte ItemFormatSize = BA[Idx]; Idx++;
-		DataFormat = new String(BA,Idx,ItemFormatSize,"windows-1251"); Idx += ItemFormatSize;
+		DataFormat = (new String(BA,Idx,ItemFormatSize,"windows-1251")).toUpperCase(Locale.US); Idx += ItemFormatSize;
 		short ItemNameSize = TDataConverter.ConvertLEByteArrayToInt16(BA,Idx); Idx += 2;
 		DataName = new String(BA,Idx,ItemNameSize,"windows-1251"); Idx += ItemNameSize;
 		int DataSize = TDataConverter.ConvertLEByteArrayToInt32(BA,Idx); Idx += 4;
@@ -109,11 +129,87 @@ public class TComponentTypedDataFile {
 		return Result;
 	}	
 
-	public void PrepareFullFromFile(String pFileName) {
+	public void PrepareAsName() {
+		//. convert to name data
+		if ((DataType % SpaceDefines.TYPEDDATAFILE_TYPE_RANGE) != SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_Name)
+			DataType = ((int)(DataType/SpaceDefines.TYPEDDATAFILE_TYPE_RANGE))*SpaceDefines.TYPEDDATAFILE_TYPE_RANGE;
+	}
+	
+	public void PrepareAsFullFromFile(String pFileName) {
 		DataFileName = pFileName;
 		// . convert to full data
 		if ((DataType % SpaceDefines.TYPEDDATAFILE_TYPE_RANGE) != SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)
 			DataType = ((int)(DataType/SpaceDefines.TYPEDDATAFILE_TYPE_RANGE))*SpaceDefines.TYPEDDATAFILE_TYPE_RANGE+SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
+	}
+	
+	public void PrepareFromServer(TGeoScopeServer Server, int pDataModel, int pDataType, boolean flWithComponents, TCanceller Canceller) throws Exception {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/* URLProtocolVersion */+"/"+Long.toString(Server.User.UserID);
+		String URL2 = "Functionality"+"/"+"ComponentDataDocument.dat";
+		//. add command parameters
+		int WithComponentsFlag;
+		if (flWithComponents)
+			WithComponentsFlag = 1;
+		else
+			WithComponentsFlag = 0;
+		URL2 = URL2+"?"+"1"/* command version */+","+Integer.toString(DataComponentType)+","+Long.toString(DataComponentID)+","+Integer.toString(pDataModel)+","+Integer.toString(pDataType)+","+Integer.toString(WithComponentsFlag);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+		StringBuffer sb = new StringBuffer();
+		for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
+			String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+			while (h.length() < 2)
+				h = "0"+h;
+			sb.append(h);
+		}
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		Canceller.Check();
+		//.
+		HttpURLConnection Connection = Server.OpenConnection(URL);
+		try {
+			Canceller.Check();
+			//.
+			InputStream in = Connection.getInputStream();
+			try {
+				Canceller.Check();
+				// .
+				int RetSize = Connection.getContentLength();
+				if (RetSize == 0) {
+					Data = null;
+					return; // . ->
+				}
+				byte[] Data = new byte[RetSize];
+				int Size;
+				int SummarySize = 0;
+				int ReadSize;
+				while (SummarySize < Data.length) {
+					ReadSize = Data.length - SummarySize;
+					Size = in.read(Data, SummarySize, ReadSize);
+					if (Size <= 0)
+						throw new Exception(TypedDataFiles.context.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
+					SummarySize += Size;
+					//.
+					Canceller.Check();
+				}
+				//.
+				FromByteArrayV0(Data);
+			} finally {
+				in.close();
+			}
+		} finally {
+			Connection.disconnect();
+		}
 	}
 	
 	public File GetTempFile() {

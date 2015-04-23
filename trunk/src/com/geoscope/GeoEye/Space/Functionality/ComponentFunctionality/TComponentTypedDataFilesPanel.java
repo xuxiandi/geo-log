@@ -451,7 +451,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	private Button btnCreateNewComponent;
 	//.
 	private TUpdating	Updating = null;
-	private int			UpdatingCount = 0;
 	//.
 	private TComponentTypedDataFileLoading ComponentTypedDataFileLoading = null;
 	
@@ -489,7 +488,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						throw new Exception("there is no a root element of the data files"); //. =>
 					//.
             		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
-            		com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.ConstructURLFile(RootItem.DataComponentType,RootItem.DataComponentID, URLFN);
+            		com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL URL = new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL(RootItem.DataComponentType,RootItem.DataComponentID);
+            		URL.ConstructURLFile(URLFN);
             		//.
             		Toast.makeText(TComponentTypedDataFilesPanel.this, getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
             	}
@@ -517,13 +517,14 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				if ((DataFiles == null) || (DataFiles.Count() == 0))
 					return false; //. ->
             	//.
-				final TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2];
+				final TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2].Clone();
 				//.
 	    		final CharSequence[] _items;
 	    		int SelectedIdx = -1;
-	    		_items = new CharSequence[2];
+	    		_items = new CharSequence[3];
 	    		_items[0] = TComponentTypedDataFilesPanel.this.getString(R.string.SOpen); 
 	    		_items[1] = TComponentTypedDataFilesPanel.this.getString(R.string.SRemove); 
+	    		_items[2] = TComponentTypedDataFilesPanel.this.getString(R.string.SGetURLFile); 
 	    		//.
 	    		AlertDialog.Builder builder = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
 	    		builder.setTitle(R.string.SSelect);
@@ -592,6 +593,73 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	    		    			alert.setNegativeButton(R.string.SCancel, null);
 	    		    			//.
 	    		    			alert.show();
+	    		    			//.
+	        		    		arg0.dismiss();
+	        		    		//.
+	    		    			break; //. >
+	    		    			
+	    		    		case 2: //. get URL-file
+								//.
+		    					TAsyncProcessing Processing = new TAsyncProcessing(TComponentTypedDataFilesPanel.this) {
+
+		    						private String URLFN;
+		    						
+		    						@Override
+		    						public void Process() throws Exception {
+	    								TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    								if (UserAgent == null)
+	    									throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SUserAgentIsNotInitialized)); //. =>
+	    								//.
+	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+	    								if (CF != null) 
+	    									try {
+	    										TURL URL = CF.GetDefaultURL();
+	    										if (URL != null) 
+	    											try {
+	    												if (URL.HasData()) {
+	    													ComponentTypedDataFile.PrepareFromServer(UserAgent.Server, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_Document, false, Canceller);
+	    													if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
+			    	    										File F = ComponentTypedDataFile.GetFile();
+			    	    										byte[] Data = new byte[(int)F.length()];
+			    	    										FileInputStream FIS = new FileInputStream(F);
+			    	    										try {
+			    	    											FIS.read(Data);
+			    	    										}
+			    	    										finally {
+			    	    											FIS.close();
+			    	    										}
+			    	    										CF.ParseFromXMLDocument(Data);
+	    													}
+	    												}
+	    	    										//.
+		    											URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+		    											URL.ConstructURLFile(URLFN);
+	    											}
+	    											finally {
+	    												URL.Release();
+	    											}
+    	    										else
+    	    											throw new Exception("there is no URL there"); //. =>
+	    												
+	    									}
+	    									finally {
+	    										CF.Release();
+	    									}
+    										else
+    											throw new Exception("there is no component functionality there"); //. =>
+		    						}
+
+		    						@Override
+		    						public void DoOnCompleted() throws Exception {
+					            		Toast.makeText(TComponentTypedDataFilesPanel.this, TComponentTypedDataFilesPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
+		    						}
+		    						
+		    						@Override
+		    						public void DoOnException(Exception E) {
+		    							Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+		    						}
+		    					};
+		    					Processing.Start();
 	    		    			//.
 	        		    		arg0.dismiss();
 	        		    		//.
@@ -713,8 +781,9 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
 	    				if (_DataFiles == null) {
-		    	        	_DataFiles = new TComponentTypedDataFiles(TComponentTypedDataFilesPanel.this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
+		    	        	_DataFiles = new TComponentTypedDataFiles(TComponentTypedDataFilesPanel.this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION);
 		    	        	_DataFiles.FromByteArrayV0(DataFilesBA);
+		    	        	_DataFiles.PrepareAsNames();
 		    	        	//.
 		    	        	Thread.sleep(100);
 	    				}
@@ -725,6 +794,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
 		    				if (UserAgent == null)
 		    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+		    				//.
+		    	        	_DataFiles.PrepareAsNames();
 	    					_DataFiles.PrepareForComponent(RootItem.DataComponentType,RootItem.DataComponentID, true, UserAgent.Server);
 	    				}
 	    			}
@@ -767,7 +838,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						if (!flExists)
 			            	break; //. >
 						TComponentTypedDataFilesPanel.this.DataFiles = (TComponentTypedDataFiles)msg.obj;
-						TComponentTypedDataFilesPanel.this.UpdatingCount++;
 						//.
 	           		 	TComponentTypedDataFilesPanel.this.Update();
 		            	//.
@@ -939,7 +1009,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 						}
 						//.
-						ComponentTypedDataFile.PrepareFullFromFile(CFN);
+						ComponentTypedDataFile.PrepareAsFullFromFile(CFN);
 						//.
 						TComponentTypedDataFilesPanel.this.MessageHandler.obtainMessage(OnCompletionMessage,ComponentTypedDataFile).sendToTarget();
 					}
@@ -1178,7 +1248,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");
 					}
 					else
-						if (ComponentTypedDataFile.DataFormat.toUpperCase(Locale.ENGLISH).equals(".XML")) {
+						if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
 							final TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 							if (CF != null)
 								try {

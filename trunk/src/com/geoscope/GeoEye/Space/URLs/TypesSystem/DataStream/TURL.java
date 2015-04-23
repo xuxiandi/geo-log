@@ -4,7 +4,7 @@ import org.w3c.dom.Element;
 
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 
-public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TURL {
+public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.TURL {
 
 	public static final String TypeID = com.geoscope.GeoEye.Space.URLs.TypesSystem.TURL.TypeID+"."+"DataStream";
 	
@@ -20,7 +20,16 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent
 	}
 	
 	
+	public TURL(long pidComponent) {
+		super(pidComponent);
+	}
+
 	public TURL(TGeoScopeServerUser pUser, Element pXMLDocumentRootNode) throws Exception {
 		super(pUser,pXMLDocumentRootNode);
+	}
+
+	@Override
+	public String GetTypeID() {
+		return TypeID;
 	}
 }

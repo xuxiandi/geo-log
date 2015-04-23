@@ -1,6 +1,5 @@
 package com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.PropsPanel;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.w3c.dom.Element;
@@ -9,7 +8,6 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
@@ -27,52 +25,27 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent
 		return (new TURL(pUser,pXMLDocumentRootNode));
 	}
 	
-	public static void ConstructURLFile(long idComponent, String ObjectName, String URLFileName) throws IOException {
-	    XmlSerializer Serializer = Xml.newSerializer();
-	    FileOutputStream FOS = new FileOutputStream(URLFileName);
-	    try {
-	        Serializer.setOutput(FOS,"UTF-8");
-	        Serializer.startDocument("UTF-8",true);
-	        Serializer.startTag("", "ROOT");
-	        //. Version
-			int Version = 1;
-	        Serializer.startTag("", "Version");
-	        Serializer.text(Integer.toString(Version));
-	        Serializer.endTag("", "Version");
-	        //. TypeID
-	        Serializer.startTag("", "TypeID");
-	        Serializer.text(TypeID);
-	        Serializer.endTag("", "TypeID");
-	        //. URL
-	        Serializer.startTag("", "URL");
-	        //. Version
-			Version = 1;
-	        Serializer.startTag("", "Version");
-	        Serializer.text(Integer.toString(Version));
-	        Serializer.endTag("", "Version");
-	        //. ObjectID
-	        Serializer.startTag("", "ObjectID");
-	        Serializer.text(Long.toString(idComponent));
-	        Serializer.endTag("", "ObjectID");
-	        //. ObjectName
-	        Serializer.startTag("", "ObjectName");
-	        Serializer.text(ObjectName);
-	        Serializer.endTag("", "ObjectName");
-	        //.
-	        Serializer.endTag("", "URL");
-	        //.
-	        Serializer.endTag("", "ROOT");
-	        Serializer.endDocument();
-	    }
-	    finally {
-	    	FOS.close();
-	    }
-	}
-
 	public String 	ObjectName;
 	
+	public TURL(long pidComponent) throws Exception {
+		super(pidComponent);
+		//.
+		ObjectName = "";
+	}
+
+	public TURL(long pidComponent, String pObjectName) throws Exception {
+		super(pidComponent);
+		//.
+		ObjectName = pObjectName;
+	}
+
 	public TURL(TGeoScopeServerUser pUser, Element pXMLDocumentRootNode) throws Exception {
 		super(pUser,pXMLDocumentRootNode);
+	}
+
+	@Override
+	public String GetTypeID() {
+		return TypeID;
 	}
 		
 	@Override
@@ -101,6 +74,15 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent
 		}
 	}
 	
+	@Override
+	public void ToXMLSerializer(XmlSerializer Serializer) throws IOException {
+		super.ToXMLSerializer(Serializer);
+        //. ObjectName
+        Serializer.startTag("", "ObjectName");
+        Serializer.text(ObjectName);
+        Serializer.endTag("", "ObjectName");
+	}
+
 	@Override
 	public void Open(Context context) throws Exception {
     	Intent intent = new Intent(context, TCoGeoMonitorObjectPanel.class);

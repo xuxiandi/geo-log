@@ -1034,5 +1034,6 @@
     <string name="STextHasBeenSaved">Text has been saved</string>
     <string name="SPictureHasBeenSaved">Picture has been saved</string>
     <string name="SURLFileNameHasBeenSaved">"URL file has been saved to "</string>
+    <string name="SGetURLFile">Get URL-file</string>
     
 </resources>

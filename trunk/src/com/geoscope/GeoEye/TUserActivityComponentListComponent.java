@@ -72,6 +72,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TDATAFileFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
+import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.THintManager;
@@ -597,11 +598,12 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 					//.
 		    		final CharSequence[] _items;
 		    		int SelectedIdx = -1;
-		    		_items = new CharSequence[4];
+		    		_items = new CharSequence[5];
 		    		_items[0] = ParentActivity.getString(R.string.SOpen); 
 		    		_items[1] = ParentActivity.getString(R.string.SContent1); 
 		    		_items[2] = ParentActivity.getString(R.string.SShowGeoLocation); 
 		    		_items[3] = ParentActivity.getString(R.string.SRemove); 
+		    		_items[4] = ParentActivity.getString(R.string.SGetURLFile); 
 		    		//.
 		    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		    		builder.setTitle(R.string.SSelect);
@@ -682,7 +684,6 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		    		    								}
 		    		    								else
 		    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(_Component.idTComponent)); //. =>
-		    		    									
 		    		    						}
 
 		    		    						@Override
@@ -704,6 +705,76 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		    		    			alert.setNegativeButton(R.string.SCancel, null);
 		    		    			//.
 		    		    			alert.show();
+		    		    			//.
+		        		    		arg0.dismiss();
+		        		    		//.
+		    		    			break; //. >
+
+		    		    		case 4: //. get URL-file
+    								if (_Component.TypedDataFiles.Count() > 0) {
+	    								final TComponentTypedDataFile ComponentTypedDataFile = _Component.TypedDataFiles.Items[0].Clone();
+	    								//.
+	    		    					TAsyncProcessing Processing = new TAsyncProcessing(ParentActivity) {
+
+	    		    						private String URLFN;
+	    		    						
+	    		    						@Override
+	    		    						public void Process() throws Exception {
+	    	    								TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    	    								if (UserAgent == null)
+	    	    									throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
+	    	    								//.
+	    	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+	    	    								if (CF != null) 
+	    	    									try {
+	    	    										TURL URL = CF.GetDefaultURL();
+	    	    										if (URL != null) 
+	    	    											try {
+	    	    												if (URL.HasData()) {
+		    	    												ComponentTypedDataFile.PrepareFromServer(UserAgent.Server, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_Document, false, Canceller);
+			    													if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
+			    	    	    										File F = ComponentTypedDataFile.GetFile();
+			    	    	    										byte[] Data = new byte[(int)F.length()];
+			    	    	    										FileInputStream FIS = new FileInputStream(F);
+			    	    	    										try {
+			    	    	    											FIS.read(Data);
+			    	    	    										}
+			    	    	    										finally {
+			    	    	    											FIS.close();
+			    	    	    										}
+			    	    	    										CF.ParseFromXMLDocument(Data);
+			    													}
+	    	    												}
+	    	    	    										//.
+	    		    											URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+	    		    											URL.ConstructURLFile(URLFN);
+	    	    											}
+	    	    											finally {
+	    	    												URL.Release();
+	    	    											}
+		    	    										else
+		    	    											throw new Exception("there is no URL there"); //. =>
+	    	    												
+	    	    									}
+	    	    									finally {
+	    	    										CF.Release();
+	    	    									}
+    	    										else
+    	    											throw new Exception("there is no component functionality there"); //. =>
+	    		    						}
+
+	    		    						@Override
+	    		    						public void DoOnCompleted() throws Exception {
+    						            		Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
+	    		    						}
+	    		    						
+	    		    						@Override
+	    		    						public void DoOnException(Exception E) {
+	    		    							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+	    		    						}
+	    		    					};
+	    		    					Processing.Start();
+    								}
 		    		    			//.
 		        		    		arg0.dismiss();
 		        		    		//.
@@ -1185,7 +1256,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
 						}
 						//.
-						ComponentTypedDataFile.PrepareFullFromFile(CFN);
+						ComponentTypedDataFile.PrepareAsFullFromFile(CFN);
 						//.
 						TUserActivityComponentListComponent.this.MessageHandler.obtainMessage(OnCompletionMessage,ComponentTypedDataFile).sendToTarget();
 					}
@@ -1424,7 +1495,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 						intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");
 					}
 					else
-						if (ComponentTypedDataFile.DataFormat.toUpperCase(Locale.ENGLISH).equals(".XML")) {
+						if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
 							TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 							if (CF != null)
 								try {

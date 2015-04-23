@@ -20,7 +20,16 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TURL {
 	}
 	
 	
+	public TURL() {
+		super();
+	}
+	
 	public TURL(TGeoScopeServerUser pUser, Element pXMLDocumentRootNode) throws Exception {
 		super(pUser,pXMLDocumentRootNode);
+	}
+
+	@Override
+	public String GetTypeID() {
+		return TypeID;
 	}
 }

@@ -149,7 +149,10 @@ public class TCoGeoMonitorObject {
 	}
 
 	public String LabelText() {
-		return (Name+" "+"¹"+Long.toString(ID));
+		String S = "";
+		if ((Name != null) && !Name.equals(""))
+			S = Name+" ";
+		return (S+"¹"+Long.toString(ID));
 	}
 	
 	public void Prepare(TReflectorComponent pReflector) {

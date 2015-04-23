@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
+import org.w3c.dom.Element;
+
 import android.content.Context;
 import android.content.Intent;
 
@@ -53,6 +55,8 @@ public class TComponentFunctionality extends TFunctionality {
 	public TGeoScopeServer Server;
 	//.
 	public int ComponentDataSource = 0;
+	//.
+	protected Element XMLDocumentRootNode = null;
 	//.
 	public TBase2DVisualizationFunctionality.TTransformatrix 	VisualizationTransformatrix = null;
 	public TBase2DVisualizationFunctionality.TData 				VisualizationData = null;

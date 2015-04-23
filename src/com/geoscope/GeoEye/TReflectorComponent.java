@@ -117,6 +117,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObj
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectTrack;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessorPanel;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TDATAFileFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
@@ -8922,6 +8923,11 @@ public class TReflectorComponent extends TUIComponent {
 							if (Version > 0)
 								switch (CF.TypeFunctionality.idType) {
 
+								case SpaceDefines.idTDATAFile:
+									TDATAFileFunctionality DFF = (TDATAFileFunctionality)CF;
+									DFF.Open();
+									return; // . ->
+
 								case SpaceDefines.idTPositioner:
 									TPositionerFunctionality PF = (TPositionerFunctionality) CF;
 									// .
@@ -8958,7 +8964,7 @@ public class TReflectorComponent extends TUIComponent {
 						context,
 						context.getString(R.string.SErrorOfPreparingDataFile)
 								+ ComponentTypedDataFile.FileName(),
-						Toast.LENGTH_SHORT).show();
+						Toast.LENGTH_LONG).show();
 				return; // . ->
 			}
 			break; // . >

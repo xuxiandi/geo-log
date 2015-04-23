@@ -1434,7 +1434,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 										
 										case SpaceDefines.idTDATAFile:
 											TDATAFileFunctionality DFF = (TDATAFileFunctionality)CF;
-											DFF.Open();
+											DFF.Open(ParentActivity);
 											return; // . ->
 
 										case SpaceDefines.idTPositioner:

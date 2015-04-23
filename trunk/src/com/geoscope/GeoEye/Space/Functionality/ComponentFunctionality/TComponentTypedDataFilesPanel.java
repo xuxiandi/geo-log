@@ -59,6 +59,7 @@ import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessorPanel;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TDATAFileFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
@@ -1161,6 +1162,11 @@ public class TComponentTypedDataFilesPanel extends Activity {
 									if (Version > 0) 
 										switch (CF.TypeFunctionality.idType) {
 										
+										case SpaceDefines.idTDATAFile:
+											TDATAFileFunctionality DFF = (TDATAFileFunctionality)CF;
+											DFF.Open();
+											return; // . ->
+
 										case SpaceDefines.idTPositioner:
 											TPositionerFunctionality PF = (TPositionerFunctionality)CF;
 											//.
@@ -1198,7 +1204,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 							TComponentTypedDataFilesPanel.this,
 							getString(R.string.SErrorOfPreparingDataFile)
 									+ ComponentTypedDataFile.FileName(),
-							Toast.LENGTH_SHORT).show();
+							Toast.LENGTH_LONG).show();
 					return; // . ->
 				}
 				break; // . >

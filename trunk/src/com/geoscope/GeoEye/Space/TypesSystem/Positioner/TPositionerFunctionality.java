@@ -84,7 +84,7 @@ public class TPositionerFunctionality extends TComponentFunctionality {
     					_Timestamp = Double.parseDouble(node.getNodeValue());
     			}
     			catch (Exception E) {
-        			throw new Exception("error of parsing xml document: "+E.getMessage()); //. =>
+        			throw new Exception("error of parsing XML document: "+E.getMessage()); //. =>
     			}
     			return Version; //. ->
     			

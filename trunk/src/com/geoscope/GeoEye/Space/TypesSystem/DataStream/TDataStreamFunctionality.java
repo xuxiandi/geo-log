@@ -44,7 +44,7 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 			return Version; //. ->
     	}
     	catch (Exception E) {
-			throw new Exception("error of loading xml document: "+E.getMessage()); //. =>
+			throw new Exception("error of loading XML document: "+E.getMessage()); //. =>
     	}
 	}
 	

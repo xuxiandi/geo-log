@@ -3,6 +3,8 @@ package com.geoscope.GeoEye.Space.URL;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import android.content.Context;
+
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 
@@ -21,6 +23,8 @@ public class TURL {
 			return null; //. ->
 	}
 	
+	public static final String DefaultURLFileName = "URL.xml";
+	
 	
 	protected TGeoScopeServerUser User;
 	protected Element XMLDocumentRootNode;
@@ -34,7 +38,8 @@ public class TURL {
 		User = pUser;
 		XMLDocumentRootNode = pXMLDocumentRootNode;
 		//.
-		Parse();
+		if (XMLDocumentRootNode != null)
+			Parse();
 	}
 	
 	protected void Parse() throws Exception {
@@ -63,6 +68,6 @@ public class TURL {
 		}
 	}
 	
-	public void Open() throws Exception {
+	public void Open(Context context) throws Exception {
 	}
 }

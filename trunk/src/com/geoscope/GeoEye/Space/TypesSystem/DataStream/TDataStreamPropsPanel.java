@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -27,6 +28,7 @@ import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
@@ -63,6 +65,22 @@ public class TDataStreamPropsPanel extends Activity {
         setContentView(R.layout.datastream_props_panel);
         //.
         lbStreamName = (TextView)findViewById(R.id.lbStreamName);
+        lbStreamName.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+            	try {
+            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+            		com.geoscope.GeoEye.Space.URLs.TypesSystem.DataStream.PropsPanel.TURL.ConstructURLFile(idComponent, URLFN);
+            		//.
+            		Toast.makeText(TDataStreamPropsPanel.this, getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
+            	}
+            	catch (Exception E) {
+            		Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            	}
+				return true;
+			}
+		});
         lbStreamInfo = (TextView)findViewById(R.id.lbStreamInfo);
         lbStreamChannels = (TextView)findViewById(R.id.lbStreamChannels);
         //.

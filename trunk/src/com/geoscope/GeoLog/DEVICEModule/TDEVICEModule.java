@@ -1351,6 +1351,8 @@ public class TDEVICEModule extends TModule
 							if ((DEVICEModule.ConnectorModule != null) && (DEVICEModule.ConnectorModule.flProcessing)) {
 								ServerAddress = DEVICEModule.ConnectorModule.GetGeographDataServerAddress();
 								ServerPort = DEVICEModule.ConnectorModule.GetGeographDataServerPort();
+								//.
+								continue; //. ^
 							}
 						}
 						//.

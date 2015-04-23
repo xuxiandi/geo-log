@@ -24,6 +24,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -81,6 +82,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerVideoPhoneCallPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerViewer;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
+import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
@@ -410,6 +412,22 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 	        setContentView(R.layout.reflector_gmo_panel);
 	        //.
 	        edGMOName = (EditText)findViewById(R.id.edGMOName);
+	        edGMOName.setOnLongClickListener(new OnLongClickListener() {
+				
+				@Override
+				public boolean onLongClick(View v) {
+	            	try {
+	            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+	            		com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.PropsPanel.TURL.ConstructURLFile(Object.ID,Object.Name, URLFN);
+	            		//.
+	            		Toast.makeText(TCoGeoMonitorObjectPanel.this, TCoGeoMonitorObjectPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
+	            	}
+	            	catch (Exception E) {
+	            		Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	}
+					return true;
+				}
+			});
 	        edGMOConnectionState = (EditText)findViewById(R.id.edGMOConnectionState);
 	        edGMOLocationState = (EditText)findViewById(R.id.edGMOLocationState);
 	        edGMOAlertState = (EditText)findViewById(R.id.edGMOAlertState);
@@ -768,6 +786,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), Mode);
 										Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.VideoRecorderModule.Mode.GetAddressArray(), Value.ToByteArray());
 									}
+									
 									@Override 
 									public void DoOnCompleted() throws Exception {
 										Update();

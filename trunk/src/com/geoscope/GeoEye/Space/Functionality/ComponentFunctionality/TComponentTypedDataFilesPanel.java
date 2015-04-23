@@ -28,6 +28,7 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -63,6 +64,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TDATAFileFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
+import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
@@ -475,6 +477,28 @@ public class TComponentTypedDataFilesPanel extends Activity {
         setContentView(R.layout.componenttypeddatafiles_panel);
         //.
         lbName = (TextView)findViewById(R.id.lbName);
+        lbName.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+            	try {
+            		if (DataFiles == null)
+            			return false; //. ->
+					TComponentTypedDataFile RootItem = DataFiles.GetRootItem();
+					if (RootItem == null)
+						throw new Exception("there is no a root element of the data files"); //. =>
+					//.
+            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+            		com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.ConstructURLFile(RootItem.DataComponentType,RootItem.DataComponentID, URLFN);
+            		//.
+            		Toast.makeText(TComponentTypedDataFilesPanel.this, getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
+            	}
+            	catch (Exception E) {
+            		Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            	}
+				return true;
+			}
+		});
         //.
         lvDataFiles = (ListView)findViewById(R.id.lvDataFiles);
         lvDataFiles.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -1164,7 +1188,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 										
 										case SpaceDefines.idTDATAFile:
 											TDATAFileFunctionality DFF = (TDATAFileFunctionality)CF;
-											DFF.Open();
+											DFF.Open(TComponentTypedDataFilesPanel.this);
 											return; // . ->
 
 										case SpaceDefines.idTPositioner:

@@ -8,6 +8,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import android.content.Context;
+
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
@@ -63,11 +65,11 @@ public class TDATAFileFunctionality extends TComponentFunctionality {
     	}
 	}
 	
-	public void Open() throws Exception {
+	public void Open(Context context) throws Exception {
 		if (TURL.IsTypeOf(TypeID)) {
 			TURL URL = TURL.GetURL(TypeID, Server.User, XMLDocumentRootNode);
 			if (URL != null)
-				URL.Open();
+				URL.Open(context);
 		}
 	}
 }

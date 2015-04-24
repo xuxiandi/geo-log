@@ -1782,7 +1782,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 		if (Object.DataStreamComponents == null)
 			return; //. >
 		TComponentDescriptor DataStreamComponent = Object.DataStreamComponents[0]; 
-		TComponentFunctionality CF = Server.User.Space.TypesSystem.TComponentFunctionality_Create(Server, DataStreamComponent.idTComponent, DataStreamComponent.idComponent);
+		TComponentFunctionality CF = Server.User.Space.TypesSystem.TComponentFunctionality_Create(DataStreamComponent.idTComponent, DataStreamComponent.idComponent);
 		try {
 			TComponentFunctionality.TPropsPanel PropsPanel = CF.TPropsPanel_Create(this);
 			if (PropsPanel != null)

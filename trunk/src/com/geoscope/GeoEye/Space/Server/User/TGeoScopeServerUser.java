@@ -2531,7 +2531,7 @@ public class TGeoScopeServerUser {
 	public void Initialize(boolean pflUserSession) throws Exception {
 		flUserSession = pflUserSession;
 		//. initialize the space 
-		Space = TSpace.InitializeSpace(Server.context);
+		Space = TSpace.InitializeSpace(this,Server.context);
 		//.
 		if (IncomingMessages == null) 
 			IncomingMessages = new TIncomingMessages(this);

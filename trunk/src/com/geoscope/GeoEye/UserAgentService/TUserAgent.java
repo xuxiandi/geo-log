@@ -50,6 +50,12 @@ public class TUserAgent {
     	return UserAgent;
     }
     
+    public static synchronized TGeoScopeServerUser GetUserAgentUser() {
+    	if (UserAgent == null)
+    		return null; //. ->
+    	return UserAgent.User();
+    }
+    
     public static synchronized TGeoScopeServer GetUserAgentServer() {
     	if (UserAgent == null)
     		return null; //. ->

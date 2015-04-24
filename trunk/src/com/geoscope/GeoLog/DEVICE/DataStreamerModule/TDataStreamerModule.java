@@ -24,9 +24,8 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
-import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
@@ -103,9 +102,9 @@ public class TDataStreamerModule extends TModule {
 			//.
 			public TDataStreamDescriptor StreamDescriptor = null;
 
-			public void SupplyWithStreamDescriptor(TGeoScopeServer Server) throws Exception {
+			public void SupplyWithStreamDescriptor(TGeoScopeServerUser User) throws Exception {
 				if (idTComponent == SpaceDefines.idTDataStream) {
-					TDataStreamFunctionality DSF = (TDataStreamFunctionality)TSpace.Space.TypesSystem.SystemTDataStream.TComponentFunctionality_Create(Server,idComponent);
+					TDataStreamFunctionality DSF = (TDataStreamFunctionality)User.Space.TypesSystem.SystemTDataStream.TComponentFunctionality_Create(idComponent);
 					try {
 						StreamDescriptor = DSF.GetStreamDescriptor();
 					}
@@ -268,10 +267,10 @@ public class TDataStreamerModule extends TModule {
 		    }
 		}
 		
-		public void SupplyComponentsWithStreamDescriptors(TGeoScopeServer Server) throws Exception {
+		public void SupplyComponentsWithStreamDescriptors(TGeoScopeServerUser User) throws Exception {
 			for (int I = 0; I < Components.size(); I++) {
 				TComponent Component = Components.get(I);
-				Component.SupplyWithStreamDescriptor(Server);
+				Component.SupplyWithStreamDescriptor(User);
 			}
 		}
 	}
@@ -346,15 +345,15 @@ public class TDataStreamerModule extends TModule {
 		}
 
 		private void StartStreamers() throws Exception {
-			TGeoScopeServer SpaceServer = TUserAgent.GetUserAgentServer();
+			TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
 			//.
 			for (int I = 0; I < StreamingComponents.Components.size(); I++) {
 				TStreamingComponents.TComponent Component = StreamingComponents.Components.get(I);
 				//.
 				if (Component.Enabled) {
 					//. supply component with its stream descriptor
-					if (SpaceServer != null)
-						Component.SupplyWithStreamDescriptor(SpaceServer);
+					if (User != null)
+						Component.SupplyWithStreamDescriptor(User);
 					//.
 					if (Component.StreamDescriptor != null)
 						for (int J = 0; J < Component.StreamDescriptor.Channels.size(); J++) {

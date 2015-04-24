@@ -93,7 +93,7 @@ public class TComponentTypedDataFiles {
 		DataParams = pDataParams;
 		//.
 		int Version = 0;
-		TComponentFunctionality CF = Server.User.Space.TypesSystem.TComponentFunctionality_Create(Server, idTComponent,idComponent);
+		TComponentFunctionality CF = Server.User.Space.TypesSystem.TComponentFunctionality_Create(idTComponent,idComponent);
 		if (CF == null)
 			return; //. ->
 		try {

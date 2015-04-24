@@ -1911,7 +1911,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
                 VisualizationData.Nodes[1] = new TBase2DVisualizationFunctionality.TData.TNode((P1.X+P2.X)/2.0,(P1.Y+P2.Y)/2.0);
                 VisualizationData.Content = new TBase2DVisualizationFunctionality.TData.TContent(ContentType,ContentData);
                 //.
-				TComponentFunctionality CF = Component.User.Space.TypesSystem.TComponentFunctionality_Create(Component.Server, DrawingsVisualizationPrototypeTypeID,DrawingsVisualizationPrototypeID);
+				TComponentFunctionality CF = Component.User.Space.TypesSystem.TComponentFunctionality_Create(DrawingsVisualizationPrototypeTypeID,DrawingsVisualizationPrototypeID);
 				if (CF != null) 
 					try {
 						CF.VisualizationData = VisualizationData;
@@ -1923,7 +1923,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
             		    	else
             		    		DataName = "";
             		    	//.
-        					TComponentFunctionality CCF = Component.User.Space.TypesSystem.TComponentFunctionality_Create(Component.User.Server, CF.idTComponent(),Result);
+        					TComponentFunctionality CCF = Component.User.Space.TypesSystem.TComponentFunctionality_Create(CF.idTComponent(),Result);
         					if (CCF == null)
         						throw new Exception("could not get a clone functionality"); //. => 
         					try {

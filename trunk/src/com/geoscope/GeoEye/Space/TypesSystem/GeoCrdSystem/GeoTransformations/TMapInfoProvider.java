@@ -2,7 +2,6 @@ package com.geoscope.GeoEye.Space.TypesSystem.GeoCrdSystem.GeoTransformations;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
-import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.DetailedPictureVisualization.TDetailedPictureVisualizationData;
 import com.geoscope.GeoEye.Space.TypesSystem.DetailedPictureVisualization.TDetailedPictureVisualizationFunctionality;
@@ -32,7 +31,7 @@ public abstract class TMapInfoProvider {
 	    public double SegmentSize;
 	    public double Size;
 
-	    public abstract boolean Prepare(TTypesSystem TypesSystem, TGeoScopeServer Server, int ComponentDataSource) throws Exception; 
+	    public abstract boolean Prepare(TTypesSystem TypesSystem, int ComponentDataSource) throws Exception; 
 	    public abstract TXYCoord ConvertPixPosToXY(double PixX, double PixY); 
 	    public abstract TXYCoord ConvertXYToPixPos(double X, double Y);
 	}
@@ -46,8 +45,8 @@ public abstract class TMapInfoProvider {
 		}
 
 		@Override
-	    public boolean Prepare(TTypesSystem TypesSystem, TGeoScopeServer Server, int ComponentDataSource) throws Exception {
-			TDetailedPictureVisualizationFunctionality DPVF = (TDetailedPictureVisualizationFunctionality)TypesSystem.SystemTDetailedPictureVisualization.TComponentFunctionality_Create(Server, idDetailedPictureVisualization);
+	    public boolean Prepare(TTypesSystem TypesSystem, int ComponentDataSource) throws Exception {
+			TDetailedPictureVisualizationFunctionality DPVF = (TDetailedPictureVisualizationFunctionality)TypesSystem.SystemTDetailedPictureVisualization.TComponentFunctionality_Create(idDetailedPictureVisualization);
 			try {
 				DPVF.ComponentDataSource = ComponentDataSource;
 				//.
@@ -138,8 +137,8 @@ public abstract class TMapInfoProvider {
 		}
 
 		@Override
-	    public boolean Prepare(TTypesSystem TypesSystem, TGeoScopeServer Server, int ComponentDataSource) throws Exception {
-			TTileServerVisualizationFunctionality TSVF = (TTileServerVisualizationFunctionality)TypesSystem.SystemTTileServerVisualization.TComponentFunctionality_Create(Server, idTileServerVisualization);
+	    public boolean Prepare(TTypesSystem TypesSystem, int ComponentDataSource) throws Exception {
+			TTileServerVisualizationFunctionality TSVF = (TTileServerVisualizationFunctionality)TypesSystem.SystemTTileServerVisualization.TComponentFunctionality_Create(idTileServerVisualization);
 			try {
 				TSVF.ComponentDataSource = ComponentDataSource;
 				//.

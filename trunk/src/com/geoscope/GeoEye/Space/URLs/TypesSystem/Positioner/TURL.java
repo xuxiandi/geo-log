@@ -68,7 +68,6 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.TURL {
 		switch (URLVersion) {
 		case 1:
 			try {
-				idComponent = 0;
 				Node node = TMyXML.SearchNode(URLNode,"ComponentData");
     			if (node != null) 
     				PF.FromXMLNode(node);

@@ -2,15 +2,10 @@ package com.geoscope.GeoEye.Space.TypesSystem.MapFormatMap;
 
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
-import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 
 public class TTMapFormatMapFunctionality extends TTypeFunctionality {
 
-	public TTMapFormatMapFunctionality(TTypeSystem pTypeSystem, TGeoScopeServer pServer) {
-		super(pServer,pTypeSystem);
-	}
-	
 	public TTMapFormatMapFunctionality(TTypeSystem pTypeSystem) {
 		super(pTypeSystem);
 	}

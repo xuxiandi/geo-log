@@ -10,22 +10,18 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
 public class TTypeFunctionality extends TFunctionality {
 	
-	public TGeoScopeServer Server;
-	//.
 	public TTypeSystem TypeSystem;
 	//.
 	public int idType;
+	//.
+	public TGeoScopeServer Server;
 	
-	public TTypeFunctionality(TGeoScopeServer pServer, TTypeSystem pTypeSystem) {
-		Server = pServer;
-		//.
+	public TTypeFunctionality(TTypeSystem pTypeSystem) {
 		TypeSystem = pTypeSystem;
 		//.
 		idType = TypeSystem.idType;
-	}
-	
-	public TTypeFunctionality(TTypeSystem pTypeSystem) {
-		this(null, pTypeSystem);
+		//.
+		Server = pTypeSystem.TypesSystem.Space.User.Server;
 	}
 	
 	public TTypesSystem TypesSystem() {

@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
-import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentData;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
@@ -81,8 +80,8 @@ public class TSystemTGeoSpace extends TTypeSystem {
 	}
 
 	@Override
-	public TTypeFunctionality TTypeFunctionality_Create(TGeoScopeServer pServer) {
-		return (new TTGeoSpaceFunctionality(this, pServer)); 
+	public TTypeFunctionality TTypeFunctionality_Create() {
+		return (new TTGeoSpaceFunctionality(this)); 
 	}
 	
 	@Override

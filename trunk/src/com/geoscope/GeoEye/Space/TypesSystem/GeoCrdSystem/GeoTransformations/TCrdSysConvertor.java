@@ -34,7 +34,7 @@ public class TCrdSysConvertor {
 		if (GeoCrdSystemData == null)
 			return false; //. ->
 		MapInfo = TMapInfoProvider.GetMapInfo(GeoCrdSystemData.idTOwner,GeoCrdSystemData.idOwner);
-		if ((MapInfo == null) || (!MapInfo.Prepare(GeoCrdSystemFunctionality.TypesSystem(),GeoCrdSystemFunctionality.Server,GeoCrdSystemFunctionality.ComponentDataSource)))
+		if ((MapInfo == null) || (!MapInfo.Prepare(GeoCrdSystemFunctionality.TypesSystem(),GeoCrdSystemFunctionality.ComponentDataSource)))
 			return false; //. ->
 		Datum = TGeoDatum.GetDatumByName(GeoCrdSystemData.Datum);
 		if (Datum == null)

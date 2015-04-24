@@ -670,7 +670,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 2:
+		    		    		case 2: //. User activity info
 		    		    			String UserActivityInfo;
 	    	    					if (Activities != null) {
 	    	            				TActivity Activity = Activities.GetItem(_Component.idActivity);
@@ -721,7 +721,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		    		    		    				if (UserAgent == null)
 		    		    		    					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		    		    		    				//.
-		    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(UserAgent.User().Server, _Component.idTComponent);
+		    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(_Component.idTComponent);
 		    		    							if (TF != null)
 		    		    								try {
 		    		    									TF.DestroyInstance(_Component.idComponent);
@@ -770,7 +770,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	    	    								if (UserAgent == null)
 	    	    									throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    	    								//.
-	    	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+	    	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 	    	    								if (CF != null) 
 	    	    									try {
 	    	    										TURL URL = CF.GetDefaultURL();
@@ -1612,7 +1612,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 					}
 					else
 						if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
-							TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+							TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 							if (CF != null)
 								try {
 									int Version = CF.ParseFromXMLDocument(Data);
@@ -1772,7 +1772,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 				if (UserAgent == null)
 					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 				//.
-				TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, _Component.idTComponent,_Component.idComponent);
+				TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_Component.idTComponent,_Component.idComponent);
 				try {
 					VisualizationPosition = CF.GetVisualizationPosition(); 
 				}

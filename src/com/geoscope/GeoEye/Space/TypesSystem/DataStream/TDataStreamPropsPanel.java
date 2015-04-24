@@ -164,7 +164,7 @@ public class TDataStreamPropsPanel extends Activity {
 	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    				//.
 	    				try {
-		    				final TDataStreamFunctionality DSF = (TDataStreamFunctionality)UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, idTComponent, idComponent);
+		    				final TDataStreamFunctionality DSF = (TDataStreamFunctionality)UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(idTComponent, idComponent);
 		    				try {
 		    					DataStreamDescriptor = DSF.GetStreamDescriptor();
 		    				}
@@ -341,7 +341,7 @@ public class TDataStreamPropsPanel extends Activity {
 				ServersInfo = UserAgent.Server.Info.GetInfo();
 				if (!ServersInfo.IsSpaceDataServerValid()) 
 					throw new Exception("Invalid space data server"); //. =>
-				final TDataStreamFunctionality DSF = (TDataStreamFunctionality)UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, idTComponent, idComponent);
+				final TDataStreamFunctionality DSF = (TDataStreamFunctionality)UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(idTComponent, idComponent);
 				try {
 					DescriptorData = DSF.GetDescriptorData();
 				}
@@ -391,7 +391,7 @@ public class TDataStreamPropsPanel extends Activity {
 				if (!ServersInfo.IsSpaceDataServerValid()) 
 					throw new Exception("Invalid space data server"); //. =>
 				byte[] DescriptorData;
-				final TDataStreamFunctionality DSF = (TDataStreamFunctionality)UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, idTComponent, idComponent);
+				final TDataStreamFunctionality DSF = (TDataStreamFunctionality)UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(idTComponent, idComponent);
 				try {
 					DescriptorData = DSF.GetDescriptorData();
 				}

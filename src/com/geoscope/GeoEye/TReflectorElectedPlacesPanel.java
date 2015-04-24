@@ -15,9 +15,9 @@ import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -33,6 +33,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.THintManager;
 
@@ -46,6 +47,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	//.
 	private TReflectorElectedPlaces ElectedPlaces;
 	
+	private TextView lbUserListTitle;
 	private Button btnNewPlace;
 	private Button btnRemoveSelectedPlaces;
 	private Button btnSendSelectedPlacesToUser;
@@ -74,6 +76,24 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
         setContentView(R.layout.reflector_electedplaces_panel);
+        //.
+        lbUserListTitle = (TextView)findViewById(R.id.lbUserListTitle);
+        lbUserListTitle.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+            	try {
+            		String URLFN = GetSelectedPlaceURLFile();
+            		//.
+            		if (URLFN != null)
+            			Toast.makeText(TReflectorElectedPlacesPanel.this, TReflectorElectedPlacesPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
+            	}
+            	catch (Exception E) {
+            		Toast.makeText(TReflectorElectedPlacesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            	}
+				return true;
+			}
+		});
         //.
         btnNewPlace = (Button)findViewById(R.id.btnNewPlace);
         btnNewPlace.setOnClickListener(new OnClickListener() {
@@ -388,4 +408,18 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 	        }
 	    };
     }	
+
+	public String GetSelectedPlaceURLFile() throws IOException {
+		@SuppressWarnings("deprecation")
+		long[] SelectedPlaces = lvPlaces.getCheckItemIds();
+		if (SelectedPlaces.length != 1)
+			return null; //. ->
+		TLocation URLPlace = ElectedPlaces.Items.get((int)SelectedPlaces[0]);
+		//.
+		com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.TURL.TData Data = new com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.TURL.TData(URLPlace.Name, URLPlace.RW.X0, URLPlace.RW.Y0, URLPlace.RW.X1, URLPlace.RW.Y1, URLPlace.RW.X2, URLPlace.RW.Y2, URLPlace.RW.X3, URLPlace.RW.Y3, URLPlace.RW.BeginTimestamp);
+		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+		com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.Panel.TURL URL = new com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.Panel.TURL(Data);
+		URL.ConstructURLFile(URLFN);
+		return URLFN;
+	}
 }

@@ -28,7 +28,7 @@ public class TDataStreamerStreamingComponentsValue extends TComponentTimestamped
     		//. supply the streaming components with its descriptors (stream descriptor datas)
 			TUserAgent UserAgent = TUserAgent.GetUserAgent();
 			if (UserAgent != null) 
-				NewStreamingComponents.SupplyComponentsWithStreamDescriptors(UserAgent.Server);
+				NewStreamingComponents.SupplyComponentsWithStreamDescriptors(UserAgent.User());
     		//. set new streaming components
 			DataStreamerModule.SetStreamingComponents(NewStreamingComponents);
 		} catch (Exception E) {

@@ -20,9 +20,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.Window;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -35,7 +35,6 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
-import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TSystemTGeoSpace;
@@ -1189,7 +1188,11 @@ public class TReflectorConfigurationPanel extends Activity {
         	cbTrackerHide.setChecked(Component.Configuration.GeoLog_flHide);
         	cbApplicationQuit.setChecked(Component.Configuration.Application_flQuitAbility);
         	//.
-        	lbContext.setText(getString(R.string.SContext)+" "+"("+getString(R.string.SFilling)+": "+Integer.toString((int)(100.0*TSpace.Space.Context.Storage.DeviceFillFactor()))+" %"+")");
+			TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
+			if (User != null)
+				lbContext.setText(getString(R.string.SContext)+" "+"("+getString(R.string.SFilling)+": "+Integer.toString((int)(100.0*User.Space.Context.Storage.DeviceFillFactor()))+" %"+")");
+			else
+				lbContext.setText("?");
         	//.
         	cbUseTrackerService.setChecked(Component.Configuration.GeoLog_flEnabled);
         	cbTrackerServerConnection.setChecked(Component.Configuration.GeoLog_flServerConnection);

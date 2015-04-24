@@ -517,7 +517,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				if ((DataFiles == null) || (DataFiles.Count() == 0))
 					return false; //. ->
             	//.
-				final TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2].Clone();
+				final TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2];
 				//.
 	    		final CharSequence[] _items;
 	    		int SelectedIdx = -1;
@@ -560,7 +560,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	    		    		    				if (UserAgent == null)
 	    		    		    					throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    		    		    				//.
-	    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(UserAgent.User().Server, ComponentTypedDataFile.DataComponentType);
+	    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(ComponentTypedDataFile.DataComponentType);
 	    		    							if (TF != null)
 	    		    								try {
 	    		    									TF.DestroyInstance(_ComponentTypedDataFile.DataComponentID);
@@ -599,9 +599,10 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	    		    			break; //. >
 	    		    			
 	    		    		case 2: //. get URL-file
-								//.
 		    					TAsyncProcessing Processing = new TAsyncProcessing(TComponentTypedDataFilesPanel.this) {
 
+		    						private TComponentTypedDataFile _ComponentTypedDataFile = ComponentTypedDataFile.Clone();
+		    						//.
 		    						private String URLFN;
 		    						
 		    						@Override
@@ -610,16 +611,16 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	    								if (UserAgent == null)
 	    									throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    								//.
-	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_ComponentTypedDataFile.DataComponentType,_ComponentTypedDataFile.DataComponentID);
 	    								if (CF != null) 
 	    									try {
 	    										TURL URL = CF.GetDefaultURL();
 	    										if (URL != null) 
 	    											try {
 	    												if (URL.HasData()) {
-	    													ComponentTypedDataFile.PrepareFromServer(UserAgent.Server, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_Document, false, Canceller);
-	    													if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
-			    	    										File F = ComponentTypedDataFile.GetFile();
+	    													_ComponentTypedDataFile.PrepareFromServer(UserAgent.Server, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_Document, false, Canceller);
+	    													if (_ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
+			    	    										File F = _ComponentTypedDataFile.GetFile();
 			    	    										byte[] Data = new byte[(int)F.length()];
 			    	    										FileInputStream FIS = new FileInputStream(F);
 			    	    										try {
@@ -1249,7 +1250,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					}
 					else
 						if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
-							final TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(UserAgent.Server, ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+							final TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 							if (CF != null)
 								try {
 									int Version = CF.ParseFromXMLDocument(Data);

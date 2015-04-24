@@ -144,7 +144,7 @@ public class TGeoSpaceFunctionality extends TComponentFunctionality {
 		int idGeoCrdSystem = Data.GetGeoCrdSystemByXY(X,Y);
 		if (idGeoCrdSystem == 0)
 			throw new Exception("no GeoCrdSystem for current XY-coordinates"); //. =>
-		TGeoCrdSystemFunctionality GCF = (TGeoCrdSystemFunctionality)TypesSystem().SystemTGeoCrdSystem.TComponentFunctionality_Create(Server, idGeoCrdSystem);
+		TGeoCrdSystemFunctionality GCF = (TGeoCrdSystemFunctionality)TypesSystem().SystemTGeoCrdSystem.TComponentFunctionality_Create(idGeoCrdSystem);
 		try {
 			GCF.ComponentDataSource = ComponentDataSource;
 			//.
@@ -248,7 +248,7 @@ public class TGeoSpaceFunctionality extends TComponentFunctionality {
 		int idGeoCrdSystem = Data.GetGeoCrdSystemByLatLong(GeoCrd.Latitude, GeoCrd.Longitude);
 		if (idGeoCrdSystem == 0)
 			throw new Exception("no GeoCrdSystem for current coordinates"); //. =>
-		TGeoCrdSystemFunctionality GCF = (TGeoCrdSystemFunctionality)TypesSystem().SystemTGeoCrdSystem.TComponentFunctionality_Create(Server, idGeoCrdSystem);
+		TGeoCrdSystemFunctionality GCF = (TGeoCrdSystemFunctionality)TypesSystem().SystemTGeoCrdSystem.TComponentFunctionality_Create(idGeoCrdSystem);
 		try {
 			GCF.ComponentDataSource = ComponentDataSource;
 			//.

@@ -12,7 +12,6 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
-import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 
 public class TTypeSystem {
 
@@ -195,17 +194,8 @@ public class TTypeSystem {
 		TypesSystem.Items.remove(this);
 	}
 	
-	public TTypeFunctionality TTypeFunctionality_Create(TGeoScopeServer pServer) {
-		return null; 
-	}
-	
 	public TTypeFunctionality TTypeFunctionality_Create() {
-		return TTypeFunctionality_Create(null); 
-	}
-	
-	public TComponentFunctionality TComponentFunctionality_Create(TGeoScopeServer pServer, long idComponent) {
-		TTypeFunctionality TypeFunctionality = TTypeFunctionality_Create(pServer);
-		return TypeFunctionality.TComponentFunctionality_Create(idComponent);
+		return null; 
 	}
 	
 	public TComponentFunctionality TComponentFunctionality_Create(long idComponent) {

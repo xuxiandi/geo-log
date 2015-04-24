@@ -9,7 +9,6 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
-import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.TSystemTCoComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TSystemTDATAFile;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TSystemTDataStream;
@@ -158,16 +157,16 @@ public class TTypesSystem {
 			Items.get(I).Context_ClearOldItems();
 	}	
 
-	public TTypeFunctionality TTypeFunctionality_Create(TGeoScopeServer pServer, int idTComponent) {
+	public TTypeFunctionality TTypeFunctionality_Create(int idTComponent) {
 		TTypeSystem TypeSystem = ItemsTable.get(idTComponent);
 		if (TypeSystem != null) 
-			return TypeSystem.TTypeFunctionality_Create(pServer); //. ->
+			return TypeSystem.TTypeFunctionality_Create(); //. ->
 		else
 			return null; //. ->
 	}	
 
-	public TComponentFunctionality TComponentFunctionality_Create(TGeoScopeServer pServer, int idTComponent, long idComponent) {
-		TTypeFunctionality TypeFunctionality = TTypeFunctionality_Create(pServer,idTComponent);
+	public TComponentFunctionality TComponentFunctionality_Create(int idTComponent, long idComponent) {
+		TTypeFunctionality TypeFunctionality = TTypeFunctionality_Create(idTComponent);
 		if (TypeFunctionality != null)
 			return TypeFunctionality.TComponentFunctionality_Create(idComponent); //. ->
 		else

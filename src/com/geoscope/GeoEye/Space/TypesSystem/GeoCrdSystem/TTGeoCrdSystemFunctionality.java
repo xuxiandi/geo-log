@@ -4,15 +4,10 @@ import java.util.ArrayList;
 
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
-import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 
 public class TTGeoCrdSystemFunctionality extends TTypeFunctionality {
 
-	public TTGeoCrdSystemFunctionality(TTypeSystem pTypeSystem, TGeoScopeServer pServer) {
-		super(pServer,pTypeSystem);
-	}
-	
 	public TTGeoCrdSystemFunctionality(TTypeSystem pTypeSystem) {
 		super(pTypeSystem);
 	}

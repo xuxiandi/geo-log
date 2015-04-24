@@ -4,7 +4,6 @@ import java.io.File;
 
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
-import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
@@ -17,8 +16,8 @@ public class TSystemTPictureVisualization extends TTypeSystem {
 	}
 
 	@Override
-	public TTypeFunctionality TTypeFunctionality_Create(TGeoScopeServer pServer) {
-		return (new TTPictureVisualizationFunctionality(this, pServer)); 
+	public TTypeFunctionality TTypeFunctionality_Create() {
+		return (new TTPictureVisualizationFunctionality(this)); 
 	}
 	
 	@Override

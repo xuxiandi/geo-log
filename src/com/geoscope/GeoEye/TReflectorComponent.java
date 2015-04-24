@@ -86,7 +86,6 @@ import com.geoscope.Classes.MultiThreading.TUpdater;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.TReflectorComponent.TObjectCreationGalleryOverlay.TItems.TItem;
 import com.geoscope.GeoEye.TReflectorComponent.TWorkSpace.TButtons.TButton;
-import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TGeoCoord;
 import com.geoscope.GeoEye.Space.Defines.TGeoLocation;
@@ -4076,7 +4075,7 @@ public class TReflectorComponent extends TUIComponent {
 				if (flCheckContextStorage) {
 					flCheckContextStorage = false;
 					// .
-					if (!TSpace.Space.Context.Storage.CheckDeviceFillFactor()) {
+					if (!Reflector.User.Space.Context.Storage.CheckDeviceFillFactor()) {
 						// . raise event
 						Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_CONTEXTSTORAGE_NEARTOCAPACITY).sendToTarget();
 					}
@@ -5652,14 +5651,14 @@ public class TReflectorComponent extends TUIComponent {
 						for (int I = 0; I < Cnt; I++) {
 							TItems.TItem Item = Items.get(I);
 							try {
-								TComponentFunctionality CF = Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Item.idTComponent,Item.idComponent);
+								TComponentFunctionality CF = Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Item.idTComponent,Item.idComponent);
 								try {
 									TComponentDescriptor Visualization = Item.Visualization; 
 									if (Visualization == null)
 										Visualization = CF.GetVisualizationComponent();
 									//.
 									if (Visualization != null) {
-										TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Visualization.idTComponent,Visualization.idComponent);
+										TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Visualization.idTComponent,Visualization.idComponent);
 										if (VF != null) 
 											try {
 												TSpaceObj Visualization_Obj = VF.GetObj(TItems.ItemMaxSize);
@@ -5795,7 +5794,7 @@ public class TReflectorComponent extends TUIComponent {
 					MessageHandler.obtainMessage(MESSAGE_START, null).sendToTarget();
 					try {
 						try {
-							TComponentFunctionality CF = Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Item.idTComponent,Item.idComponent);
+							TComponentFunctionality CF = Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Item.idTComponent,Item.idComponent);
 							try {
 								TComponentDescriptor Visualization = Item.Visualization; 
 								if (Visualization == null)
@@ -5804,7 +5803,7 @@ public class TReflectorComponent extends TUIComponent {
 								Canceller.Check();
 								//.
 								if (Visualization != null) {
-									TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Gallery.Reflector.Server, Visualization.idTComponent,Visualization.idComponent);
+									TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Gallery.Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Visualization.idTComponent,Visualization.idComponent);
 									if (VF != null) 
 										try {
 											TSpaceObj Visualization_Obj = VF.GetObj(TItems.ItemMaxSize);
@@ -6302,11 +6301,11 @@ public class TReflectorComponent extends TUIComponent {
 
     												@Override
     												public void Process() throws Exception {
-		    											TComponentFunctionality CF = Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Reflector.Server, Item.idTComponent,Item.idComponent);
+		    											TComponentFunctionality CF = Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Item.idTComponent,Item.idComponent);
 		    											try {
 		    												TComponentDescriptor VD = CF.GetVisualizationComponent();
 		    												if (VD != null) {
-		    													TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(Reflector.Server, VD.idTComponent,VD.idComponent);
+		    													TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)Reflector.User.Space.TypesSystem.TComponentFunctionality_Create(VD.idTComponent,VD.idComponent);
 		    													if (VF != null) 
 		    														try {
 		    															Item.Visualization_Obj = VF.GetObj(TItems.ItemMaxSize);
@@ -7415,7 +7414,7 @@ public class TReflectorComponent extends TUIComponent {
 											.getString(R.string.SDiskFillingIsNearToCapacity)
 											+ " - "
 											+ Integer
-													.toString((int) (100.0 * TSpace.Space.Context.Storage
+													.toString((int) (100.0 * User.Space.Context.Storage
 															.DeviceFillFactor()))
 											+ " %"
 											+ "\n"
@@ -8912,10 +8911,7 @@ public class TReflectorComponent extends TUIComponent {
 					intent = new Intent();
 					intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");
 				} else if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
-					final TComponentFunctionality CF = User.Space.TypesSystem
-							.TComponentFunctionality_Create(Server,
-									ComponentTypedDataFile.DataComponentType,
-									ComponentTypedDataFile.DataComponentID);
+					final TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 					if (CF != null)
 						try {
 							int Version = CF.ParseFromXMLDocument(Data);
@@ -9068,9 +9064,7 @@ public class TReflectorComponent extends TUIComponent {
 
 	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y, int DatumID)
 			throws Exception {
-		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality) (TSpace.Space.TypesSystem.SystemTGeoSpace
-				.TComponentFunctionality_Create(Server,
-						Configuration.GeoSpaceID));
+		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality) (User.Space.TypesSystem.SystemTGeoSpace.TComponentFunctionality_Create(Configuration.GeoSpaceID));
 		try {
 			return GSF.ConvertXYCoordinatesToGeo(X, Y, DatumID);
 		} finally {
@@ -9079,7 +9073,7 @@ public class TReflectorComponent extends TUIComponent {
 	}
 
 	public TXYCoord ConvertGeoCoordinatesToXY(int DatumID, double Latitude, double Longitude, double Altitude) throws Exception {
-		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)TSpace.Space.TypesSystem.SystemTGeoSpace.TComponentFunctionality_Create(Server, Configuration.GeoSpaceID);
+		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)User.Space.TypesSystem.SystemTGeoSpace.TComponentFunctionality_Create(Configuration.GeoSpaceID);
 		try {
 			return GSF.ConvertGeoCoordinatesToXY(DatumID, Latitude,Longitude,Altitude);
 		} finally {
@@ -9317,7 +9311,7 @@ public class TReflectorComponent extends TUIComponent {
 				else 
 					VT = new TBase2DVisualizationFunctionality.TTransformatrix(EditingObj.Transformatrix.Xbind,EditingObj.Transformatrix.Ybind, EditingObj.Transformatrix.Scale, EditingObj.Transformatrix.Rotation, EditingObj.Transformatrix.TranslateX,EditingObj.Transformatrix.TranslateY);
 				//.
-				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, EditingObj.idTComponent,EditingObj.idComponent);
+				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(EditingObj.idTComponent,EditingObj.idComponent);
 				if (CF == null)
 					return; // . ->
 				try {
@@ -9331,7 +9325,7 @@ public class TReflectorComponent extends TUIComponent {
 					//.
 			    	DataFileName = DataFile.getAbsolutePath();
 					if ((DataFileName != null) && (DataFileName.length() > 0)) {
-    					TComponentFunctionality CCF = User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, CF.idTComponent(),idClone);
+    					TComponentFunctionality CCF = User.Space.TypesSystem.TComponentFunctionality_Create(CF.idTComponent(),idClone);
     					if (CCF == null)
     						throw new Exception("could not get a clone functionality"); //. => 
     					try {
@@ -9392,7 +9386,7 @@ public class TReflectorComponent extends TUIComponent {
 			
 			@Override
 			public void Process() throws Exception {
-				TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)User.Space.TypesSystem.TComponentFunctionality_Create(Server, Obj.idTObj,Obj.idObj);
+				TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)User.Space.TypesSystem.TComponentFunctionality_Create(Obj.idTObj,Obj.idObj);
 				if (VF != null) 
 					try {
 						VF.Context_RemoveObj(); //. remove the object from context to reload data
@@ -9530,7 +9524,7 @@ public class TReflectorComponent extends TUIComponent {
 				else 
 					VT = new TBase2DVisualizationFunctionality.TTransformatrix(EditingObj.Transformatrix.Xbind,EditingObj.Transformatrix.Ybind, EditingObj.Transformatrix.Scale, EditingObj.Transformatrix.Rotation, EditingObj.Transformatrix.TranslateX,EditingObj.Transformatrix.TranslateY);
 				//.
-				TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)User.Space.TypesSystem.TComponentFunctionality_Create(User.Server, EditingObj.Obj.idTObj,EditingObj.Obj.idObj);
+				TBase2DVisualizationFunctionality VF = (TBase2DVisualizationFunctionality)User.Space.TypesSystem.TComponentFunctionality_Create(EditingObj.Obj.idTObj,EditingObj.Obj.idObj);
 				if (VF != null)
 					try {
 						VF.SetObj(EditingObj.Obj);
@@ -9729,10 +9723,7 @@ public class TReflectorComponent extends TUIComponent {
 							int idTComponent = Integer.parseInt(SA[0]);
 							long idComponent = Long.parseLong(SA[1]);
 							// .
-							TComponentFunctionality CF = User.Space.TypesSystem
-									.TComponentFunctionality_Create(
-											User.Server, idTComponent,
-											idComponent);
+							TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(idTComponent,idComponent);
 							if (CF == null)
 								return; // . ->
 							try {
@@ -9856,7 +9847,7 @@ public class TReflectorComponent extends TUIComponent {
 
 					@Override
 					public void Process() throws Exception {
-						TTypeFunctionality TF = User.Space.TypesSystem.TTypeFunctionality_Create(User.Server, idTComponent);
+						TTypeFunctionality TF = User.Space.TypesSystem.TTypeFunctionality_Create(idTComponent);
 						if (TF != null)
 							try {
 								TF.DestroyInstance(idComponent);

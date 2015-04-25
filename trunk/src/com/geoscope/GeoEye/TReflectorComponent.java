@@ -4196,12 +4196,7 @@ public class TReflectorComponent extends TUIComponent {
 					//. raise event
 					Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
 					//. remove old cached data
-					switch (GetViewMode()) {
-
-					case VIEWMODE_TILES:
-						Reflector.SpaceTileImagery.ActiveCompilationSet_RemoveOldTiles(LevelTileContainers, Canceller);
-						break; // . >
-					}
+					Reflector.SpaceTileImagery.ActiveCompilationSet_RemoveOldTiles(LevelTileContainers, Canceller);
 					//.
 					TRWLevelTileContainer[] _LevelTileContainers = new TRWLevelTileContainer[LevelTileContainers.length];
 					for (int I = 0; I < _LevelTileContainers.length; I++)

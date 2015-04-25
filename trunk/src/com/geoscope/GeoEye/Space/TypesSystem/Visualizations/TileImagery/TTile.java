@@ -132,6 +132,10 @@ public class TTile {
 		return Data_flTransparent;
 	}
 	
+	public synchronized boolean IsEmpty() {
+		return (Data_flTransparent || (Data == null));
+	}
+	
 	public synchronized void CheckTransparency() {
 		if (Data == null) {
 			Data_flTransparent = true;

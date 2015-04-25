@@ -1023,7 +1023,7 @@ public class TTileServerProviderCompilation {
 			for (int X = CompositionLevel.XIndexMin; X <= CompositionLevel.XIndexMax; X++)
 				for (int Y = CompositionLevel.YIndexMin; Y <= CompositionLevel.YIndexMax; Y++) {
 					TTile Tile = Levels[L].GetTile(X,Y);
-					if (Tile != null) { 
+					if ((Tile != null) && !Tile.IsEmpty()) { 
 						CompositionLevel.TilesMap[(Y-CompositionLevel.YIndexMin)*CompositionLevel.TilesMapSizeX+(X-CompositionLevel.XIndexMin)] = Tile;
 						//.
 						CompositionLevel.Count++;

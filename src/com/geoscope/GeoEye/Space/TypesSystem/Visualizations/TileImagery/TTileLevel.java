@@ -24,6 +24,7 @@ import android.util.Base64OutputStream;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Data.Types.Date.TTimestamp;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing;
 import com.geoscope.Classes.Exception.CancelException;
@@ -1287,7 +1288,7 @@ public class TTileLevel {
 			}
 	}
 
-	public int Container_DrawOnCanvas(TRWLevelTileContainer RWLevelTileContainer, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
+	public int Container_DrawOnCanvas(TRWLevelTileContainer RWLevelTileContainer, TTimestamp MaxTimestamp, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
 		int Result = 0;
 		int Div = (1 << Level);
 		double SW = RWLevelTileContainer._Width/Div;
@@ -1301,11 +1302,12 @@ public class TTileLevel {
 		CommonMatrix.postScale((float)(SW/TTile.TileSize),(float)(SH/TTile.TileSize),0.0F,0.0F);
 		CommonMatrix.postTranslate((float)dX,(float)dY);
 		Matrix Transformatrix = new Matrix();
+		double MaxTimestampValue = -1.0;
 		for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++) {
 			for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) {
 				synchronized (this) {
 					TTile Tile = TileIndex.GetItem(X,Y); 
-					if (Tile != null) {
+					if ((Tile != null) && ((MaxTimestamp == null) || (Tile.Timestamp > MaxTimestamp.Value))) {
 						if (!Tile.Data_flTransparent) {
 							//. drawing tile ...
 				    		Transformatrix.set(CommonMatrix);
@@ -1331,6 +1333,9 @@ public class TTileLevel {
 						else
 							Tile.ImageID = pImageID;
 						Result++;
+						//.
+						if ((MaxTimestamp != null) && (Tile.Timestamp > MaxTimestampValue))
+							MaxTimestampValue = Tile.Timestamp;
 					}
 				}
 			}
@@ -1343,9 +1348,17 @@ public class TTileLevel {
 					TimeLimit.Check();
 			}
 		}
+		//.
+		if ((MaxTimestamp != null) && (MaxTimestampValue > MaxTimestamp.Value))
+			MaxTimestamp.Value = MaxTimestampValue;
+		//.
 		return Result;
 	}
 
+	public int Container_DrawOnCanvas(TRWLevelTileContainer RWLevelTileContainer, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
+		return Container_DrawOnCanvas(RWLevelTileContainer, null, pImageID, canvas, paint, transitionpaint, Canceller, TimeLimit);
+	}
+	
 	public void Container_PaintDrawings(TRWLevelTileContainer RWLevelTileContainer, List<TDrawing> Drawings, boolean flSkipModified, float pdX, float pdY) throws Exception {
 		GetTiles(RWLevelTileContainer, false, null,null,null);
 		//.

@@ -654,44 +654,27 @@ public class TTileServerProviderCompilation {
 		TRWLevelTileContainer LevelTileContainer = GetLevelTileRange(RW);
 		if ((LevelTileContainer == null) || (Levels[LevelTileContainer.Level] == null))
 			return; //. ->
-		boolean flFilled = false;
-		if (Levels[LevelTileContainer.Level].Container_IsFilled(LevelTileContainer)) {
-			//. draw level container
-			///? flFilled = (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit) == LevelTileContainer.ContainerSquare());
-			Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit);
-			flFilled = true;
-		}
-		if (!flFilled) {
-			if (flDrawComposition) {
-				if ((CompositionTileLimit != null) && (CompositionTileLimit.Value > 0)) {
-					//. draw composition
-					try {
-						ReflectionWindow_Composition_DrawOnCanvas(GetComposition(RW,LevelTileContainer,MaxCompositionDepth,CompositionTileLimit,null),LevelTileContainer, pImageID, canvas, paint,transitionpaint, Canceller, TimeLimit);
-					} catch (CancelException E) {}
-				}
-				//. draw level container
-				Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit);
-				/*///? while (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, canvas, TimeLimit) < LevelTileContainer.ContainerSquare()) {
-					LevelTileContainer.Level--;
-					if (LevelTileContainer.Level < 0)
-						break; //. >
-					LevelTileContainer.Xmn >>= 1; 
-					LevelTileContainer.Ymn >>= 1; 
-					LevelTileContainer.Xmx >>= 1; 
-					LevelTileContainer.Ymx >>= 1; 
-				}*/
+		if (flDrawComposition) {
+			if ((CompositionTileLimit != null) && (CompositionTileLimit.Value > 0)) {
+				//. draw composition
+				try {
+					ReflectionWindow_Composition_DrawOnCanvas(GetComposition(RW,LevelTileContainer,MaxCompositionDepth,CompositionTileLimit,null),LevelTileContainer, pImageID, canvas, paint,transitionpaint, Canceller, TimeLimit);
+				} catch (CancelException E) {}
 			}
-			else {
-				//. draw level container
-				while (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit) < 1) {
-					LevelTileContainer.Level--;
-					if (LevelTileContainer.Level < 0)
-						break; //. >
-					LevelTileContainer.Xmn >>= 1; 
-					LevelTileContainer.Ymn >>= 1; 
-					LevelTileContainer.Xmx >>= 1; 
-					LevelTileContainer.Ymx >>= 1; 
-				}
+			//. draw level container
+			Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit);
+		}
+		else {
+			//. draw level container
+			while (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit) < 1) {
+				Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit);
+				LevelTileContainer.Level--;
+				if (LevelTileContainer.Level < 0)
+					break; //. >
+				LevelTileContainer.Xmn >>= 1; 
+				LevelTileContainer.Ymn >>= 1; 
+				LevelTileContainer.Xmx >>= 1; 
+				LevelTileContainer.Ymx >>= 1; 
 			}
 		}
 	}
@@ -1023,7 +1006,7 @@ public class TTileServerProviderCompilation {
 			for (int X = CompositionLevel.XIndexMin; X <= CompositionLevel.XIndexMax; X++)
 				for (int Y = CompositionLevel.YIndexMin; Y <= CompositionLevel.YIndexMax; Y++) {
 					TTile Tile = Levels[L].GetTile(X,Y);
-					if ((Tile != null) && !Tile.IsEmpty()) { 
+					if ((Tile != null) && !Tile.Data_flTransparent) { 
 						CompositionLevel.TilesMap[(Y-CompositionLevel.YIndexMin)*CompositionLevel.TilesMapSizeX+(X-CompositionLevel.XIndexMin)] = Tile;
 						//.
 						CompositionLevel.Count++;

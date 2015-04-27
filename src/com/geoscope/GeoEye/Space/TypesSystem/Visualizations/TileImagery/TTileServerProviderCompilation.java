@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -18,6 +19,7 @@ import org.w3c.dom.NodeList;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Pair;
 
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawing;
 import com.geoscope.Classes.Exception.CancelException;
@@ -599,38 +601,70 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
-	public void RemoveDownLevelsTiles(int LevelIndex, ArrayList<TTile.TDescriptor> Tiles, TCanceller Canceller, TUpdater Updater) throws Exception {
+	private void RemoveUpLevelsTiles(int LevelIndex, ArrayList<TTile.TDescriptor> Tiles, TCanceller Canceller, TUpdater Updater) throws Exception {
+		if (!flInitialized)
+			Initialize();
+		int TilesCount = Tiles.size();
+		for (int L = LevelIndex-1; L >= 0; L--) {
+			int Shift = (LevelIndex-L); 
+			TTileLevel Level = Levels[L];
+			Hashtable<Pair<Integer,Integer>, Boolean> RemovedTileTable = new Hashtable<Pair<Integer,Integer>, Boolean>();
+			for (int I = 0; I < TilesCount; I++) {
+				TTile.TDescriptor TD = Tiles.get(I);
+				//.
+				int X = (TD.X >> Shift); int Y = (TD.Y >> Shift);
+				Pair<Integer,Integer> UpTileXY = new Pair<Integer, Integer>(X,Y);
+				if (RemovedTileTable.get(UpTileXY) == null) {
+					if (flHistoryEnabled)
+						Level.RemoveTile(X,Y);
+					else {
+						if (!Level.DeleteTile(X,Y))
+							Level.DeleteTileFile(X,Y, TD.Timestamp);
+					}
+					//.
+					RemovedTileTable.put(UpTileXY, true);
+					//.
+					if (Canceller != null)
+						Canceller.Check();
+				}
+			}
+		}
+	}
+	
+	private void RemoveDownLevelsTiles(int LevelIndex, ArrayList<TTile.TDescriptor> Tiles, TCanceller Canceller, TUpdater Updater) throws Exception {
 		if (!flInitialized)
 			Initialize();
 		int Size = 2;
 		int TilesCount = Tiles.size();
 		for (int L = LevelIndex+1; L < LevelsCount; L++) {
+			int Shift = (L-LevelIndex); 
 			TTileLevel Level = Levels[L];
 			for (int I = 0; I < TilesCount; I++) {
 				TTile.TDescriptor TD = Tiles.get(I);
 				//.
-				TD.X <<= 1; 
-				TD.Y <<= 1;
-				//.
-				int Xmn = TD.X; int Ymn = TD.Y;
+				int Xmn = (TD.X << Shift); int Ymn = (TD.Y << Shift);
 				int Xmx = Xmn+Size; int Ymx = Ymn+Size;
 			      for (int Y = Ymn; Y < Ymx; Y++) 
 				        for (int X = Xmn; X < Xmx; X++) {
-				        	boolean flDeleted = false;
 							if (flHistoryEnabled)
 								Level.RemoveTile(X,Y);
-							else
-								flDeleted = Level.DeleteTile(X,Y);
+							else {
+								if (!Level.DeleteTile(X,Y))
+									Level.DeleteTileFile(X,Y, TD.Timestamp);
+							}
 							//.
-							if (!flDeleted)
-								Level.DeleteTileFile(X,Y, TD.Timestamp);
-							//.
-							Canceller.Check();
+							if (Canceller != null)
+								Canceller.Check();
 				        }
 			}
 			//.
 			Size <<= 1;
 		}
+	}
+	
+	public void RemoveUpDownLevelsTiles(int LevelIndex, ArrayList<TTile.TDescriptor> Tiles, TCanceller Canceller, TUpdater Updater) throws Exception {
+		RemoveUpLevelsTiles(LevelIndex, Tiles, Canceller, Updater);
+		RemoveDownLevelsTiles(LevelIndex, Tiles, Canceller, Updater);
 	}
 	
 	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace, boolean flEnqueue) throws Exception {
@@ -666,8 +700,16 @@ public class TTileServerProviderCompilation {
 		}
 		else {
 			//. draw level container
-			while (Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit) < 1) {
-				Levels[LevelTileContainer.Level].Container_DrawOnCanvas(LevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit);
+			TRWLevelTileContainer ResultLevelTileContainer = new TRWLevelTileContainer(LevelTileContainer);
+			int MaxAvailableTiles = 0;
+			while (true) {
+				if (Levels[LevelTileContainer.Level].TilesCount() > 0) {
+					int AvailableTiles = Levels[LevelTileContainer.Level].Container_AvailableTileCounter(LevelTileContainer);				
+					if (AvailableTiles > MaxAvailableTiles) {
+						MaxAvailableTiles = AvailableTiles;
+						ResultLevelTileContainer.AssignContainer(LevelTileContainer);
+					}
+				}
 				LevelTileContainer.Level--;
 				if (LevelTileContainer.Level < 0)
 					break; //. >
@@ -676,6 +718,8 @@ public class TTileServerProviderCompilation {
 				LevelTileContainer.Xmx >>= 1; 
 				LevelTileContainer.Ymx >>= 1; 
 			}
+			if (MaxAvailableTiles > 0)
+				Levels[ResultLevelTileContainer.Level].Container_DrawOnCanvas(ResultLevelTileContainer, pImageID,canvas,paint,transitionpaint, Canceller, TimeLimit);				
 		}
 	}
 	
@@ -1052,7 +1096,66 @@ public class TTileServerProviderCompilation {
       	}
 	}
 	
-	public void RemoveOldTiles(TRWLevelTileContainer LevelTileContainer, int VisibleDepth, TCanceller Canceller) throws Exception {
+	public void ReleaseTiles(TRWLevelTileContainer LevelTileContainer, TCanceller Canceller) throws Exception {
+		if (!flInitialized)
+			return; //. ->
+		TRWLevelTileContainer _LevelTileContainer = new TRWLevelTileContainer();
+		_LevelTileContainer.AssignContainer(LevelTileContainer);
+		//.
+		ArrayList<TLevelTile> TileList = new ArrayList<TLevelTile>(MaxAvailableTiles);
+		for (int L = LevelsCount-1; L >= 0; L--) {
+			boolean flLayIsVisible = (L == _LevelTileContainer.Level);
+			TTile[] LevelTiles = Levels[L].GetTiles();
+			int TilesCount = LevelTiles.length; 
+			for (int I = 0; I < TilesCount; I++) {
+				TTile Item = LevelTiles[I];
+				if (!Item.flModified) 
+					if (flLayIsVisible) {
+						if (!(((_LevelTileContainer.Xmn <= Item.X) && (Item.X <= _LevelTileContainer.Xmx)) && ((_LevelTileContainer.Ymn <= Item.Y) && (Item.Y <= _LevelTileContainer.Ymx)))) {
+							//. insert tile by increasing time order
+							TLevelTile LevelTile = new TLevelTile();
+							LevelTile.Level = L;
+							LevelTile.Tile = Item;
+			        		boolean flInserted = false;
+							int TLS = TileList.size();
+			    			for (int J = 0; J < TLS; J++)
+			    				if (Item.AccessTime() < TileList.get(J).Tile.AccessTime()) {
+			    					TileList.add(J,LevelTile);
+			    					flInserted = true;
+			    					break; //. >
+			    				}
+			    			if (!flInserted)
+			    				TileList.add(LevelTile);
+						}
+					}
+					else 
+						Levels[L].RemoveTile(Item);
+    			//.
+				if (Canceller != null)
+					Canceller.Check();
+			}
+			//.
+			if (flLayIsVisible) {
+    			_LevelTileContainer.Level--;
+    			_LevelTileContainer.Xmn >>= 1; 
+    			_LevelTileContainer.Ymn >>= 1; 
+    			_LevelTileContainer.Xmx >>= 1; 
+    			_LevelTileContainer.Ymx >>= 1; 
+			}
+		}
+		//. removing ...
+		int TLS = TileList.size();
+		int RemoveCount = TLS-MaxAvailableTiles;
+		for (int I = 0; I < RemoveCount; I++) {
+			TLevelTile LevelTile = TileList.get(I);
+			Levels[LevelTile.Level].RemoveTile(LevelTile.Tile);
+			//.
+			if (Canceller != null)
+				Canceller.Check();
+		}
+	}	
+
+	public void ReleaseTiles(TRWLevelTileContainer LevelTileContainer, int VisibleDepth, TCanceller Canceller) throws Exception {
 		if (!flInitialized)
 			return; //. ->
 		int RemoveCount = Levels_TilesCount()-MaxAvailableTiles;

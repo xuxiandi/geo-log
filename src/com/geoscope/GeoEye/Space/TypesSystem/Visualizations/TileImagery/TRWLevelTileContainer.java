@@ -34,7 +34,33 @@ public class TRWLevelTileContainer {
 	}
 	
 	public TRWLevelTileContainer(TRWLevelTileContainer C) {
-		AssignContainer(C);
+		Assign(C);
+	}
+	
+	public void Assign(TRWLevelTileContainer C) {
+		if (C == null) {
+			SetAsNull();
+			return; //. ->
+		}
+		Level = C.Level;
+		TileLevel = C.TileLevel;
+		//.
+		Xmn = C.Xmn;
+		Ymn = C.Ymn;
+		Xmx = C.Xmx;
+		Ymx = C.Ymx;
+		//.
+		RW_Xmn = C.RW_Xmn;
+		RW_Ymn = C.RW_Ymn;
+		b = C.b;
+		_Width = C._Width;
+		diffX1X0 = C.diffX1X0;
+		diffY1Y0 = C.diffY1Y0;
+		diffX3X0 = C.diffX3X0;
+		diffY3Y0 = C.diffY3Y0;
+		Xc = C.Xc;
+		Yc = C.Yc;
+		Rotation = C.Rotation;
 	}
 	
 	public void AssignContainer(TRWLevelTileContainer C) {

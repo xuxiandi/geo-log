@@ -373,12 +373,12 @@ public class TTileImagery {
 				ATSPC[I].PrepareUpLevelsTiles(LevelTileContainers[I], LevelStep, Canceller,Updater);
 	}
 	
-	public void ActiveCompilationSet_RemoveDownLevelsTiles(TRWLevelTileContainer[] LevelTileContainers, TGetTilesResult[] GetTilesResult, TCanceller Canceller, TUpdater Updater) throws Exception {
+	public void ActiveCompilationSet_RemoveUpDownLevelsTiles(TRWLevelTileContainer[] LevelTileContainers, TGetTilesResult[] GetTilesResult, TCanceller Canceller, TUpdater Updater) throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if ((ATSPC != null) && (ATSPC.length == GetTilesResult.length)) 
 			for (int I = 0; I < ATSPC.length; I++)	
 				if (GetTilesResult[I].RemovedTiles != null)
-					ATSPC[I].RemoveDownLevelsTiles(LevelTileContainers[I].Level, GetTilesResult[I].RemovedTiles, Canceller,Updater);
+					ATSPC[I].RemoveUpDownLevelsTiles(LevelTileContainers[I].Level, GetTilesResult[I].RemovedTiles, Canceller,Updater);
 	}
 	
 	public void ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {
@@ -483,18 +483,23 @@ public class TTileImagery {
 				ATSPC[I].ReflectionWindow_ResultComposition_DrawOnCanvas(RW, pImageID, canvas, paint,transitionpaint, Canceller, TimeLimit);
 	}
 	
-	public void ActiveCompilationSet_RemoveOldTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, int VisibleDepth) throws Exception {
+	@SuppressWarnings("unused")
+	private void ActiveCompilationSet_ReleaseTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller, int VisibleDepth) throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if ((ATSPC != null) && (ATSPC.length == LevelTileContainers.length)) 
 			for (int I = 0; I < ATSPC.length; I++)	
-				ATSPC[I].RemoveOldTiles(LevelTileContainers[I], VisibleDepth, Canceller);
+				ATSPC[I].ReleaseTiles(LevelTileContainers[I], VisibleDepth, Canceller);
 		//.
 		TGeoLogApplication.Instance().GarbageCollector.Start();
 	}
 	
-	public void ActiveCompilationSet_RemoveOldTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller) throws Exception {
-		int MaxVisibleDepth = 1;
-		ActiveCompilationSet_RemoveOldTiles(LevelTileContainers, Canceller, MaxVisibleDepth);		
+	public void ActiveCompilationSet_ReleaseTiles(TRWLevelTileContainer[] LevelTileContainers, TCanceller Canceller) throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
+		if ((ATSPC != null) && (ATSPC.length == LevelTileContainers.length)) 
+			for (int I = 0; I < ATSPC.length; I++)	
+				ATSPC[I].ReleaseTiles(LevelTileContainers[I], Canceller);
+		//.
+		TGeoLogApplication.Instance().GarbageCollector.Start();
 	}	
 
 	public void ActiveCompilationSet_RemoveAllTiles() {

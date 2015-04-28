@@ -31,6 +31,10 @@ public class TComponentTypedDataFiles {
 		DataType = pDataType;
 	}
 
+	public TComponentTypedDataFiles Clone() {
+		return (new TComponentTypedDataFiles(context, DataModel, DataType));
+	}
+	
 	public int Count() {
 		return Items.length;
 	}

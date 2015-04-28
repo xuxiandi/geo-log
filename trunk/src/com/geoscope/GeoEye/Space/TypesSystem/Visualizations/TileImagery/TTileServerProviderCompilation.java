@@ -703,8 +703,8 @@ public class TTileServerProviderCompilation {
 			TRWLevelTileContainer ResultLevelTileContainer = new TRWLevelTileContainer(LevelTileContainer);
 			int MaxAvailableTiles = 0;
 			while (true) {
-				if (Levels[LevelTileContainer.Level].TilesCount() > 0) {
-					int AvailableTiles = Levels[LevelTileContainer.Level].Container_AvailableTileCounter(LevelTileContainer);				
+				if (Levels[LevelTileContainer.Level].TilesVisibleCount() > 0) {
+					int AvailableTiles = Levels[LevelTileContainer.Level].Container_VisibleTileCounter(LevelTileContainer);				
 					if (AvailableTiles > MaxAvailableTiles) {
 						MaxAvailableTiles = AvailableTiles;
 						ResultLevelTileContainer.AssignContainer(LevelTileContainer);

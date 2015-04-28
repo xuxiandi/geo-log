@@ -11,6 +11,7 @@ import org.w3c.dom.Element;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
@@ -400,6 +401,10 @@ public class TComponentFunctionality extends TFunctionality {
 	
 	public TURL GetDefaultURL() throws Exception {
 		return (new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL(idTComponent(),idComponent));
+	}
+	
+	public Bitmap GetThumbnailImage() throws Exception {
+		return null;
 	}
 	
 	public TComponentDescriptor GetVisualizationComponent() throws Exception {

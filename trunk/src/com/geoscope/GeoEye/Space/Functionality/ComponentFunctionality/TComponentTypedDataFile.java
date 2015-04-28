@@ -1,15 +1,12 @@
 package com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.util.Locale;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
-import com.geoscope.Classes.MultiThreading.TCanceller;
-import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -21,13 +18,20 @@ public class TComponentTypedDataFile {
 	public int		DataComponentType;
 	public long		DataComponentID;
 	public int		DataType;
-	public String 	DataFormat;
-	public String 	DataName;
+	public String 	DataParams = null;
+	public String 	DataFormat = "";
+	public String 	DataName = "";
 	public byte[]	Data = null;
 	public String 	DataFileName = null;
 	
 	public TComponentTypedDataFile(TComponentTypedDataFiles pTypedDataFiles) {
 		TypedDataFiles = pTypedDataFiles;
+	}
+	
+	public TComponentTypedDataFile(TComponentTypedDataFiles pTypedDataFiles, int	pDataType) {
+		TypedDataFiles = pTypedDataFiles;
+		//.
+		DataType = pDataType;
 	}
 	
 	public TComponentTypedDataFile Clone() {
@@ -50,6 +54,10 @@ public class TComponentTypedDataFile {
 
 	public boolean DataIsNull() {
 		return (Data == null);
+	}
+	
+	public boolean DataActualityIsExpired() {
+		return DataIsNull();
 	}
 	
 	public boolean IsLoaded() {
@@ -142,74 +150,41 @@ public class TComponentTypedDataFile {
 			DataType = ((int)(DataType/SpaceDefines.TYPEDDATAFILE_TYPE_RANGE))*SpaceDefines.TYPEDDATAFILE_TYPE_RANGE+SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
 	}
 	
-	public void PrepareFromServer(TGeoScopeServer Server, int pDataModel, int pDataType, boolean flWithComponents, TCanceller Canceller) throws Exception {
-		String URL1 = Server.Address;
-		//. add command path
-		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/* URLProtocolVersion */+"/"+Long.toString(Server.User.UserID);
-		String URL2 = "Functionality"+"/"+"ComponentDataDocument.dat";
-		//. add command parameters
-		int WithComponentsFlag;
-		if (flWithComponents)
-			WithComponentsFlag = 1;
-		else
-			WithComponentsFlag = 0;
-		URL2 = URL2+"?"+"1"/* command version */+","+Integer.toString(DataComponentType)+","+Long.toString(DataComponentID)+","+Integer.toString(pDataModel)+","+Integer.toString(pDataType)+","+Integer.toString(WithComponentsFlag);
+	public void PrepareForComponent(int idTComponent, long idComponent, String pDataParams, boolean flWithComponents, TGeoScopeServer Server) throws Exception {
+		DataParams = pDataParams;
 		//.
-		byte[] URL2_Buffer;
+		int Version = 0;
+		TComponentFunctionality CF = Server.User.Space.TypesSystem.TComponentFunctionality_Create(idTComponent,idComponent);
+		if (CF == null)
+			return; //. ->
 		try {
-			URL2_Buffer = URL2.getBytes("windows-1251");
-		} catch (Exception E) {
-			URL2_Buffer = null;
-		}
-		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
-		//. encode string
-		StringBuffer sb = new StringBuffer();
-		for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
-			String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
-			while (h.length() < 2)
-				h = "0"+h;
-			sb.append(h);
-		}
-		URL2 = sb.toString();
-		//.
-		String URL = URL1+"/"+URL2+".dat";
-		//.
-		Canceller.Check();
-		//.
-		HttpURLConnection Connection = Server.OpenConnection(URL);
-		try {
-			Canceller.Check();
-			//.
-			InputStream in = Connection.getInputStream();
-			try {
-				Canceller.Check();
-				// .
-				int RetSize = Connection.getContentLength();
-				if (RetSize == 0) {
-					Data = null;
-					return; // . ->
+			if (!flWithComponents) {
+				byte[] DataDocument = CF.Context_GetDataDocument(TypedDataFiles.DataModel, DataType, DataParams, flWithComponents, Version);
+				if (DataDocument != null) {
+					FromByteArrayV0(DataDocument);
+					if (DataActualityIsExpired()) 
+						DataDocument = null;
 				}
-				byte[] Data = new byte[RetSize];
-				int Size;
-				int SummarySize = 0;
-				int ReadSize;
-				while (SummarySize < Data.length) {
-					ReadSize = Data.length - SummarySize;
-					Size = in.read(Data, SummarySize, ReadSize);
-					if (Size <= 0)
-						throw new Exception(TypedDataFiles.context.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
-					SummarySize += Size;
-					//.
-					Canceller.Check();
+				if (DataDocument == null) {
+					DataDocument = CF.Server_GetDataDocument(TypedDataFiles.DataModel, DataType, DataParams, flWithComponents, Version);
+					if (DataDocument != null)
+						FromByteArrayV0(DataDocument);
 				}
-				//.
-				FromByteArrayV0(Data);
-			} finally {
-				in.close();
+				return; //. ->
 			}
-		} finally {
-			Connection.disconnect();
+			else {
+				byte[] DataDocument = CF.Server_GetDataDocument(TypedDataFiles.DataModel, DataType, DataParams, flWithComponents, Version);
+				if (DataDocument != null)
+					FromByteArrayV0(DataDocument);
+			}
 		}
+		finally {
+			CF.Release();
+		}
+	}
+
+	public void PrepareForComponent(int idTComponent, long idComponent, boolean flWithComponents, TGeoScopeServer Server) throws Exception {
+		PrepareForComponent(idTComponent,idComponent, null, flWithComponents, Server);	
 	}
 	
 	public File GetTempFile() {
@@ -238,6 +213,23 @@ public class TComponentTypedDataFile {
 			return CreateTempFile(); //. ->
 	}
 
+	public byte[] GetFileData() throws Exception {
+		if (DataFileName != null) {
+			File F = new File(DataFileName);
+			byte[] _Data = new byte[(int)F.length()];
+			FileInputStream FIS = new FileInputStream(F);
+			try {
+				FIS.read(_Data);
+			}
+			finally {
+				FIS.close();
+			}
+			return _Data; //. ->
+		}
+		else
+			return Data; //. ->
+	}
+	
 	public boolean FileIsEmpty() throws Exception {
 		if (DataFileName != null) {
 			File F = new File(DataFileName);

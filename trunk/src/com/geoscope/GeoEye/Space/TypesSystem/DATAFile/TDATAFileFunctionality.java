@@ -9,6 +9,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
@@ -64,12 +65,25 @@ public class TDATAFileFunctionality extends TComponentFunctionality {
 			throw new Exception("error of loading XML document: "+E.getMessage()); //. =>
     	}
 	}
+
+	@Override
+	public Bitmap GetThumbnailImage() throws Exception {
+		TURL URL = GetAsURL();
+		if (URL != null)
+			return URL.GetThumbnailImage(); //. ->
+		return super.GetThumbnailImage();
+	}
+	
+	private TURL GetAsURL() throws Exception {
+		if (TURL.IsTypeOf(TypeID)) 
+			return TURL.GetURL(TypeID, Server.User, XMLDocumentRootNode); //. ->
+		else
+			return null; //. ->
+	}
 	
 	public void Open(Context context) throws Exception {
-		if (TURL.IsTypeOf(TypeID)) {
-			TURL URL = TURL.GetURL(TypeID, Server.User, XMLDocumentRootNode);
-			if (URL != null)
-				URL.Open(context);
-		}
+		TURL URL = GetAsURL();
+		if (URL != null)
+			URL.Open(context);
 	}
 }

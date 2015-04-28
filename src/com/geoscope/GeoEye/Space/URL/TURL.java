@@ -8,6 +8,7 @@ import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
@@ -123,6 +124,10 @@ public class TURL {
 	
 	public boolean HasData() {
 		return false;
+	}
+	
+	public Bitmap GetThumbnailImage() {
+		return null;
 	}
 	
 	public void Open(Context context) throws Exception {

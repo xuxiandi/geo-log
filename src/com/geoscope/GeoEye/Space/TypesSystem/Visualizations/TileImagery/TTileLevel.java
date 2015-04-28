@@ -67,12 +67,14 @@ public class TTileLevel {
 		private Hashtable<Integer, Hashtable<Integer, TTile>> XTable;
 		private TTile 	Items;
 		private int		ItemsCount;
+		private int		ItemsVisibleCount;
 		
 		public TTileIndex() {
 			XTable = new Hashtable<Integer, Hashtable<Integer,TTile>>();
 			//.
 			Items = null;
 			ItemsCount = 0;
+			ItemsVisibleCount = 0;
 		}
 		
 		public void Destroy() {
@@ -85,6 +87,7 @@ public class TTileLevel {
 				}
 				//.
 				ItemsCount = 0;
+				ItemsVisibleCount = 0;
 				Items = null;
 			}
 			XTable = null;
@@ -119,6 +122,8 @@ public class TTileLevel {
 					if (LastTile.Next != null)
 						LastTile.Next.Pred = LastTile.Pred;
 					ItemsCount--;
+					if (!LastTile.IsTransparent())
+						ItemsVisibleCount--;
 					//.
 					LastTile.Finalize();
 				}
@@ -132,6 +137,8 @@ public class TTileLevel {
 				if (Value.Next != null)
 					Value.Next.Pred = Value;
 				ItemsCount++;
+				if (!Value.IsTransparent())
+					ItemsVisibleCount++;
 				//.
 				Value.SetAsAccessed();
 			}
@@ -151,15 +158,14 @@ public class TTileLevel {
 				Hashtable<Integer, TTile> YTable = XTable.get(Item.X);
 				if (YTable != null) 
 					YTable.remove(Item.Y);
+				ItemsCount--;
+				if (!Item.IsTransparent())
+					ItemsCount--;
 				//.
 				Item.Finalize();
 				//.
 				Item = Item.Next;
 			}
-			if (Count < ItemsCount)
-				ItemsCount -= Count;
-			else 
-				ItemsCount = 0;
 			if (LastItem != null)
 				LastItem.Next = null;
 			else
@@ -193,6 +199,10 @@ public class TTileLevel {
 	
 	public synchronized int TilesCount() {
 		return TileIndex.ItemsCount;
+	}
+	
+	public synchronized int TilesVisibleCount() {
+		return TileIndex.ItemsVisibleCount;
 	}
 	
 	public synchronized TTile GetTile(int X, int Y) {
@@ -1287,12 +1297,15 @@ public class TTileLevel {
 			}
 	}
 
-	public int Container_AvailableTileCounter(TRWLevelTileContainer RWLevelTileContainer) throws CancelException, TimeIsExpiredException {
+	public int Container_VisibleTileCounter(TRWLevelTileContainer RWLevelTileContainer) throws CancelException, TimeIsExpiredException {
 		int Result = 0;
 		for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++) {
 			for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) 
-				if (TileIndex.GetItem(X,Y) != null) 
-					Result++;
+				synchronized (this) {
+					TTile Tile = TileIndex.GetItem(X,Y); 
+					if ((Tile != null) && !Tile.IsTransparent())  
+						Result++;
+				}
 		}
 		//.
 		return Result;

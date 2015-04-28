@@ -1,7 +1,6 @@
 package com.geoscope.GeoEye;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -201,9 +200,6 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 					ProgressHandler.DoOnFinish();
 			}
 
-			private static final int LOADIMAGE_DATAKIND_BITMAP 		= 0;
-			private static final int LOADIMAGE_DATAKIND_DRAWINGS 	= 1;
-			
 			private Bitmap LoadImage() throws Exception {
 				if (Item.BMP_flLoaded) {
 					if (!Item.BMP_flNull) 
@@ -214,41 +210,49 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 				//.
 				Bitmap Result = null;
 				//. 
-				int DataKind = LOADIMAGE_DATAKIND_BITMAP;
+				boolean flProcessAsDefault = true;
 				switch (Item.DataType) {
 
-				case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
-					if ((Item.DataFormat != null) && Item.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat)) 
-						DataKind = LOADIMAGE_DATAKIND_DRAWINGS;
-					break; //. >
-				}
-				//.
-				switch (DataKind) {
-					
-				case LOADIMAGE_DATAKIND_DRAWINGS:
-					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ImageDrawings_ItemImageDataParams, (Item.Component.idTComponent == SpaceDefines.idTCoComponent), Item.Server);
-					break; //. >
-					
-				default:
-					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, (Item.Component.idTComponent == SpaceDefines.idTCoComponent), Item.Server);
-					break; //. >
-				}
-				//.
-				if (Item.Component.TypedDataFiles.Items.length > 0) {
-					byte[] Data = Item.Component.TypedDataFiles.Items[0].Data;
-					if (Data != null) 
-						switch (DataKind) {
-						
-						case LOADIMAGE_DATAKIND_DRAWINGS:
-							TDrawings Drawings = new TDrawings();
-							Drawings.LoadFromByteArray(Data,0);
-							Result = Drawings.ToBitmap(ItemImageSize);
-							break; //. >
-							
-						default:
-							Result = BitmapFactory.decodeByteArray(Data, 0,Data.length); 
-							break; //. >
+				case SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName:
+					if ((Item.DataFormat != null) && Item.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
+						TComponentTypedDataFiles ComponentTypedDataFiles = new TComponentTypedDataFiles(context, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_Document);
+						ComponentTypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, true, Item.Server);
+						//.
+						TComponentTypedDataFile ComponentTypedDataFile = ComponentTypedDataFiles.GetRootItem(); 
+						if ((ComponentTypedDataFile != null) && ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
+							TComponentFunctionality CF = Item.Server.User.Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+							if (CF != null) 
+								try {
+									CF.ParseFromXMLDocument(ComponentTypedDataFile.GetFileData());
+									Result = CF.GetThumbnailImage();
+									flProcessAsDefault = (Result == null);
+								}
+								finally {
+									CF.Release();
+								}
 						}
+					}
+					break; //. >
+					
+				case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
+					if ((Item.DataFormat != null) && Item.DataFormat.equals(TDrawingDefines.DataFormat)) {
+						Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ImageDrawings_ItemImageDataParams, (Item.Component.idTComponent == SpaceDefines.idTCoComponent), Item.Server);
+						TComponentTypedDataFile DataFile = Item.Component.TypedDataFiles.GetRootItem(); 
+						if ((DataFile != null) && (DataFile.Data != null)) {
+							TDrawings Drawings = new TDrawings();
+							Drawings.LoadFromByteArray(DataFile.Data,0);
+							Result = Drawings.ToBitmap(ItemImageSize);
+						}
+						flProcessAsDefault = false;
+					}
+					break; //. >
+				}
+				//.
+				if (flProcessAsDefault) {
+					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, (Item.Component.idTComponent == SpaceDefines.idTCoComponent), Item.Server);
+					TComponentTypedDataFile DataFile = Item.Component.TypedDataFiles.GetRootItem(); 
+					if ((DataFile != null) && (DataFile.Data != null)) 
+						Result = BitmapFactory.decodeByteArray(DataFile.Data, 0,DataFile.Data.length); 
 				}
 				//.
 				if (Result != null) 
@@ -731,19 +735,10 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	    	    										if (URL != null) 
 	    	    											try {
 	    	    												if (URL.HasData()) {
-		    	    												ComponentTypedDataFile.PrepareFromServer(UserAgent.Server, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_Document, false, Canceller);
-			    													if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
-			    	    	    										File F = ComponentTypedDataFile.GetFile();
-			    	    	    										byte[] Data = new byte[(int)F.length()];
-			    	    	    										FileInputStream FIS = new FileInputStream(F);
-			    	    	    										try {
-			    	    	    											FIS.read(Data);
-			    	    	    										}
-			    	    	    										finally {
-			    	    	    											FIS.close();
-			    	    	    										}
-			    	    	    										CF.ParseFromXMLDocument(Data);
-			    													}
+	    	    													ComponentTypedDataFile.DataType = SpaceDefines.TYPEDDATAFILE_TYPE_Document; 
+	    	    													ComponentTypedDataFile.PrepareForComponent(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID, false, UserAgent.Server);
+			    													if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) 
+			    	    	    										CF.ParseFromXMLDocument(ComponentTypedDataFile.GetFileData());
 	    	    												}
 	    	    	    										//.
 	    		    											URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
@@ -1127,20 +1122,22 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 			int 	DataType = SpaceDefines.TYPEDDATAFILE_TYPE_All;
 			String 	DataFormat = null;
 			String Name = Component.GetName().split("\n")[0];
-			if (Component.TypedDataFiles.Items.length > 0) {
-				DataType = Component.TypedDataFiles.Items[0].DataType;
-				DataFormat = Component.TypedDataFiles.Items[0].DataFormat;
-				switch (Component.TypedDataFiles.Items[0].DataComponentType) {
+			TComponentTypedDataFile DataFile = Component.TypedDataFiles.GetRootItem(); 
+			if (DataFile != null) {
+				DataType = DataFile.DataType;
+				DataFormat = DataFile.DataFormat;
+				switch (DataFile.DataComponentType) {
 				
 				case SpaceDefines.idTPositioner:
-					Name = Name+" "+"/"+SpaceDefines.ComponentType_GetName(Component.TypedDataFiles.Items[0].DataComponentType,ParentActivity)+"/";
+					Name = Name+" "+"/"+SpaceDefines.ComponentType_GetName(DataFile.DataComponentType,ParentActivity)+"/";
 					break; //. >
 					
 				case SpaceDefines.idTMapFormatObject:
 					break; //. >
 					
 				default:
-					Name = Name+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataType,ParentActivity)+"/";
+					if (!SpaceDefines.TYPEDDATAFILE_TYPE_Document_IsXMLFormat(DataType,DataFormat))
+						Name = Name+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataType,ParentActivity)+"/";
 					break; //. >
 				}
 			}
@@ -1469,18 +1466,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 
 			case SpaceDefines.TYPEDDATAFILE_TYPE_Document:
 				try {
-					File F = ComponentTypedDataFile.GetFile();
-					byte[] Data = new byte[(int)F.length()];
-					FileInputStream FIS = new FileInputStream(F);
-					try {
-						FIS.read(Data);
-					}
-					finally {
-						FIS.close();
-					}
-					//.
-					if (ComponentTypedDataFile.DataFormat.toUpperCase(Locale.ENGLISH).equals(".TXT")) {
-						String Text = new String(Data,"windows-1251");
+					if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_TXT)) {
+						String Text = new String(ComponentTypedDataFile.GetFileData(),"windows-1251");
 						byte[] TextData = Text.getBytes("utf-16");
 						// .
 						File TempFile = ComponentTypedDataFile.GetTempFile();
@@ -1499,7 +1486,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 							TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 							if (CF != null)
 								try {
-									int Version = CF.ParseFromXMLDocument(Data);
+									int Version = CF.ParseFromXMLDocument(ComponentTypedDataFile.GetFileData());
 									if (Version > 0) 
 										switch (CF.TypeFunctionality.idType) {
 										

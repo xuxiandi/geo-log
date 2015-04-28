@@ -67,6 +67,10 @@ public class SpaceDefines {
 		return (Format.equals(TYPEDDATAFILE_TYPE_Document_FORMAT_XML) || Format.equals(TYPEDDATAFILE_TYPE_Document_FORMAT_TXT) || Format.equals(TYPEDDATAFILE_TYPE_Document_FORMAT_DOC));
 	}
 	//.
+	public static boolean TYPEDDATAFILE_TYPE_Document_IsXMLFormat(int DataType, String DataFormat) {
+		return (((TYPEDDATAFILE_TYPE_DocumentName <= DataType) && (DataType <= TYPEDDATAFILE_TYPE_Document)) && DataFormat.equals(TYPEDDATAFILE_TYPE_Document_FORMAT_XML));
+	}
+	//.
 	public static final String TYPEDDATAFILE_TYPE_Image_String(Context context) {
 		return context.getString(R.string.SImage1);   
 	}

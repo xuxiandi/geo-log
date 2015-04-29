@@ -4,9 +4,12 @@ import org.w3c.dom.Element;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.widget.Toast;
 
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel;
@@ -38,6 +41,11 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 		return TypeID;
 	}
 
+	@Override
+	public Bitmap GetThumbnailImage() {
+		return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_componentpropspanel);
+	}
+	
 	@Override
 	public void Open(Context context) throws Exception {
 		TAsyncProcessing Opening = new TAsyncProcessing(context) {

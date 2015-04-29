@@ -1978,6 +1978,8 @@ public class TReflectorComponent extends TUIComponent {
 									Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 					// .
 					Arrows.WorkSpace.Update();
+					//.
+					Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
 				}
 			}
 
@@ -2064,6 +2066,8 @@ public class TReflectorComponent extends TUIComponent {
 									Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 					// .
 					Arrows.WorkSpace.Update();
+					//.
+					Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
 				}
 			}
 
@@ -2146,6 +2150,8 @@ public class TReflectorComponent extends TUIComponent {
 									Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 					// .
 					Arrows.WorkSpace.Update();
+					//.
+					Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
 				}
 			}
 
@@ -2228,6 +2234,8 @@ public class TReflectorComponent extends TUIComponent {
 									Arrows.WorkSpace.Reflector.ReflectionWindow.Ymd);
 					// .
 					Arrows.WorkSpace.Update();
+					//.
+					Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
 				}
 			}
 
@@ -3720,7 +3728,7 @@ public class TReflectorComponent extends TUIComponent {
 			Reflector = pReflector;
 			// .
 			_Thread = new Thread(this);
-			_Thread.setPriority(Thread.MIN_PRIORITY);
+			//. _Thread.setPriority(Thread.MIN_PRIORITY);
 			_Thread.start();
 		}
 
@@ -3813,6 +3821,10 @@ public class TReflectorComponent extends TUIComponent {
 			StartSignal.Set();
 		}
 
+		public void Start() {
+			Start(Reflector.ReflectionWindow.GetWindow());
+		}
+		
 		public void Stop() {
 			ProcessingCanceller.Cancel();
 			//.
@@ -3924,7 +3936,7 @@ public class TReflectorComponent extends TUIComponent {
 					Progressor = pProgressor;
 					// .
 					_Thread = new Thread(this);
-					_Thread.setPriority(Thread.MIN_PRIORITY);
+					//. _Thread.setPriority(Thread.MIN_PRIORITY);
 				}
 
 				@Override
@@ -3987,7 +3999,7 @@ public class TReflectorComponent extends TUIComponent {
 				LevelTileContainers = pLevelTileContainers;
 				// .
 				_Thread = new Thread(this);
-				_Thread.setPriority(Thread.MIN_PRIORITY);
+				//. _Thread.setPriority(Thread.MIN_PRIORITY);
 			}
 
 			public void Start() {
@@ -4022,7 +4034,7 @@ public class TReflectorComponent extends TUIComponent {
 				GetTilesResult = pGetTilesResult;
 				// .
 				_Thread = new Thread(this);
-				_Thread.setPriority(Thread.MIN_PRIORITY);
+				//. _Thread.setPriority(Thread.MIN_PRIORITY);
 			}
 
 			public void Start() {
@@ -4069,7 +4081,7 @@ public class TReflectorComponent extends TUIComponent {
 			ImageProgressor = new TImageProgressor();
 			// .
 			_Thread = new Thread(this);
-			_Thread.setPriority(Thread.MIN_PRIORITY);
+			//. _Thread.setPriority(Thread.MIN_PRIORITY);
 			_Thread.start();
 		}
 
@@ -4251,7 +4263,6 @@ public class TReflectorComponent extends TUIComponent {
 					break; // . >
 				}
 				//. supply hints with images
-				_Thread.setPriority(Thread.MIN_PRIORITY);
 				int SupplyCount = 25;
 				for (int I = 0; I < SupplyCount; I++) {
 					int RC = Reflector.SpaceHints.SupplyHintsWithImageDataFiles(Canceller);
@@ -7135,7 +7146,11 @@ public class TReflectorComponent extends TUIComponent {
 	private static TReflectionWindowStrucStack MyLastWindows = null;
 	
 	
-	public boolean flExists = false;
+	public boolean 	flExists = false;
+	public boolean 	flVisible = false;
+	public boolean 	flRunning = false;
+	public boolean 	flOffline = false;
+	private boolean flEnabled = true;
 	//.
 	public int ID = 0;
 	//. Start reason
@@ -7182,10 +7197,9 @@ public class TReflectorComponent extends TUIComponent {
 	//. result image
 	protected TReflectorSpaceImage SpaceImage;
 	//.
-	public boolean flVisible = false;
-	public boolean flRunning = false;
-	public boolean flOffline = false;
-	private boolean flEnabled = true;
+	private TSpaceImageCaching _SpaceImageCaching = null;
+	//.
+	private TSpaceImageUpdating _SpaceImageUpdating = null;
 	//. Navigation mode and type
 	public int 	NavigationMode = NAVIGATION_MODE_MULTITOUCHING1;
 	//.
@@ -7213,12 +7227,8 @@ public class TReflectorComponent extends TUIComponent {
 	public TCancelableThread 	SelectedComponentTypedDataFileNamesLoading = null;
 	public AlertDialog 			SelectedComponentTypedDataFileNames_SelectorPanel = null;
 	public TCancelableThread 	SelectedComponentTypedDataFileLoading = null;
-	// .
-	private TSpaceImageCaching _SpaceImageCaching = null;
-	// .
-	private TSpaceImageUpdating 											_SpaceImageUpdating = null;
-	// .
-	public TCoGeoMonitorObjects 			CoGeoMonitorObjects;
+	//.
+	public TCoGeoMonitorObjects 					CoGeoMonitorObjects;
 	private TCoGeoMonitorObjectsLocationUpdating 	CoGeoMonitorObjects_LocationUpdating = null;
 	private void 									CoGeoMonitorObjects_LocationUpdating_Intialize() {
 		CoGeoMonitorObjects_LocationUpdating_Finalize();
@@ -7709,6 +7719,8 @@ public class TReflectorComponent extends TUIComponent {
 			break; // . >
 		}
 		//.
+		_SpaceImageCaching.Start();
+		//.
 		_AddComponent(this);
 		//.
 		flExists = true;
@@ -8059,8 +8071,7 @@ public class TReflectorComponent extends TUIComponent {
 		CancelUpdatingSpaceImage();
 		// .
 		try {
-			_SpaceImageUpdating = new TSpaceImageUpdating(this, Delay,
-					flUpdateProxySpace);
+			_SpaceImageUpdating = new TSpaceImageUpdating(this, Delay, flUpdateProxySpace);
 		} catch (Exception E) {
 		}
 		if (WorkSpace != null)

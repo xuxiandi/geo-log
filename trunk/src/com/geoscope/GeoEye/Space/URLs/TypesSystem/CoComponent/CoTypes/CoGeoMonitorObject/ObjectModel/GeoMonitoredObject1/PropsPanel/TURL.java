@@ -8,8 +8,11 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectPanel;
 
@@ -83,6 +86,11 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent
         Serializer.endTag("", "ObjectName");
 	}
 
+	@Override
+	public Bitmap GetThumbnailImage() {
+		return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_cocomponent_geomonitorobject1);
+	}
+	
 	@Override
 	public void Open(Context context) throws Exception {
     	Intent intent = new Intent(context, TCoGeoMonitorObjectPanel.class);

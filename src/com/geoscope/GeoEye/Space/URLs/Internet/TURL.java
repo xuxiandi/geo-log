@@ -4,8 +4,11 @@ import org.w3c.dom.Element;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 
 public class TURL extends com.geoscope.GeoEye.Space.URLs.TURL {
@@ -28,6 +31,11 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TURL {
 	@Override
 	public String GetTypeID() {
 		return TypeID;
+	}
+	
+	@Override
+	public Bitmap GetThumbnailImage() {
+		return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_internet);
 	}
 	
 	@Override

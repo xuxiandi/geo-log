@@ -41,7 +41,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.
 	
 	@Override
 	public Bitmap GetThumbnailImage() {
-		return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_component_positioner);
+		return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_location);
 	}
 	
 	@Override

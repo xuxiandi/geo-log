@@ -390,7 +390,7 @@ public class TSensorMeter extends TCancelableThread {
 		String DataName = Measurement.Descriptor.TypeID()+"("+OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(Measurement.Descriptor.StartTimestamp))+")"; 
 		//.
     	if ((DataName != null) && (DataName.length() > 0))
-    		DataName = "@"+TComponentFileStreaming.EncodeFileNameString(DataName);
+    		DataName = "@"+TComponentFileStreaming.CheckAndEncodeFileNameString(DataName);
     	else
     		DataName = "";
     	//.

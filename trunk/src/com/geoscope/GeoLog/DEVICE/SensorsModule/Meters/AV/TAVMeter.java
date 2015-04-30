@@ -1,8 +1,11 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.AV;
 
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderPanel;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 
 public class TAVMeter extends TSensorMeter {
 
@@ -34,11 +37,25 @@ public class TAVMeter extends TSensorMeter {
 			SetStatus(STATUS_RUNNING);
 			try {
 				try {
+					Camera.TCameraMeasurementInfo LastMeasurementInfo = null;
 					while (!Canceller.flCancel) {
 						if (!SensorsModule.Device.VideoRecorderModule.IsRecording())
 							SensorsModule.Device.VideoRecorderModule.SetRecorderState(true);
 						//.
 						Thread.sleep(VideoRecorderCheckInterval);
+						//.
+				    	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
+				    	if (VideoRecorderPanel != null) {
+				    		Camera.TCameraMeasurementInfo MeasurementInfo = VideoRecorderPanel.Recording_GetMeasurementInfo();
+				    		if ((MeasurementInfo == null) || !MeasurementInfo.Equals(LastMeasurementInfo)) {
+				    			if (LastMeasurementInfo != null) {
+									TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, LastMeasurementInfo.DatabaseFolder, LastMeasurementInfo.MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+									DoOnMeasurementFinish(Measurement);
+				    			}
+								//.
+			    				LastMeasurementInfo = MeasurementInfo;
+				    		}
+				    	}
 					}
 				}
 				finally {

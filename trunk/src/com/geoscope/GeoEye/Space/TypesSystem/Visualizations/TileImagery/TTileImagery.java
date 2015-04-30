@@ -373,12 +373,37 @@ public class TTileImagery {
 				ATSPC[I].PrepareUpLevelsTiles(LevelTileContainers[I], LevelStep, Canceller,Updater);
 	}
 	
+	public void ActiveCompilationSet_RemoveUpLevelsTiles(TRWLevelTileContainer[] LevelTileContainers, TGetTilesResult[] GetTilesResult, TCanceller Canceller, TUpdater Updater) throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
+		if ((ATSPC != null) && (ATSPC.length == GetTilesResult.length)) {
+			int Cnt = ATSPC.length;
+			for (int I = 0; I < Cnt; I++)	
+				if (GetTilesResult[I].RemovedTiles != null)
+					ATSPC[I].RemoveUpLevelsTiles(LevelTileContainers[I].Level, GetTilesResult[I].RemovedTiles, Canceller,Updater);
+		}
+	}
+	
+	public void ActiveCompilationSet_RemoveDownLevelsTiles(TRWLevelTileContainer[] LevelTileContainers, TGetTilesResult[] GetTilesResult, TCanceller Canceller, TUpdater Updater) throws Exception {
+		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
+		if ((ATSPC != null) && (ATSPC.length == GetTilesResult.length)) {
+			int Cnt = ATSPC.length;
+			for (int I = 0; I < Cnt; I++)	
+				if (GetTilesResult[I].RemovedTiles != null)
+					ATSPC[I].RemoveDownLevelsTiles(LevelTileContainers[I].Level, GetTilesResult[I].RemovedTiles, Canceller,Updater);
+		}
+	}
+	
 	public void ActiveCompilationSet_RemoveUpDownLevelsTiles(TRWLevelTileContainer[] LevelTileContainers, TGetTilesResult[] GetTilesResult, TCanceller Canceller, TUpdater Updater) throws Exception {
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
-		if ((ATSPC != null) && (ATSPC.length == GetTilesResult.length)) 
-			for (int I = 0; I < ATSPC.length; I++)	
+		if ((ATSPC != null) && (ATSPC.length == GetTilesResult.length)) {
+			int Cnt = ATSPC.length;
+			for (int I = 0; I < Cnt; I++)	
 				if (GetTilesResult[I].RemovedTiles != null)
-					ATSPC[I].RemoveUpDownLevelsTiles(LevelTileContainers[I].Level, GetTilesResult[I].RemovedTiles, Canceller,Updater);
+					ATSPC[I].RemoveUpLevelsTiles(LevelTileContainers[I].Level, GetTilesResult[I].RemovedTiles, null,Updater);
+			for (int I = 0; I < Cnt; I++)	
+				if (GetTilesResult[I].RemovedTiles != null)
+					ATSPC[I].RemoveDownLevelsTiles(LevelTileContainers[I].Level, GetTilesResult[I].RemovedTiles, Canceller,Updater);
+		}
 	}
 	
 	public void ActiveCompilationSet_ReflectionWindow_DrawOnCanvas(TReflectionWindowStruc RW, int pImageID, Canvas canvas, Paint paint, Paint transitionpaint, TCanceller Canceller, TTimeLimit TimeLimit) throws CancelException, TimeIsExpiredException {

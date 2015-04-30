@@ -754,8 +754,14 @@ public class TDEVICEModule extends TModule
     	
     	public static final String ItemsFileName = "ComponentFileStreaming.xml"; 
     	public static final int StreamingAttemptSleepTime = 1000*60; //. seconds
+    	
+    	public static final int ComponentFileNameMaxSize = 100;
 
-    	public static String EncodeFileNameString(String FNS) throws UnsupportedEncodingException {
+    	public static String CheckAndEncodeFileNameString(String FNS) throws UnsupportedEncodingException {
+    		FNS = FNS.replace("'", "\"");
+    		if (FNS.length() > ComponentFileNameMaxSize)
+    			FNS = FNS.substring(0, ComponentFileNameMaxSize);
+    		//.
     		byte[] FNSBA = FNS.getBytes("windows-1251");
             StringBuffer sb = new StringBuffer();
             int Cnt = FNSBA.length;

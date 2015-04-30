@@ -601,7 +601,7 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
-	private void RemoveUpLevelsTiles(int LevelIndex, ArrayList<TTile.TDescriptor> Tiles, TCanceller Canceller, TUpdater Updater) throws Exception {
+	public void RemoveUpLevelsTiles(int LevelIndex, ArrayList<TTile.TDescriptor> Tiles, TCanceller Canceller, TUpdater Updater) throws Exception {
 		if (!flInitialized)
 			Initialize();
 		int TilesCount = Tiles.size();
@@ -631,7 +631,7 @@ public class TTileServerProviderCompilation {
 		}
 	}
 	
-	private void RemoveDownLevelsTiles(int LevelIndex, ArrayList<TTile.TDescriptor> Tiles, TCanceller Canceller, TUpdater Updater) throws Exception {
+	public void RemoveDownLevelsTiles(int LevelIndex, ArrayList<TTile.TDescriptor> Tiles, TCanceller Canceller, TUpdater Updater) throws Exception {
 		if (!flInitialized)
 			Initialize();
 		int Size = 2;
@@ -663,7 +663,7 @@ public class TTileServerProviderCompilation {
 	}
 	
 	public void RemoveUpDownLevelsTiles(int LevelIndex, ArrayList<TTile.TDescriptor> Tiles, TCanceller Canceller, TUpdater Updater) throws Exception {
-		RemoveUpLevelsTiles(LevelIndex, Tiles, Canceller, Updater);
+		RemoveUpLevelsTiles(LevelIndex, Tiles, null, Updater);
 		RemoveDownLevelsTiles(LevelIndex, Tiles, Canceller, Updater);
 	}
 	
@@ -704,7 +704,7 @@ public class TTileServerProviderCompilation {
 			int MaxAvailableTiles = 0;
 			while (true) {
 				if (Levels[LevelTileContainer.Level].TilesVisibleCount() > 0) {
-					int AvailableTiles = Levels[LevelTileContainer.Level].Container_VisibleTileCounter(LevelTileContainer);				
+					int AvailableTiles = Levels[LevelTileContainer.Level].Container_TileCounter(LevelTileContainer);				
 					if (AvailableTiles > MaxAvailableTiles) {
 						MaxAvailableTiles = AvailableTiles;
 						ResultLevelTileContainer.AssignContainer(LevelTileContainer);

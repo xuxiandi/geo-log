@@ -80,7 +80,7 @@ public class TMeasurementProcessorPanel extends Activity {
     	            //.
     	            Processor.Setup(Measurement);
     	            //.
-    	            Processor.SetPosition(MeasurementStartPosition, 100, true);
+    	            Processor.SetPosition(MeasurementStartPosition, 100, false);
     			}
     			
     			@Override

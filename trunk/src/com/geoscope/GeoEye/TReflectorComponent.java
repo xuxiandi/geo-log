@@ -3728,7 +3728,7 @@ public class TReflectorComponent extends TUIComponent {
 			Reflector = pReflector;
 			// .
 			_Thread = new Thread(this);
-			//. _Thread.setPriority(Thread.MIN_PRIORITY);
+			_Thread.setPriority(Thread.MIN_PRIORITY);
 			_Thread.start();
 		}
 
@@ -3936,7 +3936,7 @@ public class TReflectorComponent extends TUIComponent {
 					Progressor = pProgressor;
 					// .
 					_Thread = new Thread(this);
-					//. _Thread.setPriority(Thread.MIN_PRIORITY);
+					_Thread.setPriority(Thread.MIN_PRIORITY);
 				}
 
 				@Override
@@ -3999,7 +3999,7 @@ public class TReflectorComponent extends TUIComponent {
 				LevelTileContainers = pLevelTileContainers;
 				// .
 				_Thread = new Thread(this);
-				//. _Thread.setPriority(Thread.MIN_PRIORITY);
+				_Thread.setPriority(Thread.MIN_PRIORITY);
 			}
 
 			public void Start() {
@@ -4034,7 +4034,7 @@ public class TReflectorComponent extends TUIComponent {
 				GetTilesResult = pGetTilesResult;
 				// .
 				_Thread = new Thread(this);
-				//. _Thread.setPriority(Thread.MIN_PRIORITY);
+				_Thread.setPriority(Thread.MIN_PRIORITY);
 			}
 
 			public void Start() {
@@ -4066,9 +4066,7 @@ public class TReflectorComponent extends TUIComponent {
 		public TImageProgressor ImageProgressor;
 		//.
 		private boolean 														flPrepareUpLevels = true;
-		private TSpaceImageUpdating.TActiveCompilationUpLevelsTilesPreparing	ActiveCompilationUpLevelsTilesPreparing = null;
 		private boolean 														flRemoveUpDownLevels = true;
-		private TSpaceImageUpdating.TActiveCompilationUpDownLevelsTilesRemoving	ActiveCompilationUpDownLevelsTilesRemoving = null;
 
 		public TSpaceImageUpdating(TReflectorComponent pReflector, int pDelay, boolean pflUpdateProxySpace) throws Exception {
     		super();
@@ -4081,35 +4079,10 @@ public class TReflectorComponent extends TUIComponent {
 			ImageProgressor = new TImageProgressor();
 			// .
 			_Thread = new Thread(this);
-			//. _Thread.setPriority(Thread.MIN_PRIORITY);
+			_Thread.setPriority(Thread.MIN_PRIORITY);
 			_Thread.start();
 		}
 
-		@Override
-		public void Cancel() {
-			TActiveCompilationUpDownLevelsTilesRemoving _ActiveCompilationDownLevelsTilesRemoving;
-			synchronized (this) {
-				_ActiveCompilationDownLevelsTilesRemoving = ActiveCompilationUpDownLevelsTilesRemoving;
-				ActiveCompilationUpDownLevelsTilesRemoving = null;
-			}
-			if (_ActiveCompilationDownLevelsTilesRemoving != null) {
-				_ActiveCompilationDownLevelsTilesRemoving.Cancel();
-				_ActiveCompilationDownLevelsTilesRemoving = null;
-			}
-			//.
-			TActiveCompilationUpLevelsTilesPreparing _ActiveCompilationUpLevelsTilesPreparing;
-			synchronized (this) {
-				_ActiveCompilationUpLevelsTilesPreparing = ActiveCompilationUpLevelsTilesPreparing;
-				ActiveCompilationUpLevelsTilesPreparing = null;
-			}
-			if (_ActiveCompilationUpLevelsTilesPreparing != null) {
-				_ActiveCompilationUpLevelsTilesPreparing.Cancel();
-				_ActiveCompilationUpLevelsTilesPreparing = null;
-			}
-			//.
-			super.Cancel();
-		}
-		
 		@Override
 		public void run() {
 			try {
@@ -4197,7 +4170,7 @@ public class TReflectorComponent extends TUIComponent {
 
 						case TTileImagery.SERVERTYPE_HTTPSERVER:
 							// . sequential preparing in current thread
-							Reflector.SpaceTileImagery.ActiveCompilationSet_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
+							PrepareTilesResult = Reflector.SpaceTileImagery.ActiveCompilationSet_PrepareTiles(LevelTileContainers, Canceller, ImageUpdater, ImageProgressor);
 							break; // . >
 
 						case TTileImagery.SERVERTYPE_DATASERVER:
@@ -4237,28 +4210,23 @@ public class TReflectorComponent extends TUIComponent {
 						throw CE; //. =>
 					}
 					//. raise event
-					Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
+					if (!Canceller.flCancel)
+						Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
 					//.
 					TRWLevelTileContainer[] _LevelTileContainers = new TRWLevelTileContainer[LevelTileContainers.length];
 					for (int I = 0; I < _LevelTileContainers.length; I++)
 						if (LevelTileContainers[I] != null)
 							_LevelTileContainers[I] = new TRWLevelTileContainer(LevelTileContainers[I]);
 					//. remove up and down level's tiles if they are updated as new
-					if (flRemoveUpDownLevels && (PrepareTilesResult != null)) {
-						Reflector.SpaceTileImagery.ActiveCompilationSet_RemoveUpDownLevelsTiles(_LevelTileContainers, PrepareTilesResult, null, null);
-					}
+					if (flRemoveUpDownLevels && (PrepareTilesResult != null)) 
+						Reflector.SpaceTileImagery.ActiveCompilationSet_RemoveUpLevelsTiles(_LevelTileContainers, PrepareTilesResult, Canceller, null);
+					Canceller.Check();
 					//. prepare upper level's tiles
 					if (flPrepareUpLevels) {
 						//. flPrepareUpLevels = false;
 						//.
 						TActiveCompilationUpLevelsTilesPreparing _ActiveCompilationUpLevelsTilesPreparing = new TActiveCompilationUpLevelsTilesPreparing(_LevelTileContainers);
-						synchronized (this) {
-							if (ActiveCompilationUpLevelsTilesPreparing != null)
-								ActiveCompilationUpLevelsTilesPreparing.Cancel();
-							//.
-							ActiveCompilationUpLevelsTilesPreparing = _ActiveCompilationUpLevelsTilesPreparing;
-							ActiveCompilationUpLevelsTilesPreparing.Start();
-						}
+						_ActiveCompilationUpLevelsTilesPreparing.Start();
 					}
 					break; // . >
 				}
@@ -8114,7 +8082,7 @@ public class TReflectorComponent extends TUIComponent {
 
 	public synchronized void CancelUpdatingSpaceImage() {
 		if (_SpaceImageUpdating != null) {
-			_SpaceImageUpdating.Cancel();
+			_SpaceImageUpdating.CancelByCanceller();
 			_SpaceImageUpdating = null;
 		}
 	}
@@ -8122,7 +8090,7 @@ public class TReflectorComponent extends TUIComponent {
 	public synchronized void CancelAndWaitUpdatingSpaceImage()
 			throws InterruptedException {
 		if (_SpaceImageUpdating != null) {
-			_SpaceImageUpdating.CancelAndWait();
+			_SpaceImageUpdating.CancelByCancellerAndWait();
 			_SpaceImageUpdating = null;
 		}
 	}
@@ -9033,7 +9001,7 @@ public class TReflectorComponent extends TUIComponent {
 
 		case SpaceDefines.TYPEDDATAFILE_TYPE_Measurement:
 			try {
-				String MeasurementID = Integer.toString(ComponentTypedDataFile.DataComponentType)+":"+Long.toString(ComponentTypedDataFile.DataComponentID);
+				String MeasurementID = Integer.toString(ComponentTypedDataFile.DataComponentType)+"_"+Long.toString(ComponentTypedDataFile.DataComponentID);
 				//. open appropriate extent
 	            Intent ProcessorPanel = new Intent(ParentActivity, TMeasurementProcessorPanel.class);
 	            ProcessorPanel.putExtra("MeasurementDatabaseFolder",TGeoLogApplication.GetTempFolder());
@@ -9230,7 +9198,7 @@ public class TReflectorComponent extends TUIComponent {
                     					Name = Name.substring(0,DataNameMaxSize);
                     				final String DataName; 
                     		    	if ((Name != null) && (Name.length() > 0))
-                    		    		DataName = "@"+TComponentFileStreaming.EncodeFileNameString(Name);
+                    		    		DataName = "@"+TComponentFileStreaming.CheckAndEncodeFileNameString(Name);
                     		    	else
                     		    		DataName = "";
                     				//. creating ...

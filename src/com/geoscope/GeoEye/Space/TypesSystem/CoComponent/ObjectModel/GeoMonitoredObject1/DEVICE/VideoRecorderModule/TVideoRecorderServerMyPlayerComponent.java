@@ -946,6 +946,21 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 		surface = arg0;
 		Width = arg2;
 		Height = arg3;
+		//. re-initialize video
+		if ((VideoChannelProcessor == null) && (Measurement.Descriptor.Model != null)) {
+			int Cnt = Measurement.Descriptor.Model.Stream.Channels.size();
+			for (int C = 0; C < Cnt; C++) {
+				TChannel Channel = Measurement.Descriptor.Model.Stream.Channels.get(C);
+				//.
+				if (Channel.IsTypeOf(TVideoH264IChannelProcessor.TypeID)) {
+					flVideo = true;
+					//.
+					synchronized (this) {
+						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, Measurement.Folder(), Channel, surface, Width,Height);
+					}
+				}
+			}
+		}
 		//.
 		if (OnVideoSurfaceChangedHandler != null) 
 			OnVideoSurfaceChangedHandler.DoOnSurfaceChanged(surface);

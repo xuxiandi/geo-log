@@ -22,6 +22,7 @@ import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneCapturingServer;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACEncoder;
@@ -791,6 +792,8 @@ public class CameraStreamerFRAME extends Camera {
 			synchronized (this) {
 				if (MeasurementDescriptor != null) {
 					MeasurementDescriptor.FinishTimestamp = FinishTimestamp;
+					MeasurementDescriptor.GeographServerObjectID = VideoRecorderModule.Device.idGeographServerObject;
+					MeasurementDescriptor.GUID = TUIDGenerator.GenerateWithTimestamp();
 					//.
 					if (AACChannel != null)
 						AACChannel.Packets = AudioSampleEncoderPackets;

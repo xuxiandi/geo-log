@@ -1353,7 +1353,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 
 			case SpaceDefines.TYPEDDATAFILE_TYPE_Measurement:
 				try {
-					String MeasurementID = Integer.toString(ComponentTypedDataFile.DataComponentType)+":"+Long.toString(ComponentTypedDataFile.DataComponentID);
+					String MeasurementID = Integer.toString(ComponentTypedDataFile.DataComponentType)+"_"+Long.toString(ComponentTypedDataFile.DataComponentID);
 					//. open appropriate extent
 		            Intent ProcessorPanel = new Intent(this, TMeasurementProcessorPanel.class);
 		            ProcessorPanel.putExtra("MeasurementDatabaseFolder",TGeoLogApplication.GetTempFolder());

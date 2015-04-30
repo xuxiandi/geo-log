@@ -1,5 +1,7 @@
 package com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid;
 
+import java.io.File;
+
 import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
@@ -22,6 +24,12 @@ public class Camera {
 		return CurrentCamera.flSaving; 
 	}	
 		
+	public static synchronized TCameraMeasurementInfo CurrentCamera_GetMeasurementInfo() throws Exception {
+		if (CurrentCamera == null)
+			return null; //. ->
+		return CurrentCamera.GetMeasurementInfo();
+	}
+
 	public static synchronized TMeasurementDescriptor CurrentCamera_GetMeasurementDescriptor() throws Exception {
 		if (CurrentCamera == null)
 			return null; //. ->
@@ -33,6 +41,23 @@ public class Camera {
 			return; //. ->
 		CurrentCamera.UpdateMeasurementCurrentDescriptor(); 
 	}	
+	
+	public static class TCameraMeasurementInfo {
+		
+		public String DatabaseFolder;
+		public String MeasurementID;
+		
+		public TCameraMeasurementInfo(String pDatabaseFolder, String pMeasurementID) {
+			DatabaseFolder = pDatabaseFolder;
+			MeasurementID = pMeasurementID;
+		}
+		
+		public boolean Equals(TCameraMeasurementInfo AnInfo) {
+			if (AnInfo == null)
+				return false; //. ->
+			return (DatabaseFolder.equals(AnInfo.DatabaseFolder) && MeasurementID.equals(AnInfo.MeasurementID));
+		}
+	}
 	
 	public static class AudioSetupError extends Exception {
 
@@ -98,6 +123,10 @@ public class Camera {
 	}
 	
 	public void FinishTransmitting() {
+	}
+	
+	public synchronized TCameraMeasurementInfo GetMeasurementInfo() {
+		return (new TCameraMeasurementInfo((new File(MeasurementFolder)).getParent(),MeasurementID));
 	}
 	
 	public synchronized TMeasurementDescriptor GetMeasurementCurrentDescriptor() throws Exception {

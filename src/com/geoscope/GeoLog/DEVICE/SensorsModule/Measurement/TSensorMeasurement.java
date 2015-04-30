@@ -172,9 +172,9 @@ public class TSensorMeasurement {
 	public void Finish() throws Exception {
 		Descriptor.Model.Stop();
 		//.
+		Descriptor.FinishTimestamp = OleDate.UTCCurrentTimestamp();
 		Descriptor.GeographServerObjectID = GeographServerObjectID;
 		Descriptor.GUID = TUIDGenerator.GenerateWithTimestamp();
-		Descriptor.FinishTimestamp = OleDate.UTCCurrentTimestamp();
 		//.
 		TSensorsModuleMeasurements.SetMeasurementDescriptor(DatabaseFolder, Descriptor.ID, Descriptor);
 	}

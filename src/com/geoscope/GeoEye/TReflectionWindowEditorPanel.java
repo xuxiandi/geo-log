@@ -1919,7 +1919,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 						//.
     					if ((DataFileName != null) && (DataFileName.length() > 0)) {
             		    	if ((DataName != null) && (DataName.length() > 0))
-            		    		DataName = "@"+TComponentFileStreaming.EncodeFileNameString(DataName);
+            		    		DataName = "@"+TComponentFileStreaming.CheckAndEncodeFileNameString(DataName);
             		    	else
             		    		DataName = "";
             		    	//.

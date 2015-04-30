@@ -337,7 +337,7 @@ public class TSensorsModuleMeasurements {
 			else
 				Descriptor.GeographServerObjectID = 0;
 			//.
-			node = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"GeographServerObjectID");
+			node = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"GUID");
 			if (node != null) {
 				node = node.getFirstChild();
 				if (node != null) 

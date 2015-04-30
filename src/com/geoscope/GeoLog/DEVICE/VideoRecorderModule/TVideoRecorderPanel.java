@@ -333,6 +333,10 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 		VideoRecorder.FinishTransmitting();
 	}
 	
+	public Camera.TCameraMeasurementInfo Recording_GetMeasurementInfo() throws Exception {
+		return Camera.CurrentCamera_GetMeasurementInfo();
+	}
+	
     @Override
 	public TMeasurementDescriptor Recording_GetMeasurementDescriptor() throws Exception {
 		return Camera.CurrentCamera_GetMeasurementDescriptor();

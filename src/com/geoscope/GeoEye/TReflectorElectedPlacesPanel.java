@@ -416,7 +416,7 @@ public class TReflectorElectedPlacesPanel extends Activity  {
 			return null; //. ->
 		TLocation URLPlace = ElectedPlaces.Items.get((int)SelectedPlaces[0]);
 		//.
-		com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.TURL.TData Data = new com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.TURL.TData(URLPlace.Name, URLPlace.RW.X0, URLPlace.RW.Y0, URLPlace.RW.X1, URLPlace.RW.Y1, URLPlace.RW.X2, URLPlace.RW.Y2, URLPlace.RW.X3, URLPlace.RW.Y3, URLPlace.RW.BeginTimestamp);
+		com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.TURL.TData Data = new com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.TURL.TData(URLPlace.Name, URLPlace.RW.X0, URLPlace.RW.Y0, URLPlace.RW.X1, URLPlace.RW.Y1, URLPlace.RW.X2, URLPlace.RW.Y2, URLPlace.RW.X3, URLPlace.RW.Y3, URLPlace.RW.EndTimestamp);
 		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
 		com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.Panel.TURL URL = new com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.Panel.TURL(Data);
 		URL.ConstructURLFile(URLFN);

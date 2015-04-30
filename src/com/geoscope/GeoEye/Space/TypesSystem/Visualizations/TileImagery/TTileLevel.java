@@ -642,12 +642,9 @@ public class TTileLevel {
 							Result = new ArrayList<TTile.TDescriptor>();
 						Result.add(new TTile.TDescriptor(X,Y));
 						//.
-						if (Progressor != null)
+						if ((Progressor != null) && ((Canceller == null) || !Canceller.flCancel))
 							Progressor.DecProgressValue();
 					}
-	            	//.
-					if (Canceller != null)
-						Canceller.Check();
 	            	//.
 	                SummarySize -= Params.length;
 	            }
@@ -683,18 +680,16 @@ public class TTileLevel {
 							Result = new ArrayList<TTile.TDescriptor>();
 						Result.add(new TTile.TDescriptor(Timestamp.X,Timestamp.Y, Timestamp.Timestamp));
 						//.
-						if (Progressor != null)
+						if ((Progressor != null) && ((Canceller == null) || !Canceller.flCancel))
 							Progressor.DecProgressValue();
 					}
-	            	//.
-					if (Canceller != null)
-						Canceller.Check();
 				}
 			}
 			else {
 				TTileImageryDataServer.TTileTimestampDescriptor[] Timestamps = IDS.GetTilesTimestamps(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, Xmn, Xmx, Ymn, Ymx, ExceptTiles, Canceller);
 				for (int I = 0; I < Timestamps.length; I++) {
 					TTileImageryDataServer.TTileTimestampDescriptor Timestamp = Timestamps[I];
+					//.
 	            	TTile Tile;
 	            	synchronized (this) {
 						Tile = TileIndex.GetItem(Timestamp.X,Timestamp.Y);
@@ -706,12 +701,9 @@ public class TTileLevel {
 							Result = new ArrayList<TTile.TDescriptor>();
 						Result.add(new TTile.TDescriptor(Timestamp.X,Timestamp.Y, Timestamp.Timestamp));
 						//.
-						if (Progressor != null)
+						if ((Progressor != null) && ((Canceller == null) || !Canceller.flCancel))
 							Progressor.DecProgressValue();
 					}
-	            	//.
-					if (Canceller != null)
-						Canceller.Check();
 				}
 			}
 		}
@@ -774,9 +766,6 @@ public class TTileLevel {
 		try {
 			InputStream in = Connection.getInputStream();
 			try {
-				if (Canceller != null)
-					Canceller.Check();
-				//.
 				int SummarySize = Connection.getContentLength();
 				if (SummarySize == 0)
 					return; //. ->
@@ -799,16 +788,14 @@ public class TTileLevel {
 	            	//.
 	            	AddTile(X,Y, Timestamp,TileData);
 	            	//.
-	            	if (Progressor != null) { 
-	            		if ((!Progressor.IncProgressValue()) && (Updater != null))
-	    	            	Updater.Update();
-	            	}
-	            	else
-	            		if (Updater != null)	            	
-	    	            	Updater.Update();
-	            	//.
-					if (Canceller != null)
-						Canceller.Check();
+	            	if ((Canceller == null) || !Canceller.flCancel)
+		            	if (Progressor != null) { 
+		            		if ((!Progressor.IncProgressValue()) && (Updater != null))
+		    	            	Updater.Update();
+		            	}
+		            	else
+		            		if (Updater != null)	            	
+		    	            	Updater.Update();
 	            	//.
 	                SummarySize -= Params.length;
 	                SummarySize -= TileSize;
@@ -835,14 +822,13 @@ public class TTileLevel {
 		            	//.
 		            	AddTile(TD.X,TD.Y, TD.Timestamp,TD.Data);
 		            	//.
-		            	if (Updater != null)
-		            		Updater.Update();
-		            	//.
-		            	if (Progressor != null) 
-		            		Progressor.IncProgressValue();
-		            	//.
-						if (Canceller != null)
-							Canceller.Check();
+		            	if ((Canceller == null) || !Canceller.flCancel) {
+			            	if (Updater != null)
+			            		Updater.Update();
+			            	//.
+			            	if (Progressor != null) 
+			            		Progressor.IncProgressValue();
+		            	}
 					}
 				}
 				finally {
@@ -857,16 +843,15 @@ public class TTileLevel {
 		            	//.
 		            	AddTile(TD.X,TD.Y, TD.Timestamp,TD.Data);
 		            	//.
-		            	if (Progressor != null) { 
-		            		if ((!Progressor.IncProgressValue()) && (Updater != null))
-		    	            	Updater.Update();
+		            	if ((Canceller == null) || !Canceller.flCancel) {
+			            	if (Progressor != null) { 
+			            		if ((!Progressor.IncProgressValue()) && (Updater != null))
+			    	            	Updater.Update();
+			            	}
+			            	else
+			            		if (Updater != null)	            	
+			    	            	Updater.Update();
 		            	}
-		            	else
-		            		if (Updater != null)	            	
-		    	            	Updater.Update();
-		            	//.
-						if (Canceller != null)
-							Canceller.Check();
 					}
 				}
 				finally {
@@ -1143,13 +1128,13 @@ public class TTileLevel {
 			switch (Compilation.TileImagery.ServerType) {
 			
 			case TTileImagery.SERVERTYPE_HTTPSERVER:
-				Result.RemovedTiles = HttpServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, null, Canceller,Progressor); 
+				Result.RemovedTiles = HttpServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, null, Canceller, Progressor); 
 				if (Result.RemovedTiles == null)
 					return Result; //. ->
 				break; //. >
 
 			case TTileImagery.SERVERTYPE_DATASERVER:
-				Result.RemovedTiles = DataServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, null, Canceller,Progressor); 
+				Result.RemovedTiles = DataServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, null, Canceller, Progressor); 
 				if (Result.RemovedTiles == null)
 					return Result; //. ->
 				break; //. >
@@ -1162,27 +1147,33 @@ public class TTileLevel {
 				switch (Compilation.TileImagery.ServerType) {
 				
 				case TTileImagery.SERVERTYPE_HTTPSERVER:
-					Result.RemovedTiles = HttpServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Progressor);
+					Result.RemovedTiles = HttpServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller, Progressor);
 					break; //. >
 
 				case TTileImagery.SERVERTYPE_DATASERVER:
-					Result.RemovedTiles = DataServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Progressor);
+					Result.RemovedTiles = DataServer_RemoveTilesByTimestampsFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller, Progressor);
 					break; //. >
 				}		
 		}
-		//. loading new tiles from server
-		ExceptTiles = GetAvailableTiles(Xmn,Xmx, Ymn,Ymx);
-		if ((!ExceptTiles.flAll) && (!Compilation.IsOffline()))
-			switch (Compilation.TileImagery.ServerType) {
-			
-			case TTileImagery.SERVERTYPE_HTTPSERVER:
-				HttpServer_GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater,Progressor);
-				break; //. >
-				
-			case TTileImagery.SERVERTYPE_DATASERVER:
-				DataServer_GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater,Progressor);
-				break; //. >
-			}
+		//. loading new tiles from the server
+		if ((Canceller == null) || !Canceller.flCancel) {
+			ExceptTiles = GetAvailableTiles(Xmn,Xmx, Ymn,Ymx);
+			if (!ExceptTiles.flAll && !Compilation.IsOffline())
+				try {
+					switch (Compilation.TileImagery.ServerType) {
+					
+					case TTileImagery.SERVERTYPE_HTTPSERVER:
+						HttpServer_GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater,Progressor);
+						break; //. >
+						
+					case TTileImagery.SERVERTYPE_DATASERVER:
+						DataServer_GetTilesFromServer(Xmn,Xmx, Ymn,Ymx, ExceptTiles.Data, Canceller,Updater,Progressor);
+						break; //. >
+					}
+				}
+				catch (CancelException CE) {
+				}
+		}
 		//.
 		return Result;
 	}
@@ -1297,7 +1288,21 @@ public class TTileLevel {
 			}
 	}
 
-	public int Container_VisibleTileCounter(TRWLevelTileContainer RWLevelTileContainer) throws CancelException, TimeIsExpiredException {
+	public int Container_TileCounter(TRWLevelTileContainer RWLevelTileContainer) throws CancelException, TimeIsExpiredException {
+		int Result = 0;
+		for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++) {
+			for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) 
+				synchronized (this) {
+					TTile Tile = TileIndex.GetItem(X,Y); 
+					if (Tile != null)  
+						Result++;
+				}
+		}
+		//.
+		return Result;
+	}
+
+	public int Container_TileVisibleCounter(TRWLevelTileContainer RWLevelTileContainer) throws CancelException, TimeIsExpiredException {
 		int Result = 0;
 		for (int X = RWLevelTileContainer.Xmn; X <= RWLevelTileContainer.Xmx; X++) {
 			for (int Y = RWLevelTileContainer.Ymn; Y <= RWLevelTileContainer.Ymx; Y++) 

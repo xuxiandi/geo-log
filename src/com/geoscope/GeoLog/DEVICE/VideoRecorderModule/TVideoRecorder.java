@@ -230,6 +230,10 @@ public class TVideoRecorder {
 		}
 	}
 	
+	public Camera.TCameraMeasurementInfo Recording_GetMeasurementInfo() throws Exception {
+		return Camera.CurrentCamera_GetMeasurementInfo();
+	}
+	
 	public TMeasurementDescriptor Recording_GetMeasurementDescriptor() throws Exception {
 		return Camera.CurrentCamera_GetMeasurementDescriptor();
 	}

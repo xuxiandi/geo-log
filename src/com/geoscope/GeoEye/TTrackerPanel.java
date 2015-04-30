@@ -2478,7 +2478,7 @@ public class TTrackerPanel extends Activity {
     
     private void EnqueueDataFile(int DataFileType, Object Data, String DataName) throws Exception {
     	if ((DataName != null) && (DataName.length() > 0))
-    		DataName = "@"+TComponentFileStreaming.EncodeFileNameString(DataName);
+    		DataName = "@"+TComponentFileStreaming.CheckAndEncodeFileNameString(DataName);
     	else
     		DataName = "";
     	//.

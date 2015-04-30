@@ -1544,7 +1544,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 			    		intent = new Intent(ParentActivity, TDrawingEditor.class);
 			  		    intent.putExtra("FileName", ComponentTypedDataFile.GetFile().getAbsolutePath()); 
 			  		    intent.putExtra("ReadOnly", true); 
-			  		  ParentActivity.startActivity(intent);
+			  		    ParentActivity.startActivity(intent);
 			  		    //.
 						return; // . ->
 					}

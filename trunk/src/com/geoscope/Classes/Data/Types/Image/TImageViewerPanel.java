@@ -1,10 +1,14 @@
 package com.geoscope.Classes.Data.Types.Image;
 
+import java.io.File;
+import java.io.FileInputStream;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -21,8 +25,11 @@ import com.geoscope.GeoEye.R;
 
 public class TImageViewerPanel extends Activity {
 
+	public static final int MaxBitmalSize = 2048;
+	
 	//. Copyright Ishii Kenzo (matabii), URL: https://github.com/matabii/scale-imageview-android
 	public static class ScaleImageView extends ImageView implements android.view.View.OnTouchListener {
+		
 	    private Context mContext;
 	    private float MAX_SCALE = 2f;
 
@@ -258,7 +265,7 @@ public class TImageViewerPanel extends Activity {
 	}	
 
 	private String ImageFileName;
-	private Bitmap ImageBitmap;
+	private Bitmap ImageBitmap = null;
 	private ScaleImageView ivImage;
 	
     public void onCreate(Bundle savedInstanceState) {
@@ -279,17 +286,59 @@ public class TImageViewerPanel extends Activity {
         StartLoadingImage();
     }
     
+    @Override
+    protected void onDestroy() {
+    	if (ImageBitmap != null) {
+    		ImageBitmap.recycle();
+    		ImageBitmap = null;
+    	}
+    	//.
+    	super.onDestroy();
+    }
+    
     private void StartLoadingImage() {
 		TAsyncProcessing Processing = new TAsyncProcessing(TImageViewerPanel.this,getString(R.string.SWaitAMoment)) {
 			
+			private Bitmap _ImageBitmap = null;
+			
 			@Override
 			public void Process() throws Exception {
-				ImageBitmap = BitmapFactory.decodeFile(ImageFileName);
+				File F = new File(ImageFileName);
+				FileInputStream FS = new FileInputStream(F);
+				try
+				{
+					BitmapFactory.Options options = new BitmapFactory.Options();
+					options.inDither = false;
+					options.inPurgeable = true;
+					options.inInputShareable = true;
+					options.inTempStorage = new byte[1024*256]; 							
+					Rect rect = new Rect();
+    				Bitmap bitmap = BitmapFactory.decodeFileDescriptor(FS.getFD(), rect, options);
+    				try {
+    					int ImageMaxSize = options.outWidth;
+    					if (options.outHeight > ImageMaxSize)
+    						ImageMaxSize = options.outHeight;
+    					float MaxSize = MaxBitmalSize;
+    					float Scale = MaxSize/ImageMaxSize; 
+    					Matrix matrix = new Matrix();     
+    					matrix.postScale(Scale,Scale);
+    					//.
+    					_ImageBitmap = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true);
+    				}
+    				finally {
+    					bitmap.recycle();
+    				}
+				}
+				finally {
+					FS.close();
+				}
 	    		Thread.sleep(100); 
 			}
 			
 			@Override 
 			public void DoOnCompleted() throws Exception {
+				ImageBitmap = _ImageBitmap;
+				//.
 				ivImage.setImageBitmap(ImageBitmap);
 			}
 			

@@ -1,8 +1,13 @@
 package com.geoscope.GeoEye.Space.URL;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
@@ -27,6 +32,30 @@ public class TURL {
 			return com.geoscope.GeoEye.Space.URLs.TURL.GetURL(TypeID, pUser,pXMLDocumentRootNode); //. ->
 		else
 			return null; //. ->
+	}
+	
+	public static TURL GetURLFromXmlData(byte[] XmlData, TGeoScopeServerUser pUser) throws Exception {
+    	Document XmlDoc;
+		ByteArrayInputStream BIS = new ByteArrayInputStream(XmlData);
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+			factory.setNamespaceAware(true);     
+			DocumentBuilder builder = factory.newDocumentBuilder(); 			
+			XmlDoc = builder.parse(BIS); 
+		}
+		finally {
+			BIS.close();
+		}
+		Element XMLDocumentRootNode = XmlDoc.getDocumentElement();
+		Node node;
+		String TypeID = "";
+		node = TMyXML.SearchNode(XMLDocumentRootNode,"TypeID");
+		if (node != null) {
+			node = node.getFirstChild();
+			if (node != null)
+				TypeID = node.getNodeValue();
+		}
+		return GetURL(TypeID, pUser, XMLDocumentRootNode);
 	}
 	
 	public static final String DefaultURLFileName = "URL.xml";

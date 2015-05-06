@@ -1575,7 +1575,7 @@ public class TReflectorComponent extends TUIComponent {
 	public static class TWorkSpace extends TViewLayer {
 
 		public static float LeftGroupButtonXFitFactorForBriefMode = 1 / 10.0F;
-		public static float LeftGroupButtonXFitFactorForNormalMode = 1 / 5.0F;
+		public static float LeftGroupButtonXFitFactorForNormalMode = 1.1F / 5.0F;
 		// .
 		public static int UpdateTransitionInterval = 50; // . milliseconds
 		public static int UpdateTransitionStep = 25; // . %

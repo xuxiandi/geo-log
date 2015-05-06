@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ROOT xmlns:dt="urn:schemas-microsoft-com:datatypes">
+  <Version>1</Version>
+  <TypeID>URL.Space.Internet</TypeID>
+  <URL>
+    <Version>1</Version>
+    <Value>https://google.com</Value>
+  </URL>
+</ROOT>

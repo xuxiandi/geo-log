@@ -49,12 +49,13 @@ public class TUserListComponent extends TUIComponent {
 	public static final int MODE_FORLOCATION 			= 1;
 	public static final int MODE_FORGEOMONITOROBJECT	= 2;
 	public static final int MODE_FORCHAT 				= 3;
+	public static final int MODE_FORURL					= 4;
 	//.
 	private static final int MESSAGE_UPDATELIST = 1;
 	public static final int UpdateInterval = 1000*30; //. seconds
 	//.
 	public static String 	RecentUsersFileName() {
-		return TReflector.ProfileFolder()+"/"+"UserListRecents.dat";
+		return TReflectorComponent.ProfileFolder()+"/"+"UserListRecents.dat";
 	}
 	//.
 	public static final int RecentUsersMaxCount = 10;
@@ -305,6 +306,10 @@ public class TUserListComponent extends TUIComponent {
         	
         case MODE_FORCHAT:
         	lbUserListTitle.setText(R.string.SSelectUserForChat);
+        	break;
+        	
+        case MODE_FORURL:
+        	lbUserListTitle.setText(R.string.SSelectUserForURLSending);
         	break;
         	
         default:

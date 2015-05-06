@@ -1,5 +1,7 @@
 package com.geoscope.Classes.IO.UI;
 
+import android.content.Intent;
+
 
 
 public class TUIComponent {
@@ -36,5 +38,8 @@ public class TUIComponent {
 	
 	public boolean IsVisible() {
 		return flVisible;
+	}
+	
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	}
 }

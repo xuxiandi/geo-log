@@ -41,11 +41,6 @@ public class TReflector extends Activity {
 	// .
 	public static final String GarryG = "Когда мила родная сторона, которой возлелеян и воспитан, то к куче ежедневного дерьма относишься почти-что с аппетитом.";
 
-
-	public static final String ProfileFolder() {
-		return TGeoLogApplication.ProfileFolder();
-	}
-
 	public static int NextID = 0;
 	//.
 	public static synchronized int GetNextID() {

@@ -49,7 +49,7 @@ public class TReflectorSpaceLays {
 		}
 		
 		private synchronized void Load() throws Exception {
-			String FN = TReflector.ProfileFolder()+"/"+SuperLaysFileName;
+			String FN = TReflectorComponent.ProfileFolder()+"/"+SuperLaysFileName;
 			File F = new File(FN);
 			if (!F.exists()) {
 				Items = new TSuperLay[0];
@@ -111,7 +111,7 @@ public class TReflectorSpaceLays {
 		
 		public synchronized void Save() throws IllegalArgumentException, IllegalStateException, IOException {
 	    	int Version = 0;
-			String FN = TReflector.ProfileFolder()+"/"+SuperLaysFileName;
+			String FN = TReflectorComponent.ProfileFolder()+"/"+SuperLaysFileName;
 			File F = new File(FN);
 			if (!F.exists()) {
 				F.getParentFile().mkdirs();

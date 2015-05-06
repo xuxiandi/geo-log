@@ -11,7 +11,7 @@ import com.geoscope.GeoEye.Space.Defines.TLocation;
 
 public class TReflectorElectedPlaces {
 
-	public static final String ElectedPlaceFileName = TReflector.ProfileFolder()+"/"+"ElectedPlaces.dat";
+	public static final String ElectedPlaceFileName = TReflectorComponent.ProfileFolder()+"/"+"ElectedPlaces.dat";
 	public static final int ElectedPlaceFileVersion = 3;
 	
 	public ArrayList<TLocation> Items = new ArrayList<TLocation>();

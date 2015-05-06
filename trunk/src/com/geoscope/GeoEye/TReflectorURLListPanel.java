@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
 import android.widget.LinearLayout;
@@ -31,11 +32,11 @@ public class TReflectorURLListPanel extends Activity {
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
-        setContentView(R.layout.user_activitycomponentlist_panel);
+        setContentView(R.layout.reflector_urllist_panel); 
         //.
         LinearLayout ParentLayout = (LinearLayout)findViewById(R.id.llParent);
         //.
-        ListComponent = new TURLFolderListComponent(this, ParentLayout, URLListFolder, TUserActivityComponentListComponent.LIST_ROW_SIZE_NORMAL_ID, Component, null);
+        ListComponent = new TURLFolderListComponent(this, ParentLayout, URLListFolder, TUserActivityComponentListComponent.LIST_ROW_SIZE_SMALL_ID, Component, null);
         //.
         setResult(RESULT_CANCELED);
         //.
@@ -57,5 +58,10 @@ public class TReflectorURLListPanel extends Activity {
 		}
 		//.
 		super.onDestroy();
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		ListComponent.onActivityResult(requestCode, resultCode, data);
 	}
 }

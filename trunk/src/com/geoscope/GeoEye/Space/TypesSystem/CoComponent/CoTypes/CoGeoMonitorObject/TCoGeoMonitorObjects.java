@@ -25,7 +25,6 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
@@ -252,7 +251,7 @@ public class TCoGeoMonitorObjects {
 	}
 
 	private synchronized void Load() throws Exception {
-		String FN = TReflector.ProfileFolder()+"/"+CoGeoMonitorObjectsFileName;
+		String FN = TReflectorComponent.ProfileFolder()+"/"+CoGeoMonitorObjectsFileName;
 		File F = new File(FN);
 		if (!F.exists()) {
 			Items = new TCoGeoMonitorObject[0];

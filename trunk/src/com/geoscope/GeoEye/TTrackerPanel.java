@@ -179,7 +179,7 @@ public class TTrackerPanel extends Activity {
 		public boolean flChanged = false;
 		
 		public TConfiguration() {
-			ConfigurationFileName = TReflector.ProfileFolder()+"/"+FileName;
+			ConfigurationFileName = TReflectorComponent.ProfileFolder()+"/"+FileName;
 		}
 		
 		public void Load() throws Exception {

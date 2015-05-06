@@ -97,7 +97,7 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 public class TReflectionWindowEditorPanel extends Activity implements OnTouchListener {
 
 	public static String 	DrawingsFolder() {
-		return TReflector.ProfileFolder()+"/"+"Drawings";
+		return TReflectorComponent.ProfileFolder()+"/"+"Drawings";
 	}
 	//.
 	public static String 	DrawingsFile_Name() {

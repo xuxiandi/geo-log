@@ -131,6 +131,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileSer
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoEye.Space.TypesSystem.VisualizationsOptions.TBitmapDecodingOptions;
+import com.geoscope.GeoEye.Space.URLs.TURLFolderListComponent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgentService;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -149,6 +150,12 @@ import com.geoscope.GeoLog.TrackerService.TTrackerService;
 @SuppressLint("HandlerLeak")
 public class TReflectorComponent extends TUIComponent {
 
+	public static final String ProfileFolder() {
+		return TGeoLogApplication.ProfileFolder();
+	}
+
+	public static final String URLListFolder = ProfileFolder()+"/"+"URLs";
+	
 	public static int NextID = 0;
 	//.
 	public static synchronized int GetNextID() {
@@ -240,7 +247,7 @@ public class TReflectorComponent extends TUIComponent {
 		}
 
 		private void LoadReflectionWindowDisabledLays() throws IOException {
-			String FN = TReflector.ProfileFolder() + "/"
+			String FN = ProfileFolder() + "/"
 					+ ReflectionWindowDisabledLaysFileName;
 			File F = new File(FN);
 			if (F.exists()) {
@@ -492,7 +499,7 @@ public class TReflectorComponent extends TUIComponent {
 			}
 			flChanged = false;
 			// . load reflection window
-			FN = TReflector.ProfileFolder() + "/" + ReflectionWindowFileName;
+			FN = ProfileFolder() + "/" + ReflectionWindowFileName;
 			F = new File(FN);
 			if (F.exists()) {
 				FileSize = F.length();
@@ -520,7 +527,7 @@ public class TReflectorComponent extends TUIComponent {
 			int SleepTime = 1000;
 			for (int I = 0; I < TryCount; I++) {
 				try {
-					String FN = TReflector.ProfileFolder() + "/"
+					String FN = ProfileFolder() + "/"
 							+ ConfigurationFileName;
 					if (!_Load(FN))
 						break; // . >
@@ -529,7 +536,7 @@ public class TReflectorComponent extends TUIComponent {
 					Thread.sleep(SleepTime);
 				}
 			}
-			String FN = TReflector.ProfileFolder() + "/"
+			String FN = ProfileFolder() + "/"
 					+ ConfigurationFileName + "." + LastConfigurationFilePrefix;
 			if (_Load(FN))
 				return; // . ->
@@ -544,7 +551,7 @@ public class TReflectorComponent extends TUIComponent {
 			if (Lays != null) {
 				ReflectionWindow_DisabledLaysIDs = Lays.GetDisabledLaysIDs();
 				// .
-				FN = TReflector.ProfileFolder() + "/"
+				FN = ProfileFolder() + "/"
 						+ ReflectionWindowDisabledLaysFileName;
 				if (ReflectionWindow_DisabledLaysIDs != null) {
 					String TFN = FN + ".tmp";
@@ -574,7 +581,7 @@ public class TReflectorComponent extends TUIComponent {
 			// . save reflection window
 			ReflectionWindowData = Reflector.ReflectionWindow.GetWindow()
 					.ToByteArray();
-			String FN = TReflector.ProfileFolder() + "/"
+			String FN = ProfileFolder() + "/"
 					+ ReflectionWindowFileName;
 			if (ReflectionWindowData != null) {
 				String TFN = FN + ".tmp";
@@ -593,7 +600,7 @@ public class TReflectorComponent extends TUIComponent {
 			}
 			// .
 			if (flChanged) {
-				FN = TReflector.ProfileFolder() + "/" + ConfigurationFileName;
+				FN = ProfileFolder() + "/" + ConfigurationFileName;
 				String TFN = FN + ".tmp";
 				XmlSerializer serializer = Xml.newSerializer();
 				FileWriter writer = new FileWriter(TFN);
@@ -749,7 +756,7 @@ public class TReflectorComponent extends TUIComponent {
 				File TF = new File(TFN);
 				File F = new File(FN);
 				if (F.exists()) {
-					File LFN = new File(TReflector.ProfileFolder() + "/"
+					File LFN = new File(ProfileFolder() + "/"
 							+ ConfigurationFileName + "."
 							+ LastConfigurationFilePrefix);
 					F.renameTo(LFN);
@@ -860,7 +867,7 @@ public class TReflectorComponent extends TUIComponent {
 		}
 
 		@Override
-		public boolean DoOnCommand(TGeoScopeServerUser User,
+		public boolean DoOnCommand(final TGeoScopeServerUser User,
 				TIncomingCommandMessage Message) {
 			if (Message instanceof TGeoScopeServerUser.TLocationCommandMessage) {
 				try {
@@ -980,6 +987,78 @@ public class TReflectorComponent extends TUIComponent {
 														context.getString(R.string.SObject)
 																+ "'"
 																+ _Message.CoGeoMonitorObject.Name
+																+ "'"
+																+ context.getString(R.string.SHasBeenAddedToYourList1),
+														Toast.LENGTH_SHORT)
+														.show();
+											} catch (Exception E) {
+												Toast.makeText(context,
+														E.getMessage(),
+														Toast.LENGTH_LONG)
+														.show();
+											}
+										}
+									})
+							.setNegativeButton(R.string.SNo,
+									new DialogInterface.OnClickListener() {
+										@Override
+										public void onClick(
+												DialogInterface dialog, int id) {
+											try {
+												_Message.SetAsProcessed();
+											} catch (Exception E) {
+												Toast.makeText(context,
+														E.getMessage(),
+														Toast.LENGTH_LONG)
+														.show();
+											}
+										}
+									}).show();
+					// .
+					return true; // . ->
+				} catch (Exception E) {
+					Toast.makeText(context, E.getMessage(),
+							Toast.LENGTH_LONG).show();
+				}
+			} else if (Message instanceof TGeoScopeServerUser.TURLCommandMessage) {
+				try {
+					final TGeoScopeServerUser.TURLCommandMessage _Message = (TGeoScopeServerUser.TURLCommandMessage) Message;
+					String _UserText;
+					if (Message.Sender != null)
+						_UserText = Message.Sender.UserName + "\n" + "  "
+								+ Message.Sender.UserFullName;
+					else
+						_UserText = "? (ID: "
+								+ Long.toString(Message.SenderID) + ")";
+					final String UserText = _UserText;
+					new AlertDialog.Builder(context)
+							.setIcon(android.R.drawable.ic_dialog_alert)
+							.setTitle(R.string.SConfirmation)
+							.setMessage(
+									context.getString(R.string.SUser)
+											+ UserText
+											+ "\n"
+											+ context.getString(R.string.SHaveSentToYouANewBookmark)
+											+ "\n"
+											+ "  "
+											+ _Message.URLName
+											+ "\n"
+											+ context.getString(R.string.SDoYouWantToAddIt))
+							.setPositiveButton(R.string.SYes,
+									new DialogInterface.OnClickListener() {
+										@Override
+										public void onClick(
+												DialogInterface dialog, int id) {
+											try {
+												TURLFolderListComponent.Components_AddNewURL(URLListFolder, _Message.URLName,_Message.URLData, User);
+												//.
+												_Message.SetAsProcessed();
+												// .
+												Toast.makeText(
+														context,
+														context.getString(R.string.SBookmark)
+																+ "'"
+																+ _Message.URLName
 																+ "'"
 																+ context.getString(R.string.SHasBeenAddedToYourList1),
 														Toast.LENGTH_SHORT)
@@ -2718,6 +2797,9 @@ public class TReflectorComponent extends TUIComponent {
 			Buttons.Items[BUTTON_ELECTEDPLACES].Top = Y;
 			Buttons.Items[BUTTON_ELECTEDPLACES].Height = YStep;
 			Y += YStep;
+			Buttons.Items[BUTTON_URLS].Top = Y;
+			Buttons.Items[BUTTON_URLS].Height = YStep;
+			Y += YStep;
 			Buttons.Items[BUTTON_MAPOBJECTSEARCH].Top = Y;
 			Buttons.Items[BUTTON_MAPOBJECTSEARCH].Height = YStep;
 			Y += YStep;
@@ -3311,6 +3393,14 @@ public class TReflectorComponent extends TUIComponent {
 						intent.putExtra("ComponentID", Reflector.ID);
 						Reflector.ParentActivity.startActivity(intent);
 						break; // . >
+
+					case BUTTON_URLS:
+						intent = new Intent(Reflector.context, TReflectorURLListPanel.class);
+						intent.putExtra("ComponentID", Reflector.ID);
+						intent.putExtra("URLListFolder", URLListFolder);
+						Reflector.ParentActivity.startActivity(intent);
+						//.
+						break; //. >
 
 					case BUTTON_USERSEARCH:
 						intent = new Intent(Reflector.context, TUserListPanel.class);
@@ -5973,7 +6063,7 @@ public class TReflectorComponent extends TUIComponent {
 			//.
 			if (ItemsLoading != null)
 				ItemsLoading.Cancel();
-			ItemsLoading = new TItemsLoading(this, Items,TReflector.ProfileFolder()+"/"+ItemsFileName);
+			ItemsLoading = new TItemsLoading(this, Items,ProfileFolder()+"/"+ItemsFileName);
 			//.
 			flInitialized = true;
 		}
@@ -7094,20 +7184,21 @@ public class TReflectorComponent extends TUIComponent {
 	private static final int BUTTONS_STYLE_BRIEF 	= 1;
 	private static final int BUTTONS_STYLE_NORMAL 	= 2;
 	// .
-	private static final int BUTTONS_COUNT = 12;
+	private static final int BUTTONS_COUNT = 13;
 	// .
 	private static final int BUTTON_UPDATE 						= 0;
 	private static final int BUTTON_SHOWREFLECTIONPARAMETERS 	= 1;
 	private static final int BUTTON_ELECTEDPLACES 				= 2;
 	private static final int BUTTON_OBJECTS 					= 3;
-	private static final int BUTTON_MAPOBJECTSEARCH 			= 4;
-	private static final int BUTTON_PREVWINDOW 					= 5;
-	private static final int BUTTON_CREATINGGALLERY 			= 6;
-	private static final int BUTTON_EDITOR 						= 7;
-	private static final int BUTTON_USERSEARCH 					= 8;
-	private static final int BUTTON_TRACKER 					= 9;
-	private static final int BUTTON_COMPASS 					= 10;
-	private static final int BUTTON_MYUSERPANEL 				= 11;
+	private static final int BUTTON_URLS 						= 4;
+	private static final int BUTTON_MAPOBJECTSEARCH 			= 5;
+	private static final int BUTTON_PREVWINDOW 					= 6;
+	private static final int BUTTON_CREATINGGALLERY 			= 7;
+	private static final int BUTTON_EDITOR 						= 8;
+	private static final int BUTTON_USERSEARCH 					= 9;
+	private static final int BUTTON_TRACKER 					= 10;
+	private static final int BUTTON_COMPASS 					= 11;
+	private static final int BUTTON_MYUSERPANEL 				= 12;
 
 	private static boolean flCheckContextStorage = true;
 	// .
@@ -7941,6 +8032,8 @@ public class TReflectorComponent extends TUIComponent {
 			Y += ButtonHeight;
 			Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "*", Color.GREEN);
 			Y += ButtonHeight;
+			Buttons[BUTTON_URLS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "B", Color.GREEN);
+			Y += ButtonHeight;
 			Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "?", Color.GREEN);
 			Y += ButtonHeight;
 			Buttons[BUTTON_PREVWINDOW] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "<", Color.GREEN);
@@ -7978,6 +8071,8 @@ public class TReflectorComponent extends TUIComponent {
 			Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, context.getString(R.string.SObjects), Color.GREEN);
 			Y += ButtonHeight;
 			Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, context.getString(R.string.SPlaces), Color.GREEN);
+			Y += ButtonHeight;
+			Buttons[BUTTON_URLS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, ParentActivity.getString(R.string.SBookmarks), Color.GREEN);
 			Y += ButtonHeight;
 			Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, context.getString(R.string.SSearch2), Color.GREEN);
 			Y += ButtonHeight;
@@ -9890,7 +9985,7 @@ public class TReflectorComponent extends TUIComponent {
 
 							@Override
 							public void Process() throws Exception {
-								String ItemsFile = TReflector.ProfileFolder()+"/"+TObjectCreationGalleryOverlay.ItemsFileName;
+								String ItemsFile = ProfileFolder()+"/"+TObjectCreationGalleryOverlay.ItemsFileName;
 								TObjectCreationGalleryOverlay.TItems GalleryItems = new TObjectCreationGalleryOverlay.TItems(TReflectorComponent.this,ItemsFile);
 								TObjectCreationGalleryOverlay.TItems.TItem NewItem = new TObjectCreationGalleryOverlay.TItems.TItem(idTComponent,idComponent, ComponentName);
 								GalleryItems.Add(NewItem);

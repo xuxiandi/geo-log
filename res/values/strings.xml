@@ -1035,5 +1035,16 @@
     <string name="SPictureHasBeenSaved">Picture has been saved</string>
     <string name="SURLFileNameHasBeenSaved">"URL file has been saved to "</string>
     <string name="SGetURLFile">Get URL-file</string>
+    <string name="SBookmarks">Bookmarks</string>
+    <string name="SImport">Import &#8230;</string>
+    <string name="SUpItem">up item</string>
+    <string name="SDownItem">down item</string>
+    <string name="SRemoveSelectedBookmark">Remove selected bookmark ?</string>
+    <string name="SHaveSentToYouANewBookmark">have sent to you a new bookmark:</string>
+    <string name="SDoYouWantToAddIt">Do you want to add it to your list ?</string>
+    <string name="SBookmark">Bookmark: </string>
+    <string name="SSelectUserForURLSending">Select a user for the bookmark sending</string>
+    <string name="SBookmarkHasBeenSent">The bookmark has been sent.</string>
+    <string name="SSendBookmarkToUser">Send the bookmark to the user &#8230;</string>
     
 </resources>

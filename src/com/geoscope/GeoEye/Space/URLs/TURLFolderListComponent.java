@@ -3,7 +3,6 @@ package com.geoscope.GeoEye.Space.URLs;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,24 +24,30 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.InputType;
 import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -53,11 +58,14 @@ import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.Data.Types.Image.TDiskImageCache;
 import com.geoscope.Classes.Exception.CancelException;
+import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
 import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectorComponent;
+import com.geoscope.GeoEye.TUserListComponent;
+import com.geoscope.GeoEye.TUserListPanel;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -65,6 +73,28 @@ import com.geoscope.GeoLog.Application.THintManager;
 
 @SuppressLint("HandlerLeak")
 public class TURLFolderListComponent extends TUIComponent {
+	
+	private static ArrayList<TURLFolderListComponent> Components = new ArrayList<TURLFolderListComponent>();
+	
+	private static synchronized void Components_Add(TURLFolderListComponent Component) {
+		Components.add(Component);
+	}
+	
+	private static synchronized void Components_Remove(TURLFolderListComponent Component) {
+		Components.remove(Component);
+	}
+	
+	public static synchronized void Components_AddNewURL(String URLListFolder, String URLName, byte[] URLData, TGeoScopeServerUser User) throws Exception {
+		TURLFolderListComponent.TURLFolderList URLFolderList = new TURLFolderListComponent.TURLFolderList(URLListFolder, User);
+		URLFolderList.Add(URLName,URLData);
+		//.
+		int Cnt = Components.size();
+		for (int I = 0; I < Cnt; I++) {
+			TURLFolderListComponent Component = Components.get(I);
+			if (Component.URLListFolder.equals(URLFolderList))
+				Component.PostStartUpdating();
+		}
+	}
 	
 	public static class TURLFolderList {
 	
@@ -209,7 +239,49 @@ public class TURLFolderListComponent extends TUIComponent {
 		    }
 		}	
 
+		public TItem GetItem(String ID) {
+			int Cnt = Items.size();
+			for (int I = 0; I < Cnt; I++) {
+				TItem Item = Items.get(I); 
+				if (Item.ID.equals(ID)) 
+					return Item; //. ->
+			}
+			return null;
+		}
+		
+		public int GetItemIndex(String ID) {
+			int Cnt = Items.size();
+			for (int I = 0; I < Cnt; I++)
+				if (Items.get(I).ID.equals(ID)) 
+					return I; //. ->
+			return -1;
+		}
+		
+		public byte[] GetItemData(String ItemID) throws IOException {
+		    String URLFileName = Folder+"/"+ItemID+".xml";
+			File F = new File(URLFileName);
+			if (F.exists()) {
+		    	long FileSize = F.length();
+		    	FileInputStream FIS = new FileInputStream(F);
+		    	try {
+		    		byte[] Data = new byte[(int)FileSize];
+		    		FIS.read(Data);
+		    		//.
+		    		return Data; //. ->
+		    	}
+		    	finally {
+		    		FIS.close();
+		    	}
+			}
+			else
+				return null; //. ->
+		}
+		
 		public String Add(String Name, byte[] Data) throws Exception {
+	        File F = new File(Folder);
+		    if (!F.exists()) 
+		    	F.mkdirs();
+		    //.
 		    String ID = TUIDGenerator.Generate();
 		    String URLFileName = Folder+"/"+ID+".xml";
 			FileOutputStream FOS = new FileOutputStream(URLFileName);
@@ -223,6 +295,7 @@ public class TURLFolderListComponent extends TUIComponent {
 			TItem Item = new TItem();
 			Item.ID = ID;
 			Item.Name = Name;
+    		Item.URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlData(Data, User);					    	
 			//.
 			Items.add(Item);
 			//.
@@ -241,6 +314,28 @@ public class TURLFolderListComponent extends TUIComponent {
 			Save();
 			//.
 			return Item.ID;
+		}
+
+		public void Remove(String ID) throws Exception {
+			int Index = GetItemIndex(ID);
+			if (Index >= 0)
+				Remove(Index);
+		}
+		
+		public boolean Replace(String ID, int NewIndex) throws Exception {
+			boolean Result = false;
+			if ((0 <= NewIndex) && (NewIndex < Items.size())) {
+				int Index = GetItemIndex(ID);
+				if (Index >= 0) {
+					TItem Item = Items.remove(Index);
+					Items.add(NewIndex, Item);
+				    //.
+					Save();
+					//.
+					Result = true;
+				}
+			}
+			return Result;
 		}
 	}
 	
@@ -412,8 +507,8 @@ public class TURLFolderListComponent extends TUIComponent {
 		private View 				ProgressBar;
 		private TProgressHandler 	ProgressHandler;
 		//.
-		private TURLListItem[] 	Items;
-		private int				Items_SelectedIndex = -1;
+		private TURLListItem[] 			Items;
+		private String					Items_SelectedItemID = "";
 		//.
 		private LayoutInflater layoutInflater;
 		//.
@@ -491,10 +586,21 @@ public class TURLFolderListComponent extends TUIComponent {
 		}
 
 		public void Items_SetSelectedIndex(int Index, boolean flNotify) {
-			Items_SelectedIndex = Index;
+			Items_SelectedItemID = Items[Index].Item.ID;
 			//.
 			if (flNotify)
 				notifyDataSetChanged();
+		}
+		
+		public void Items_SetSelectedItemID(String ItemID, boolean flNotify) {
+			Items_SelectedItemID = ItemID;
+			//.
+			if (flNotify)
+				notifyDataSetChanged();
+		}
+		
+		public String Items_GetSelectedItemID() {
+			return Items_SelectedItemID;
 		}
 		
 		@Override
@@ -558,11 +664,11 @@ public class TURLFolderListComponent extends TUIComponent {
 				holder.ivImage.setOnClickListener(ImageClickListener);
 			}
 			else {
-				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder));
+				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_text));
 				holder.ivImage.setOnClickListener(null);
 			}
 			//. show selection
-			if (position == Items_SelectedIndex) {
+			if (Item.Item.ID.equals(Items_SelectedItemID)) {
 	            convertView.setSelected(true);
 	            convertView.setBackgroundColor(0xFFFFADB1);
 	        }			
@@ -594,6 +700,10 @@ public class TURLFolderListComponent extends TUIComponent {
 	private ListView 		lvURLList;
 	//.
 	private View ProgressBar;
+	//.
+	private Button btnImportURL;
+	private Button btnUpItem;
+	private Button btnDownItem;
 	//.
 	private TUpdating	Updating = null;
 	
@@ -643,19 +753,17 @@ public class TURLFolderListComponent extends TUIComponent {
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				if (URLList == null)
 					return false; //. ->
-				final com.geoscope.GeoEye.Space.URL.TURL URL = URLList.Items.get(arg2).URL;
-				if (URL == null)
+				final TURLFolderList.TItem URLItem = URLList.Items.get(arg2);
+				if (URLItem.URL == null)
 					return false; //. ->
             	//.
 				try {
 		    		final CharSequence[] _items;
 		    		int SelectedIdx = -1;
-		    		_items = new CharSequence[5];
+		    		_items = new CharSequence[3];
 		    		_items[0] = ParentActivity.getString(R.string.SOpen); 
-		    		_items[1] = ParentActivity.getString(R.string.SContent1); 
-		    		_items[2] = ParentActivity.getString(R.string.SShowGeoLocation); 
-		    		_items[3] = ParentActivity.getString(R.string.SRemove); 
-		    		_items[4] = ParentActivity.getString(R.string.SGetURLFile); 
+		    		_items[1] = ParentActivity.getString(R.string.SSendBookmarkToUser); 
+		    		_items[2] = ParentActivity.getString(R.string.SRemove); 
 		    		//.
 		    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		    		builder.setTitle(R.string.SSelect);
@@ -667,9 +775,9 @@ public class TURLFolderListComponent extends TUIComponent {
 		    		    	try {
 		    		    		switch (arg1) {
 		    		    		
-		    		    		case 0: //. open
+		    		    		case 0: //. open URL
 		    						try {
-		    							URL.Open(ParentActivity);
+		    							URLItem.URL.Open(ParentActivity);
 			    						//.
 			        		    		arg0.dismiss();
 		    						}
@@ -679,52 +787,31 @@ public class TURLFolderListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 1: //. content
-		    						try {
-			    						//.
-			        		    		arg0.dismiss();
-		    						}
-		    						catch (Exception E) {
-		    			                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
-		    						}
-		        		    		//.
-		    		    			break; //. >
-		    		    			
-		    		    		case 2: //. show location
+		    		    		case 1: //. send URL
+		    		    			SendSelectedURLToUser();
 		    						//.
 		        		    		arg0.dismiss();
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 3: //. remove component
+		    		    		case 2: //. remove URL
 		    		    			AlertDialog.Builder alert = new AlertDialog.Builder(ParentActivity);
 		    		    			//.
 		    		    			alert.setTitle(R.string.SRemoval);
-		    		    			alert.setMessage(R.string.SRemoveSelectedComponent);
+		    		    			alert.setMessage(R.string.SRemoveSelectedBookmark);
 		    		    			//.
 		    		    			alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
 		    		    				
 		    		    				@Override
 		    		    				public void onClick(DialogInterface dialog, int whichButton) {
-		    		    					TAsyncProcessing Removing = new TAsyncProcessing(ParentActivity, ParentActivity.getString(R.string.SRemoving)) {
-
-		    		    						@Override
-		    		    						public void Process() throws Exception {
-		    		    						}
-
-		    		    						@Override
-		    		    						public void DoOnCompleted() throws Exception {
-		    		    							StartUpdating();	    		    							
-		    		    							//.
-		    		    							Toast.makeText(ParentActivity, R.string.SObjectHasBeenRemoved, Toast.LENGTH_LONG).show();
-		    		    						}
-		    		    						
-		    		    						@Override
-		    		    						public void DoOnException(Exception E) {
-		    		    							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
-		    		    						}
-		    		    					};
-		    		    					Removing.Start();
+		    		    					try {
+	    		    							URLList.Remove(URLItem.ID);
+	    		    							//.
+	    		    							Update();    		    							
+				    						}
+				    						catch (Exception E) {
+				    			                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+				    						}
 		    		    				}
 		    		    			});
 		    		    			//.
@@ -734,9 +821,6 @@ public class TURLFolderListComponent extends TUIComponent {
 		    		    			//.
 		        		    		arg0.dismiss();
 		        		    		//.
-		    		    			break; //. >
-
-		    		    		case 4: //. get URL-file
 		    		    			break; //. >
 		    		    		}
 		    		    	}
@@ -770,6 +854,139 @@ public class TURLFolderListComponent extends TUIComponent {
         //.
         ProgressBar = ParentLayout.findViewById(R.id.pbProgress);
         //.
+        btnImportURL = (Button)ParentLayout.findViewById(R.id.btnImportURL);
+        btnImportURL.setOnClickListener(new OnClickListener() {
+        	
+			@Override
+            public void onClick(View v) {
+		    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(ParentActivity, TGeoLogApplication.GetTempFolder())
+		    	.setFilter(".xml")
+		    	.setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+		        	
+		            @Override
+		            public void OnSelectedFile(String fileName) {
+		        		final String SelectedFileName = fileName; 
+	                    //.
+		        		AlertDialog.Builder alert = new AlertDialog.Builder(ParentActivity);
+		        		// .
+		        		alert.setTitle(R.string.SDataName);
+		        		alert.setMessage(R.string.SEnterName);
+		        		// .
+		        		final EditText input = new EditText(ParentActivity);
+		        		input.setInputType(InputType.TYPE_CLASS_TEXT);
+		        		alert.setView(input);
+		        		// .
+		        		alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+		        			
+		        					@Override
+		        					public void onClick(DialogInterface dialog, int whichButton) {
+		        						//. hide keyboard
+		        						InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+		        						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+		        						//.
+		        						try {
+		        							String Name = input.getText().toString();
+		        							//.
+		        							File F = new File(SelectedFileName);
+		        							byte[] Data;
+		        					    	long FileSize = F.length();
+		        					    	FileInputStream FIS = new FileInputStream(F);
+		        					    	try {
+		        					    		Data = new byte[(int)FileSize];
+		        					    		FIS.read(Data);
+		        					    	}
+		        					    	finally {
+		        					    		FIS.close();
+		        					    	}
+		        					    	//.
+		        					    	if (URLList != null) {
+		        					    		if (Name.length() == 0)
+		        					    			Name = "?";
+		        					    		URLList.Add(Name, Data);
+		        					    		//.
+		        					    		Update();
+		        					    	}
+		        						} catch (Exception E) {
+		        							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+		        						}
+		        					}
+		        				});
+		        		// .
+		        		alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+		        			
+		        					@Override
+		        					public void onClick(DialogInterface dialog, int whichButton) {
+		        						// . hide keyboard
+		        						InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+		        						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+		        					}
+		        				});
+		        		// .
+		        		alert.show();
+		            }
+
+					@Override
+					public void OnCancel() {
+					}
+		        });
+		    	FileSelector.show();    	
+            }
+        });
+        //.
+        btnUpItem = (Button)ParentLayout.findViewById(R.id.btnUpItem);
+        btnUpItem.setOnClickListener(new OnClickListener() {
+        	
+			@Override
+            public void onClick(View v) {
+				try {
+					String SelectedItemID = lvURLListAdapter.Items_GetSelectedItemID();
+					int ItemIndex  = URLList.GetItemIndex(SelectedItemID);
+					if (ItemIndex > 0) {
+			    		//.
+						ItemIndex--;
+						if (URLList.Replace(SelectedItemID, ItemIndex)) {
+							Update();
+							//.
+							lvURLListAdapter.Items_SetSelectedItemID(SelectedItemID, true);
+							//.
+							lvURLList.setItemChecked(ItemIndex, true);
+							lvURLList.setSelection(ItemIndex);
+						}
+					}
+		    	}
+		    	catch (Exception E) {
+		    		Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+		    	}
+			}
+        });
+        //.
+        btnDownItem = (Button)ParentLayout.findViewById(R.id.btnDownItem);
+        btnDownItem.setOnClickListener(new OnClickListener() {
+        	
+			@Override
+            public void onClick(View v) {
+				try {
+					String SelectedItemID = lvURLListAdapter.Items_GetSelectedItemID();
+					int ItemIndex  = URLList.GetItemIndex(SelectedItemID);
+					if (ItemIndex >= 0) {
+			    		//.
+						ItemIndex++;
+						if (URLList.Replace(SelectedItemID, ItemIndex)) {
+							Update();
+							//.
+							lvURLListAdapter.Items_SetSelectedItemID(SelectedItemID, true);
+							//.
+							lvURLList.setItemChecked(ItemIndex, true);
+							lvURLList.setSelection(ItemIndex);
+						}
+					}
+		    	}
+		    	catch (Exception E) {
+		    		Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+		    	}
+			}
+        });
+        //.
         final int HintID = THintManager.HINT__Long_click_to_show_an_item_location;
         final TextView lbListHint = (TextView)ParentLayout.findViewById(R.id.lbListHint);
         String Hint = THintManager.GetHint(HintID, ParentActivity);
@@ -791,6 +1008,8 @@ public class TURLFolderListComponent extends TUIComponent {
         else
         	lbListHint.setVisibility(View.GONE);
         //.
+        Components_Add(this);
+        //.
         flExists = true;
 	}
 
@@ -798,6 +1017,8 @@ public class TURLFolderListComponent extends TUIComponent {
 	public void Destroy() throws Exception {
 		flExists = false;
 		//.
+        Components_Remove(this);
+        //.
 		if (Updating != null) {
 			Updating.Cancel();
 			Updating = null;
@@ -824,6 +1045,23 @@ public class TURLFolderListComponent extends TUIComponent {
 		return ParentLayout.isShown();
 	}
 	
+    @Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {        
+       
+        case REQUEST_SELECT_USER:
+        	if (resultCode == Activity.RESULT_OK) {
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+            		long UserID = extras.getLong("UserID");
+            		DoSendSelectedURLToUser(UserID);
+            	}
+        	}
+            break; //. >
+        }
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
 	private class TUpdating extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION 				= -1;
@@ -1039,4 +1277,164 @@ public class TURLFolderListComponent extends TUIComponent {
     		Updating.Cancel();
     	Updating = new TUpdating(true,false);
     }    
+    
+    private static final int MESSAGE_STARTUPDATING = 1;
+    
+	private final Handler MessageHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+        	try {
+    			switch (msg.what) {
+
+    			case MESSAGE_STARTUPDATING:
+    				if (!flExists)
+    	            	break; //. >
+    				StartUpdating();
+    				// .
+    				break; // . >				
+    			}
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
+		}
+	};
+	
+	public void PostStartUpdating() {
+		MessageHandler.obtainMessage(MESSAGE_STARTUPDATING).sendToTarget();
+	}
+
+	private static final int REQUEST_SELECT_USER = 1;
+	
+	public void SendSelectedURLToUser() {
+    	Intent intent = new Intent(ParentActivity, TUserListPanel.class);
+		intent.putExtra("ComponentID", Component.ID);
+    	intent.putExtra("Mode",TUserListComponent.MODE_FORURL);    	
+    	ParentActivity.startActivityForResult(intent, REQUEST_SELECT_USER);		
+	}
+	
+    private class TURLsToUserSending extends TCancelableThread {
+
+    	private static final int MESSAGE_EXCEPTION 				= 0;
+    	private static final int MESSAGE_DONE 					= 1;
+    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 2;
+    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
+    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
+
+    	private long UserID;
+    	private TURLFolderList List;
+    	private TURLFolderList.TItem[] Items;
+    	
+        private ProgressDialog progressDialog; 
+    	
+    	public TURLsToUserSending(long pUserID, TURLFolderList pList, TURLFolderList.TItem[] pItems) {
+    		super();
+    		//.
+    		UserID = pUserID;
+    		List = pList;
+    		Items = pItems;
+    		//.
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+
+		@Override
+		public void run() {
+			try {
+    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+    			try {
+    				for (int I = 0; I < Items.length; I++) {
+    					TURLFolderList.TItem Item = Items[I];
+    					TGeoScopeServerUser.TURLCommandMessage CommandMessage = new TGeoScopeServerUser.TURLCommandMessage(TGeoScopeServerUser.TGeoMonitorObjectCommandMessage.Version_0, Item.Name, List.GetItemData(Item.ID));
+    					Component.User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
+    					//.
+    	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(int)(100.0*I/Items.length)).sendToTarget();
+        				//.
+        				if (Canceller.flCancel)
+        					throw new CancelException(); //. =>
+    				}
+				}
+				finally {
+	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+				}
+				//.
+    			MessageHandler.obtainMessage(MESSAGE_DONE).sendToTarget();
+        	}
+        	catch (InterruptedException E) {
+        	}
+        	catch (CancelException CE) {
+        	}
+        	catch (IOException E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+        	}
+        	catch (Throwable E) {
+    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+        	}
+		}
+
+		private final Handler MessageHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	        	try {
+		            switch (msg.what) {
+		            
+		            case MESSAGE_EXCEPTION:
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_DONE:
+	                    Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SBookmarkHasBeenSent), Toast.LENGTH_SHORT).show();
+		            	//.
+		            	break; //. >
+		            	
+		            case MESSAGE_PROGRESSBAR_SHOW:
+		            	progressDialog = new ProgressDialog(ParentActivity);
+		            	progressDialog.setMessage(ParentActivity.getString(R.string.SSending));    
+		            	if (Items.length > 1) {
+			            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		            		progressDialog.setIndeterminate(false);
+		            		progressDialog.setMax(100);
+		            	}
+		            	else { 
+			            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		            		progressDialog.setIndeterminate(true);
+		            	}
+		            	progressDialog.setCancelable(false);
+		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								Cancel();
+							}
+						});
+		            	//.
+		            	progressDialog.show(); 	            	
+		            	//.
+		            	break; //. >
+
+		            case MESSAGE_PROGRESSBAR_HIDE:
+		            	progressDialog.dismiss(); 
+		            	//.
+		            	break; //. >
+		            
+		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            	progressDialog.setProgress((Integer)msg.obj);
+		            	//.
+		            	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
+	        }
+	    };
+    }		
+
+	public void DoSendSelectedURLToUser(long UserID) {
+		TURLFolderList.TItem SelectedItem = URLList.GetItem(lvURLListAdapter.Items_GetSelectedItemID());
+		if (SelectedItem == null)
+			return; //. ->
+		new TURLsToUserSending(UserID, URLList, new TURLFolderList.TItem[] {SelectedItem});
+	}
 }

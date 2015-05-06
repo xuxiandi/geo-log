@@ -1035,5 +1035,16 @@
     <string name="SPictureHasBeenSaved">Картинка сохранена</string>
     <string name="SURLFileNameHasBeenSaved">"URL файл сохранён в "</string>
     <string name="SGetURLFile">Получить URL-файл</string>
+    <string name="SBookmarks">Закладки</string>
+    <string name="SImport">Импорт &#8230;</string>
+    <string name="SUpItem">вверх</string>
+    <string name="SDownItem">вниз</string>
+    <string name="SRemoveSelectedBookmark">Удалить выделенную закладку ?</string>
+    <string name="SHaveSentToYouANewBookmark">послал Вам новую закладку:</string>
+    <string name="SDoYouWantToAddIt">Хотите вставить её в ваш список ?</string>
+    <string name="SBookmark">Закладка: </string>
+    <string name="SSelectUserForURLSending">Выберите пользователя для отправки закладки</string>
+    <string name="SBookmarkHasBeenSent">Закладка отправлена.</string>
+    <string name="SSendBookmarkToUser">Отправить закладку пользователю &#8230;</string>
     
 </resources>

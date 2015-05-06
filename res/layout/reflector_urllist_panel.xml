@@ -17,7 +17,7 @@
             android:layout_toLeftOf="@+id/pbProgress"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="@string/SActivityComponentList"
+            android:text="@string/SBookmarks"
             android:textColor="#ff000000"
             android:textSize="16sp" />
 
@@ -49,5 +49,37 @@
         android:textColor="#ff000000"
         android:textSize="12sp"
         android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/btnImportURL"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:text="@string/SImport"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnUpItem"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:text="@string/SUpItem"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnDownItem"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:text="@string/SDownItem"
+            android:textSize="16sp" />
+    </LinearLayout>
 
 </LinearLayout>

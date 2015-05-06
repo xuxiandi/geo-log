@@ -13,7 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
-import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 
 public class TComponentUserData {
 
@@ -24,7 +24,7 @@ public class TComponentUserData {
 	public  Element RootNode = null;
 	
 	public TComponentUserData() throws Exception {
-		ComponentUserDataFile = TReflector.ProfileFolder()+"/"+ComponentUserDataFileName;
+		ComponentUserDataFile = TReflectorComponent.ProfileFolder()+"/"+ComponentUserDataFileName;
 		//.
 		Load();
 	}

@@ -28,6 +28,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Base64;
 import android.util.Xml;
 import android.widget.Toast;
 
@@ -39,7 +40,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.TSpace;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
@@ -920,10 +921,13 @@ public class TGeoScopeServerUser {
 							if (TGeoMonitorObjectCommandMessage.Check(Message))
 								return new TGeoMonitorObjectCommandMessage(pServer, Message); //. ->
 							else
-								if (TUserTaskStatusCommandMessage.Check(Message))
-									return new TUserTaskStatusCommandMessage(Message); //. ->
+								if (TURLCommandMessage.Check(Message))
+									return new TURLCommandMessage(pServer, Message); //. ->
 								else
-									return Message; //. ->
+									if (TUserTaskStatusCommandMessage.Check(Message))
+										return new TUserTaskStatusCommandMessage(Message); //. ->
+									else
+										return Message; //. ->
 			}
 			else
 				if (Message.IsCommandResponse()) {
@@ -1556,6 +1560,74 @@ public class TGeoScopeServerUser {
 		}		
 	}
 	
+	public static class TURLCommandMessage extends TIncomingCommandMessage {
+
+		public static final String Prefix = "#URL";
+		
+		public static final int Version_0	= 0;
+		
+		public static boolean Check(TIncomingMessage Message) {
+			return Message.Message.startsWith(Prefix);
+		}
+
+		@Override
+		public String TypeInfo() {
+			return "URL";
+		}
+		
+		public String 	URLName = "";
+		public byte[]	URLData;
+		
+		public TURLCommandMessage(int pVersion, String pURLName, byte[] pURLData) throws Exception {
+			Version = pVersion;
+			Session = IncomingMessages_GetNewCommandSession();
+			//.
+			URLName = pURLName;
+			URLData = pURLData;
+			//.
+			Construct();
+		}
+		
+		public TURLCommandMessage(TGeoScopeServer pServer, TIncomingMessage BaseMessage) throws Exception {
+			super(BaseMessage);
+			//.
+			Parse();
+		}
+		
+		@Override
+		protected void Construct() throws Exception {
+			Timestamp = OleDate.UTCCurrentTimestamp();
+			//.
+			String _Name = URLName.replace(';',',');
+			Message = Prefix+" "+Integer.toString(Version)/*Parameters version*/+";"+_Name+";"+Base64.encodeToString(URLData, 0,URLData.length, Base64.NO_WRAP)+";"+Integer.toString(Session);
+		}
+		
+		@Override
+		protected String[] ParseParams() throws Exception {
+			if (!Message.startsWith(Prefix))
+				throw new Exception("incorrect command prefix"); //. =>
+			String ParamsString = Message.substring(Prefix.length()+1/*skip space*/);
+			String[] Params = ParamsString.split(";");
+			int Version = Integer.parseInt(Params[0]);
+			switch (Version) {
+			
+			case 0:
+				URLName = Params[1];
+				URLData = Base64.decode(Params[2], Base64.NO_WRAP);
+				//.
+				return Params; //. ->
+				
+			default:
+				throw new Exception("unknown command parameters version"); //. =>
+			}
+		}
+		
+		@Override
+		public String GetInfo() {
+			return URLName;
+		}		
+	}
+	
 	public static class TUserTaskStatusCommandMessage extends TIncomingCommandMessage {
 
 		public static final String Prefix = "#USERTASKSTATUS";
@@ -1611,7 +1683,7 @@ public class TGeoScopeServerUser {
 	public static class TIncomingMessages extends TCancelableThread {
 		
 		public static String 		MessagesFileName() {
-			return TReflector.ProfileFolder()+"/"+"UserIncomingMessages.dat";
+			return TReflectorComponent.ProfileFolder()+"/"+"UserIncomingMessages.dat";
 		}
 		//.
 		public static final int 	Messages_ProcessedMaxCount = 5; 

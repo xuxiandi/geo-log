@@ -11,7 +11,27 @@
         android:background="#ff999999"
         android:gravity="center"
         android:text="@string/SMyObjects"
-        android:textColor="#ff000000" />
+        android:textColor="#ff000000"
+        android:textSize="16sp" />
+
+    <ListView
+        android:id="@+id/lvObjects"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:cacheColorHint="#00000000"
+        android:choiceMode="multipleChoice"
+        android:scrollbars="vertical" />
+
+    <TextView
+        android:id="@+id/lbListHint"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#E7C04A"
+        android:gravity="left"
+        android:textColor="#ff000000"
+        android:textSize="12sp"
+        android:visibility="visible" />
 
     <LinearLayout
         android:id="@+id/LinearLayout2"
@@ -77,26 +97,6 @@
             android:text="@string/SReports"
             android:textSize="16sp"
             android:visibility="gone" />
-
     </LinearLayout>
-
-    <ListView
-        android:id="@+id/lvObjects"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:cacheColorHint="#00000000"
-        android:choiceMode="multipleChoice"
-        android:scrollbars="vertical" />
-
-    <TextView
-        android:id="@+id/lbListHint"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#E7C04A"
-        android:gravity="left"
-        android:textColor="#ff000000"
-        android:textSize="12sp"
-        android:visibility="visible" />
 
 </LinearLayout>

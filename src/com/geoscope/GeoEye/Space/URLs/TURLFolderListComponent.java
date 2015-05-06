@@ -295,13 +295,17 @@ public class TURLFolderListComponent extends TUIComponent {
 			TItem Item = new TItem();
 			Item.ID = ID;
 			Item.Name = Name;
-    		Item.URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlData(Data, User);					    	
+    		Item.URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlData(Data, User);
 			//.
-			Items.add(Item);
-			//.
-			Save();
-			//.
-			return ID;
+    		if (Item.URL != null) {
+    			Items.add(Item);
+    			//.
+    			Save();
+    			//.
+    			return ID; //. ->
+    		}
+    		else
+    			return null; //. ->
 		}
 		
 		public String Remove(int Index) throws Exception {
@@ -607,19 +611,19 @@ public class TURLFolderListComponent extends TUIComponent {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			TViewHolder holder;
 			if (convertView == null) {
-				int LayoutID = R.layout.user_activitycomponentlist_row_layout;
+				int LayoutID = R.layout.urllist_row_layout;
 				switch (Panel.ListRowSizeID) {
 				
 				case LIST_ROW_SIZE_SMALL_ID:
-					LayoutID = R.layout.user_activitycomponentlist_row_small_layout;
+					LayoutID = R.layout.urllist_row_small_layout;
 					break; //. >
 					
 				case LIST_ROW_SIZE_NORMAL_ID:
-					LayoutID = R.layout.user_activitycomponentlist_row_layout;
+					LayoutID = R.layout.urllist_row_layout;
 					break; //. >
 					
 				case LIST_ROW_SIZE_BIG_ID:
-					LayoutID = R.layout.user_activitycomponentlist_row_big_layout;
+					LayoutID = R.layout.urllist_row_big_layout;
 					break; //. >
 				}
 				convertView = layoutInflater.inflate(LayoutID, null);
@@ -860,7 +864,7 @@ public class TURLFolderListComponent extends TUIComponent {
 			@Override
             public void onClick(View v) {
 		    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(ParentActivity, TGeoLogApplication.GetTempFolder())
-		    	.setFilter(".xml")
+		        .setFilter(".*\\.xml")
 		    	.setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
 		        	
 		            @Override

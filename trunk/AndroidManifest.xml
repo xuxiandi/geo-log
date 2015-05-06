@@ -291,7 +291,8 @@
         <activity
             android:name="TReflectorURLListPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent" >
         </activity>
         <activity
             android:name="TReflectorMapObjectsPanel"

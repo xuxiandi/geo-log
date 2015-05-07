@@ -197,7 +197,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				case SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName:
 					if ((Item.DataFormat != null) && Item.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
 						TComponentTypedDataFiles ComponentTypedDataFiles = new TComponentTypedDataFiles(context, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_Document);
-						ComponentTypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, true, Item.Server);
+						ComponentTypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, (Item.Component.idTComponent == SpaceDefines.idTCoComponent), Item.Server);
 						//.
 						TComponentTypedDataFile ComponentTypedDataFile = ComponentTypedDataFiles.GetRootItem(); 
 						if ((ComponentTypedDataFile != null) && ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
@@ -226,6 +226,12 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						}
 						flProcessAsDefault = false;
 					}
+					break; //. >
+
+				case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
+				case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
+				case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
+					flProcessAsDefault = false;
 					break; //. >
 				}
 				//.

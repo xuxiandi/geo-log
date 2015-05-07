@@ -93,6 +93,12 @@ public class TComponentTypedDataFiles {
 			Items[I].PrepareAsName();
 	}
 	
+	public void PrepareAsFull() {
+		int Cnt = Items.length;
+		for (int I = 0; I < Cnt; I++) 
+			Items[I].PrepareAsFull();
+	}
+	
 	public void PrepareForComponent(int idTComponent, long idComponent, String pDataParams, boolean flWithComponents, TGeoScopeServer Server) throws Exception {
 		DataParams = pDataParams;
 		//.

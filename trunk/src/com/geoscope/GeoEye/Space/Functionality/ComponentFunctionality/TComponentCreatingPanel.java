@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -28,6 +29,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
@@ -720,16 +723,16 @@ public class TComponentCreatingPanel extends Activity {
     }
     
     private void DataFileName_Dialog(final int DataNameMaxSize, final TOnDataFileNameHandler OnDataFileNameHandler) {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		// .
-		alert.setTitle(R.string.SDataName);
-		alert.setMessage(R.string.SEnterName);
-		// .
 		final EditText input = new EditText(this);
 		input.setInputType(InputType.TYPE_CLASS_TEXT);
-		alert.setView(input);
-		// .
-		alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+		//.
+		final AlertDialog dlg = new AlertDialog.Builder(this)
+		//.
+		.setTitle(R.string.SDataName)
+		.setMessage(R.string.SEnterName)
+		//.
+		.setView(input)
+		.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int whichButton) {
@@ -747,9 +750,9 @@ public class TComponentCreatingPanel extends Activity {
 					Toast.makeText(TComponentCreatingPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
 				}
 			}
-		});
-		// .
-		alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+		})
+		//.
+		.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int whichButton) {
@@ -757,8 +760,17 @@ public class TComponentCreatingPanel extends Activity {
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
 			}
-		});
+		}).create();
+		//.
+		input.setOnEditorActionListener(new OnEditorActionListener() {
+			
+			@Override
+			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+				dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
+				return false;
+			}
+        });        
 		// .
-		alert.show();
+		dlg.show();
     }
 }

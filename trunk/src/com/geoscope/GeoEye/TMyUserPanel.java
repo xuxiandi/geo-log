@@ -39,6 +39,7 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Xml;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -47,7 +48,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TextView.OnEditorActionListener;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
@@ -1227,46 +1230,55 @@ public class TMyUserPanel extends Activity {
     }
     
     private void DataFileName_Dialog(final int DataNameMaxSize, final TOnDataFileNameHandler OnDataFileNameHandler) {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		// .
-		alert.setTitle(R.string.SDataName);
-		alert.setMessage(R.string.SEnterName);
-		// .
 		final EditText input = new EditText(this);
 		input.setInputType(InputType.TYPE_CLASS_TEXT);
-		alert.setView(input);
-		// .
-		alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+		//.
+		final AlertDialog dlg = new AlertDialog.Builder(this)
+		//.
+		.setTitle(R.string.SDataName)
+		.setMessage(R.string.SEnterName)
+		//.
+		.setView(input)
+		.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
 			
-					@Override
-					public void onClick(DialogInterface dialog, int whichButton) {
-						//. hide keyboard
-						InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-						//.
-						try {
-							String Name = input.getText().toString();
-            				if (Name.length() > DataNameMaxSize)
-            					Name = Name.substring(0,DataNameMaxSize);
-            				//.
-							OnDataFileNameHandler.DoOnDataFileNameHandler(Name);
-						} catch (Exception E) {
-							Toast.makeText(TMyUserPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
-						}
-					}
-				});
-		// .
-		alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int whichButton) {
+				//. hide keyboard
+				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+				//.
+				try {
+					String Name = input.getText().toString();
+    				if (Name.length() > DataNameMaxSize)
+    					Name = Name.substring(0,DataNameMaxSize);
+    				//.
+					OnDataFileNameHandler.DoOnDataFileNameHandler(Name);
+				} catch (Exception E) {
+					Toast.makeText(TMyUserPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+				}
+			}
+		})
+		//.
+		.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
 			
-					@Override
-					public void onClick(DialogInterface dialog, int whichButton) {
-						// . hide keyboard
-						InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-					}
-				});
+			@Override
+			public void onClick(DialogInterface dialog, int whichButton) {
+				// . hide keyboard
+				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+			}
+		}).create();
+		//.
+		input.setOnEditorActionListener(new OnEditorActionListener() {
+			
+			@Override
+			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+				dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
+				return false;
+			}
+        });        
 		// .
-		alert.show();
+		dlg.show();
     }
     
 	private void ServiceOperation_Cancel() {

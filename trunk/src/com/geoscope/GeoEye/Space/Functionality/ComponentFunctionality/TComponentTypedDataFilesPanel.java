@@ -461,6 +461,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	private Button btnCreateNewComponent;
 	//.
 	private TUpdating	Updating = null;
+	private int			UpdateCount = 0;
 	//.
 	private TComponentTypedDataFileLoading ComponentTypedDataFileLoading = null;
 	
@@ -728,7 +729,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	protected void onResume() {
 		super.onResume();
         //.
-        StartUpdating();
+		if (UpdateCount == 0)
+			StartUpdating();
 	}
 	
 	@Override
@@ -741,8 +743,11 @@ public class TComponentTypedDataFilesPanel extends Activity {
         switch (requestCode) {        
 
         case REQUEST_ADD_COMPONENT: 
-        	if (resultCode == RESULT_OK)   
+        	if (resultCode == RESULT_OK) {   
         	    setResult(RESULT_OK);
+        	    //.
+        	    StartUpdating();
+        	}
         	break; //. >
         }
     }
@@ -832,23 +837,27 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		            	if (Canceller.flCancel)
 			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+		                Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_COMPLETED:
-						if (!flExists)
+						if (Canceller.flCancel)
 			            	break; //. >
 						TComponentTypedDataFilesPanel.this.DataFiles = (TComponentTypedDataFiles)msg.obj;
 						//.
 	           		 	TComponentTypedDataFilesPanel.this.Update();
+	           		 	//. auto-start if there is only one item
+	    				if ((UpdateCount == 1) && ((DataFiles != null) && (DataFiles.Count() == 1))) {
+		    				TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[0];
+		    				ComponentTypedDataFile_Process(ComponentTypedDataFile);
+	    				}
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_FINISHED:
-						if (Canceller.flCancel)
-			            	break; //. >
-		            	TComponentTypedDataFilesPanel.this.Updating = null;
+		            	if (TComponentTypedDataFilesPanel.this.Updating == TUpdating.this)
+		            		TComponentTypedDataFilesPanel.this.Updating = null;
 		            	//.
 		            	break; //. >
 		            	
@@ -859,6 +868,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		            	progressDialog.setIndeterminate(true); 
 		            	progressDialog.setCancelable(true);
 		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+		            		
 							@Override
 							public void onCancel(DialogInterface arg0) {
 								Cancel();
@@ -866,10 +876,12 @@ public class TComponentTypedDataFilesPanel extends Activity {
 								if (flClosePanelOnCancel)
 									TComponentTypedDataFilesPanel.this.finish();
 								else
-					    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
+									if (TComponentTypedDataFilesPanel.this.DataFiles == null)
+										TComponentTypedDataFilesPanel.this.finish();
 							}
 						});
-		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TComponentTypedDataFilesPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TComponentTypedDataFilesPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() {
+		            		
 		            		@Override 
 		            		public void onClick(DialogInterface dialog, int which) { 
 								Cancel();
@@ -877,7 +889,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 								if (flClosePanelOnCancel)
 									TComponentTypedDataFilesPanel.this.finish();
 								else
-					    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
+									if (TComponentTypedDataFilesPanel.this.DataFiles == null)
+										TComponentTypedDataFilesPanel.this.finish();
 		            		} 
 		            	}); 
 		            	//.
@@ -938,6 +951,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			Items[I] = Item;
 		}
 		lvDataFiles.setAdapter(new TComponentListAdapter(this, lvDataFiles, ProgressBar, Items));
+		//.
+		UpdateCount++;
     }
 
     private void StartUpdating() {
@@ -1014,6 +1029,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						}
 						//.
 						ComponentTypedDataFile.PrepareAsFullFromFile(CFN);
+						//.
+						Canceller.Check();
 						//.
 						TComponentTypedDataFilesPanel.this.MessageHandler.obtainMessage(OnCompletionMessage,ComponentTypedDataFile).sendToTarget();
 					}

@@ -1261,6 +1261,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 						//.
 						ComponentTypedDataFile.PrepareAsFullFromFile(CFN);
 						//.
+						Canceller.Check();
+						//.
 						TUserActivityComponentListComponent.this.MessageHandler.obtainMessage(OnCompletionMessage,ComponentTypedDataFile).sendToTarget();
 					}
 					finally {

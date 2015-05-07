@@ -143,6 +143,12 @@ public class TComponentTypedDataFile {
 			DataType = ((int)(DataType/SpaceDefines.TYPEDDATAFILE_TYPE_RANGE))*SpaceDefines.TYPEDDATAFILE_TYPE_RANGE;
 	}
 	
+	public void PrepareAsFull() {
+		// . convert to full data
+		if ((DataType % SpaceDefines.TYPEDDATAFILE_TYPE_RANGE) != SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)
+			DataType = ((int)(DataType/SpaceDefines.TYPEDDATAFILE_TYPE_RANGE))*SpaceDefines.TYPEDDATAFILE_TYPE_RANGE+SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
+	}
+	
 	public void PrepareAsFullFromFile(String pFileName) {
 		DataFileName = pFileName;
 		// . convert to full data

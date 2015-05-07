@@ -947,7 +947,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 		Width = arg2;
 		Height = arg3;
 		//. re-initialize video
-		if ((VideoChannelProcessor == null) && (Measurement.Descriptor.Model != null)) {
+		if ((VideoChannelProcessor == null) && ((Measurement != null) && (Measurement.Descriptor.Model != null))) {
 			int Cnt = Measurement.Descriptor.Model.Stream.Channels.size();
 			for (int C = 0; C < Cnt; C++) {
 				TChannel Channel = Measurement.Descriptor.Model.Stream.Channels.get(C);

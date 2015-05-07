@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.InputType;
 import android.util.Xml;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -52,6 +53,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
@@ -84,16 +86,23 @@ public class TURLFolderListComponent extends TUIComponent {
 		Components.remove(Component);
 	}
 	
+	private static synchronized TURLFolderListComponent Components_GetComponent(String URLListFolder) {
+		int Cnt = Components.size();
+		for (int I = 0; I < Cnt; I++) {
+			TURLFolderListComponent Component = Components.get(I);
+			if (Component.URLListFolder.equals(URLListFolder))
+				return Component; //. ->
+		}
+		return null;
+	}
+	
 	public static synchronized void Components_AddNewURL(String URLListFolder, String URLName, byte[] URLData, TGeoScopeServerUser User) throws Exception {
 		TURLFolderListComponent.TURLFolderList URLFolderList = new TURLFolderListComponent.TURLFolderList(URLListFolder, User);
 		URLFolderList.Add(URLName,URLData);
 		//.
-		int Cnt = Components.size();
-		for (int I = 0; I < Cnt; I++) {
-			TURLFolderListComponent Component = Components.get(I);
-			if (Component.URLListFolder.equals(URLFolderList))
-				Component.PostStartUpdating();
-		}
+		TURLFolderListComponent Component = Components_GetComponent(URLListFolder);
+		if (Component != null)
+			Component.PostStartUpdating();
 	}
 	
 	public static class TURLFolderList {
@@ -607,6 +616,35 @@ public class TURLFolderListComponent extends TUIComponent {
 			return Items_SelectedItemID;
 		}
 		
+		public void Items_Replace(String ItemID, int NewIndex, boolean flNotify) {
+			int Cnt = Items.length;
+			if ((0 <= NewIndex) && (NewIndex < Cnt)) {
+				int Index = -1;
+				for (int I = 0; I < Cnt; I++)
+					if (Items[I].Item.ID.equals(ItemID)) {
+						Index = I;
+						break; //. >
+					}
+				if ((Index >= 0) && (Index != NewIndex)) { 
+					TURLListItem Item = Items[Index]; 
+					if (NewIndex < Index) {
+						Cnt = (Index-NewIndex);
+						for (int I = Index; I > NewIndex; I--)
+							Items[I] = Items[I-1];
+					}
+					else {
+						Cnt = (NewIndex-Index);
+						for (int I = Index; I < NewIndex; I++)
+							Items[I] = Items[I+1];
+					}
+					Items[NewIndex] = Item; 
+					//.
+					if (flNotify)
+						notifyDataSetChanged();
+				}
+			}
+		}
+		
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			TViewHolder holder;
@@ -792,7 +830,7 @@ public class TURLFolderListComponent extends TUIComponent {
 		    		    			break; //. >
 		    		    			
 		    		    		case 1: //. send URL
-		    		    			SendSelectedURLToUser();
+		    		    			SelectedURL_SendToUser();
 		    						//.
 		        		    		arg0.dismiss();
 		        		    		//.
@@ -871,62 +909,71 @@ public class TURLFolderListComponent extends TUIComponent {
 		            public void OnSelectedFile(String fileName) {
 		        		final String SelectedFileName = fileName; 
 	                    //.
-		        		AlertDialog.Builder alert = new AlertDialog.Builder(ParentActivity);
-		        		// .
-		        		alert.setTitle(R.string.SDataName);
-		        		alert.setMessage(R.string.SEnterName);
-		        		// .
 		        		final EditText input = new EditText(ParentActivity);
 		        		input.setInputType(InputType.TYPE_CLASS_TEXT);
-		        		alert.setView(input);
-		        		// .
-		        		alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+		        		//.
+		        		final AlertDialog dlg = new AlertDialog.Builder(ParentActivity)
+		        		//.
+		        		.setTitle(R.string.SDataName)
+		        		.setMessage(R.string.SEnterName)
+		        		//.
+		        		.setView(input)
+		        		.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
 		        			
-		        					@Override
-		        					public void onClick(DialogInterface dialog, int whichButton) {
-		        						//. hide keyboard
-		        						InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-		        						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-		        						//.
-		        						try {
-		        							String Name = input.getText().toString();
-		        							//.
-		        							File F = new File(SelectedFileName);
-		        							byte[] Data;
-		        					    	long FileSize = F.length();
-		        					    	FileInputStream FIS = new FileInputStream(F);
-		        					    	try {
-		        					    		Data = new byte[(int)FileSize];
-		        					    		FIS.read(Data);
-		        					    	}
-		        					    	finally {
-		        					    		FIS.close();
-		        					    	}
-		        					    	//.
-		        					    	if (URLList != null) {
-		        					    		if (Name.length() == 0)
-		        					    			Name = "?";
-		        					    		URLList.Add(Name, Data);
-		        					    		//.
-		        					    		Update();
-		        					    	}
-		        						} catch (Exception E) {
-		        							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
-		        						}
-		        					}
-		        				});
-		        		// .
-		        		alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+		        			@Override
+		        			public void onClick(DialogInterface dialog, int whichButton) {
+		        				//. hide keyboard
+		        				InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+		        				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+		        				//.
+        						try {
+        							String Name = input.getText().toString();
+        							//.
+        							File F = new File(SelectedFileName);
+        							byte[] Data;
+        					    	long FileSize = F.length();
+        					    	FileInputStream FIS = new FileInputStream(F);
+        					    	try {
+        					    		Data = new byte[(int)FileSize];
+        					    		FIS.read(Data);
+        					    	}
+        					    	finally {
+        					    		FIS.close();
+        					    	}
+        					    	//.
+        					    	if (URLList != null) {
+        					    		if (Name.length() == 0)
+        					    			Name = "?";
+        					    		URLList.Add(Name, Data);
+        					    		//.
+        					    		Update();
+        					    	}
+        						} catch (Exception E) {
+        							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+        						}
+		        			}
+		        		})
+		        		//.
+		        		.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
 		        			
-		        					@Override
-		        					public void onClick(DialogInterface dialog, int whichButton) {
-		        						// . hide keyboard
-		        						InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-		        						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-		        					}
-		        				});
+		        			@Override
+		        			public void onClick(DialogInterface dialog, int whichButton) {
+		        				// . hide keyboard
+		        				InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+		        				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+		        			}
+		        		}).create();
+		        		//.
+		        		input.setOnEditorActionListener(new OnEditorActionListener() {
+		        			
+		        			@Override
+		        			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+		        				dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
+		        				return false;
+		        			}
+		                });        
 		        		// .
-		        		alert.show();
+		        		dlg.show();
 		            }
 
 					@Override
@@ -943,20 +990,7 @@ public class TURLFolderListComponent extends TUIComponent {
 			@Override
             public void onClick(View v) {
 				try {
-					String SelectedItemID = lvURLListAdapter.Items_GetSelectedItemID();
-					int ItemIndex  = URLList.GetItemIndex(SelectedItemID);
-					if (ItemIndex > 0) {
-			    		//.
-						ItemIndex--;
-						if (URLList.Replace(SelectedItemID, ItemIndex)) {
-							Update();
-							//.
-							lvURLListAdapter.Items_SetSelectedItemID(SelectedItemID, true);
-							//.
-							lvURLList.setItemChecked(ItemIndex, true);
-							lvURLList.setSelection(ItemIndex);
-						}
-					}
+					SelectedURL_MoveUp();
 		    	}
 		    	catch (Exception E) {
 		    		Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -970,20 +1004,7 @@ public class TURLFolderListComponent extends TUIComponent {
 			@Override
             public void onClick(View v) {
 				try {
-					String SelectedItemID = lvURLListAdapter.Items_GetSelectedItemID();
-					int ItemIndex  = URLList.GetItemIndex(SelectedItemID);
-					if (ItemIndex >= 0) {
-			    		//.
-						ItemIndex++;
-						if (URLList.Replace(SelectedItemID, ItemIndex)) {
-							Update();
-							//.
-							lvURLListAdapter.Items_SetSelectedItemID(SelectedItemID, true);
-							//.
-							lvURLList.setItemChecked(ItemIndex, true);
-							lvURLList.setSelection(ItemIndex);
-						}
-					}
+					SelectedURL_MoveDown();
 		    	}
 		    	catch (Exception E) {
 		    		Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -1058,7 +1079,7 @@ public class TURLFolderListComponent extends TUIComponent {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
             		long UserID = extras.getLong("UserID");
-            		DoSendSelectedURLToUser(UserID);
+            		SelectedURL_DoSendToUser(UserID);
             	}
         	}
             break; //. >
@@ -1308,15 +1329,6 @@ public class TURLFolderListComponent extends TUIComponent {
 		MessageHandler.obtainMessage(MESSAGE_STARTUPDATING).sendToTarget();
 	}
 
-	private static final int REQUEST_SELECT_USER = 1;
-	
-	public void SendSelectedURLToUser() {
-    	Intent intent = new Intent(ParentActivity, TUserListPanel.class);
-		intent.putExtra("ComponentID", Component.ID);
-    	intent.putExtra("Mode",TUserListComponent.MODE_FORURL);    	
-    	ParentActivity.startActivityForResult(intent, REQUEST_SELECT_USER);		
-	}
-	
     private class TURLsToUserSending extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION 				= 0;
@@ -1435,7 +1447,50 @@ public class TURLFolderListComponent extends TUIComponent {
 	    };
     }		
 
-	public void DoSendSelectedURLToUser(long UserID) {
+	private void SelectedURL_MoveUp() throws Exception {
+		String SelectedItemID = lvURLListAdapter.Items_GetSelectedItemID();
+		int ItemIndex  = URLList.GetItemIndex(SelectedItemID);
+		if (ItemIndex > 0) {
+    		//.
+			ItemIndex--;
+			if (URLList.Replace(SelectedItemID, ItemIndex)) {
+				lvURLListAdapter.Items_Replace(SelectedItemID, ItemIndex, true);
+				//.
+				if (!((lvURLList.getFirstVisiblePosition() < ItemIndex) && (ItemIndex < lvURLList.getLastVisiblePosition()))) {
+					lvURLList.setItemChecked(ItemIndex, true);
+					lvURLList.setSelection(ItemIndex);
+				}
+			}
+		}
+	}
+	
+	private void SelectedURL_MoveDown() throws Exception {
+		String SelectedItemID = lvURLListAdapter.Items_GetSelectedItemID();
+		int ItemIndex  = URLList.GetItemIndex(SelectedItemID);
+		if (ItemIndex >= 0) {
+    		//.
+			ItemIndex++;
+			if (URLList.Replace(SelectedItemID, ItemIndex)) {
+				lvURLListAdapter.Items_Replace(SelectedItemID, ItemIndex, true);
+				//.
+				if (!((lvURLList.getFirstVisiblePosition() < ItemIndex) && (ItemIndex < lvURLList.getLastVisiblePosition()))) { 
+					lvURLList.setItemChecked(ItemIndex, true);
+					lvURLList.setSelection(ItemIndex);
+				}
+			}
+		}
+	}
+	
+	private static final int REQUEST_SELECT_USER = 1;
+	
+	private void SelectedURL_SendToUser() {
+    	Intent intent = new Intent(ParentActivity, TUserListPanel.class);
+		intent.putExtra("ComponentID", Component.ID);
+    	intent.putExtra("Mode",TUserListComponent.MODE_FORURL);    	
+    	ParentActivity.startActivityForResult(intent, REQUEST_SELECT_USER);		
+	}
+	
+	private void SelectedURL_DoSendToUser(long UserID) {
 		TURLFolderList.TItem SelectedItem = URLList.GetItem(lvURLListAdapter.Items_GetSelectedItemID());
 		if (SelectedItem == null)
 			return; //. ->

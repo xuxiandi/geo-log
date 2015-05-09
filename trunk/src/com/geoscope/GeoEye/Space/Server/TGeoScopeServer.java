@@ -243,7 +243,7 @@ public class TGeoScopeServer {
 					}
 					return httpConn; //. ->
 				} catch (SocketTimeoutException STE) {
-					throw new IOException(context.getString(R.string.SConnectionTimeoutError)); //. =>
+					throw new SocketTimeoutException(context.getString(R.string.SConnectionTimeoutError)); //. =>
 				} catch (ConnectException CE) {
 					throw new ConnectException(context.getString(R.string.SNoServerConnection)); //. =>
 				} catch (Exception E) {
@@ -254,6 +254,9 @@ public class TGeoScopeServer {
 				}
 			}
 			catch (Exception E) {
+				if (E instanceof SocketTimeoutException)
+					throw E; //. =>
+				//.
 				TryCounter--;
 				if (TryCounter == 0)
 					throw E; //. =>

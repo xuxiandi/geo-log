@@ -600,6 +600,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 								Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
 								intent.putExtra("ComponentID", Component.ID);
 								intent.putExtra("DataFiles", ActivitiesComponents.Items[arg2].TypedDataFiles.ToByteArrayV0());
+								intent.putExtra("AutoStart", true);
 								//.
 								ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
 							}
@@ -634,8 +635,8 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		    		_items[1] = ParentActivity.getString(R.string.SContent1); 
 		    		_items[2] = ParentActivity.getString(R.string.SUserActivity); 
 		    		_items[3] = ParentActivity.getString(R.string.SShowGeoLocation); 
-		    		_items[4] = ParentActivity.getString(R.string.SRemove); 
-		    		_items[5] = ParentActivity.getString(R.string.SGetURLFile); 
+		    		_items[4] = ParentActivity.getString(R.string.SGetURLFile); 
+		    		_items[5] = ParentActivity.getString(R.string.SRemove); 
 		    		//.
 		    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		    		builder.setTitle(R.string.SSelect);
@@ -666,8 +667,10 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		    						try {
 	    								if (_Component.TypedDataFiles.Count() > 0) {
 		    								Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
-		    								intent.putExtra("ComponentID", Component.ID);
+		    								if (Component != null)
+		    									intent.putExtra("ComponentID", Component.ID);
 		    								intent.putExtra("DataFiles", _Component.TypedDataFiles.ToByteArrayV0());
+		    								intent.putExtra("AutoStart", true);
 		    								//.
 		    								ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
 	    								}
@@ -713,7 +716,73 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 4: //. remove component
+		    		    		case 4: //. get URL-file
+    								if (_Component.TypedDataFiles.Count() > 0) {
+	    								final TComponentTypedDataFile ComponentTypedDataFile = _Component.TypedDataFiles.Items[0].Clone();
+	    								//.
+	    		    					TAsyncProcessing Processing = new TAsyncProcessing(ParentActivity) {
+
+	    		    						private String URLFN;
+	    		    						
+	    		    						@Override
+	    		    						public void Process() throws Exception {
+	    	    								TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    	    								if (UserAgent == null)
+	    	    									throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
+	    	    								//.
+	    	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+	    	    								if (CF != null) 
+	    	    									try {
+	    	    										TURL URL = CF.GetDefaultURL();
+	    	    										if (URL != null) 
+	    	    											try {
+	    	    												if (URL.HasData()) {
+	    	    													ComponentTypedDataFile.DataType = SpaceDefines.TYPEDDATAFILE_TYPE_Document; 
+	    	    													ComponentTypedDataFile.PrepareForComponent(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID, false, UserAgent.Server);
+			    													if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) 
+			    	    	    										CF.ParseFromXMLDocument(ComponentTypedDataFile.GetFileData());
+	    	    												}
+	    	    	    										//.
+	    		    											URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+	    		    											URL.ConstructURLFile(URLFN);
+	    	    											}
+	    	    											finally {
+	    	    												URL.Release();
+	    	    											}
+		    	    										else
+		    	    											throw new Exception("there is no URL there"); //. =>
+	    	    												
+	    	    									}
+	    	    									finally {
+	    	    										CF.Release();
+	    	    									}
+    	    										else
+    	    											throw new Exception("there is no component functionality there"); //. =>
+	    		    						}
+
+	    		    						@Override
+	    		    						public void DoOnCompleted() throws Exception {
+	    		    	    	    		    new AlertDialog.Builder(ParentActivity)
+	    		    	            			.setIcon(android.R.drawable.ic_dialog_alert)
+	    		    	            			.setTitle(R.string.SInfo)
+	    		    	            			.setMessage(ParentActivity.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+ParentActivity.getString(R.string.SUseItForImport))
+	    		    	            			.setPositiveButton(R.string.SOk, null)
+	    		    	            			.show();
+	    		    						}
+	    		    						
+	    		    						@Override
+	    		    						public void DoOnException(Exception E) {
+	    		    							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+	    		    						}
+	    		    					};
+	    		    					Processing.Start();
+    								}
+		    		    			//.
+		        		    		arg0.dismiss();
+		        		    		//.
+		    		    			break; //. >
+		    		    			
+		    		    		case 5: //. remove component
 		    		    			AlertDialog.Builder alert = new AlertDialog.Builder(ParentActivity);
 		    		    			//.
 		    		    			alert.setTitle(R.string.SRemoval);
@@ -761,67 +830,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		    		    			alert.setNegativeButton(R.string.SCancel, null);
 		    		    			//.
 		    		    			alert.show();
-		    		    			//.
-		        		    		arg0.dismiss();
-		        		    		//.
-		    		    			break; //. >
-		    		    			
-		    		    		case 5: //. get URL-file
-    								if (_Component.TypedDataFiles.Count() > 0) {
-	    								final TComponentTypedDataFile ComponentTypedDataFile = _Component.TypedDataFiles.Items[0].Clone();
-	    								//.
-	    		    					TAsyncProcessing Processing = new TAsyncProcessing(ParentActivity) {
-
-	    		    						private String URLFN;
-	    		    						
-	    		    						@Override
-	    		    						public void Process() throws Exception {
-	    	    								TUserAgent UserAgent = TUserAgent.GetUserAgent();
-	    	    								if (UserAgent == null)
-	    	    									throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    	    								//.
-	    	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
-	    	    								if (CF != null) 
-	    	    									try {
-	    	    										TURL URL = CF.GetDefaultURL();
-	    	    										if (URL != null) 
-	    	    											try {
-	    	    												if (URL.HasData()) {
-	    	    													ComponentTypedDataFile.DataType = SpaceDefines.TYPEDDATAFILE_TYPE_Document; 
-	    	    													ComponentTypedDataFile.PrepareForComponent(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID, false, UserAgent.Server);
-			    													if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) 
-			    	    	    										CF.ParseFromXMLDocument(ComponentTypedDataFile.GetFileData());
-	    	    												}
-	    	    	    										//.
-	    		    											URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
-	    		    											URL.ConstructURLFile(URLFN);
-	    	    											}
-	    	    											finally {
-	    	    												URL.Release();
-	    	    											}
-		    	    										else
-		    	    											throw new Exception("there is no URL there"); //. =>
-	    	    												
-	    	    									}
-	    	    									finally {
-	    	    										CF.Release();
-	    	    									}
-    	    										else
-    	    											throw new Exception("there is no component functionality there"); //. =>
-	    		    						}
-
-	    		    						@Override
-	    		    						public void DoOnCompleted() throws Exception {
-    						            		Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
-	    		    						}
-	    		    						
-	    		    						@Override
-	    		    						public void DoOnException(Exception E) {
-	    		    							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
-	    		    						}
-	    		    					};
-	    		    					Processing.Start();
-    								}
 		    		    			//.
 		        		    		arg0.dismiss();
 		        		    		//.

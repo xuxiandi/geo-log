@@ -421,7 +421,12 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 	            		com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.PropsPanel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.PropsPanel.TURL(Object.ID,Object.Name);
 	            		URL.ConstructURLFile(URLFN);
 	            		//.
-	            		Toast.makeText(TCoGeoMonitorObjectPanel.this, TCoGeoMonitorObjectPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
+		    		    new AlertDialog.Builder(TCoGeoMonitorObjectPanel.this)
+		    	        .setIcon(android.R.drawable.ic_dialog_alert)
+		    	        .setTitle(R.string.SInfo)
+		    	        .setMessage(TCoGeoMonitorObjectPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TCoGeoMonitorObjectPanel.this.getString(R.string.SUseItForImport))
+		    		    .setPositiveButton(R.string.SOk, null)
+		    		    .show();
 	            	}
 	            	catch (Exception E) {
 	            		Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();

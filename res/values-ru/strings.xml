@@ -1034,7 +1034,7 @@
     <string name="STextHasBeenSaved">Текст сохранён</string>
     <string name="SPictureHasBeenSaved">Картинка сохранена</string>
     <string name="SURLFileNameHasBeenSaved">"URL файл сохранён в "</string>
-    <string name="SGetURLFile">Получить URL-файл</string>
+    <string name="SGetURLFile">Копировать URL-ссылку</string>
     <string name="SBookmarks">Закладки</string>
     <string name="SImport">Импорт &#8230;</string>
     <string name="SUpItem">вверх</string>
@@ -1046,5 +1046,6 @@
     <string name="SSelectUserForURLSending">Выберите пользователя для отправки закладки</string>
     <string name="SBookmarkHasBeenSent">Закладка отправлена.</string>
     <string name="SSendBookmarkToUser">Отправить закладку пользователю &#8230;</string>
+    <string name="SUseItForImport">Используйте его для импорта.</string>
     
 </resources>

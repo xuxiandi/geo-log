@@ -70,8 +70,8 @@ public class TUserChatPanel extends Activity {
 	//.
 	public static final int CameraImageMaxSize = 1024;
 	
-	public static final String MessageTextFileName 		= "MessagePicture.txt";
-	public static final String MessagePictureFileName 	= "MessageText.png";
+	public static final String MessageTextFileName 		= "MessageText.txt";
+	public static final String MessagePictureFileName 	= "MessagePicture.png";
 	
 	private static final int MESSAGE_SENT 				= 1;
 	private static final int MESSAGE_RECEIVED 			= 2;

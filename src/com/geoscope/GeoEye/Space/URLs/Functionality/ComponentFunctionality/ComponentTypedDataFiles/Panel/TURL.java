@@ -178,6 +178,8 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 				Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
 				intent.putExtra("ComponentID", 0);
 				intent.putExtra("DataFiles", TypedDataFiles.ToByteArrayV0());
+				intent.putExtra("AutoStart", true);
+				//.
 				context.startActivity(intent);
 			}
 			

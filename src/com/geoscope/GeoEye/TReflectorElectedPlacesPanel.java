@@ -86,7 +86,12 @@ public class TReflectorElectedPlacesPanel extends Activity  {
             		String URLFN = GetSelectedPlaceURLFile();
             		//.
             		if (URLFN != null)
-            			Toast.makeText(TReflectorElectedPlacesPanel.this, TReflectorElectedPlacesPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
+    	    		    new AlertDialog.Builder(TReflectorElectedPlacesPanel.this)
+            			.setIcon(android.R.drawable.ic_dialog_alert)
+            			.setTitle(R.string.SInfo)
+            			.setMessage(TReflectorElectedPlacesPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TReflectorElectedPlacesPanel.this.getString(R.string.SUseItForImport))
+            			.setPositiveButton(R.string.SOk, null)
+            			.show();
             	}
             	catch (Exception E) {
             		Toast.makeText(TReflectorElectedPlacesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();

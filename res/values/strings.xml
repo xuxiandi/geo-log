@@ -1034,7 +1034,7 @@
     <string name="STextHasBeenSaved">Text has been saved</string>
     <string name="SPictureHasBeenSaved">Picture has been saved</string>
     <string name="SURLFileNameHasBeenSaved">"URL file has been saved to "</string>
-    <string name="SGetURLFile">Get URL-file</string>
+    <string name="SGetURLFile">Copy URL-link</string>
     <string name="SBookmarks">Bookmarks</string>
     <string name="SImport">Import &#8230;</string>
     <string name="SUpItem">up item</string>
@@ -1046,5 +1046,6 @@
     <string name="SSelectUserForURLSending">Select a user for the bookmark sending</string>
     <string name="SBookmarkHasBeenSent">The bookmark has been sent.</string>
     <string name="SSendBookmarkToUser">Send the bookmark to the user &#8230;</string>
+    <string name="SUseItForImport">Use it for import.</string>
     
 </resources>

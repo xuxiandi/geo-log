@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -74,7 +75,12 @@ public class TDataStreamPropsPanel extends Activity {
             		com.geoscope.GeoEye.Space.URLs.TypesSystem.DataStream.PropsPanel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.DataStream.PropsPanel.TURL(idComponent);
             		URL.ConstructURLFile(URLFN);
             		//.
-            		Toast.makeText(TDataStreamPropsPanel.this, getString(R.string.SURLFileNameHasBeenSaved)+URLFN, Toast.LENGTH_LONG).show();
+	    		    new AlertDialog.Builder(TDataStreamPropsPanel.this)
+	    	        .setIcon(android.R.drawable.ic_dialog_alert)
+	    	        .setTitle(R.string.SInfo)
+	    	        .setMessage(TDataStreamPropsPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TDataStreamPropsPanel.this.getString(R.string.SUseItForImport))
+	    		    .setPositiveButton(R.string.SOk, null)
+	    		    .show();
             	}
             	catch (Exception E) {
             		Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();

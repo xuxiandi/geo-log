@@ -12,6 +12,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +45,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 	private SurfaceView svSurface;
 	private TextView lbTitle;
 	private TextView lbStatus;
+	private ImageView ivAudioOnly;
 	//.
 	private boolean IsInFront = false;
 	//.
@@ -82,6 +84,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
             //.
             lbTitle = (TextView)findViewById(R.id.lbTitle);
             lbStatus = (TextView)findViewById(R.id.lbStatus);
+            ivAudioOnly = (ImageView)findViewById(R.id.ivAudioOnly);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
@@ -186,12 +189,25 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 		//.
 		String Title = getString(R.string.SChannels1)+SB.toString();
 		lbTitle.setText(Title);
+		//.
+        ivAudioOnly.setVisibility(StreamChannelProcessors_IsAudioOnly() ? View.VISIBLE : View.GONE);
 	}
 	
 	private void StreamChannelProcessors_Finalize() throws Exception {
 		for (int I = 0; I < StreamChannelProcessors.size(); I++) 
 			StreamChannelProcessors.get(I).Destroy();
 		StreamChannelProcessors.clear();
+	}
+	
+	private boolean StreamChannelProcessors_IsAudioOnly() {
+		boolean flAudio = false;
+		boolean flVideo = false;
+		for (int I = 0; I < StreamChannelProcessors.size(); I++) {
+			TStreamChannelProcessorAbstract ChannelProcessor = StreamChannelProcessors.get(I);
+			flAudio |= ChannelProcessor.IsAudial();
+			flVideo |= ChannelProcessor.IsVisual();
+		}
+		return (flAudio && !flVideo);
 	}
 	
 	private static final int MESSAGE_SHOWSTATUSMESSAGE 	= 1;
@@ -228,7 +244,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
     					lbStatus.setText("");
     					lbStatus.setVisibility(View.GONE);
     				}
-    				// .
+    				//.
     				break; // . >
     			}
         	}

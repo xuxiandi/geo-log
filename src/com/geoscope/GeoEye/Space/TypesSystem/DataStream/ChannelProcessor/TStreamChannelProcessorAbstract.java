@@ -210,6 +210,10 @@ public abstract class TStreamChannelProcessorAbstract {
     	Close();
     }
 
+    public boolean IsAudial() {
+    	return false;
+    }
+    
     public boolean IsVisual() {
     	return true;
     }

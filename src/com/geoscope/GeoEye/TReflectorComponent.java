@@ -76,7 +76,8 @@ import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
 import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
@@ -6470,9 +6471,8 @@ public class TReflectorComponent extends TUIComponent {
 			File RF = new File(TGeoLogApplication.Resources_GetCurrentFolder()+"/"+TGeoLogApplication.Resource_ImagesFolder);
 			if (RF.exists())
 				BaseFolder = RF.getAbsolutePath();
-	    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(Reflector.context,BaseFolder)
-	        .setFilter(".*\\.bmp|.*\\.png|.*\\.jpg|.*\\.jpeg")
-	        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+			//.
+			TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(Reflector.context, BaseFolder, ".BMP,.PNG,.JPG,.JPEG", new TFileSystemFileSelector.OpenDialogListener() {
 	        	
 	            @Override
 	            public void OnSelectedFile(String fileName) {
@@ -6529,7 +6529,7 @@ public class TReflectorComponent extends TUIComponent {
 				public void OnCancel() {
 				}
 	        });
-	    	FileSelector.show();    	
+			FileSelector.show();
 		}
 		
 		private void SetupFromImageFile_DoOnItemLoaded(TItem Item, Bitmap Image) {
@@ -9262,9 +9262,7 @@ public class TReflectorComponent extends TUIComponent {
 	}
 	
 	private void ObjectCreatingGallery_CommitCreatingObject() throws Exception {
-    	TFileSystemFileSelector DataFileSelector = new TFileSystemFileSelector(context)
-        .setFilter(".*")
-        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+		TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(context, null, new TFileSystemFileSelector.OpenDialogListener() {
         	
             @Override
             public void OnSelectedFile(String fileName) {
@@ -9326,7 +9324,7 @@ public class TReflectorComponent extends TUIComponent {
 				ObjectCreatingGallery_CancelCreatingObject();
 			}
         });
-    	DataFileSelector.show();    	
+    	FileSelector.show();    	
     	//.
 		Toast.makeText(context, R.string.SSelectAFileToLoad, Toast.LENGTH_LONG).show();
 	}
@@ -9848,9 +9846,8 @@ public class TReflectorComponent extends TUIComponent {
 		File RF = new File(TGeoLogApplication.Resources_GetCurrentFolder()+"/"+TGeoLogApplication.Resource_ImagesFolder);
 		if (RF.exists())
 			BaseFolder = RF.getAbsolutePath();
-    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(context,BaseFolder)
-        .setFilter(".*\\.bmp|.*\\.png|.*\\.jpg|.*\\.jpeg")
-        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+		//.
+		TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(context, BaseFolder, ".BMP,.PNG,.JPG,.JPEG", new TFileSystemFileSelector.OpenDialogListener() {
         	
             @Override
             public void OnSelectedFile(String fileName) {

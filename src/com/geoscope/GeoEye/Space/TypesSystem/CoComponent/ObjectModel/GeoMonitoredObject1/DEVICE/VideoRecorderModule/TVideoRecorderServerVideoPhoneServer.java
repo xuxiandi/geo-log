@@ -960,7 +960,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 			public void DoOnException(Throwable E) {
 				TVideoRecorderServerVideoPhoneServer.this.DoOnException(E);
 			}
-		}, lbStatus);
+		}, lbStatus,ivAudioOnly);
     	//.
         SetSurface(true);
     }

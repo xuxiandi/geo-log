@@ -50,6 +50,12 @@
             android:screenOrientation="landscape" >
         </activity>
         <activity
+            android:name="com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelectorPanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DefaultTransparent" >
+        </activity>
+        <activity
             android:name="com.geoscope.GeoLog.Application.TSplashPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:label=""

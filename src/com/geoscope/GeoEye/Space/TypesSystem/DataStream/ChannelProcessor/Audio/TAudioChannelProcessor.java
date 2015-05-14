@@ -454,6 +454,11 @@ public class TAudioChannelProcessor extends TStreamChannelProcessor {
     }
         
 	@Override
+    public boolean IsAudial() {
+    	return true;
+    }
+    
+	@Override
     public boolean IsVisual() {
     	return false;
     }

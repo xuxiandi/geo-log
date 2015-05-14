@@ -65,7 +65,8 @@ import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TProgressor;
@@ -837,9 +838,7 @@ public class TTrackerPanel extends Activity {
         	
 			@Override
             public void onClick(View v) {
-		    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TTrackerPanel.this)
-		        .setFilter(".*")
-		        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+				TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TTrackerPanel.this, null, new TFileSystemFileSelector.OpenDialogListener() {
 		        	
 		            @Override
 		            public void OnSelectedFile(String fileName) {

@@ -60,7 +60,8 @@ import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.Data.Types.Image.TDiskImageCache;
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
 import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
@@ -901,9 +902,7 @@ public class TURLFolderListComponent extends TUIComponent {
         	
 			@Override
             public void onClick(View v) {
-		    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(ParentActivity, TGeoLogApplication.GetTempFolder())
-		        .setFilter(".*\\.xml")
-		    	.setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+				TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(ParentActivity, TGeoLogApplication.GetTempFolder(), ".XML", new TFileSystemFileSelector.OpenDialogListener() {
 		        	
 		            @Override
 		            public void OnSelectedFile(String fileName) {

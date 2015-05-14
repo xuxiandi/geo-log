@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +37,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	//.
 	private SurfaceView svVideoRecorderServerViewer;
 	private TextView lbVideoRecorderServer;
+	private ImageView ivAudioOnly;
 	//.
 	private boolean IsInFront = false;
 	
@@ -57,6 +59,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 		});
         //.
         lbVideoRecorderServer = (TextView)findViewById(R.id.lbVideoRecorderServer);
+        //.
+        ivAudioOnly = (ImageView)findViewById(R.id.ivAudioOnly);
         //.
         TReflector Reflector = TReflector.GetReflector();
         //.
@@ -85,7 +89,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 				public void DoOnException(Throwable E) {
 					TVideoRecorderServerViewer.this.DoOnException(E);
 				}
-			}, lbVideoRecorderServer);
+			}, lbVideoRecorderServer,ivAudioOnly);
         	//.
         	try {
         		VideoRecorderServerView.Initialize();

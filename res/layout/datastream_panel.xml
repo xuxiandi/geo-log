@@ -35,6 +35,14 @@
             android:textSize="18sp"
             android:visibility="visible" />
 
+        <ImageView
+            android:id="@+id/ivAudioOnly"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/SAudio"
+            android:scaleType="center"
+            android:src="@drawable/audio"
+            android:visibility="gone" />
     </RelativeLayout>
 
 </FrameLayout>

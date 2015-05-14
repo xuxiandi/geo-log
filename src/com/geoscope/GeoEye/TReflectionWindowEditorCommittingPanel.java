@@ -19,7 +19,8 @@ import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.Toast;
 
-import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
 
 public class TReflectionWindowEditorCommittingPanel extends Activity {
 
@@ -295,12 +296,11 @@ public class TReflectionWindowEditorCommittingPanel extends Activity {
         //.
         btnAttachmentFileName = (Button)findViewById(R.id.btnRWEditorCommittingVisualizationAttachmentFileName);
         btnAttachmentFileName.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
-            	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TReflectionWindowEditorCommittingPanel.this)
-                .setFilter(".*")
-                .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
-                	
+    			TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TReflectionWindowEditorCommittingPanel.this, null, new TFileSystemFileSelector.OpenDialogListener() {
+    	        	
                     @Override
                     public void OnSelectedFile(String fileName) {
                         edAttachmentFileName.setText(fileName);

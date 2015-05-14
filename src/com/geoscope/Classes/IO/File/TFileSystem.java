@@ -287,8 +287,20 @@ public class TFileSystem {
 		}
 	}	
 	
+	public static String FileName_GetDottedExtension(String FN) {
+		int Idx = FN.lastIndexOf(".");
+		if (Idx >= 0)
+			return FN.substring(Idx); //. ->
+		else
+			return ""; //. ->
+	}
+	
 	public static String FileName_GetExtension(String FN) {
-	    return FN.substring(FN.lastIndexOf(".")+1);
+		int Idx = FN.lastIndexOf(".");
+		if ((Idx >= 0) && ((Idx+1) < FN.length()))
+			return FN.substring(Idx+1); //. ->
+		else
+			return ""; //. ->
 	}
 	
 	public static byte[] File_ToByteArray(String FN) throws IOException {

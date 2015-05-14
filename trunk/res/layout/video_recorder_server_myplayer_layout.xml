@@ -14,14 +14,44 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:textColor="#FF111111"
         android:textSize="12sp"
         android:visibility="visible" />
 
-    <SeekBar
-        android:id="@+id/sbVideoRecorderServerMyPlayer"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="100"
-        android:progress="0" />
+        android:background="#00FFFFFF" >
+
+        <CheckBox
+            android:id="@+id/cbVideoRecorderServerMyPlayerPause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingRight="2dp"
+            android:text="@string/SPause"
+            android:textColor="#FF333333"
+            android:visibility="gone" />
+
+        <SeekBar
+            android:id="@+id/sbVideoRecorderServerMyPlayer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/cbVideoRecorderServerMyPlayerPause"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/cbVideoRecorderServerMyPlayerPause"
+            android:max="100"
+            android:minHeight="20dp"
+            android:progress="0" />
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/ivVideoRecorderServerMyPlayerAudioOnly"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/SAudio"
+        android:scaleType="center"
+        android:src="@drawable/audio"
+        android:visibility="gone" />
 
 </FrameLayout>

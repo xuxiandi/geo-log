@@ -69,7 +69,8 @@ import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawingNode;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TLineDrawing;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TPictureDrawing;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
@@ -1162,9 +1163,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	    						break; //. >
 	    						
 	    					case 1: //. take a picture form file
-	    				    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TReflectionWindowEditorPanel.this)
-	    				        .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
-	    				        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+	    						TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TReflectionWindowEditorPanel.this, ".BMP,.PNG,.GIF,.JPG,.JPEG", new TFileSystemFileSelector.OpenDialogListener() {
 	    				        	
 	    				            @Override
 	    				            public void OnSelectedFile(String fileName) {

@@ -26,9 +26,12 @@ import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
+import android.view.View.OnClickListener;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -868,8 +871,10 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	public double 			MeasurementCurrentPositionFactor = 0.0;
 	//.
 	private SurfaceView 	svVideoRecorderServerMyPlayer;
-	private TextView 		lbVideoRecorderServerMyPlayer;
-	private SeekBar 		sbVideoRecorderServerMyPlayer;
+	public TextView 		lbVideoRecorderServerMyPlayer;
+	public SeekBar 			sbVideoRecorderServerMyPlayer;
+	public CheckBox			cbVideoRecorderServerMyPlayerPause;
+	private ImageView		ivVideoRecorderServerMyPlayerAudioOnly;
 	//.
 	private boolean 			flAudio = false;
 	private TChannelProcessor	AudioChannelProcessor = null;
@@ -900,8 +905,11 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
         //.
         lbVideoRecorderServerMyPlayer = (TextView)ParentLayout.findViewById(R.id.lbVideoRecorderServerMyPlayer);
         //.
+        cbVideoRecorderServerMyPlayerPause = (CheckBox)ParentLayout.findViewById(R.id.cbVideoRecorderServerMyPlayerPause);
+        //.
         sbVideoRecorderServerMyPlayer = (SeekBar)ParentLayout.findViewById(R.id.sbVideoRecorderServerMyPlayer);
         sbVideoRecorderServerMyPlayer.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        	
         	@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
 			}
@@ -919,6 +927,22 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 			}
 		});
 		sbVideoRecorderServerMyPlayer.setVisibility(View.GONE);
+        //.
+        cbVideoRecorderServerMyPlayerPause = (CheckBox)ParentLayout.findViewById(R.id.cbVideoRecorderServerMyPlayerPause);
+        cbVideoRecorderServerMyPlayerPause.setOnClickListener(new OnClickListener() {
+        	
+            @Override
+            public void onClick(View v) {
+                boolean checked = ((CheckBox)v).isChecked();
+                //.
+                if (checked)
+                	Pause();
+                else
+                	Resume();
+            }
+        });
+        //.
+        ivVideoRecorderServerMyPlayerAudioOnly = (ImageView)ParentLayout.findViewById(R.id.ivVideoRecorderServerMyPlayerAudioOnly);
 	}
 	
 	@Override
@@ -1002,6 +1026,8 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 		}
 		//.
 		sbVideoRecorderServerMyPlayer.setVisibility(View.VISIBLE);
+		//.
+		ivVideoRecorderServerMyPlayerAudioOnly.setVisibility((flAudio && !flVideo) ? View.VISIBLE : View.GONE);
 		//.
 		ShowInfo();
 		//.

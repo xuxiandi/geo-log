@@ -56,7 +56,8 @@ import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
@@ -855,10 +856,8 @@ public class TMyUserPanel extends Activity {
 			break; //. >
 			
 		case ACTIVITY_DATAFILE_TYPE_FILE:
-	    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(this)
-	        .setFilter(".*")
-	        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
-
+			TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(this, null, new TFileSystemFileSelector.OpenDialogListener() {
+	        	
 	        	@Override
 	            public void OnSelectedFile(String fileName) {
 	        		final String SelectedFileName = fileName; 

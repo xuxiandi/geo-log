@@ -49,7 +49,8 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
@@ -454,9 +455,7 @@ public class TUserChatPanel extends Activity {
 						break; //. >
 						
 					case 1: //. take a picture form file
-				    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TUserChatPanel.this)
-				        .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
-				        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+						TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TUserChatPanel.this, ".BMP,.PNG,.GIF,.JPG,.JPEG", new TFileSystemFileSelector.OpenDialogListener() {
 				        	
 				            @Override
 				            public void OnSelectedFile(String fileName) {

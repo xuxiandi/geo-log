@@ -442,6 +442,11 @@ public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
     }
         
 	@Override
+    public boolean IsAudial() {
+    	return true;
+    }
+    
+	@Override
     public boolean IsVisual() {
     	return false;
     }

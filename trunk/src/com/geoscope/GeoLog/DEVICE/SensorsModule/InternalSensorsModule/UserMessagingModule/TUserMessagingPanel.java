@@ -67,7 +67,8 @@ import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.UserMes
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.Exception.CancelException;
-import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
@@ -1124,10 +1125,7 @@ public class TUserMessagingPanel extends Activity {
 						break; //. >
 						
 					case 1: //. take a picture form file
-				    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TUserMessagingPanel.this)
-				        //. .setFilter(".*\\.bmp|.*\\.png|.*\\.gif|.*\\.jpg|.*\\.jpeg")
-				    	.setFilter(".*\\.jpg|.*\\.jpeg")        
-				    	.setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+						TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TUserMessagingPanel.this, ".JPG,.JPEG", new TFileSystemFileSelector.OpenDialogListener() {
 				        	
 				            @Override
 				            public void OnSelectedFile(String fileName) {

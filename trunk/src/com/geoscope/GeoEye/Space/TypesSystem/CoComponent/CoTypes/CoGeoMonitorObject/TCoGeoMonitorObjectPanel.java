@@ -46,7 +46,8 @@ import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Color.ColorPicker;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.Classes.IO.File.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
@@ -1320,9 +1321,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						btnImportAudioFiles.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-						    	TFileSystemFileSelector FileSelector = new TFileSystemFileSelector(TCoGeoMonitorObjectPanel.this)
-						        .setFilter(".*\\.zip")
-						        .setOpenDialogListener(new TFileSystemFileSelector.OpenDialogListener() {
+								TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TCoGeoMonitorObjectPanel.this, ".ZIP", new TFileSystemFileSelector.OpenDialogListener() {
 						        	
 						            @Override
 						            public void OnSelectedFile(String fileName) {

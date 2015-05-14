@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.SurfaceHolder;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -73,6 +74,8 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 				}
 			};
 			ProcessorComponent.SetLayout(this, ProcessorLayout);
+			//.
+			ProcessorComponent.cbVideoRecorderServerMyPlayerPause.setVisibility(View.VISIBLE);
 		} catch (Exception E) {
 			String S = E.getMessage();
 			if (S == null)

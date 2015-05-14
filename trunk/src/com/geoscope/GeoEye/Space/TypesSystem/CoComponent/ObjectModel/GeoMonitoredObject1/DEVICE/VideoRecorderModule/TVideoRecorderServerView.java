@@ -3,6 +3,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 import android.content.Context;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.geoscope.Classes.Exception.TExceptionHandler;
@@ -19,6 +20,7 @@ public abstract class TVideoRecorderServerView {
 	protected TCoGeoMonitorObject 	Object;
 	
 	protected TextView lbVideoRecorderServer;
+	protected ImageView ivAudioOnly;
 
 	public boolean 					flActive = false;
 	//.
@@ -33,7 +35,7 @@ public abstract class TVideoRecorderServerView {
 	//.
 	private TExceptionHandler ExceptionHandler;
 	
-    public TVideoRecorderServerView(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
+    public TVideoRecorderServerView(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer, ImageView pivAudioOnly) {
     	context = pcontext;
     	//.
     	GeographProxyServerAddress = pGeographProxyServerAddress;
@@ -49,6 +51,7 @@ public abstract class TVideoRecorderServerView {
     	ExceptionHandler = pExceptionHandler;
         //.
         lbVideoRecorderServer = plbVideoRecorderServer;
+        ivAudioOnly = pivAudioOnly;
     	//.
         UpdateInfo();
     }

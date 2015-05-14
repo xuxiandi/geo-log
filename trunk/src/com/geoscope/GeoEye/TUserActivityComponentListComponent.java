@@ -1137,7 +1137,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 			int 	DataType = SpaceDefines.TYPEDDATAFILE_TYPE_All;
 			String 	DataFormat = null;
 			String Name = Component.GetName().split("\n")[0];
-			TComponentTypedDataFile DataFile = Component.TypedDataFiles.GetRootItem(); 
+			TComponentTypedDataFile DataFile = Component.TypedDataFiles.GetRootItem();
+			TComponent _Component;
 			if (DataFile != null) {
 				DataType = DataFile.DataType;
 				DataFormat = DataFile.DataFormat;
@@ -1155,8 +1156,11 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 						Name = Name+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataType,ParentActivity)+"/";
 					break; //. >
 				}
+				//.
+				_Component = new TComponent(Component.idActivity, DataFile.DataComponentType,DataFile.DataComponentID, Component.Timestamp);
 			}
-			TComponent _Component = new TComponent(Component.idActivity, DataFile.DataComponentType,DataFile.DataComponentID, Component.Timestamp);
+			else
+				_Component = new TComponent(Component.idActivity, Component.idTComponent,Component.idComponent, Component.Timestamp);
 			_Component.GeoLocation = Component.GeoLocation;
 			_Component.TypedDataFiles = new TComponentTypedDataFiles(ParentActivity, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);
 			//.

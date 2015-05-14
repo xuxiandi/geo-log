@@ -19,6 +19,8 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.os.SystemClock;
 import android.view.Surface;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
@@ -718,8 +720,8 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
 	private TLANConnectionRepeater 	VideoLocalServer = null;
 	private TVideoClient			VideoClient = null;
 	
-    public TVideoRecorderServerViewTCP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer) {
-    	super(pcontext, pGeographProxyServerAddress,pGeographProxyServerPort, pUserID,pUserPassword, pObject, pflAudio,pflVideo, pUserAccessKey, pExceptionHandler, plbVideoRecorderServer);
+    public TVideoRecorderServerViewTCP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer, ImageView pivAudioOnly) {
+    	super(pcontext, pGeographProxyServerAddress,pGeographProxyServerPort, pUserID,pUserPassword, pObject, pflAudio,pflVideo, pUserAccessKey, pExceptionHandler, plbVideoRecorderServer,pivAudioOnly);
     }
 	
     @Override
@@ -835,10 +837,12 @@ public class TVideoRecorderServerViewTCP extends TVideoRecorderServerView {
         	S = S+context.getString(R.string.SVideo);
         else
         	S = S+context.getString(R.string.SNoVideo);
-        if (flAudio)
+        if (flAudio) 
         	S = S+", "+context.getString(R.string.SAudio);
         else
         	S = S+", "+context.getString(R.string.SNoAudio);
         lbVideoRecorderServer.setText(S);
+        //.
+        ivAudioOnly.setVisibility((flAudio && !flVideo) ? View.VISIBLE : View.GONE);
 	}	
 }

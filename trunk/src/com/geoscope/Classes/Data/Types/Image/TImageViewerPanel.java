@@ -25,7 +25,7 @@ import com.geoscope.GeoEye.R;
 
 public class TImageViewerPanel extends Activity {
 
-	public static final int MaxBitmalSize = 2048;
+	public static final int MaxBitmapSize = 2048;
 	
 	//. Copyright Ishii Kenzo (matabii), URL: https://github.com/matabii/scale-imageview-android
 	public static class ScaleImageView extends ImageView implements android.view.View.OnTouchListener {
@@ -318,7 +318,7 @@ public class TImageViewerPanel extends Activity {
     					int ImageMaxSize = options.outWidth;
     					if (options.outHeight > ImageMaxSize)
     						ImageMaxSize = options.outHeight;
-    					float MaxSize = MaxBitmalSize;
+    					float MaxSize = MaxBitmapSize;
     					float Scale = MaxSize/ImageMaxSize; 
     					Matrix matrix = new Matrix();     
     					matrix.postScale(Scale,Scale);

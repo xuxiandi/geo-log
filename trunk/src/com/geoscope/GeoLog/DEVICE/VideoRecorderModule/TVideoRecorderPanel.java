@@ -15,6 +15,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -96,6 +97,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 	protected SurfaceHolder 					Surface = null;
 	private TSurfaceHolderCallbackHandler		Surface_HolderCallbackHandler;
 	protected TextView 							lbStatus;
+	protected ImageView 						ivAudioOnly;
     //.
 	private TVideoRecorder								VideoRecorder;
 	private	FrameLayout									VideoRecorder_SurfaceLayout;
@@ -117,6 +119,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
             SurfaceLayout = (FrameLayout)findViewById(R.id.VideoRecorderPanelSurfaceLayout);
         	svSurface = (SurfaceView)findViewById(R.id.VideoRecorderPanelSurface);
             lbStatus = (TextView)findViewById(R.id.lbVideoRecorderPanelSurface);
+            ivAudioOnly = (ImageView)findViewById(R.id.ivAudioOnly);
     		//.
     		Surface_HolderCallbackHandler = new TSurfaceHolderCallbackHandler();
             //.

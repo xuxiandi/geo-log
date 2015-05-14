@@ -1,4 +1,4 @@
-package com.geoscope.Classes.IO.File;
+package com.geoscope.Classes.IO.File.FileSelector;
 
 
 import java.io.File;
@@ -61,6 +61,7 @@ public class TFileSystemFileSelector extends AlertDialog.Builder {
     private String accessDeniedMessage = "access is denied";
 
     public interface OpenDialogListener {
+    	
         public void OnSelectedFile(String fileName);
         public void OnCancel();
     }

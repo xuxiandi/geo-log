@@ -106,7 +106,7 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
 			public static final int FILETYPE_AUDIO 		= 3;
 			public static final int FILETYPE_VIDEO 		= 4;
 			
-			public static final int MaxImageBitmapSize = 512;
+			public static final int MaxImageBitmapSize = 128;
 			
 			public String ID;
 			//.
@@ -629,7 +629,7 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
 			Bitmap BMP = null;
 			//.
 			if (!Item.BMP_flLoaded)
-				new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+				new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			else {
 				if (!Item.BMP_flNull)
 					if (flListIsScrolling)
@@ -639,7 +639,7 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
 						if (BMP == null) {
 							Item.BMP_flLoaded = false;
 							//.
-							new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+							new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 						}
 					}
 			}

@@ -64,6 +64,7 @@ import android.widget.ToggleButton;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
+import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
 import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
@@ -105,24 +106,27 @@ public class TTrackerPanel extends Activity {
 	private static final int CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_START	= 1;
 	private static final int CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH 	= 2;
 	
-	private static final int UPDATE_CONFIGURATION		= 1;
-	private static final int SHOW_NEWPOIPANEL			= 2;
-	private static final int SHOW_LASTPOICAMERA 		= 3;
-	private static final int SHOW_LASTPOITEXTEDITOR		= 4;
-	private static final int SHOW_LASTPOIVIDEOCAMERA	= 5;
-	private static final int SHOW_LASTPOIVIDEOCAMERA1 	= 6;
-	private static final int SHOW_LASTPOIDRAWINGEDITOR 	= 7;
+	private static final int UPDATE_CONFIGURATION			= 1;
+	private static final int SHOW_NEWPOIPANEL				= 2;
+	private static final int SHOW_LASTPOICAMERA 			= 3;
+	private static final int SHOW_LASTPOICAMERAANDEDITOR	= 4;
+	private static final int SHOW_LASTPOITEXTEDITOR			= 5;
+	private static final int SHOW_LASTPOIVIDEOCAMERA		= 6;
+	private static final int SHOW_LASTPOIVIDEOCAMERA1 		= 7;
+	private static final int SHOW_LASTPOIDRAWINGEDITOR 		= 8;
+	private static final int SHOW_LASTPOIIMAGEDRAWINGEDITOR = 9;
 	//.
 	private static final int POI_SUBMENU_NEWPOI 	= 101; 
 	private static final int POI_SUBMENU_ADDTEXT 	= 102; 
 	private static final int POI_SUBMENU_ADDIMAGE 	= 103; 
 	private static final int POI_SUBMENU_ADDVIDEO 	= 104;
 	//.
-	private static final int POI_DATAFILE_TYPE_TEXT 	= 1;
-	private static final int POI_DATAFILE_TYPE_IMAGE 	= 2;
-	private static final int POI_DATAFILE_TYPE_VIDEO 	= 3;
-	private static final int POI_DATAFILE_TYPE_DRAWING 	= 4;
-	private static final int POI_DATAFILE_TYPE_FILE 	= 5;
+	private static final int POI_DATAFILE_TYPE_TEXT 		= 1;
+	private static final int POI_DATAFILE_TYPE_IMAGE 		= 2;
+	private static final int POI_DATAFILE_TYPE_EDITEDIMAGE	= 3;
+	private static final int POI_DATAFILE_TYPE_VIDEO 		= 4;
+	private static final int POI_DATAFILE_TYPE_DRAWING 		= 5;
+	private static final int POI_DATAFILE_TYPE_FILE 		= 6;
     
 	public static final int UpdatingInterval = 5000; //. ms
 	
@@ -794,10 +798,57 @@ public class TTrackerPanel extends Activity {
 			@Override
             public void onClick(View v) {
       		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getImageTempFile(TTrackerPanel.this))); 
+      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetImageTempFile(TTrackerPanel.this))); 
       		    startActivityForResult(intent, SHOW_LASTPOICAMERA);    		
             }
         });
+        btnAddPOIImage.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+				final CharSequence[] _items;
+				_items = new CharSequence[2];
+				_items[0] = getString(R.string.SAddImage);
+				_items[1] = getString(R.string.STakePictureWithCameraAndEdit);
+				AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: //. take a picture
+				      		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+				      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetImageTempFile(TTrackerPanel.this))); 
+				      		    startActivityForResult(intent, SHOW_LASTPOICAMERA);    		
+								break; //. >
+								
+							case 1: //. take a picture and edit
+				      		    intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+				      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetImageTempFile(TTrackerPanel.this))); 
+				      		    startActivityForResult(intent, SHOW_LASTPOICAMERAANDEDITOR);    		
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				//.
+				return true;
+			}
+		});
         btnAddPOIVideo = (Button)findViewById(R.id.btnAddPOIVideo);
         btnAddPOIVideo.setEnabled(false);
         btnAddPOIVideo.setOnClickListener(new OnClickListener() {
@@ -805,7 +856,7 @@ public class TTrackerPanel extends Activity {
 			@Override
             public void onClick(View v) {
       		    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getVideoTempFile(TTrackerPanel.this))); 
+      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetVideoTempFile(TTrackerPanel.this))); 
       		    startActivityForResult(intent, SHOW_LASTPOIVIDEOCAMERA1);    		
             }
         });
@@ -825,7 +876,7 @@ public class TTrackerPanel extends Activity {
 			@Override
             public void onClick(View v) {
 				Intent intent = new Intent(TTrackerPanel.this, TDrawingEditor.class);
-	    		File F = getDrawingTempFile(TTrackerPanel.this);
+	    		File F = GetDrawingTempFile(TTrackerPanel.this);
 	    		F.delete();
 	  		    intent.putExtra("FileName", F.getAbsolutePath()); 
 	  		    intent.putExtra("ReadOnly", false); 
@@ -1592,7 +1643,7 @@ public class TTrackerPanel extends Activity {
 
     	case POI_SUBMENU_ADDIMAGE:
   		    intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getImageTempFile(this))); 
+  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(GetImageTempFile(this))); 
   		    startActivityForResult(intent, SHOW_LASTPOICAMERA);    		
     		//.
     		return true; //. >
@@ -1703,7 +1754,7 @@ public class TTrackerPanel extends Activity {
 
         case SHOW_LASTPOICAMERA: 
         	if (resultCode == RESULT_OK) {  
-				final File F = getImageTempFile(this);
+				final File F = GetImageTempFile(this);
 				if (F.exists()) {
 					try {
                     	if (Configuration.GPSModuleConfiguration.MapPOI_flDataName) 
@@ -1726,6 +1777,116 @@ public class TTrackerPanel extends Activity {
 				}
 				else
         			Toast.makeText(this, R.string.SImageWasNotPrepared, Toast.LENGTH_SHORT).show();  
+        	}  
+            break; //. >
+
+        case SHOW_LASTPOICAMERAANDEDITOR: 
+        	if (resultCode == RESULT_OK) {  
+				final File F = GetImageTempFile(this);
+				TAsyncProcessing PictureProcessing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+					
+					private File ImageFile = null;
+					
+					@Override
+					public void Process() throws Exception {
+				    	TTracker Tracker = TTracker.GetTracker();
+				    	if (Tracker == null)
+				    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+						//.
+		            	if (F.exists()) {
+	            			FileInputStream fs = new FileInputStream(F);
+	            			try {
+	            				BitmapFactory.Options options = new BitmapFactory.Options();
+	            				options.inDither=false;
+	            				options.inPurgeable=true;
+	            				options.inInputShareable=true;
+	            				options.inTempStorage=new byte[1024*256]; 							
+	            				Rect rect = new Rect();
+	            				Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
+	            				try {
+	            					int ImageMaxSize = options.outWidth;
+	            					if (options.outHeight > ImageMaxSize)
+	            						ImageMaxSize = options.outHeight;
+	            					float MaxSize = Tracker.GeoLog.GPSModule.MapPOIConfiguration.Image_ResX;
+	            					float Scale = MaxSize/ImageMaxSize; 
+	            					Matrix matrix = new Matrix();     
+	            					matrix.postScale(Scale,Scale);
+	            					//.
+	            					Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true);
+	            					try {
+	            						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	            						try {
+	            							Canceller.Check();
+	            							//.
+	            							if (!resizedBitmap.compress(CompressFormat.JPEG, 100, bos)) 
+	            								throw new Exception("error of compressing the picture to JPEG format"); //. =>
+	            							//.
+	            							Canceller.Check();
+	            							//.
+	            							byte[] ImageData = bos.toByteArray();
+	            							//.
+	            							ImageFile = GetImageTempFile(context);
+	            							FileOutputStream FOS = new FileOutputStream(ImageFile);
+	            							try {
+	            								FOS.write(ImageData);
+	            							}
+	            							finally {
+	            								FOS.close();
+	            							}
+	            						}
+	            						finally {
+	            							bos.close();
+	            						}
+	            					}
+	            					finally {
+	            						resizedBitmap.recycle();
+	            					}
+	            				}
+	            				finally {
+	            					bitmap.recycle();
+	            				}
+	            			}
+	            			finally
+	            			{
+	            				fs.close();
+	            			}
+		            	}
+						else
+		        			throw new Exception(context.getString(R.string.SImageWasNotPrepared)); //. =>  
+					}
+					
+					@Override
+					public void DoOnCompleted() throws Exception {
+						if (Canceller.flCancel)
+							return; //. ->
+						if (!flExists)
+							return; //. ->
+                    	//.
+						if (ImageFile != null) {
+					    	String FileName = TGeoLogApplication.GetTempFolder()+"/"+"TrackerImageDrawing"+"."+TDrawingDefines.FileExtension;
+					    	//.
+					    	Intent intent = new Intent(TTrackerPanel.this, TDrawingEditor.class);
+					    	//.
+					    	intent.putExtra("ImageFileName", ImageFile.getAbsolutePath());
+					    	//.
+					    	intent.putExtra("FileName", FileName); 
+					    	intent.putExtra("ReadOnly", false); 
+					    	intent.putExtra("SpaceContainersAvailable", false); 
+					    	startActivityForResult(intent, SHOW_LASTPOIIMAGEDRAWINGEDITOR);    		
+						}
+					}
+					
+					@Override
+					public void DoOnException(Exception E) {
+						if (Canceller.flCancel)
+							return; //. ->
+						if (!flExists)
+							return; //. ->
+						//.
+						Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+				};
+				PictureProcessing.Start();
         	}  
             break; //. >
 
@@ -1760,7 +1921,7 @@ public class TTrackerPanel extends Activity {
         case SHOW_LASTPOIVIDEOCAMERA1: 
         	if (resultCode == RESULT_OK) {  
             	try {
-    				final File F = getVideoTempFile(this);
+    				final File F = GetVideoTempFile(this);
     				if (F.exists()) {
                     	if (Configuration.GPSModuleConfiguration.MapPOI_flDataName) 
                     		DataFileName_Dialog(TConfiguration.TGPSModuleConfiguration.MapPOI_DataNameMaxSize, new TOnDataFileNameHandler() {
@@ -1802,6 +1963,101 @@ public class TTrackerPanel extends Activity {
 					catch (Exception E) {
 	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
 					}
+                }
+			}
+            break; //. >
+            
+        case SHOW_LASTPOIIMAGEDRAWINGEDITOR: 
+        	if (resultCode == RESULT_OK) {  
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+                	String DrawingFileName = extras.getString("FileName");
+                	final File F = new File(DrawingFileName);
+                	if (F.exists()) {
+        				TAsyncProcessing PictureProcessing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+        					
+        					private File ImageFile;
+        					
+        					@Override
+        					public void Process() throws Exception {
+                    	    	FileInputStream FIS = new FileInputStream(F);
+                    	    	try {
+                            		byte[] DRW = new byte[(int)F.length()];
+                        			FIS.read(DRW);
+                                	//.
+        							TDrawings Drawings = new TDrawings();
+        							Drawings.LoadFromByteArray(DRW,0);
+        							Bitmap Image = Drawings.ToBitmap(Drawings.GetOptimalSize());
+        							//.
+            						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            						try {
+            							if (!Image.compress(CompressFormat.JPEG, 100, bos)) 
+            								throw new Exception("error of compressing the picture to JPEG format"); //. =>
+            							byte[] ImageData = bos.toByteArray();
+            							//.
+            							ImageFile = GetImageTempFile(context);
+            							FileOutputStream FOS = new FileOutputStream(ImageFile);
+            							try {
+            								FOS.write(ImageData);
+            							}
+            							finally {
+            								FOS.close();
+            							}
+            						}
+            						finally {
+            							bos.close();
+            						}
+                    	    	}
+                    	    	finally {
+                    	    		FIS.close();
+                    	    	}
+        						//.
+        						F.delete();
+        					}
+        					
+        					@Override
+        					public void DoOnCompleted() throws Exception {
+        						if (Canceller.flCancel)
+        							return; //. ->
+        						if (!flExists)
+        							return; //. ->
+                            	//.
+        						if (ImageFile.exists()) {
+        							try {
+        				            	if (Configuration.GPSModuleConfiguration.MapPOI_flDataName) 
+        				            		DataFileName_Dialog(TConfiguration.TGPSModuleConfiguration.MapPOI_DataNameMaxSize, new TOnDataFileNameHandler() {
+        				            			
+        				            			@Override
+        				            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+        				            	    		EnqueueDataFile(POI_DATAFILE_TYPE_EDITEDIMAGE, ImageFile,Name);
+        				            			}
+        				            		});
+        				            	else 
+        				    	    		EnqueueDataFile(POI_DATAFILE_TYPE_EDITEDIMAGE, ImageFile,null);
+        							}
+        							catch (Throwable E) {
+        								String S = E.getMessage();
+        								if (S == null)
+        									S = E.getClass().getName();
+        			        			Toast.makeText(TTrackerPanel.this, S, Toast.LENGTH_LONG).show();  						
+        							}
+        						}
+        						else
+        		        			Toast.makeText(TTrackerPanel.this, R.string.SImageWasNotPrepared, Toast.LENGTH_SHORT).show();  
+        					}
+        					
+        					@Override
+        					public void DoOnException(Exception E) {
+        						if (Canceller.flCancel)
+        							return; //. ->
+        						if (!flExists)
+        							return; //. ->
+        						//.
+        						Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+        					}
+        				};
+        				PictureProcessing.Start();
+                	}
                 }
 			}
             break; //. >
@@ -2116,7 +2372,7 @@ public class TTrackerPanel extends Activity {
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_GPSMODULE_POI_ADDIMAGE)) {
 			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
   		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getImageTempFile(TTrackerPanel.this))); 
+  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetImageTempFile(TTrackerPanel.this))); 
   		    startActivityForResult(intent, SHOW_LASTPOICAMERA);		
 			return; //. ->
 		}
@@ -2124,7 +2380,7 @@ public class TTrackerPanel extends Activity {
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_GPSMODULE_POI_ADDVIDEO)) {
 			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
   		    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.getVideoTempFile(TTrackerPanel.this))); 
+  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetVideoTempFile(TTrackerPanel.this))); 
   		    startActivityForResult(intent, SHOW_LASTPOIVIDEOCAMERA1);	
 			return; //. ->
 		}
@@ -2416,15 +2672,15 @@ public class TTrackerPanel extends Activity {
     	}
     }
     
-    protected File getImageTempFile(Context context) {
+    protected File GetImageTempFile(Context context) {
     	  return new File(TGeoLogApplication.GetTempFolder(),"Image.jpg");
     }
     
-    protected File getVideoTempFile(Context context) {
+    protected File GetVideoTempFile(Context context) {
   	  return new File(TGeoLogApplication.GetTempFolder(),"Video.3gp");
   }
   
-    protected File getDrawingTempFile(Context context) {
+    protected File GetDrawingTempFile(Context context) {
     	return new File(TGeoLogApplication.GetTempFolder(),"Drawing"+"."+TDrawingDefines.FileExtension);
     }
 
@@ -2518,7 +2774,8 @@ public class TTrackerPanel extends Activity {
 			break; //. >
 		}
 			
-		case POI_DATAFILE_TYPE_IMAGE: {
+		case POI_DATAFILE_TYPE_IMAGE:
+		case POI_DATAFILE_TYPE_EDITEDIMAGE: {
 			//. try to gc
 			TGeoLogApplication.Instance().GarbageCollector.Collect();
 			//.

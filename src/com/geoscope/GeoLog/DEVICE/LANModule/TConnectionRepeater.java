@@ -317,6 +317,10 @@ public class TConnectionRepeater extends TCancelableThread {
 					flRunning = false;
 				}
 			}
+			catch (InterruptedException IOE) {
+			}
+			catch (IOException IOE) {
+			}
 			catch (Throwable TE) {
 				String S = TE.getMessage();
 				if (S == null)
@@ -338,6 +342,10 @@ public class TConnectionRepeater extends TCancelableThread {
 				finally {
 					flRunning = false;
 				}
+			}
+			catch (InterruptedException IOE) {
+			}
+			catch (IOException IOE) {
 			}
 			catch (Throwable TE) {
 				String S = TE.getMessage();

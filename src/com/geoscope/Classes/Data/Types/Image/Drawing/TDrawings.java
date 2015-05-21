@@ -10,12 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.Bitmap.CompressFormat;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
@@ -439,6 +436,15 @@ public class TDrawings {
 			Items.get(I).Translate(dX,dY);
 	}
 	
+	public void Scale(float X0, float Y0, float Scale) {
+		/*if (SpaceContainers != null)
+			SpaceContainers.Translate(dX,dY);*/
+		//.
+		int Cnt = Items.size();
+		for (int I = 0; I < Cnt; I++) 
+			Items.get(I).Scale(X0,Y0, Scale);
+	}
+	
 	public TDrawingNode GetAveragePosition() {
 		TDrawingNode Result = new TDrawingNode();
 		int Cnt = 0;
@@ -475,7 +481,27 @@ public class TDrawings {
 		}
 		return Result;
 	}
-		
+	
+	public int GetOptimalSize() {
+		int Result = 0;
+		int Cnt = Items.size();
+		for (int I = 0; I < Cnt; I++) {
+			TDrawing Item = Items.get(I);
+			if (Item instanceof TImageDrawing) {
+				TImageDrawing ImageDrawing = (TImageDrawing)Item;
+				if (ImageDrawing.Image != null) {
+					int W = ImageDrawing.Image.getWidth();
+					if (W > Result)
+						Result = W;
+					int H = ImageDrawing.Image.getHeight();
+					if (H > Result)
+						Result = H;
+				}
+			}
+		}
+		return Result;
+	}
+	
 	public void Paint(Canvas canvas) {
 		for (int I = 0; I < Items_HistoryIndex; I++) 
 			Items.get(I).Paint(canvas);
@@ -503,26 +529,34 @@ public class TDrawings {
 	}
 	
 	public Bitmap ToBitmap(int MaxSize) {
-		Bitmap BMP = ToBitmap();
+		TRectangle DrawingsRectangle = GetRectangle();
+		float W = DrawingsRectangle.Width();
+		float H = DrawingsRectangle.Height();
+		if ((W == 0) || (H == 0))
+			return null; //. ->
+		float Scale;
+		if (W > H) 
+			Scale = MaxSize/W; 
+		else 
+			Scale = MaxSize/H; 
+		Bitmap BMP = Bitmap.createBitmap((int)(W*Scale)+1,(int)(H*Scale)+1, Bitmap.Config.ARGB_8888);
+		Canvas BMPCanvas = new Canvas(BMP);
+		//.
+		float dX = DrawingsRectangle.Xmn-1.0F;
+		float dY = DrawingsRectangle.Ymn-1.0F;
+		//.
+		Translate(-dX,-dY);
+		Scale(0.0F,0.0F, Scale);
 		try {
-			float W = BMP.getWidth();
-			float H = BMP.getHeight();
-			float Multiplier;
-			if (W > H) 
-				Multiplier = MaxSize/W; 
-			else 
-				Multiplier = MaxSize/H; 
-			RectF ResultRectangle = new RectF(0.0F,0.0F,W*Multiplier,H*Multiplier);
-			//.
-			Bitmap Result = Bitmap.createBitmap(((int)ResultRectangle.width())+1,((int)ResultRectangle.height())+1, Config.ARGB_8888);
-			Canvas ResultCanvas = new Canvas(Result);
-			ResultCanvas.drawBitmap(BMP, new Rect(0,0,BMP.getWidth(),BMP.getHeight()), ResultRectangle, new android.graphics.Paint());
-			//.
-			return Result; //. ->
+			BMP.eraseColor(Descriptor.BackgroundColor);
+			Paint(BMPCanvas);
 		}
 		finally {
-			BMP.recycle();
+			Scale(0.0F,0.0F, 1.0F/Scale);
+			Translate(dX,dY);
 		}
+		//.
+		return BMP;
 	}
 	
 	public byte[] SaveAsBitmapData(String Format) throws IOException {

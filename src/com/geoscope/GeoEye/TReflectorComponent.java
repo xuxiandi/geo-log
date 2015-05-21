@@ -1512,24 +1512,18 @@ public class TReflectorComponent extends TUIComponent {
 					switch (pEvent.getPointerCount()) {
 
 					case 1:
-						Pointer0_Move(pEvent.getX(0),
-								pEvent.getY(0));
+						Pointer0_Move(pEvent.getX(0),pEvent.getY(0));
 						break; // . >
 
 					case 2:
-						Pointer0_Move(pEvent.getX(0),
-								pEvent.getY(0));
-						Pointer1_Move(pEvent.getX(1),
-								pEvent.getY(1));
+						Pointer0_Move(pEvent.getX(0),pEvent.getY(0));
+						Pointer1_Move(pEvent.getX(1),pEvent.getY(1));
 						break; // . >
 
 					case 3:
-						Pointer0_Move(pEvent.getX(0),
-								pEvent.getY(0));
-						Pointer1_Move(pEvent.getX(1),
-								pEvent.getY(1));
-						Pointer2_Move(pEvent.getX(2),
-								pEvent.getY(2));
+						Pointer0_Move(pEvent.getX(0),pEvent.getY(0));
+						Pointer1_Move(pEvent.getX(1),pEvent.getY(1));
+						Pointer2_Move(pEvent.getX(2),pEvent.getY(2));
 						break; // . >
 					}
 					break; // . >
@@ -3349,7 +3343,7 @@ public class TReflectorComponent extends TUIComponent {
 			}
 			//.
 			int idxDownButton = Buttons.DownButtonIndex;
-			if ((idxDownButton != -1)) {
+			if (idxDownButton != -1) {
 				boolean flPlayGeoLog = ((System.currentTimeMillis() - Buttons.DownButtons_Time) > 7000);
 				Buttons.ClearDownButton();
 				// .
@@ -4308,7 +4302,7 @@ public class TReflectorComponent extends TUIComponent {
 					for (int I = 0; I < _LevelTileContainers.length; I++)
 						if (LevelTileContainers[I] != null)
 							_LevelTileContainers[I] = new TRWLevelTileContainer(LevelTileContainers[I]);
-					//. remove up and down level's tiles if they are updated as new
+					//. remove up level's tiles if they are updated as new
 					if (flRemoveUpDownLevels && (PrepareTilesResult != null)) 
 						Reflector.SpaceTileImagery.ActiveCompilationSet_RemoveUpLevelsTiles(_LevelTileContainers, PrepareTilesResult, Canceller, null);
 					Canceller.Check();
@@ -8403,6 +8397,28 @@ public class TReflectorComponent extends TUIComponent {
 
 	public void TranslateReflectionWindow(float dX, float dY) {
 		TranslateReflectionWindow(dX, dY, true);
+	}
+
+	public void ScaleReflectionWindow(float Scale, boolean flUpdate) {
+		ReflectionWindowTransformatrix.reset();
+		//.
+		if (SpaceImage != null)
+			synchronized (SpaceImage) {
+				SpaceImage.ResultBitmapTransformatrix.postScale(Scale,Scale, SpaceImage.Width()/2.0F, SpaceImage.Height()/2.0F);
+				if (SpaceImage.flSegments)
+					SpaceImage.SegmentsTransformatrix.postScale(Scale,Scale, SpaceImage.Width()/2.0F, SpaceImage.Height()/2.0F);
+			}
+		//.
+		ReflectionWindow.ChangeScaleReflection(Scale);
+		//.
+		ResetNavigationAndUpdateCurrentSpaceImage();
+		//.
+		if (flUpdate)
+			StartUpdatingSpaceImage();
+	}
+
+	public void ScaleReflectionWindow(float Scale) {
+		ScaleReflectionWindow(Scale, true);
 	}
 
 	public void SetReflectionWindowByLocation(TLocation Location) {

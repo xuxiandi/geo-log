@@ -48,6 +48,6 @@
         android:gravity="left"
         android:textColor="#ff000000"
         android:textSize="12sp"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
 </LinearLayout>

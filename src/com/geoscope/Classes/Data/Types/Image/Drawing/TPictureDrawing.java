@@ -43,7 +43,8 @@ public class TPictureDrawing extends TDrawing {
 	}
 	
 	public void Paint(Canvas pCanvas) {
-		pCanvas.drawBitmap(Picture, Node.X,Node.Y, paint);
+		if (Picture != null)
+			pCanvas.drawBitmap(Picture, Node.X,Node.Y, paint);
 	}
 	
 	public void Translate(float dX, float dY) {
@@ -51,6 +52,12 @@ public class TPictureDrawing extends TDrawing {
 		Node.Y += dY;
 	}
 	
+	@Override
+	public void Scale(float X0, float Y0, float Scale) {
+		Node.X = X0+(Node.X-X0)*Scale;
+		Node.Y = Y0+(Node.Y-Y0)*Scale;
+	}
+
 	@Override
 	public TDrawingNode GetAveragePosition() {
 		TDrawingNode Result = new TDrawingNode(Node.X,Node.Y);

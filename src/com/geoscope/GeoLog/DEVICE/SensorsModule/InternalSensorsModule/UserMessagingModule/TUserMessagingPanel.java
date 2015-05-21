@@ -98,11 +98,13 @@ public class TUserMessagingPanel extends Activity {
 	//.
 	public static final int CameraImageMaxSize = 1024;
 	
-	public static final String MessageTextFileName 		= "MessagePicture.txt";
-	public static final String MessagePictureFileName 	= "MessageText.png";
+	public static final String MessageTextFileName 		= "MessageText.txt";
+	public static final String MessagePictureFileName 	= "MessagePicture.png";
 	
-	private static final int REQUEST_DRAWINGEDITOR			= 1;
-	private static final int REQUEST_ADDPICTUREFROMCAMERA	= 2;
+	private static final int REQUEST_DRAWINGEDITOR				= 1;
+	private static final int REQUEST_ADDPICTUREFROMCAMERA		= 2;
+	private static final int REQUEST_ADDEDITEDPICTUREFROMCAMERA	= 3;
+	private static final int REQUEST_IMAGEDRAWINGEDITOR			= 4;
 	
 	private static int NextMessageID = 0;
 	private synchronized static int GetNextMessageID() {
@@ -458,14 +460,13 @@ public class TUserMessagingPanel extends Activity {
 				final File F = GetCameraPictureTempFile(this);
 				TAsyncProcessing PictureProcessing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
 					
-					private byte[] PictureData;
+					private byte[] ImageData;
 					
 					@Override
 					public void Process() throws Exception {
 		            	if (F.exists()) {
 	            			FileInputStream fs = new FileInputStream(F);
-	            			try
-	            			{
+	            			try {
 	            				BitmapFactory.Options options = new BitmapFactory.Options();
 	            				options.inDither=false;
 	            				options.inPurgeable=true;
@@ -487,8 +488,8 @@ public class TUserMessagingPanel extends Activity {
 	            						ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	            						try {
 	            							if (!resizedBitmap.compress(CompressFormat.JPEG, 100, bos)) 
-	            								throw new Exception("error of commpressing the picture to JPEG format"); //. =>
-	            							PictureData = bos.toByteArray();
+	            								throw new Exception("error of compressing the picture to JPEG format"); //. =>
+	            							ImageData = bos.toByteArray();
 	            						}
 	            						finally {
 	            							bos.close();
@@ -518,7 +519,7 @@ public class TUserMessagingPanel extends Activity {
 						if (!flExists)
 							return; //. ->
                     	//.
-                    	new TUserMessageSending(TUserMessageDataType.TYPE_IMAGE_JPG,PictureData,null,MESSAGE_SENT);
+                    	new TUserMessageSending(TUserMessageDataType.TYPE_IMAGE_JPG,ImageData,null,MESSAGE_SENT);
 					}
 					
 					@Override
@@ -533,6 +534,181 @@ public class TUserMessagingPanel extends Activity {
 				};
 				PictureProcessing.Start();
         	}  
+        	//.
+        	SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
+            break; //. >
+            
+        case REQUEST_ADDEDITEDPICTUREFROMCAMERA: 
+        	if (resultCode == RESULT_OK) {  
+				final File F = GetCameraPictureTempFile(this);
+				TAsyncProcessing PictureProcessing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+					
+					private File ImageFile = null;
+					
+					@Override
+					public void Process() throws Exception {
+		            	if (F.exists()) {
+	            			FileInputStream fs = new FileInputStream(F);
+	            			try {
+	            				BitmapFactory.Options options = new BitmapFactory.Options();
+	            				options.inDither=false;
+	            				options.inPurgeable=true;
+	            				options.inInputShareable=true;
+	            				options.inTempStorage=new byte[1024*256]; 							
+	            				Rect rect = new Rect();
+	            				Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
+	            				try {
+	            					int ImageMaxSize = options.outWidth;
+	            					if (options.outHeight > ImageMaxSize)
+	            						ImageMaxSize = options.outHeight;
+	            					float MaxSize = CameraImageMaxSize;
+	            					float Scale = MaxSize/ImageMaxSize; 
+	            					Matrix matrix = new Matrix();     
+	            					matrix.postScale(Scale,Scale);
+	            					//.
+	            					Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true);
+	            					try {
+	            						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	            						try {
+	            							Canceller.Check();
+	            							//.
+	            							if (!resizedBitmap.compress(CompressFormat.JPEG, 100, bos)) 
+	            								throw new Exception("error of compressing the picture to JPEG format"); //. =>
+	            							//.
+	            							Canceller.Check();
+	            							//.
+	            							byte[] ImageData = bos.toByteArray();
+	            							//.
+	            							ImageFile = GetCameraPictureTempFile(context);
+	            							FileOutputStream FOS = new FileOutputStream(ImageFile);
+	            							try {
+	            								FOS.write(ImageData);
+	            							}
+	            							finally {
+	            								FOS.close();
+	            							}
+	            						}
+	            						finally {
+	            							bos.close();
+	            						}
+	            					}
+	            					finally {
+	            						resizedBitmap.recycle();
+	            					}
+	            				}
+	            				finally {
+	            					bitmap.recycle();
+	            				}
+	            			}
+	            			finally
+	            			{
+	            				fs.close();
+	            			}
+		            	}
+						else
+		        			throw new Exception(context.getString(R.string.SImageWasNotPrepared)); //. =>  
+					}
+					
+					@Override
+					public void DoOnCompleted() throws Exception {
+						if (Canceller.flCancel)
+							return; //. ->
+						if (!flExists)
+							return; //. ->
+                    	//.
+						if (ImageFile != null) {
+					    	String FileName = TGeoLogApplication.GetTempFolder()+"/"+"UserChatImageDrawing"+"."+TDrawingDefines.FileExtension;
+					    	//.
+					    	Intent intent = new Intent(TUserMessagingPanel.this, TDrawingEditor.class);
+					    	//.
+					    	intent.putExtra("ImageFileName", ImageFile.getAbsolutePath());
+					    	//.
+					    	intent.putExtra("FileName", FileName); 
+					    	intent.putExtra("ReadOnly", false); 
+					    	intent.putExtra("SpaceContainersAvailable", false); 
+					    	startActivityForResult(intent, REQUEST_IMAGEDRAWINGEDITOR);    		
+						}
+					}
+					
+					@Override
+					public void DoOnException(Exception E) {
+						if (Canceller.flCancel)
+							return; //. ->
+						if (!flExists)
+							return; //. ->
+						//.
+						Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+				};
+				PictureProcessing.Start();
+        	}  
+        	//.
+        	SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
+            break; //. >
+
+        case REQUEST_IMAGEDRAWINGEDITOR: 
+        	if (resultCode == RESULT_OK) {  
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+                	String DrawingFileName = extras.getString("FileName");
+                	final File F = new File(DrawingFileName);
+                	if (F.exists()) {
+        				TAsyncProcessing PictureProcessing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+        					
+        					private byte[] ImageData;
+        					
+        					@Override
+        					public void Process() throws Exception {
+                    	    	FileInputStream FIS = new FileInputStream(F);
+                    	    	try {
+                            		byte[] DRW = new byte[(int)F.length()];
+                        			FIS.read(DRW);
+                                	//.
+        							TDrawings Drawings = new TDrawings();
+        							Drawings.LoadFromByteArray(DRW,0);
+        							Bitmap Image = Drawings.ToBitmap(CameraImageMaxSize);
+        							//.
+            						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            						try {
+            							if (!Image.compress(CompressFormat.JPEG, 100, bos)) 
+            								throw new Exception("error of compressing the picture to JPEG format"); //. =>
+            							ImageData = bos.toByteArray();
+            						}
+            						finally {
+            							bos.close();
+            						}
+                    	    	}
+                    	    	finally {
+                    	    		FIS.close();
+                    	    	}
+        						//.
+        						F.delete();
+        					}
+        					
+        					@Override
+        					public void DoOnCompleted() throws Exception {
+        						if (Canceller.flCancel)
+        							return; //. ->
+        						if (!flExists)
+        							return; //. ->
+                            	//.
+                            	new TUserMessageSending(TUserMessageDataType.TYPE_IMAGE_JPG,ImageData,null,MESSAGE_SENT);
+        					}
+        					
+        					@Override
+        					public void DoOnException(Exception E) {
+        						if (Canceller.flCancel)
+        							return; //. ->
+        						if (!flExists)
+        							return; //. ->
+        						//.
+        						Toast.makeText(TUserMessagingPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+        					}
+        				};
+        				PictureProcessing.Start();
+                	}
+                }
+			}
         	//.
         	SetUserStatus(TUserStatusDataType.USERSTATUS_AVAILABLE);
             break; //. >
@@ -1103,9 +1279,10 @@ public class TUserMessagingPanel extends Activity {
     
     private void SendUserPicture() {
 		final CharSequence[] _items;
-		_items = new CharSequence[2];
+		_items = new CharSequence[3];
 		_items[0] = getString(R.string.SAddImage);
-		_items[1] = getString(R.string.SAddImageFromFile);
+		_items[1] = getString(R.string.STakePictureWithCameraAndEdit);
+		_items[2] = getString(R.string.SAddImageFromFile);
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.SOperations);
 		builder.setNegativeButton(getString(R.string.SCancel),null);
@@ -1124,7 +1301,13 @@ public class TUserMessagingPanel extends Activity {
 		      		    startActivityForResult(intent, REQUEST_ADDPICTUREFROMCAMERA);    		
 						break; //. >
 						
-					case 1: //. take a picture form file
+					case 1: //. take a picture and edit
+		      		    intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(GetCameraPictureTempFile(TUserMessagingPanel.this))); 
+		      		    startActivityForResult(intent, REQUEST_ADDEDITEDPICTUREFROMCAMERA);    		
+						break; //. >
+						
+					case 2: //. take a picture form file
 						TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TUserMessagingPanel.this, ".JPG,.JPEG", new TFileSystemFileSelector.OpenDialogListener() {
 				        	
 				            @Override

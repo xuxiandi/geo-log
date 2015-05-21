@@ -848,22 +848,22 @@ public class TCoGeoMonitorObject {
 	
 	public boolean Select(TReflectionWindowStruc RW, float pX, float pY) {
 		flSelected = false;
-		boolean R;
 		float X = 0, Y = 0;
 		synchronized (this) {
-			R = (VisualizationLocation != null);
-			if (R) {
-				TXYCoord C = RW.ConvertToScreen(VisualizationLocation.X,VisualizationLocation.Y);
-				X = (float)C.X;
-				Y = (float)C.Y;
-			}
+			if (VisualizationLocation == null)
+				return flSelected; //. ->
+			//.
+			TXYCoord C = RW.ConvertToScreen(VisualizationLocation.X,VisualizationLocation.Y);
+			//.
+			X = (float)C.X;
+			Y = (float)C.Y;
 		}
-		if (R) {
-			float PictureHeight = TextHeight;
-			float PictureWidth = PictureHeight;
-			float W = (PictureWidth+PictureDelimiter)*3+LabelTextWidth;
-			flSelected = (((X <= pX) && (pX <= (X+W))) && (((Y <= pY) && (pY <= (Y+PictureHeight)))));
-		}		
+		if (!(((RW.Xmn <= X) && (X <= RW.Xmx)) && ((RW.Ymn <= Y) && (Y <= RW.Ymx))))
+			return flSelected; //. ->
+		float PictureHeight = TextHeight;
+		float PictureWidth = PictureHeight;
+		float W = (PictureWidth+PictureDelimiter)*3+LabelTextWidth;
+		flSelected = (((X <= pX) && (pX <= (X+W))) && (((Y <= pY) && (pY <= (Y+PictureHeight)))));
 		return flSelected;
 	}
 	

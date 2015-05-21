@@ -20,8 +20,12 @@ public class TLineDrawing extends TDrawing {
 	public static final int DefaultNodesCapacity = 100;
 	
 	public static class TBrushMaskFilter {
+
+		public TBrushMaskFilter Clone() {
+			return null;
+		}
 	}
-	
+
 	public static class TBrushBlurMaskFilter extends TBrushMaskFilter {
 		
 		public static final Blur[] BlurValues = Blur.values();
@@ -33,6 +37,11 @@ public class TLineDrawing extends TDrawing {
 			BlurStyle = pBlurStyle;
 			BlurRadius = pBlurRadius;
 		}
+		
+		@Override
+		public TBrushMaskFilter Clone() {
+			return (new TBrushBlurMaskFilter(BlurStyle, BlurRadius));
+		}
 	}
 
 	public static final Paint DefaultBrush = new Paint();
@@ -43,8 +52,8 @@ public class TLineDrawing extends TDrawing {
 	public ArrayList<TDrawingNode> Nodes = new ArrayList<TDrawingNode>(DefaultNodesCapacity);
 	
 	public TLineDrawing(Paint pBrush, TBrushMaskFilter pBrushMaskFilter) {
-		Brush = pBrush;
-		BrushMaskFilter = pBrushMaskFilter;
+		Brush = new Paint(pBrush);
+		BrushMaskFilter = pBrushMaskFilter.Clone();
 	}
 	
 	public TLineDrawing() {
@@ -73,6 +82,19 @@ public class TLineDrawing extends TDrawing {
 			Node.X += dX;
 			Node.Y += dY;
 		}
+	}
+
+	@Override
+	public void Scale(float X0, float Y0, float Scale) {
+		for (int J = 0; J < Nodes.size(); J++) {
+			TDrawingNode Node = Nodes.get(J);
+			Node.X = X0+(Node.X-X0)*Scale;
+			Node.Y = Y0+(Node.Y-Y0)*Scale;
+		}
+		//.
+		Brush.setStrokeWidth(Brush.getStrokeWidth()*Scale);
+		if (BrushMaskFilter instanceof TBrushBlurMaskFilter) 
+			((TBrushBlurMaskFilter)BrushMaskFilter).BlurRadius *= Scale;
 	}
 
 	@Override

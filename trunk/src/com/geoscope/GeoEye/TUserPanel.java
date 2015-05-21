@@ -19,6 +19,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -49,6 +50,7 @@ public class TUserPanel extends Activity {
 	//.
 	private TReflectorComponent Component;
 	//.
+	private ImageView ivUser;
 	private EditText edUserName;
 	private EditText edUserFullName;
 	private EditText edUserContactInfo;
@@ -98,6 +100,7 @@ public class TUserPanel extends Activity {
         //. 
         setContentView(R.layout.user_panel);
         //.
+        ivUser = (ImageView)findViewById(R.id.ivUser);
         edUserName = (EditText)findViewById(R.id.edUserName);
         edUserFullName = (EditText)findViewById(R.id.edUserFullName);
         edUserContactInfo = (EditText)findViewById(R.id.edUserContactInfo);
@@ -458,20 +461,22 @@ public class TUserPanel extends Activity {
         		llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
         	}
         	else {
-        		edUserName.setText("");
+        		edUserName.setText(""); 
         		edUserFullName.setText("");
-        		edUserContactInfo.setText("");
+        		edUserContactInfo.setText(""); 
         		edUserDomains.setText("");
         		cbUserTaskEnabled.setVisibility(View.GONE);
         		llUserTasks.setVisibility(View.GONE);
         	}
         	//.
         	if (UserInfo.UserIsOnline) {
+        		ivUser.setImageDrawable(getResources().getDrawable(R.drawable.onlineuser));
         		edUserConnectionState.setText(getString(R.string.SOnline));
         		edUserConnectionState.setTextColor(Color.GREEN);
         		btnUserLocation.setEnabled(true);
         	}
         	else {
+        		ivUser.setImageDrawable(getResources().getDrawable(R.drawable.offlineuser));
         		edUserConnectionState.setText(getString(R.string.SOffline));
         		edUserConnectionState.setTextColor(Color.RED);
         		btnUserLocation.setEnabled(false);

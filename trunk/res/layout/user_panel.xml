@@ -32,7 +32,7 @@
                 android:layout_centerVertical="true"
                 android:contentDescription="@string/SUser1"
                 android:padding="8dp"
-                android:src="@drawable/user" />
+                android:src="@drawable/offlineuser" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -73,7 +73,6 @@
                             android:textColor="#ffffffff"
                             android:textSize="18sp"
                             tools:ignore="NestedWeights" />
-
                     </LinearLayout>
 
                     <LinearLayout
@@ -102,7 +101,6 @@
                             android:textColor="#ffffffff"
                             android:textSize="18sp"
                             tools:ignore="NestedWeights" />
-
                     </LinearLayout>
                 </LinearLayout>
 
@@ -131,7 +129,6 @@
                         android:paddingLeft="2dp"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
-
                 </LinearLayout>
 
                 <LinearLayout
@@ -159,7 +156,6 @@
                         android:paddingLeft="2dp"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
-
                 </LinearLayout>
 
                 <RelativeLayout

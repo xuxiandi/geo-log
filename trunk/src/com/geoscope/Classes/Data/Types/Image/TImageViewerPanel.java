@@ -305,8 +305,7 @@ public class TImageViewerPanel extends Activity {
 			public void Process() throws Exception {
 				File F = new File(ImageFileName);
 				FileInputStream FS = new FileInputStream(F);
-				try
-				{
+				try {
 					BitmapFactory.Options options = new BitmapFactory.Options();
 					options.inDither = false;
 					options.inPurgeable = true;

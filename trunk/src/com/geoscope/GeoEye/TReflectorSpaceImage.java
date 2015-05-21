@@ -78,6 +78,18 @@ public class TReflectorSpaceImage {
 				}
 	}
 	
+	public synchronized int Width() {
+		if (ResultBitmap == null)
+			return 0; //. ->
+		return ResultBitmap.getWidth();
+	}
+	
+	public synchronized int Height() {
+		if (ResultBitmap == null)
+			return 0; //. ->
+		return ResultBitmap.getHeight();
+	}
+	
 	public synchronized void DoOnResize(int pWidth, int pHeight) {
 		if ((ResultBitmap == null) || (!((ResultBitmap.getWidth() == pWidth) && (ResultBitmap.getHeight() == pHeight)))) {
 			if (ResultBitmap != null) 

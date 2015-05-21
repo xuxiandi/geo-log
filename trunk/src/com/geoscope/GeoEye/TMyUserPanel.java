@@ -42,6 +42,7 @@ import android.util.Xml;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -49,12 +50,13 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
+import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
 import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
@@ -73,6 +75,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawi
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.Application.THintManager;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TComponentServiceOperation;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
@@ -89,14 +92,17 @@ public class TMyUserPanel extends Activity {
 	private static final int REQUEST_SHOWONREFLECTOR 	= 2;
 	private static final int REQUEST_TEXTEDITOR			= 3;
 	private static final int REQUEST_CAMERA 			= 4;
-	private static final int REQUEST_VIDEOCAMERA		= 5;
-	private static final int REQUEST_DRAWINGEDITOR		= 6;
+	private static final int REQUEST_CAMERAANDEDITOR 	= 5;
+	private static final int REQUEST_VIDEOCAMERA		= 6;
+	private static final int REQUEST_DRAWINGEDITOR		= 7;
+	private static final int REQUEST_IMAGEDRAWINGEDITOR	= 8;
 	
-	private static final int ACTIVITY_DATAFILE_TYPE_TEXT 	= 1;
-	private static final int ACTIVITY_DATAFILE_TYPE_IMAGE 	= 2;
-	private static final int ACTIVITY_DATAFILE_TYPE_VIDEO 	= 3;
-	private static final int ACTIVITY_DATAFILE_TYPE_DRAWING = 4;
-	private static final int ACTIVITY_DATAFILE_TYPE_FILE 	= 5;
+	private static final int ACTIVITY_DATAFILE_TYPE_TEXT 		= 1;
+	private static final int ACTIVITY_DATAFILE_TYPE_IMAGE 		= 2;
+	private static final int ACTIVITY_DATAFILE_TYPE_EDITEDIMAGE	= 3;
+	private static final int ACTIVITY_DATAFILE_TYPE_VIDEO 		= 4;
+	private static final int ACTIVITY_DATAFILE_TYPE_DRAWING 	= 5;
+	private static final int ACTIVITY_DATAFILE_TYPE_FILE 		= 6;
 	
 	public static class TConfiguration {
 		
@@ -411,6 +417,49 @@ public class TMyUserPanel extends Activity {
 				}
             }
         });
+        btnUserCurrentActivityAddImageDataFile.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+				final CharSequence[] _items;
+				_items = new CharSequence[2];
+				_items[0] = getString(R.string.SAddImage);
+				_items[1] = getString(R.string.STakePictureWithCameraAndEdit);
+				AlertDialog.Builder builder = new AlertDialog.Builder(TMyUserPanel.this);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: //. take a picture
+			    				AddDataFile(ACTIVITY_DATAFILE_TYPE_IMAGE);
+								break; //. >
+								
+							case 1: //. take a picture and edit
+			    				AddDataFile(ACTIVITY_DATAFILE_TYPE_EDITEDIMAGE);
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TMyUserPanel.this, TMyUserPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				//.
+				return true;
+			}
+		});
         btnUserCurrentActivityAddVideoDataFile = (Button)findViewById(R.id.btnUserCurrentActivityAddVideoDataFile);
         btnUserCurrentActivityAddVideoDataFile.setOnClickListener(new OnClickListener() {
         	@Override
@@ -560,6 +609,27 @@ public class TMyUserPanel extends Activity {
             }
         });
         //.
+        final int HintID = THintManager.HINT__My_user_panel_hint;
+        final TextView lbHint = (TextView)findViewById(R.id.lbHint);
+        String Hint = THintManager.GetHint(HintID, this);
+        if (Hint != null) {
+        	lbHint.setText(Hint);
+            lbHint.setOnLongClickListener(new OnLongClickListener() {
+            	
+    			@Override
+    			public boolean onLongClick(View v) {
+    				THintManager.SetHintAsDisabled(HintID);
+    	        	lbHint.setVisibility(View.GONE);
+    	        	//.
+    				return true;
+    			}
+    		});
+            //.
+        	lbHint.setVisibility(View.VISIBLE);
+        }
+        else
+        	lbHint.setVisibility(View.GONE);
+        //.
         flExists = true;
         //.
         StatusUpdater = new Timer();
@@ -657,7 +727,7 @@ public class TMyUserPanel extends Activity {
 
         case REQUEST_CAMERA: 
         	if (resultCode == RESULT_OK) {  
-				final File F = getImageTempFile(this);
+				final File F = GetImageTempFile(this);
 				if (F.exists()) {
 					try {
 		            	if (Configuration.ActivityConfiguration.flDataName) 
@@ -683,10 +753,120 @@ public class TMyUserPanel extends Activity {
         	}  
             break; //. >
 
+        case REQUEST_CAMERAANDEDITOR: 
+        	if (resultCode == RESULT_OK) {  
+				final File F = GetImageTempFile(this);
+				TAsyncProcessing PictureProcessing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+					
+					private File ImageFile = null;
+					
+					@Override
+					public void Process() throws Exception {
+				    	TTracker Tracker = TTracker.GetTracker();
+				    	if (Tracker == null)
+				    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+						//.
+		            	if (F.exists()) {
+	            			FileInputStream fs = new FileInputStream(F);
+	            			try {
+	            				BitmapFactory.Options options = new BitmapFactory.Options();
+	            				options.inDither=false;
+	            				options.inPurgeable=true;
+	            				options.inInputShareable=true;
+	            				options.inTempStorage=new byte[1024*256]; 							
+	            				Rect rect = new Rect();
+	            				Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fs.getFD(), rect, options);
+	            				try {
+	            					int ImageMaxSize = options.outWidth;
+	            					if (options.outHeight > ImageMaxSize)
+	            						ImageMaxSize = options.outHeight;
+	            					float MaxSize = Tracker.GeoLog.GPSModule.MapPOIConfiguration.Image_ResX;
+	            					float Scale = MaxSize/ImageMaxSize; 
+	            					Matrix matrix = new Matrix();     
+	            					matrix.postScale(Scale,Scale);
+	            					//.
+	            					Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true);
+	            					try {
+	            						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	            						try {
+	            							Canceller.Check();
+	            							//.
+	            							if (!resizedBitmap.compress(CompressFormat.JPEG, 100, bos)) 
+	            								throw new Exception("error of compressing the picture to JPEG format"); //. =>
+	            							//.
+	            							Canceller.Check();
+	            							//.
+	            							byte[] ImageData = bos.toByteArray();
+	            							//.
+	            							ImageFile = GetImageTempFile(context);
+	            							FileOutputStream FOS = new FileOutputStream(ImageFile);
+	            							try {
+	            								FOS.write(ImageData);
+	            							}
+	            							finally {
+	            								FOS.close();
+	            							}
+	            						}
+	            						finally {
+	            							bos.close();
+	            						}
+	            					}
+	            					finally {
+	            						resizedBitmap.recycle();
+	            					}
+	            				}
+	            				finally {
+	            					bitmap.recycle();
+	            				}
+	            			}
+	            			finally
+	            			{
+	            				fs.close();
+	            			}
+		            	}
+						else
+		        			throw new Exception(context.getString(R.string.SImageWasNotPrepared)); //. =>  
+					}
+					
+					@Override
+					public void DoOnCompleted() throws Exception {
+						if (Canceller.flCancel)
+							return; //. ->
+						if (!flExists)
+							return; //. ->
+                    	//.
+						if (ImageFile != null) {
+					    	String FileName = TGeoLogApplication.GetTempFolder()+"/"+"MyUserImageDrawing"+"."+TDrawingDefines.FileExtension;
+					    	//.
+					    	Intent intent = new Intent(TMyUserPanel.this, TDrawingEditor.class);
+					    	//.
+					    	intent.putExtra("ImageFileName", ImageFile.getAbsolutePath());
+					    	//.
+					    	intent.putExtra("FileName", FileName); 
+					    	intent.putExtra("ReadOnly", false); 
+					    	intent.putExtra("SpaceContainersAvailable", false); 
+					    	startActivityForResult(intent, REQUEST_IMAGEDRAWINGEDITOR);    		
+						}
+					}
+					
+					@Override
+					public void DoOnException(Exception E) {
+						if (Canceller.flCancel)
+							return; //. ->
+						if (!flExists)
+							return; //. ->
+						//.
+						Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+				};
+				PictureProcessing.Start();
+        	}  
+            break; //. >
+
         case REQUEST_VIDEOCAMERA: 
         	if (resultCode == RESULT_OK) {  
             	try {
-    				final File F = getVideoTempFile(this);
+    				final File F = GetVideoTempFile(this);
     				if (F.exists()) {
 		            	if (Configuration.ActivityConfiguration.flDataName) 
 		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
@@ -728,6 +908,101 @@ public class TMyUserPanel extends Activity {
 					catch (Exception E) {
 	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
 					}
+                }
+			}
+            break; //. >
+            
+        case REQUEST_IMAGEDRAWINGEDITOR: 
+        	if (resultCode == RESULT_OK) {  
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+                	String DrawingFileName = extras.getString("FileName");
+                	final File F = new File(DrawingFileName);
+                	if (F.exists()) {
+        				TAsyncProcessing PictureProcessing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+        					
+        					private File ImageFile;
+        					
+        					@Override
+        					public void Process() throws Exception {
+                    	    	FileInputStream FIS = new FileInputStream(F);
+                    	    	try {
+                            		byte[] DRW = new byte[(int)F.length()];
+                        			FIS.read(DRW);
+                                	//.
+        							TDrawings Drawings = new TDrawings();
+        							Drawings.LoadFromByteArray(DRW,0);
+        							Bitmap Image = Drawings.ToBitmap(Drawings.GetOptimalSize());
+        							//.
+            						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            						try {
+            							if (!Image.compress(CompressFormat.JPEG, 100, bos)) 
+            								throw new Exception("error of compressing the picture to JPEG format"); //. =>
+            							byte[] ImageData = bos.toByteArray();
+            							//.
+            							ImageFile = GetImageTempFile(context);
+            							FileOutputStream FOS = new FileOutputStream(ImageFile);
+            							try {
+            								FOS.write(ImageData);
+            							}
+            							finally {
+            								FOS.close();
+            							}
+            						}
+            						finally {
+            							bos.close();
+            						}
+                    	    	}
+                    	    	finally {
+                    	    		FIS.close();
+                    	    	}
+        						//.
+        						F.delete();
+        					}
+        					
+        					@Override
+        					public void DoOnCompleted() throws Exception {
+        						if (Canceller.flCancel)
+        							return; //. ->
+        						if (!flExists)
+        							return; //. ->
+                            	//.
+        						if (ImageFile.exists()) {
+        							try {
+        				            	if (Configuration.ActivityConfiguration.flDataName) 
+        				            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
+        				            			
+        				            			@Override
+        				            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+        				            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_EDITEDIMAGE, ImageFile,Name);
+        				            			}
+        				            		});
+        				            	else 
+        				    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_EDITEDIMAGE, ImageFile,null);
+        							}
+        							catch (Throwable E) {
+        								String S = E.getMessage();
+        								if (S == null)
+        									S = E.getClass().getName();
+        			        			Toast.makeText(TMyUserPanel.this, S, Toast.LENGTH_LONG).show();  						
+        							}
+        						}
+        						else
+        		        			Toast.makeText(TMyUserPanel.this, R.string.SImageWasNotPrepared, Toast.LENGTH_SHORT).show();  
+        					}
+        					
+        					@Override
+        					public void DoOnException(Exception E) {
+        						if (Canceller.flCancel)
+        							return; //. ->
+        						if (!flExists)
+        							return; //. ->
+        						//.
+        						Toast.makeText(TMyUserPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+        					}
+        				};
+        				PictureProcessing.Start();
+                	}
                 }
 			}
             break; //. >
@@ -835,19 +1110,25 @@ public class TMyUserPanel extends Activity {
 			
 		case ACTIVITY_DATAFILE_TYPE_IMAGE:
   		    intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TMyUserPanel.this.getImageTempFile(TMyUserPanel.this))); 
+  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TMyUserPanel.this.GetImageTempFile(TMyUserPanel.this))); 
   		    startActivityForResult(intent, REQUEST_CAMERA);    		
+			break; //. >
+			
+		case ACTIVITY_DATAFILE_TYPE_EDITEDIMAGE:
+  		    intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TMyUserPanel.this.GetImageTempFile(TMyUserPanel.this))); 
+  		    startActivityForResult(intent, REQUEST_CAMERAANDEDITOR);    		
 			break; //. >
 			
 		case ACTIVITY_DATAFILE_TYPE_VIDEO:
   		    intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TMyUserPanel.this.getVideoTempFile(TMyUserPanel.this))); 
+  		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TMyUserPanel.this.GetVideoTempFile(TMyUserPanel.this))); 
   		    startActivityForResult(intent, REQUEST_VIDEOCAMERA);    		
 			break; //. >
 
 		case ACTIVITY_DATAFILE_TYPE_DRAWING:
     		intent = new Intent(TMyUserPanel.this, TDrawingEditor.class);
-    		File F = getDrawingTempFile(this);
+    		File F = GetDrawingTempFile(this);
     		F.delete();
   		    intent.putExtra("FileName", F.getAbsolutePath()); 
   		    intent.putExtra("ReadOnly", false); 
@@ -954,7 +1235,8 @@ public class TMyUserPanel extends Activity {
 			break; //. >
 		}
 			
-		case ACTIVITY_DATAFILE_TYPE_IMAGE: {
+		case ACTIVITY_DATAFILE_TYPE_IMAGE: 
+		case ACTIVITY_DATAFILE_TYPE_EDITEDIMAGE: {
 			//. try to gc
 			TGeoLogApplication.Instance().GarbageCollector.Collect();
 			//.
@@ -1210,15 +1492,15 @@ public class TMyUserPanel extends Activity {
     	startActivity(intent);
     }
     
-    protected File getImageTempFile(Context context) {
+    protected File GetImageTempFile(Context context) {
   	  	return new File(TGeoLogApplication.GetTempFolder(),"Image.jpg");
     }
   
-    protected File getVideoTempFile(Context context) {
+    protected File GetVideoTempFile(Context context) {
     	return new File(TGeoLogApplication.GetTempFolder(),"Video.3gp");
     }
 
-    protected File getDrawingTempFile(Context context) {
+    protected File GetDrawingTempFile(Context context) {
     	return new File(TGeoLogApplication.GetTempFolder(),"Drawing"+"."+TDrawingDefines.FileExtension);
     }
 

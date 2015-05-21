@@ -13,6 +13,16 @@ public class TDrawing {
 		public float Xmx;
 		public float Ymx;
 		
+		public TRectangle() {
+		}
+		
+		public TRectangle(float pXmn, float pYmn, float pXmx, float pYmx) {
+			Xmn = pXmn;
+			Ymn = pYmn;
+			Xmx = pXmx;
+			Ymx = pYmx;
+		}
+		
 		public float Width() {
 			return (Xmx-Xmn);
 		}
@@ -31,6 +41,9 @@ public class TDrawing {
 		case TPictureDrawing.TYPE_ID:
 			return (new TPictureDrawing()); //. ->
 			
+		case TImageDrawing.TYPE_ID:
+			return (new TImageDrawing()); //. ->
+			
 		default:
 			return null; //. ->
 		}
@@ -47,6 +60,9 @@ public class TDrawing {
 	}
 	
 	public void Translate(float dX, float dY) {
+	}
+	
+	public void Scale(float X0, float Y0, float Scale) {
 	}
 	
 	public TDrawingNode GetAveragePosition() {

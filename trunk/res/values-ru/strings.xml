@@ -1047,5 +1047,8 @@
     <string name="SBookmarkHasBeenSent">Закладка отправлена.</string>
     <string name="SSendBookmarkToUser">Отправить закладку пользователю &#8230;</string>
     <string name="SUseItForImport">Используйте его для импорта.</string>
+    <string name="SMovingAndScaling">перемещение и масштабирование</string>
+    <string name="STakePictureWithCameraAndEdit">Добавить отредактированное изображение</string>
+    <string name="SMyUserPanelHint">Долгое нажатие на кнопку [+Изображение] открывает контекстное меню.\n(долгое нажатие на подсказке убирает её)</string>
     
 </resources>

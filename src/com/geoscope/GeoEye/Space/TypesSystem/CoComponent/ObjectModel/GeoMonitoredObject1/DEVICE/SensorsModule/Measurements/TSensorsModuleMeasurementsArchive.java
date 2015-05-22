@@ -839,6 +839,8 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 		@Override
 		public void run() {
 			try {
+				Canceller.SetOwnerThread(this);
+				//.
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
 					String MeasurementFolder = TSensorsModuleMeasurements.Context_GetMeasurementFolder(Object.GeographServerObjectID(), MeasurementID);
@@ -1101,6 +1103,8 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 		@Override
 		public void run() {
 			try {
+				Canceller.SetOwnerThread(this);
+				//.
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
     				MeasurementFolder = TSensorsModuleMeasurements.Context_GetMeasurementFolder(Object.GeographServerObjectID(), MeasurementID);

@@ -49,11 +49,15 @@ public class TCancelableThread implements Runnable {
 		Canceller.flCancel = true;
 	}
 
+	public void CancelByInterrupt() {
+		if (_Thread != null)
+			_Thread.interrupt();
+	}
+	
 	public void Cancel() {
 		CancelByCanceller();
 		//.
-		if (_Thread != null)
-			_Thread.interrupt();
+		CancelByInterrupt();
 	}
 
 	public void Wait() throws InterruptedException {

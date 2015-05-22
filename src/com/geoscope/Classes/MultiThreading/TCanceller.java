@@ -6,7 +6,7 @@ public class TCanceller {
 	
 	public boolean flCancel;
 	//.
-	public TCancelableThread OwnerThread;
+	private volatile TCancelableThread OwnerThread;
 	
 	public TCanceller() {
 		flCancel = false;
@@ -18,15 +18,20 @@ public class TCanceller {
 		OwnerThread = pOwnerThread;
 	}
 	
-	public void Cancel() {
-		flCancel = true;
+	public void SetOwnerThread(TCancelableThread pOwnerThread) {
+		OwnerThread = pOwnerThread;
 	}
 	
-	public void CancelWithOwnerThread() {
-		Cancel();
+	public TCancelableThread GetOwnerThread() {
+		return OwnerThread;
+	}
+	
+	public void Cancel() {
+		flCancel = true;
 		//.
-		if (OwnerThread != null)
-			OwnerThread.Cancel();
+		TCancelableThread _OwnerThread = OwnerThread;
+		if (_OwnerThread != null)
+			_OwnerThread.CancelByInterrupt();
 	}
 	
 	public void Reset() {

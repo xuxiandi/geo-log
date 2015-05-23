@@ -14,8 +14,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -131,6 +133,8 @@ public class TUserChatPanel extends Activity {
 	private Button btnUserChatTextEntry;
 	private Button btnUserChatDrawingSend;
 	private Button btnUserChatPictureSend;
+	//.
+	private BroadcastReceiver EventReceiver = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -247,6 +251,20 @@ public class TUserChatPanel extends Activity {
         //.
     	if ((UserAgent.Server.User != null) && (UserAgent.Server.User.IncomingMessages != null))
     		UserIncomingMessages_LastCheckInterval = UserAgent.Server.User.IncomingMessages.SetFastCheckInterval(); //. speed up messages updating
+		//.
+		EventReceiver = new BroadcastReceiver() {
+			
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+					TUserChatPanel.this.finish();
+					//.
+					return; // . ->
+				}
+			}
+		};
+		IntentFilter ScreenOffFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+		getApplicationContext().registerReceiver(EventReceiver, ScreenOffFilter);
         //.
         Panels.put(ContactUser.UserID, this);
         //.
@@ -258,6 +276,11 @@ public class TUserChatPanel extends Activity {
     	flExists = false;
     	//.
     	Panels.remove(ContactUser.UserID);
+		//.
+		if (EventReceiver != null) {
+			getApplicationContext().unregisterReceiver(EventReceiver);
+			EventReceiver = null;
+		}
     	//.
     	if (MessageAsProcessedMarkingList != null) {
     		for (int I = 0; I < MessageAsProcessedMarkingList.size(); I++)

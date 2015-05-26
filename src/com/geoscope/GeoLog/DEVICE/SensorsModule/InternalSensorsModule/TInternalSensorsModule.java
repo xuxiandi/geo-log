@@ -716,7 +716,7 @@ public class TInternalSensorsModule extends TModule {
 	private TDataType 	ECTLRChannel_MagneticField;
 	private TDataType 	ECTLRChannel_Gyroscope;
 	//.
-	private TGPSChannel GPSChannel = null;
+	public TGPSChannel 	GPSChannel = null;
 	
     public TInternalSensorsModule(TSensorsModule pSensorsModule) throws Exception {
     	super(pSensorsModule);

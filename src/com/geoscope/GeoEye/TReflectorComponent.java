@@ -7585,7 +7585,12 @@ public class TReflectorComponent extends TUIComponent {
 		//.
 		context = ParentActivity;
 		//.
-		Bundle extras = Parameters.getExtras();
+		Bundle extras;
+		if (Parameters != null)
+			extras = Parameters.getExtras();
+		else
+			extras = null;
+		//.
 		if (extras != null) 
 			Reason = extras.getInt("Reason");
 		//.
@@ -10054,6 +10059,12 @@ public class TReflectorComponent extends TUIComponent {
 		final long idComponent = OwnerSpaceObj.OwnerID;
 		//.
 		Toast.makeText(context, Integer.toString(idTComponent)+":"+Long.toString(idComponent), Toast.LENGTH_LONG).show();
+	}
+	
+	public void ObjectTracks_Clear() {
+		ObjectTracks.Clear();
+		//.
+		StartUpdatingCurrentSpaceImage();
 	}
 	
 	public void ObjectTracks_AddTrack(final byte[] TrackData) {

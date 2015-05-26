@@ -367,7 +367,7 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 	}
 	
 	@Override
-	public void SetLayout(Activity pParentActivity, LinearLayout pParentLayout) {
+	public void SetLayout(Activity pParentActivity, LinearLayout pParentLayout) throws Exception {
 		super.SetLayout(pParentActivity, pParentLayout);
 		//.
 		LayoutInflater inflater = (LayoutInflater)ParentActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

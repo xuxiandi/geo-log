@@ -83,4 +83,14 @@ public class TDataTypes {
 		}
 		return null;
 	}
+
+	public TDataType GetItemByClass(Class<?> ItemClass) {
+		int Cnt = Items.size();
+		for (int I = 0; I < Cnt; I++) {
+			TDataType Item = Items.get(I);
+			if (Item.getClass() == ItemClass)
+				return Item; //. ->
+		}
+		return null;
+	}
 }

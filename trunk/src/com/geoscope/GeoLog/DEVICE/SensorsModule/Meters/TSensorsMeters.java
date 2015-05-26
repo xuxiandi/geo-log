@@ -33,6 +33,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterInfo;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.AV.TAVMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ASTLR.TASTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TECTLRMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.GPSTLR.TGPSTLRMeter;
 
 public class TSensorsMeters {
 
@@ -484,9 +485,10 @@ public class TSensorsMeters {
 	}
 
 	private void CreateMeters() throws Exception {
-		TAVMeter 	AVMeter		= new TAVMeter(SensorsModule, ProfileFolder); 		Items_AddItem(AVMeter);
-		TECTLRMeter ECTLRMeter 	= new TECTLRMeter(SensorsModule, ProfileFolder); 	Items_AddItem(ECTLRMeter);
-		TASTLRMeter ASTLRMeter 	= new TASTLRMeter(SensorsModule, ProfileFolder); 	Items_AddItem(ASTLRMeter);
+		TAVMeter 		AVMeter		= new TAVMeter(SensorsModule, ProfileFolder); 		Items_AddItem(AVMeter);
+		TECTLRMeter 	ECTLRMeter 	= new TECTLRMeter(SensorsModule, ProfileFolder); 	Items_AddItem(ECTLRMeter);
+		TASTLRMeter 	ASTLRMeter 	= new TASTLRMeter(SensorsModule, ProfileFolder); 	Items_AddItem(ASTLRMeter);
+		TGPSTLRMeter	GPSTLRMeter = new TGPSTLRMeter(SensorsModule, ProfileFolder); 	Items_AddItem(GPSTLRMeter);
 	}
 	
 	private void Items_AddItem(TSensorMeter Meter) {

@@ -7,6 +7,7 @@ import android.widget.LinearLayout;
 import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.ASTLR.TASTLRMeasurementProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.ECTLR.TECTLRMeasurementProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.GPSTLR.TGPSTLRMeasurementProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerMyPlayerComponent;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
@@ -20,6 +21,8 @@ public class TMeasurementProcessor extends TUIComponent {
 			return new TECTLRMeasurementProcessor(); //. ->
 		if (MeasurementDescriptor.IsTypeOf(TASTLRMeasurementProcessor.TypeID))
 			return new TASTLRMeasurementProcessor(); //. ->
+		if (MeasurementDescriptor.IsTypeOf(TGPSTLRMeasurementProcessor.TypeID))
+			return new TGPSTLRMeasurementProcessor(); //. ->
 		else
 			return null; //. ->
 	}
@@ -73,7 +76,7 @@ public class TMeasurementProcessor extends TUIComponent {
 		return "";
 	}
 	
-	public void SetLayout(Activity pParentActivity, LinearLayout pParentLayout) {
+	public void SetLayout(Activity pParentActivity, LinearLayout pParentLayout) throws Exception {
 		ParentActivity = pParentActivity;
 		ParentLayout = pParentLayout;
 	}

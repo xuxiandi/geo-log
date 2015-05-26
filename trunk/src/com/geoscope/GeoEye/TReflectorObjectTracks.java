@@ -57,6 +57,10 @@ public class TReflectorObjectTracks {
 		Tracks.remove(TrackIndex);
 	}
 	
+	public void Clear() {
+		Tracks.clear();
+	}
+	
     private byte[] GetCoGeoMonitorObjectTrackData(long idCoComponent, int GeoSpaceID, double BegTime, double EndTime, int DataType) throws Exception,IOException {
 		String URL1 = Reflector.Server.Address;
 		//. add command path

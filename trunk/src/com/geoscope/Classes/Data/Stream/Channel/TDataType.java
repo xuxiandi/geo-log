@@ -171,6 +171,12 @@ public class TDataType {
 	public TDataType() {
 	}
 	
+	public TDataType(TContainerType pContainerType) {
+		this();
+		//.
+		ContainerType = pContainerType;
+	}
+	
 	public TDataType(TContainerType pContainerType, String pTypeID, TChannel pChannel) {
 		ContainerType = pContainerType;
 		TypeID = pTypeID;

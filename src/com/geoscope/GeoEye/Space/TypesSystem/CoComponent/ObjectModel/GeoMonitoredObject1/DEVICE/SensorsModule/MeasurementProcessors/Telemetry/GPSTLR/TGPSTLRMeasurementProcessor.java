@@ -105,15 +105,18 @@ public class TGPSTLRMeasurementProcessor extends TMeasurementProcessor {
 					ArrayList<TGPSFixDataType.TValue> TrackFixes = new ArrayList<TGPSFixDataType.TValue>(1024);
 					ArrayList<TContainerType> Values = (ArrayList<TContainerType>)TLRChannel_GPSFixDataType.Extra;
 					if (Values != null) {
-						TGPSFixDataType GPSFix = new TGPSFixDataType(); 
+						TGPSFixDataType GPSFix = new TGPSFixDataType();
+						TGPSFixDataType.TValue LastGPSFixValue = null; 
 						int Cnt = Values.size();
 						for (int I = 0; I < Cnt; I++) {
 							GPSFix.ContainerType = Values.get(I);
 							try {
 								TGPSFixDataType.TValue GPSFixValue = GPSFix.Value();
 								//.
-								if (GPSFixValue.IsAvailable())
+								if (!GPSFixValue.CoordinatesAreEquals(LastGPSFixValue) && GPSFixValue.IsAvailable())
 									TrackFixes.add(GPSFixValue);
+								//.
+								LastGPSFixValue = GPSFixValue;
 							} catch (WrongContainerTypeException e) {
 							}
 						}
@@ -249,7 +252,7 @@ public class TGPSTLRMeasurementProcessor extends TMeasurementProcessor {
 					Thread.sleep(10); 
 				}
 				//.
-				TGPSFixDataType.TValue NearFix = TLRChannel_GPSFixes_GetNearestToTime(Measurement.Descriptor.StartTimestamp+Position); 
+				TGPSFixDataType.TValue NearFix = TLRChannel_GPSFixes_GetCalculatedValue(Measurement.Descriptor.StartTimestamp+Position); 
 				if ((ReflectorComponent != null) && (NearFix != null)) 
 					LocationXY = ReflectorComponent.ConvertGeoCoordinatesToXY(NearFix.DatumID, NearFix.Latitude,NearFix.Longitude,NearFix.Altitude);
 			}
@@ -272,6 +275,74 @@ public class TGPSTLRMeasurementProcessor extends TMeasurementProcessor {
 	}
 	
 	@SuppressWarnings("unchecked")
+	private TGPSFixDataType.TValue TLRChannel_GPSFixes_GetCalculatedValue(double Timestamp) throws WrongContainerTypeException {
+		TGPSFixDataType.TValue LR = null;
+		TGPSFixDataType.TValue RR = null;
+		if (TLRChannel_GPSFixDataType != null) {
+			ArrayList<TContainerType> Values = (ArrayList<TContainerType>)TLRChannel_GPSFixDataType.Extra;
+			if (Values != null) {
+				TGPSFixDataType GPSFix = new TGPSFixDataType(); 
+				double LeftMinDistance = -Double.MAX_VALUE;
+				double RightMinDistance = Double.MAX_VALUE;
+				int Cnt = Values.size();
+				for (int I = 0; I < Cnt; I++) {
+					GPSFix.ContainerType = Values.get(I);
+					//.
+					TGPSFixDataType.TValue V = GPSFix.Value();
+					if (V.IsAvailable()) {
+						double Distance = (V.Timestamp-Timestamp); 
+						if ((Distance < 0) && (Distance > LeftMinDistance)) {
+							LeftMinDistance = Distance;
+							LR = V;
+						}
+						if ((Distance >= 0) && (Distance < RightMinDistance)) {
+							RightMinDistance = Distance;
+							RR = V;
+						}
+					}
+				}
+				//.
+				Cnt = 0;
+				if (LR != null)
+					Cnt++;
+				if (RR != null)
+					Cnt++;
+				if (Cnt == 0)
+					return null; //. ->
+				else
+					if (Cnt == 1) {
+						if (LR != null) 
+							return LR; //. ->
+						else
+							return RR; //. ->
+					}
+					else {
+						double dT = RR.Timestamp-LR.Timestamp;
+						if (dT == 0.0)
+							return LR; //. ->
+						double dTS = Timestamp-LR.Timestamp;
+						double F = dTS/dT; 
+						TGPSFixDataType.TValue Result = new TGPSFixDataType.TValue(
+								LR.DatumID,
+								Timestamp,
+								LR.Latitude+(RR.Latitude-LR.Latitude)*F, 
+								LR.Longitude+(RR.Longitude-LR.Longitude)*F, 
+								LR.Altitude+(RR.Altitude-LR.Altitude)*F, 
+								LR.Speed+(RR.Speed-LR.Speed)*F, 
+								LR.Bearing+(RR.Bearing-LR.Bearing)*F, 
+								LR.Precision+(RR.Precision-LR.Precision)*F 
+						);
+						return Result; //. ->
+					}
+			}
+			else
+				return null; //. ->
+		}
+		else
+			return null; //. ->
+	}
+	
+	@SuppressWarnings({ "unchecked", "unused" })
 	private TGPSFixDataType.TValue TLRChannel_GPSFixes_GetNearestToTime(double Time) {
 		TGPSFixDataType.TValue Result = null;
 		if (TLRChannel_GPSFixDataType != null) {

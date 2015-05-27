@@ -87,6 +87,8 @@ public class TTLRChannel extends TStreamChannel {
 							}
 						};
 						//. processing ...
+						if (DestinationChannel.DataTypes != null)
+							DestinationChannel.DataTypes.ClearExtraFields();
 						DestinationChannel.DoStreaming(BIS,BOS.size(), null, OnProgressHandler, 1000, 5, OnIdleHandler, Canceller);
 					}
 					finally {

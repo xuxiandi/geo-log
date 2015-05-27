@@ -7879,6 +7879,16 @@ public class TReflectorComponent extends TUIComponent {
 	}
 	
 	@Override
+	public void Resume() {
+		DoOnResume();
+	}
+	
+	@Override
+	public void Pause() {
+		DoOnPause();
+	}
+	
+	@Override
 	public void Show() {
 		ParentLayout.setVisibility(View.VISIBLE);
 		//.

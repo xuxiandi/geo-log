@@ -28,8 +28,8 @@ public class TReflectorObjectTracks {
 		Reflector = pReflector;
 		DrawPaint.setDither(true);
 		DrawPaint.setStyle(Paint.Style.STROKE);
-		DrawPaint.setStrokeJoin(Paint.Join.ROUND);
-		DrawPaint.setStrokeCap(Paint.Cap.ROUND);
+		DrawPaint.setStrokeJoin(Paint.Join.BEVEL);
+		DrawPaint.setStrokeCap(Paint.Cap.BUTT);
 		DrawPaint.setStrokeWidth(1.5F*Reflector.metrics.density);
 		NodeRadius = 1.5F*Reflector.metrics.density;
 	}
@@ -123,18 +123,21 @@ public class TReflectorObjectTracks {
 	public void DrawOnCanvas(TReflectionWindowStruc RW, Canvas canvas) {
 		for (int I = 0; I < Tracks.size(); I++) {
 			TCoGeoMonitorObjectTrack OT = Tracks.get(I);
-			if (OT.flEnabled && (OT.Nodes != null)) {
-				float[] ScreenNodes = new float[OT.NodesCount << 2];
+			if (OT.flEnabled && (OT.Nodes != null) && (OT.NodesCount > 1)) {
+				int Cnt = OT.NodesCount;
+				float[] ScreenNodes = new float[(Cnt-1) << 2];
 				int Idx = 0;
-				int ScrIdx = 0;
 				TXYCoord C0 = RW.ConvertToScreen(OT.Nodes[Idx+1]/*X*/,OT.Nodes[Idx+2]/*Y*/);
 				Idx += 3;				
-				for (int J = 1; J < OT.NodesCount; J++) {
+				int ScrIdx = 0;
+				for (int J = 1; J < Cnt; J++) {
 					TXYCoord C1 = RW.ConvertToScreen(OT.Nodes[Idx+1]/*X*/,OT.Nodes[Idx+2]/*Y*/);
 					ScreenNodes[ScrIdx+0] = (float)C0.X;
 					ScreenNodes[ScrIdx+1] = (float)C0.Y;
 					ScreenNodes[ScrIdx+2] = (float)C1.X;
 					ScreenNodes[ScrIdx+3] = (float)C1.Y;
+					if (Math.sqrt(Math.pow(C1.X-C0.X, 2)+Math.pow(C1.Y-C0.Y, 2)) > 100)
+						C0 = C1;
 					//.
 					C0 = C1;
 					ScrIdx += 4;

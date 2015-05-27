@@ -39,26 +39,32 @@ public class TGPSTLRMeter extends TSensorMeter {
 		if (SourceChannel == null)
 			throw new IOException("no source channel"); //. =>
 		//.
-		SourceChannel.SourceChannels_Start();
+		SourceChannel.Suspend();
 		try {
-			int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
-			while (!Canceller.flCancel) {
-				TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
-				Measurement.TLRChannel.Assign(SourceChannel);
-				//.
-				Measurement.Start();
-				try {
-					SourceChannel.DoStreaming(Measurement.TLRChannel.DestrinationStream, Canceller, MeasurementMaxDuration);
+			SourceChannel.SourceChannels_Start();
+			try {
+				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
+				while (!Canceller.flCancel) {
+					TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+					Measurement.TLRChannel.Assign(SourceChannel);
+					//.
+					Measurement.Start();
+					try {
+						SourceChannel.DoStreaming(Measurement.TLRChannel.DestrinationStream, Canceller, MeasurementMaxDuration);
+					}
+					finally {
+						Measurement.Finish();
+					}
+					//.
+					DoOnMeasurementFinish(Measurement);
 				}
-				finally {
-					Measurement.Finish();
-				}
-				//.
-				DoOnMeasurementFinish(Measurement);
+			}
+			finally {
+				SourceChannel.SourceChannels_Stop();
 			}
 		}
 		finally {
-			SourceChannel.SourceChannels_Stop();
+			SourceChannel.Resume();
 		}
 	}
 }

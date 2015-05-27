@@ -1,23 +1,3 @@
-/*
- *
- * Copyright (C) 2005-2006 Tommi Laukkanen
- * http://www.substanceofcode.com
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 package com.geoscope.GeoLog.DEVICE.GPSModule;
 
 import java.io.ByteArrayInputStream;
@@ -1297,23 +1277,35 @@ public class TGPSModule extends TModule implements Runnable
     		private TGPSChannel GPSChannel = pDestinationChannel;
     			
     		@Override
-			protected void DoOnSubscribed(com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber Subscriber) {
+			protected void DoOnSubscribed(final com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber Subscriber) {
 				try {
-	    			DestinationChannel_GPSMode.Timestamp = OleDate.UTCCurrentTimestamp();
-	    			DestinationChannel_GPSMode.Value = Mode.GetValue();
+					final TTimestampedInt16ContainerType.TValue GPSMode = new TTimestampedInt16ContainerType.TValue();
+					final TTimestampedInt16ContainerType.TValue GPSStatus = new TTimestampedInt16ContainerType.TValue();
+					//.
+	    			GPSMode.Timestamp = OleDate.UTCCurrentTimestamp();
+	    			GPSMode.Value = Mode.GetValue();
 	    			//.
-	    			synchronized (GPSChannel) {
-	        			GPSChannel.GPSMode.SetContainerTypeValue(DestinationChannel_GPSMode);
-	        			GPSChannel.DoOnData(GPSChannel.GPSMode, Subscriber);
-					}
+	    			GPSStatus.Timestamp = OleDate.UTCCurrentTimestamp();
+	    			GPSStatus.Value = Status.GetValue();
 	    			//.
-	    			DestinationChannel_GPSStatus.Timestamp = OleDate.UTCCurrentTimestamp();
-	    			DestinationChannel_GPSStatus.Value = Status.GetValue();
-	    			//.
-	    			synchronized (GPSChannel) {
-	        			GPSChannel.GPSStatus.SetContainerTypeValue(DestinationChannel_GPSStatus);
-	        			GPSChannel.DoOnData(GPSChannel.GPSStatus, Subscriber);
-	    			}
+	    			Thread Processing = new Thread(new Runnable() {
+						
+						@Override
+						public void run() {
+							try {
+				    			synchronized (GPSChannel) {
+				        			GPSChannel.GPSMode.SetContainerTypeValue(GPSMode);
+				        			GPSChannel.DoOnData(GPSChannel.GPSMode, Subscriber);
+				        			//.
+				        			GPSChannel.GPSStatus.SetContainerTypeValue(GPSStatus);
+				        			GPSChannel.DoOnData(GPSChannel.GPSStatus, Subscriber);
+								}
+							}
+							catch (Throwable T) {
+							}								
+						}
+					});
+					Processing.start();
 				} catch (Exception E) {
 				}
 			};

@@ -335,7 +335,7 @@ public class TReflector extends Activity {
 		super.onResume();
 		//.
 		if (Component != null)
-			Component.DoOnResume();
+			Component.Resume();
 		//. start tracker position fixing immediately if it is in impulse mode
 		TTracker Tracker = TTracker.GetTracker();
 		if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode)
@@ -345,7 +345,7 @@ public class TReflector extends Activity {
 	@Override
 	public void onPause() {
 		if (Component != null)
-			Component.DoOnPause();
+			Component.Pause();
 		//.
 		super.onPause();
 	}

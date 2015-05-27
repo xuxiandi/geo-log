@@ -2125,6 +2125,8 @@ public class TObjectModelHistoryPanel extends Activity {
         LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
         MeasurementProcessors_Layout.addView(ProcessorLayout, LP);
         MeasurementProcessor.Processor.SetLayout(this, ProcessorLayout);
+        //.
+        MeasurementProcessor.Processor.Start();
     	//.
         MeasurementProcessor.CurrentMeasurement = null;
     	//.
@@ -2138,6 +2140,7 @@ public class TObjectModelHistoryPanel extends Activity {
 		}
 		//.
     	if (MeasurementProcessor.Processor != null) {
+    		MeasurementProcessor.Processor.Stop();
     		MeasurementProcessor.Processor.Destroy();
     		MeasurementProcessor.Processor = null;
     	}

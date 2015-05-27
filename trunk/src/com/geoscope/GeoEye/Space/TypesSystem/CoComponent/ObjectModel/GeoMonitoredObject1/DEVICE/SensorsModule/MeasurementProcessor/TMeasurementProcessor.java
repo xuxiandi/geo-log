@@ -66,10 +66,13 @@ public class TMeasurementProcessor extends TUIComponent {
     	flExists = true;
 	}
 
+	@Override
 	public void Destroy() throws Exception {
     	flExists = false;
     	//.
 		Finalize();
+		//.
+		super.Destroy();
 	}
 
 	public String GetTypeID() {

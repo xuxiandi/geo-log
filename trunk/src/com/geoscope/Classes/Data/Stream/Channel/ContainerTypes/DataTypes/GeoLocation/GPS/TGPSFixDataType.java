@@ -47,6 +47,12 @@ public class TGPSFixDataType extends TDataType {
 	    public boolean IsAvailable() {
 	        return ((Precision != UnknownFixPrecision) && (Precision != UnavailableFixPrecision));
 	    }
+
+	    public boolean CoordinatesAreEquals(TValue Value) {
+	    	if (Value == null)
+	    		return false; //. ->
+	    	return ((Value.Latitude == Latitude) && (Value.Longitude == Longitude) && (Value.Altitude == Altitude));
+	    }
 	}
 
     public static final double 	UnavailableFixPrecision = 1000000000.0;

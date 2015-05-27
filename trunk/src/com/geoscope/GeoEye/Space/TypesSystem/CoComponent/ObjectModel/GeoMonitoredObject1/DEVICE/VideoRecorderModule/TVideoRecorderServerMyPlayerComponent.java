@@ -988,6 +988,8 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 		//.
 		if (OnVideoSurfaceChangedHandler != null) 
 			OnVideoSurfaceChangedHandler.DoOnSurfaceChanged(surface);
+		//.
+		ShowInfo();
 	}
 	
 	@Override
@@ -1026,8 +1028,6 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 		}
 		//.
 		sbVideoRecorderServerMyPlayer.setVisibility(View.VISIBLE);
-		//.
-		ivVideoRecorderServerMyPlayerAudioOnly.setVisibility((flAudio && !flVideo) ? View.VISIBLE : View.GONE);
 		//.
 		ShowInfo();
 		//.
@@ -1137,6 +1137,8 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
         SB.append(": "+Integer.toString(Secs)+" "+ParentActivity.getString(R.string.SSec1));
         //.
         lbVideoRecorderServerMyPlayer.setText(SB.toString());
+		//.
+		ivVideoRecorderServerMyPlayerAudioOnly.setVisibility((flAudio && !flVideo) ? View.VISIBLE : View.GONE);
 	}
 	
 	private synchronized boolean IsRunning() {

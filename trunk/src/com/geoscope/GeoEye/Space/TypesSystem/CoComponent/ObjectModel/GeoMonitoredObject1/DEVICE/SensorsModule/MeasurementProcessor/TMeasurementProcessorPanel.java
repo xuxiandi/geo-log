@@ -60,8 +60,6 @@ public class TMeasurementProcessorPanel extends Activity {
     	        		_Measurement = new TSensorMeasurement(MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
     	        	else
     	        		_Measurement = TSensorMeasurement.FromDataFile(MeasurementDataFile, MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance, Canceller);
-    	        	//.
-    				_Measurement.Descriptor.Model.Process(Canceller);
     			}
 
     			@Override
@@ -77,6 +75,7 @@ public class TMeasurementProcessorPanel extends Activity {
     	            //.
     	            Processor.SetLayout(TMeasurementProcessorPanel.this, ProcessorLayout);
     	            Processor.flStandalone = true;
+    	            Processor.Start();
     	            //.
     	            Processor.Setup(Measurement);
     	            //.
@@ -140,13 +139,21 @@ public class TMeasurementProcessorPanel extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		//.
+		if (Processor != null)
+			Processor.Resume();
+		//.
 		IsInFront = true;
 	}
 
     @Override
 	protected void onPause() {
-		super.onPause();
 		IsInFront = false;
+		//.
+		if (Processor != null)
+			Processor.Pause();
+		//.
+		super.onPause();
 	}
 
 	@Override
@@ -157,10 +164,22 @@ public class TMeasurementProcessorPanel extends Activity {
 	@Override
 	public void onStart() {
     	super.onStart();
+    	//.
+		if (Processor != null)
+			try {
+				Processor.Start();
+			} catch (Exception E) {
+			}
     }
 	
 	@Override
 	protected void onStop() {
+		if (Processor != null)
+			try {
+				Processor.Stop();
+			} catch (Exception E) {
+			}
+		//.
 		super.onStop();
 	}
 

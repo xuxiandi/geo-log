@@ -70,6 +70,14 @@ public class TDataTypes {
 		return Items.size();
 	}
 	
+	public void ClearExtraFields() {
+		int Cnt = Items.size();
+		for (int I = 0; I < Cnt; I++) {
+			TDataType Item = Items.get(I);
+			Item.Extra = null;
+		}
+	}
+	
 	public TDataType GetItemByIndex(int Index) {
 		return Items.get(Index);
 	}

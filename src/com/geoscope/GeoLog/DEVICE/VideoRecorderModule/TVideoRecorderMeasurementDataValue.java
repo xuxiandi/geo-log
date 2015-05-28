@@ -8,7 +8,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Operatio
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 
 public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDataValue {
 
@@ -42,7 +41,7 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
     	switch (Operation) {
     	case 1: //. delete measurement(s)
     		String _CurrentMeasurementID = null;
-    		TMeasurementDescriptor CurrentMeasurement = Camera.CurrentCamera_GetMeasurementDescriptor();
+    		TMeasurementDescriptor CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
     		if (CurrentMeasurement != null)
     			_CurrentMeasurementID = CurrentMeasurement.ID;
     		//.
@@ -59,7 +58,7 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
             
     	case 2: //. move measurement(s) to data server
     		_CurrentMeasurementID = null;
-    		CurrentMeasurement = Camera.CurrentCamera_GetMeasurementDescriptor();
+    		CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
     		if (CurrentMeasurement != null)
     			_CurrentMeasurementID = CurrentMeasurement.ID;
     		//.
@@ -68,7 +67,7 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
     			do {
     				Thread.sleep(5000); //. wait for restarting
     				//.
-    	    		CurrentMeasurement = Camera.CurrentCamera_GetMeasurementDescriptor();
+    	    		CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
     			} while ((CurrentMeasurement != null) && (CurrentMeasurement.ID.equals(MeasurementID)));
     		}
     		String MIDs = MeasurementID;
@@ -80,7 +79,7 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
         			do {
         				Thread.sleep(5000); //. wait for restarting
         				//.
-        	    		CurrentMeasurement = Camera.CurrentCamera_GetMeasurementDescriptor();
+        	    		CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
         			} while ((CurrentMeasurement != null) && (CurrentMeasurement.ID.equals(MeasurementID)));
         		}
     			if (!MIDs.equals("")) 
@@ -139,7 +138,7 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
     		}
     		//.
     		if (SA.length == 3) {
-            	Camera.CurrentCamera_FlashMeasurement();
+    			TVideoRecorder.VideoRecorder_FlashMeasurement();
             	//.
             	int MS = VideoRecorderModule.Measurement_GetSize(MeasurementID, flDecriptor,flAudio,flVideo);
             	if (MS > TVideoRecorderMeasurements.MeasurementDataTransferableLimit)
@@ -159,7 +158,7 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
     				FinishTimestamp = Double.parseDouble(SA[4]);
     			//.
     			try {
-    	    		TMeasurementDescriptor CurrentMeasurement = Camera.CurrentCamera_GetMeasurementDescriptor();
+    	    		TMeasurementDescriptor CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
     	    		if (CurrentMeasurement != null)
     	    			CurrentMeasurement.FinishTimestamp = TVideoRecorderMeasurements.GetCurrentTime();
     	    		//.

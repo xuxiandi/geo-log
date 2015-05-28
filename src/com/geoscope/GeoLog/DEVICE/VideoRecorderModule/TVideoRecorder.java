@@ -17,6 +17,7 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraRegistrator
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerH263;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerH264;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera.TCameraMeasurementInfo;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorder {
@@ -39,6 +40,50 @@ public class TVideoRecorder {
 		//.
 		public TMeasurementDescriptor Recording_GetMeasurementDescriptor() throws Exception;
 	}
+
+	private static TVideoRecorder _VideoRecorder = null;
+	
+	private static synchronized void SetVideoRecorder(TVideoRecorder VideoRecorder) {
+		_VideoRecorder = VideoRecorder;
+	}
+	
+	private static synchronized void ClearVideoRecorder(TVideoRecorder VideoRecorder) {
+		if (_VideoRecorder == VideoRecorder)
+			_VideoRecorder = null;
+	}
+	
+	public static synchronized boolean IsVideoRecorderNull() {
+		return (_VideoRecorder == null);
+	}
+
+	public static synchronized TVideoRecorder GetVideoRecorder() {
+		return _VideoRecorder;
+	}
+	
+	public static synchronized boolean VideoRecorder_IsSaving() {
+		if (_VideoRecorder == null)
+			return false; //. ->
+		return _VideoRecorder.flSaving; 
+	}	
+		
+	public static synchronized TCameraMeasurementInfo VideoRecorder_GetMeasurementInfo() throws Exception {
+		if (_VideoRecorder == null)
+			return null; //. ->
+		return _VideoRecorder.Recording_GetMeasurementInfo();
+	}
+
+	public static synchronized TMeasurementDescriptor VideoRecorder_GetMeasurementDescriptor() throws Exception {
+		if (_VideoRecorder == null)
+			return null; //. ->
+		return _VideoRecorder.Recording_GetMeasurementDescriptor(); 
+	}	
+		
+	public static synchronized void VideoRecorder_FlashMeasurement() throws Exception {
+		if (_VideoRecorder == null)
+			return; //. ->
+		_VideoRecorder.Recording_UpdateMeasurementDescriptor(); 
+	}	
+	
 	
 	private Context context;
 	//.
@@ -61,8 +106,6 @@ public class TVideoRecorder {
     //.
     public boolean 				flPreview = true;
     //.
-    public boolean				flHidden = false;
-    //.
     private boolean 			Status_flVisible = false;
     //.
     private Object Lock = new Object();
@@ -70,25 +113,33 @@ public class TVideoRecorder {
 	private PowerManager.WakeLock wl;
     
     @SuppressWarnings("deprecation")
-	public TVideoRecorder(Context pcontext, TVideoRecorderModule pVideoRecorderModule, TextView pcamera_lbStatus, boolean pflHidden) {
+	public TVideoRecorder(Context pcontext, TVideoRecorderModule pVideoRecorderModule, TextView pcamera_lbStatus) {
     	context = pcontext;
     	VideoRecorderModule = pVideoRecorderModule;
         camera_lbStatus = pcamera_lbStatus;
-        flHidden = pflHidden;
 		//.
 		camera_flStarted = false;
 		camera = null;
     	//.
 		PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
 		wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "DVRWakeLock");
+		//.
+		SetVideoRecorder(this);
+    }
+    
+	public TVideoRecorder(Context pcontext, TVideoRecorderModule pVideoRecorderModule) {
+		this(pcontext, pVideoRecorderModule, null);
+	}
+	
+    public void Destroy() {
+    	ClearVideoRecorder(this);
+    	//.
+		FinalizeRecorder();
     }
 	
 	private void DoStartRecording() {
 		synchronized (Lock) {
 			try {
-				if (camera_Surface == null)
-					return; //. -> 
-				//.
 				try {
 					switch (Mode) {
 					
@@ -144,9 +195,6 @@ public class TVideoRecorder {
 				StopRecording();
 			//.
 			try {
-				if (camera_Surface == null)
-					return Result; //. -> 
-				//.
 				Address = "";
 				AudioPort = 0;
 				VideoPort = 0;
@@ -230,14 +278,6 @@ public class TVideoRecorder {
 		}
 	}
 	
-	public Camera.TCameraMeasurementInfo Recording_GetMeasurementInfo() throws Exception {
-		return Camera.CurrentCamera_GetMeasurementInfo();
-	}
-	
-	public TMeasurementDescriptor Recording_GetMeasurementDescriptor() throws Exception {
-		return Camera.CurrentCamera_GetMeasurementDescriptor();
-	}
-	
 	public void InitializeRecorder() {
 		if (RecorderIsInitialized())
 			return; //. ->
@@ -249,8 +289,6 @@ public class TVideoRecorder {
 		else {
 			if (IsRecording()) 
 				StopRecording();
-	        /*if (!flHidden)
-	        	Toast.makeText(context, context.getString(R.string.SRecordingIsStopped), Toast.LENGTH_LONG).show();*/
 		}
 		//.
 		wl.acquire();
@@ -342,7 +380,6 @@ public class TVideoRecorder {
 			camera_lbStatus.setText(R.string.SCameraOff);
 		}
 	}
-
 	
 	private static final int MESSAGE_STARTRECORDING		= 1;
 	
@@ -362,5 +399,16 @@ public class TVideoRecorder {
         	}
         }
     };
- 	
+
+	public Camera.TCameraMeasurementInfo Recording_GetMeasurementInfo() throws Exception {
+		return camera.GetMeasurementInfo();
+	}
+	
+	public TMeasurementDescriptor Recording_GetMeasurementDescriptor() throws Exception {
+		return camera.GetMeasurementCurrentDescriptor();
+	}
+
+	public void Recording_UpdateMeasurementDescriptor() throws Exception {
+		camera.UpdateMeasurementCurrentDescriptor();
+	}
 }

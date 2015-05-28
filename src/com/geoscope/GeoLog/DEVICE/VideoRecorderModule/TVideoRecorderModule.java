@@ -59,7 +59,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoReco
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderVideoFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.TMediaFrameServer;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -217,7 +216,7 @@ public class TVideoRecorderModule extends TModule {
 									for (int I = 0; I < Measurements.length; I++) 
 										if (Measurements[I] != null) {
 											String MeasurementID = Measurements[I].getName();
-											TMeasurementDescriptor CurrentMeasurement = Camera.CurrentCamera_GetMeasurementDescriptor();
+											TMeasurementDescriptor CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
 											if (!((CurrentMeasurement != null) && CurrentMeasurement.ID.equals(MeasurementID))) {
 												try {
 													ProcessMeasurement(MeasurementID,TransferBuffer);
@@ -231,7 +230,7 @@ public class TVideoRecorderModule extends TModule {
 									for (int I = 0; I < Measurements.length; I++) 
 										if (Measurements[I] != null) {
 											String MeasurementID = Measurements[I];
-											TMeasurementDescriptor CurrentMeasurement = Camera.CurrentCamera_GetMeasurementDescriptor();
+											TMeasurementDescriptor CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
 											if (!((CurrentMeasurement != null) && CurrentMeasurement.ID.equals(MeasurementID))) {
 												try {
 													ProcessMeasurement(MeasurementID,TransferBuffer);
@@ -1037,10 +1036,10 @@ public class TVideoRecorderModule extends TModule {
                 	break; //. >
                 	
                 case MESSAGE_CHECKRECORDERMEASUREMENT:
-                	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
-        			if ((VideoRecorderPanel != null) && VideoRecorderPanel.IsRecording() && VideoRecorderPanel.IsSaving()) 
+                	TVideoRecorder VideoRecorder = TVideoRecorder.GetVideoRecorder();
+        			if ((VideoRecorder != null) && VideoRecorder.IsRecording() && VideoRecorder.flSaving) 
         				try {
-        					TMeasurementDescriptor CurrentMeasurement = VideoRecorderPanel.Recording_GetMeasurementDescriptor();
+        					TMeasurementDescriptor CurrentMeasurement = VideoRecorder.Recording_GetMeasurementDescriptor();
         					if ((CurrentMeasurement != null) && CurrentMeasurement.IsStarted()) {
         						double NowTime = TVideoRecorderMeasurements.GetCurrentTime();
         						if ((NowTime-CurrentMeasurement.StartTimestamp) > MeasurementConfiguration.MaxDuration)
@@ -1072,28 +1071,28 @@ public class TVideoRecorderModule extends TModule {
     	if (!flEnabled) 
     		return; //. ->
     	//.
-    	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
-    	if (Active.BooleanValue() && (VideoRecorderPanel != null)) {
+    	TVideoRecorder VideoRecorder = TVideoRecorder.GetVideoRecorder();
+    	if (Active.BooleanValue() && (VideoRecorder != null)) {
     		boolean flRestart = false;
     		boolean flStop = false;
-			if (Recording.BooleanValue() && VideoRecorderPanel.IsRecording()) {
-				flRestart = (!((Mode.GetValue() == VideoRecorderPanel.GetMode()) && (Transmitting.BooleanValue() == VideoRecorderPanel.IsTransmitting()) && (Saving.BooleanValue() == VideoRecorderPanel.IsSaving()) && (Audio.BooleanValue() == VideoRecorderPanel.IsAudio()) && (Video.BooleanValue() == VideoRecorderPanel.IsVideo())));
+			if (Recording.BooleanValue() && VideoRecorder.IsRecording()) {
+				flRestart = (!((Mode.GetValue() == VideoRecorder.Mode) && (Transmitting.BooleanValue() == VideoRecorder.flTransmitting) && (Saving.BooleanValue() == VideoRecorder.flSaving) && (Audio.BooleanValue() == VideoRecorder.flAudio) && (Video.BooleanValue() == VideoRecorder.flVideo)));
 			}
 			else
 				if (Recording.BooleanValue())
 					flRestart = true;
 				else
-					if (VideoRecorderPanel.IsRecording())
+					if (VideoRecorder.IsRecording())
 						flStop = true;
 			if (flRestart) {
-				boolean flSetTransmitting = ((Transmitting.BooleanValue() != VideoRecorderPanel.IsTransmitting()) && (Mode.GetValue() == VideoRecorderPanel.GetMode()) && (Saving.BooleanValue() == VideoRecorderPanel.IsSaving()) && (Audio.BooleanValue() == VideoRecorderPanel.IsAudio()) && (Video.BooleanValue() == VideoRecorderPanel.IsVideo()));
+				boolean flSetTransmitting = ((Transmitting.BooleanValue() != VideoRecorder.flTransmitting) && (Mode.GetValue() == VideoRecorder.Mode) && (Saving.BooleanValue() == VideoRecorder.flSaving) && (Audio.BooleanValue() == VideoRecorder.flAudio) && (Video.BooleanValue() == VideoRecorder.flVideo));
 				if (flSetTransmitting) {
 					if (Transmitting.BooleanValue()) {
 						if (Device.idGeographServerObject != 0)
-							VideoRecorderPanel.StartTransmitting(Device.idGeographServerObject);
+							VideoRecorder.StartTransmitting(Device.idGeographServerObject);
 					}
 					else
-						VideoRecorderPanel.FinishTransmitting();
+						VideoRecorder.FinishTransmitting();
 				}
 				else {
     				TReceiverDescriptor RD = GetReceiverDescriptor();
@@ -1108,8 +1107,7 @@ public class TVideoRecorderModule extends TModule {
             				}
             	    	}
             	    	//.
-            			if (VideoRecorderPanel.RestartRecording(RD, Mode.GetValue(), Transmitting.BooleanValue(), Saving.BooleanValue(), Audio.BooleanValue(),Video.BooleanValue(), Recording.flPreview) && (!TVideoRecorderPanel.flHidden))
-            				/*///? Toast.makeText(Device.context, Device.context.getString(R.string.SRecordingIsStarted)+RD.Address, Toast.LENGTH_LONG).show()*/;
+            			if (VideoRecorder.RestartRecording(RD, Mode.GetValue(), Transmitting.BooleanValue(), Saving.BooleanValue(), Audio.BooleanValue(),Video.BooleanValue(), Recording.flPreview) && (!TVideoRecorderPanel.flHidden));
             		}
 				}
 			}
@@ -1118,28 +1116,36 @@ public class TVideoRecorderModule extends TModule {
     				FinishRecorder();
     	}
     	else
-    		if (Active.BooleanValue()) {
-    			if (!TVideoRecorderPanel.flStarting) {
-            		TVideoRecorderPanel.flStarting = true;
-            		//.
-    				TVideoRecorderPanel.flHidden = RecorderIsHidden;
-        	    	if (TVideoRecorderPanel.flHidden) {
-        				TReflector RFL = TReflector.GetReflector();
-        				if (RFL != null) {
-            				TReflectorComponent Reflector = RFL.Component;
-            	        	if (((Reflector != null) && Reflector.flVisible) || Video.BooleanValue())
-            	        		TVideoRecorderPanel.flHidden = false;
-        				}
-        	    	}
-        			//.
-            		Intent intent = new Intent(Device.context,TVideoRecorderPanel.class);
-            		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            		Device.context.startActivity(intent);
-    			}
-    		}
-    		else 
+    		if (Active.BooleanValue()) 
+    	    	if (Recording.flPreview || !MediaFrameServer.H264EncoderServer_IsAvailable()) {
+        			if (!TVideoRecorderPanel.flStarting) {
+                		TVideoRecorderPanel.flStarting = true;
+                		//.
+        				TVideoRecorderPanel.flHidden = RecorderIsHidden;
+            	    	if (TVideoRecorderPanel.flHidden) {
+            				TReflector RFL = TReflector.GetReflector();
+            				if (RFL != null) {
+                				TReflectorComponent Reflector = RFL.Component;
+                	        	if (((Reflector != null) && Reflector.flVisible) || Video.BooleanValue())
+                	        		TVideoRecorderPanel.flHidden = false;
+            				}
+            	    	}
+            			//. start recorder with preview
+                		Intent intent = new Intent(Device.context,TVideoRecorderPanel.class);
+                		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                		Device.context.startActivity(intent);
+        			}
+    	    	}
+    	    	else
+            		new TVideoRecorder(Device.context, this); //. start recorder silently
+    		else {
+    			if (VideoRecorder != null)
+    				VideoRecorder.Destroy();
+    			//.
+    	    	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
     			if (VideoRecorderPanel != null)
     				VideoRecorderPanel.finish();
+    		}
     }
     
     public void PostUpdateRecorderState() {
@@ -1147,9 +1153,9 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void FinishRecorder() {
-    	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
-    	if (VideoRecorderPanel != null)
-    		VideoRecorderPanel.StopRecording();
+    	TVideoRecorder VideoRecorder = TVideoRecorder.GetVideoRecorder();
+    	if (VideoRecorder != null)
+    		VideoRecorder.StopRecording();
 		//.
 		/*///??? synchronized (this) {
 			if (ServerSaver != null)
@@ -1158,8 +1164,8 @@ public class TVideoRecorderModule extends TModule {
     }
     
     public void ReinitializeRecorder() {
-    	TVideoRecorderPanel VideoRecorderPanel = TVideoRecorderPanel.GetVideoRecorderPanel();
-    	if ((VideoRecorderPanel != null) && VideoRecorderPanel.IsRecording())
+    	TVideoRecorder VideoRecorder = TVideoRecorder.GetVideoRecorder();
+    	if ((VideoRecorder != null) && VideoRecorder.IsRecording())
     		FinishRecorder();
     	UpdateRecorderState();
     }
@@ -1182,7 +1188,7 @@ public class TVideoRecorderModule extends TModule {
         
         public void FlashRecorderMeasurement() {
         	try {
-				Camera.CurrentCamera_FlashMeasurement();
+        		TVideoRecorder.VideoRecorder_FlashMeasurement();
 			} catch (Exception E) {
 	        	CompletionHandler.obtainMessage(MESSAGE_OPERATION_ERROR,new Exception(Device.context.getString(R.string.SMeasurementUpdatingError)+E.getMessage())).sendToTarget();        	
 			}

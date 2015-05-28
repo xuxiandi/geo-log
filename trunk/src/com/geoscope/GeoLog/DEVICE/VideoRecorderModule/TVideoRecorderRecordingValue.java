@@ -12,7 +12,7 @@ public class TVideoRecorderRecordingValue extends TComponentTimestampedBooleanVa
 
 	protected TVideoRecorderModule VideoRecorderModule;
 	//.
-	public boolean flPreview = true;
+	public boolean flPreview = false;
 	
 	public TVideoRecorderRecordingValue(TVideoRecorderModule pVideoRecorderModule) {
 		VideoRecorderModule = pVideoRecorderModule;

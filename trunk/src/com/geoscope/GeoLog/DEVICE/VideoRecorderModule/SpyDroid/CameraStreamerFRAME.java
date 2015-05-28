@@ -471,14 +471,10 @@ public class CameraStreamerFRAME extends Camera {
 		//.
 		camera = null;
 		VideoFrameCaptureCallback = new TVideoFrameCaptureCallback();
-		//.
-		SetCurrentCamera(this);
 	}
 	
 	@Override
 	public void Destroy() throws Exception {
-		SetCurrentCamera(null);
-		//.
 		Finalize();
 	}
 	
@@ -575,13 +571,16 @@ public class CameraStreamerFRAME extends Camera {
 	        if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
 	        	Surface 	Preview = null;
 	        	Rect 		PreviewFrame = null;
-	        	if (pflPreview) {
+	        	if (pflPreview && (holder != null)) {
 	        		Preview = holder.getSurface();
 	        		PreviewFrame = holder.getSurfaceFrame();
 	        	}
 	        	VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, camera_parameters_Video_FrameSize.width, camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, Preview,PreviewFrame);
 	        }
 	        else {
+				if (holder == null)
+					throw new Exception("surface isn't set"); //. ->
+				//.
 		        for (int I = 0; I < 4; I++) 
 		        	camera.addCallbackBuffer(CreateCallbackBuffer());
 		        //.

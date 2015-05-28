@@ -12,36 +12,6 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.PacketTime
 
 public class Camera {
 
-    private static Camera CurrentCamera = null;
-
-	public static synchronized void SetCurrentCamera(Camera CS) {
-		CurrentCamera = CS;
-	}
-	
-	public static synchronized boolean CurrentCamera_IsSaving() {
-		if (CurrentCamera == null)
-			return false; //. ->
-		return CurrentCamera.flSaving; 
-	}	
-		
-	public static synchronized TCameraMeasurementInfo CurrentCamera_GetMeasurementInfo() throws Exception {
-		if (CurrentCamera == null)
-			return null; //. ->
-		return CurrentCamera.GetMeasurementInfo();
-	}
-
-	public static synchronized TMeasurementDescriptor CurrentCamera_GetMeasurementDescriptor() throws Exception {
-		if (CurrentCamera == null)
-			return null; //. ->
-		return CurrentCamera.GetMeasurementCurrentDescriptor(); 
-	}	
-		
-	public static synchronized void CurrentCamera_FlashMeasurement() throws Exception {
-		if (CurrentCamera == null)
-			return; //. ->
-		CurrentCamera.UpdateMeasurementCurrentDescriptor(); 
-	}	
-	
 	public static class TCameraMeasurementInfo {
 		
 		public String DatabaseFolder;
@@ -72,6 +42,7 @@ public class Camera {
 
 		public VideoSetupError() {}
 	}
+	
 	
 	protected TVideoRecorderModule VideoRecorderModule;
 	//.

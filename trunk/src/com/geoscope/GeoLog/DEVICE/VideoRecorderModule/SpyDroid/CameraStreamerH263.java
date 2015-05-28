@@ -53,14 +53,10 @@ public class CameraStreamerH263 extends Camera {
 		//.
 		sound = new MediaStreamer();
 		video = new MediaStreamer();
-		//.
-		SetCurrentCamera(this);
 	}
 	
 	@Override
 	public void Destroy() throws Exception {
-		SetCurrentCamera(null);
-		//.
 		Finalize();
 		//.
 		if (video != null) {
@@ -124,6 +120,9 @@ public class CameraStreamerH263 extends Camera {
 		H263PacketizerGSPS _vstream = null;
 		if (flVideo) {
 			try {
+				if (holder == null)
+					throw new Exception("surface isn't set"); //. ->
+				//.
 				video.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
 				video.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 				video.setVideoFrameRate(fps);

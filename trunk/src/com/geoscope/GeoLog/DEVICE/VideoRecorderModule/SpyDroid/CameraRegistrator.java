@@ -19,14 +19,10 @@ public class CameraRegistrator extends Camera {
 		super(pVideoRecorderModule);
 		//.
 		media = new MediaRecorder();
-		//.
-		SetCurrentCamera(this);
 	}
 	
 	@Override
 	public void Destroy() throws Exception {
-		SetCurrentCamera(null);
-		//.
 		Finalize();
 		//.
 		if (media != null) {
@@ -82,6 +78,9 @@ public class CameraRegistrator extends Camera {
     		media.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
     	}
     	if (flVideo) {
+			if (holder == null)
+				throw new Exception("surface isn't set"); //. ->
+			//.
     		if (fps > 0)
     			media.setVideoFrameRate(fps);
         	media.setVideoSize(resX, resY);

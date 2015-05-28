@@ -33,21 +33,17 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
     
 	private static TVideoRecorderPanel _VideoRecorderPanel = null;
 	
-	public static synchronized TVideoRecorderPanel GetVideoRecorderPanel() {
-		return _VideoRecorderPanel;
-	}
-	
-	public static synchronized void SetVideoRecorderPanel(TVideoRecorderPanel Panel) {
+	private static synchronized void SetVideoRecorderPanel(TVideoRecorderPanel Panel) {
 		_VideoRecorderPanel = Panel;
 	}
 	
-	public static synchronized void ClearVideoRecorderPanel(TVideoRecorderPanel Panel) {
+	private static synchronized void ClearVideoRecorderPanel(TVideoRecorderPanel Panel) {
 		if (_VideoRecorderPanel == Panel)
 			_VideoRecorderPanel = null;
 	}
 	
-	public static synchronized boolean IsVideoRecorderPanelNull() {
-		return (_VideoRecorderPanel == null);
+	public static synchronized TVideoRecorderPanel GetVideoRecorderPanel() {
+		return _VideoRecorderPanel;
 	}
 	
 	
@@ -78,6 +74,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
 			VideoRecorder.FinalizeRecorder();
+			//.
 			VideoRecorder.camera_Surface_Clear(holder);
 		}
 		@Override
@@ -86,6 +83,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 				VideoRecorder.FinalizeRecorder();
 				//.
 				VideoRecorder.camera_Surface_Set(holder);
+				//.
 				VideoRecorder.InitializeRecorder();
 			}
 		}
@@ -131,7 +129,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
         		TTracker Tracker = TTracker.GetTracker();
         		if (Tracker == null)
         			throw new Exception("Tracker is null"); //. =>
-        		VideoRecorder = new TVideoRecorder(this, Tracker.GeoLog.VideoRecorderModule, VideoRecorder_lbStatus, flHidden);
+        		VideoRecorder = new TVideoRecorder(this, Tracker.GeoLog.VideoRecorderModule, VideoRecorder_lbStatus);
             }
             catch (Exception E) {
             	Toast.makeText(this, getString(R.string.SVideoRecorderInitializationError)+E.getMessage(), Toast.LENGTH_LONG).show();
@@ -144,9 +142,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
     		VideoRecorder_Surface_HolderCallbackHandler = new TVideoRecorderSurfaceHolderCallbackHandler();
     		//.
     		SetVideoRecorderPanel(TVideoRecorderPanel.this);
-        	//.
-            /*///- if (!flHidden)
-            	Toast.makeText(this, getString(R.string.SVideoRegistratorIsOn), Toast.LENGTH_LONG).show();*/
+    		//.
     		SetSurface(false);
     	}
     	finally {
@@ -157,6 +153,11 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
     @Override
     public void onDestroy() {
     	ClearVideoRecorderPanel(this);
+    	//.
+    	if (VideoRecorder != null) {
+    		VideoRecorder.Destroy();
+    		VideoRecorder = null;
+    	}
     	//.
 		super.onDestroy();
     }
@@ -337,11 +338,11 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 	}
 	
 	public Camera.TCameraMeasurementInfo Recording_GetMeasurementInfo() throws Exception {
-		return Camera.CurrentCamera_GetMeasurementInfo();
+		return VideoRecorder.Recording_GetMeasurementInfo();
 	}
 	
     @Override
 	public TMeasurementDescriptor Recording_GetMeasurementDescriptor() throws Exception {
-		return Camera.CurrentCamera_GetMeasurementDescriptor();
+		return VideoRecorder.Recording_GetMeasurementDescriptor();
 	}
 }

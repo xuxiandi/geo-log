@@ -401,14 +401,27 @@ public class TVideoRecorder {
     };
 
 	public Camera.TCameraMeasurementInfo Recording_GetMeasurementInfo() throws Exception {
-		return camera.GetMeasurementInfo();
+		synchronized (Lock) {
+			if (camera != null)
+				return camera.GetMeasurementInfo(); //. ->
+			else
+				return null; //. ->
+		}
 	}
 	
 	public TMeasurementDescriptor Recording_GetMeasurementDescriptor() throws Exception {
-		return camera.GetMeasurementCurrentDescriptor();
+		synchronized (Lock) {
+			if (camera != null)
+				return camera.GetMeasurementCurrentDescriptor(); //. ->
+			else
+				return null; //. ->
+		}
 	}
 
 	public void Recording_UpdateMeasurementDescriptor() throws Exception {
-		camera.UpdateMeasurementCurrentDescriptor();
+		synchronized (Lock) {
+			if (camera != null)
+				camera.UpdateMeasurementCurrentDescriptor();
+		}
 	}
 }

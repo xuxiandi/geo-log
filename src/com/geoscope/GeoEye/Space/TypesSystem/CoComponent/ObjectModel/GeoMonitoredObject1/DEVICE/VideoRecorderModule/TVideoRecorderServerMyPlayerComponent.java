@@ -943,6 +943,9 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
         });
         //.
         ivVideoRecorderServerMyPlayerAudioOnly = (ImageView)ParentLayout.findViewById(R.id.ivVideoRecorderServerMyPlayerAudioOnly);
+		//.
+        if (flStandalone)
+        	cbVideoRecorderServerMyPlayerPause.setVisibility(View.VISIBLE);
 	}
 	
 	@Override

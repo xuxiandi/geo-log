@@ -1309,6 +1309,7 @@ public class TObjectModelHistoryPanel extends Activity {
 	private LinearLayout 							MeasurementProcessors_Layout = null;
 	private ArrayList<TMeasurementProcessorItem>	MeasurementProcessors = null;
 	private boolean 								MeasurementProcessors_flEnabled = false;
+	private boolean 								MeasurementProcessors_flSetup = false;
 	private int										MeasurementProcessors_VisibleCounter = 0;
 	
     public void onCreate(Bundle savedInstanceState) {
@@ -1470,12 +1471,12 @@ public class TObjectModelHistoryPanel extends Activity {
             public void onClick(View v) {
             	MeasurementProcessors_flEnabled = cbShowMeasurementViewer.isChecked(); 
             	if (MeasurementProcessors_flEnabled) {
-            		cbTimeAnimation.setEnabled(true);
+            		Animation_SetEnabled(true);
             	}
             	else {
             		MeasurementProcessors_Pause();
                 	//.
-            		cbTimeAnimation.setEnabled(false);
+            		Animation_SetEnabled(false);
             	}
             	//. validation
             	TimeIntervalSlider.ValidateCurrentTime(true);
@@ -1487,7 +1488,7 @@ public class TObjectModelHistoryPanel extends Activity {
         	
             @Override
             public void onClick(View v) {
-            	if (cbTimeAnimation.isChecked())
+            	if (Animation_IsAllowedAtTheMoment())
                 	TimeIntervalSlider.ValidateCurrentTime(true);
             	else
             		MeasurementProcessors_Pause();
@@ -1629,7 +1630,7 @@ public class TObjectModelHistoryPanel extends Activity {
 			        		//.
 							if (MeasurementProcessors_flEnabled || (MeasurementProcessors_VisibleCounter > 0)) 
 								try {
-									MeasurementProcessors_SetCurrentTime(Time, (flChanging || !cbTimeAnimation.isChecked()), (flDelayAllowed ? MeasurementProcessor_SetPositionDelay : 0));			        		
+									MeasurementProcessors_SetCurrentTime(Time, (flChanging || !Animation_IsAllowedAtTheMoment()), (flDelayAllowed ? MeasurementProcessor_SetPositionDelay : 0));			        		
 								} catch (Exception E) {
 									Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 								}
@@ -2076,22 +2077,6 @@ public class TObjectModelHistoryPanel extends Activity {
 	}
 	
 	private void MeasurementProcessor_Initialize(final TMeasurementProcessorItem MeasurementProcessor) throws Exception {
-		MeasurementProcessor.Processor.OnVideoSurfaceChangedHandler = new TVideoRecorderServerMyPlayerComponent.TOnSurfaceChangedHandler() {
-			
-			@Override
-			public void DoOnSurfaceChanged(SurfaceHolder surface) {
-				try {
-					MeasurementProcessor.Processor.Reset();
-				} catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-					Toast.makeText(TObjectModelHistoryPanel.this, S, Toast.LENGTH_LONG).show();
-				}
-				//.
-				TimeIntervalSlider.ValidateCurrentTime(true);
-			}
-		};
 		MeasurementProcessor.Processor.OnProgressHandler = new TVideoRecorderServerMyPlayerComponent.TOnProgressHandler() {
 			
 			private static final double MinTriggerInterval = (1.0/(24.0*3600.0))*1.0; //. seconds
@@ -2146,10 +2131,15 @@ public class TObjectModelHistoryPanel extends Activity {
     	}
 	}
 	
-	private void MeasurementProcessor_SetCurrentTime(final TMeasurementProcessorItem MeasurementProcessor, double Timestamp, final boolean flPause, final int Delay) throws IOException, InterruptedException {
+	private void MeasurementProcessor_SetCurrentTime(final TMeasurementProcessorItem MeasurementProcessor, double Timestamp, boolean flPause, int Delay) throws IOException, InterruptedException {
 		TSensorMeasurementDescriptor AMeasurement = null;
 		if (MeasurementProcessors_flEnabled && MeasurementProcessor.flEnabled)
 			AMeasurement = History.SensorMeasurements.GetTypedMeasurementByTimestamp(MeasurementProcessor.Processor.GetTypeID(), Timestamp);
+		//.
+		if (MeasurementProcessor.CurrentMeasurementOpening != null) {
+			MeasurementProcessor.CurrentMeasurementOpening.Cancel();
+			MeasurementProcessor.CurrentMeasurementOpening = null;
+		}
 		//.
 		if (AMeasurement != null) {
 			MeasurementProcessor.CurrentMeasurement = AMeasurement;
@@ -2161,14 +2151,11 @@ public class TObjectModelHistoryPanel extends Activity {
 			Item.Location = MeasurementProcessor.CurrentMeasurement.Location;
 			Item.Position = (Timestamp-MeasurementProcessor.CurrentMeasurement.StartTimestamp);
 			//.
-			if (MeasurementProcessor.CurrentMeasurementOpening != null) {
-				MeasurementProcessor.CurrentMeasurementOpening.Cancel();
-				MeasurementProcessor.CurrentMeasurementOpening = null;
-			}
-			//.
         	if (MeasurementProcessor.Processor.IsSetup() && (MeasurementProcessor.CurrentMeasurement != null) && TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementProcessor.Processor.Measurement.Descriptor.ID, MeasurementProcessor.CurrentMeasurement.ID)) 
         		MeasurementProcessor.Processor.SetPosition(Item.Position, Delay, flPause);
         	else {
+    			MeasurementProcessors_ClearSetupState();
+				//.
         		MeasurementProcessor.CurrentMeasurementOpening = new TAsyncProcessing() {
 
         			@Override
@@ -2189,21 +2176,25 @@ public class TObjectModelHistoryPanel extends Activity {
                     				if (Canceller.flCancel) 
                     					return true; //. ->
                     				//.
-    			    	        	if (!MeasurementProcessor.Processor.IsSetup() || !((MeasurementProcessor.CurrentMeasurement != null) && TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementProcessor.CurrentMeasurement.ID, MeasurementProcessor.Processor.Measurement.Descriptor.ID))) { 
+    			    	        	if (!MeasurementProcessor.Processor.IsSetup() || !((MeasurementProcessor.CurrentMeasurement != null) && TSensorMeasurementDescriptor.IDsAreTheSame(MeasurementProcessor.CurrentMeasurement.ID, MeasurementProcessor.Processor.Measurement.Descriptor.ID))) {  
     			    	        		MeasurementProcessor.Processor.Setup(Measurement);
-    	    		    	        	if (!MeasurementProcessor.Processor.IsVisible()) {
-    	    		    					MeasurementProcessors_VisibleCounter++;
-    	    		    					if (MeasurementProcessors_VisibleCounter == 1)
-    	    		    						MeasurementProcessors_Layout.setVisibility(View.VISIBLE);
-    	    		    					//.
-    	    		    			        LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f/MeasurementProcessors_VisibleCounter);
-	    		    						MeasurementProcessors_Layout.setLayoutParams(LP);
-	    		    						//.
-    	    		    					MeasurementProcessor.Processor.Show();
-    	    		    	        	}
+    				    	        	//.
+    				    	        	if (!MeasurementProcessor.Processor.IsVisible()) {
+    				    					MeasurementProcessors_VisibleCounter++;
+    				    					if (MeasurementProcessors_VisibleCounter == 1)
+    				    						MeasurementProcessors_Layout.setVisibility(View.VISIBLE);
+    				    					//.
+    				    			        LinearLayout.LayoutParams LP = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f/MeasurementProcessors_VisibleCounter);
+    			    						MeasurementProcessors_Layout.setLayoutParams(LP);
+    			    						//.
+    				    					MeasurementProcessor.Processor.Show();
+    				    	        	}
     			    	        	}
     	    		    	        //. validation
-    			    	        	MeasurementProcessor_SetCurrentTime(MeasurementProcessor, TimeIntervalSlider.CurrentTime, flPause, 0/*Delay*/);
+    			    	        	MeasurementProcessor_SetCurrentTime(MeasurementProcessor, TimeIntervalSlider.CurrentTime, true, 0/*Delay*/);
+    			    	        	//.
+    			    	        	if (MeasurementProcessors_IsSetup())
+    			    					TimeIntervalSlider.ValidateCurrentTime(true);
     			    	        	//.
         			    	        return true; //. ->
         	    				}
@@ -2255,8 +2246,6 @@ public class TObjectModelHistoryPanel extends Activity {
 		}
 		else {
     		try {
-    			MeasurementProcessor.Processor.Reset();
-    			//.
 				if (MeasurementProcessor.Processor.IsVisible()) {
 					MeasurementProcessor.Processor.Hide();
 					//.
@@ -2268,6 +2257,9 @@ public class TObjectModelHistoryPanel extends Activity {
 						MeasurementProcessors_Layout.setLayoutParams(LP);
 					}
 				}
+				//.
+    			if (MeasurementProcessor.Processor.IsSetup())
+    				MeasurementProcessor.Processor.Reset();
 			} catch (Exception E) {
 				String S = E.getMessage();
 				if (S == null)
@@ -2305,6 +2297,29 @@ public class TObjectModelHistoryPanel extends Activity {
 		MeasurementProcessors = null;
 	}
 	
+	private void MeasurementProcessors_CheckSetupState() {
+		MeasurementProcessors_flSetup = true;
+		int Cnt = MeasurementProcessors.size();
+		for (int I = 0; I < Cnt; I++) {
+			TMeasurementProcessorItem Processor = MeasurementProcessors.get(I);
+			if (Processor.CurrentMeasurement != null) {
+				MeasurementProcessors_flSetup &= (Processor.Processor.IsSetup() && TSensorMeasurementDescriptor.IDsAreTheSame(Processor.CurrentMeasurement.ID, Processor.Processor.Measurement.Descriptor.ID));
+				if (!MeasurementProcessors_flSetup)
+					return; //. ->
+			}
+		}
+	}
+	
+	private void MeasurementProcessors_ClearSetupState() {
+		MeasurementProcessors_flSetup = false;
+	}
+	
+	private boolean MeasurementProcessors_IsSetup() {
+		if (!MeasurementProcessors_flSetup)
+			MeasurementProcessors_CheckSetupState();
+		return MeasurementProcessors_flSetup;
+	}
+	
 	private void MeasurementProcessors_SetCurrentTime(double Timestamp, boolean flPause, int Delay) throws IOException, InterruptedException {
 		int Cnt = MeasurementProcessors.size();
 		for (int I = 0; I < Cnt; I++) {
@@ -2318,6 +2333,23 @@ public class TObjectModelHistoryPanel extends Activity {
 		int Cnt = MeasurementProcessors.size();
 		for (int I = 0; I < Cnt; I++) 
 			MeasurementProcessors.get(I).Processor.Pause();
+	}
+	
+	private boolean Animation_IsActive() {
+		return cbTimeAnimation.isChecked();
+	}
+	
+	private boolean Animation_IsAllowedAtTheMoment() {
+		return (Animation_IsActive() && MeasurementProcessors_IsSetup());
+	}
+	
+	private void Animation_SetActive(boolean flActive) {
+		if (Animation_IsActive() != flActive)
+			cbTimeAnimation.performClick();
+	}
+	
+	private void Animation_SetEnabled(boolean flEnabled) {
+		cbTimeAnimation.setEnabled(flEnabled);
 	}
 	
     private void OpenCurrentTimeInReflector() throws Exception {
@@ -2337,8 +2369,8 @@ public class TObjectModelHistoryPanel extends Activity {
 			//.
 			SendShowGeoLocationRecordMessage(ReflectorID,GeoLocationRecord, 2000/*delay, ms*/);
 			//.
-			if (cbTimeAnimation.isChecked())
-				cbTimeAnimation.performClick();
+			if (Animation_IsActive())
+				Animation_SetActive(false);
     	}
     }
     
@@ -2346,7 +2378,7 @@ public class TObjectModelHistoryPanel extends Activity {
     private double MeasurementSkipInterval = (1.0/(24.0*3600.0))*1; //. seconds
     
     private void OpenCurrentTimeAVMeasurementInProcessor() {
-    	TSensorMeasurementDescriptor _Measurement = History.SensorMeasurements.GetMeasurementByTimestamp(TimeIntervalSlider.CurrentTime);
+    	TSensorMeasurementDescriptor _Measurement = History.SensorMeasurements.GetTypedMeasurementByTimestamp(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID, TimeIntervalSlider.CurrentTime);
     	if (_Measurement == null) 
     		return; //. ->
 		double DistanceToFinish = (_Measurement.FinishTimestamp-TimeIntervalSlider.CurrentTime);
@@ -2390,8 +2422,8 @@ public class TObjectModelHistoryPanel extends Activity {
 				}
 			});
 			//.
-			if (cbTimeAnimation.isChecked())
-				cbTimeAnimation.performClick();
+			if (Animation_IsActive())
+				Animation_SetActive(false);
 		}
     }
     

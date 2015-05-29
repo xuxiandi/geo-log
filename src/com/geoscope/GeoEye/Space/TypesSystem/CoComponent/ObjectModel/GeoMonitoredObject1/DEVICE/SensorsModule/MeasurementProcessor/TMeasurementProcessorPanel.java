@@ -73,8 +73,10 @@ public class TMeasurementProcessorPanel extends Activity {
     	            if (Processor == null)
     	            	throw new Exception("there is no handler for a type: "+Measurement.Descriptor.TypeID()); //. ->
     	            //.
-    	            Processor.SetLayout(TMeasurementProcessorPanel.this, ProcessorLayout);
     	            Processor.flStandalone = true;
+    	            //.
+    	            Processor.SetLayout(TMeasurementProcessorPanel.this, ProcessorLayout);
+    	            //.
     	            Processor.Start();
     	            //.
     	            Processor.Setup(Measurement);

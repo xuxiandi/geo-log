@@ -99,11 +99,14 @@ public class TURLFolderListComponent extends TUIComponent {
 	
 	public static synchronized void Components_AddNewURL(String URLListFolder, String URLName, byte[] URLData, TGeoScopeServerUser User) throws Exception {
 		TURLFolderListComponent.TURLFolderList URLFolderList = new TURLFolderListComponent.TURLFolderList(URLListFolder, User);
-		URLFolderList.Add(URLName,URLData);
-		//.
-		TURLFolderListComponent Component = Components_GetComponent(URLListFolder);
-		if (Component != null)
-			Component.PostStartUpdating();
+		com.geoscope.GeoEye.Space.URL.TURL URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlData(URLData, User);
+		if (URL != null) {
+			URLFolderList.Add(URLName,URLData,URL);
+			//.
+			TURLFolderListComponent Component = Components_GetComponent(URLListFolder);
+			if (Component != null)
+				Component.PostStartUpdating();
+		}
 	}
 	
 	public static class TURLFolderList {
@@ -287,7 +290,7 @@ public class TURLFolderListComponent extends TUIComponent {
 				return null; //. ->
 		}
 		
-		public String Add(String Name, byte[] Data) throws Exception {
+		public String Add(String Name, byte[] Data, com.geoscope.GeoEye.Space.URL.TURL URL) throws Exception {
 	        File F = new File(Folder);
 		    if (!F.exists()) 
 		    	F.mkdirs();
@@ -305,17 +308,13 @@ public class TURLFolderListComponent extends TUIComponent {
 			TItem Item = new TItem();
 			Item.ID = ID;
 			Item.Name = Name;
-    		Item.URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlData(Data, User);
+    		Item.URL = URL;
 			//.
-    		if (Item.URL != null) {
-    			Items.add(Item);
-    			//.
-    			Save();
-    			//.
-    			return ID; //. ->
-    		}
-    		else
-    			return null; //. ->
+			Items.add(Item);
+			//.
+			Save();
+			//.
+			return ID; //. ->
 		}
 		
 		public String Remove(int Index) throws Exception {
@@ -687,7 +686,7 @@ public class TURLFolderListComponent extends TUIComponent {
 			Bitmap BMP = null;
 			//.
 			if (!Item.BMP_flLoaded)
-				new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+				new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			else {
 				if (!Item.BMP_flNull)
 					if (flListIsScrolling)
@@ -697,7 +696,7 @@ public class TURLFolderListComponent extends TUIComponent {
 						if (BMP == null) {
 							Item.BMP_flLoaded = false;
 							//.
-							new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+							new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 						}
 					}
 			}
@@ -906,73 +905,82 @@ public class TURLFolderListComponent extends TUIComponent {
 		        	
 		            @Override
 		            public void OnSelectedFile(String fileName) {
-		        		final String SelectedFileName = fileName; 
-	                    //.
-		        		final EditText input = new EditText(ParentActivity);
-		        		input.setInputType(InputType.TYPE_CLASS_TEXT);
-		        		//.
-		        		final AlertDialog dlg = new AlertDialog.Builder(ParentActivity)
-		        		//.
-		        		.setTitle(R.string.SDataName)
-		        		.setMessage(R.string.SEnterName)
-		        		//.
-		        		.setView(input)
-		        		.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
-		        			
-		        			@Override
-		        			public void onClick(DialogInterface dialog, int whichButton) {
-		        				//. hide keyboard
-		        				InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-		        				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-		        				//.
-        						try {
-        							String Name = input.getText().toString();
-        							//.
-        							File F = new File(SelectedFileName);
-        							byte[] Data;
-        					    	long FileSize = F.length();
-        					    	FileInputStream FIS = new FileInputStream(F);
-        					    	try {
-        					    		Data = new byte[(int)FileSize];
-        					    		FIS.read(Data);
-        					    	}
-        					    	finally {
-        					    		FIS.close();
-        					    	}
-        					    	//.
-        					    	if (URLList != null) {
-        					    		if (Name.length() == 0)
-        					    			Name = "?";
-        					    		URLList.Add(Name, Data);
-        					    		//.
-        					    		Update();
-        					    	}
-        						} catch (Exception E) {
-        							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
-        						}
-		        			}
-		        		})
-		        		//.
-		        		.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
-		        			
-		        			@Override
-		        			public void onClick(DialogInterface dialog, int whichButton) {
-		        				// . hide keyboard
-		        				InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-		        				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-		        			}
-		        		}).create();
-		        		//.
-		        		input.setOnEditorActionListener(new OnEditorActionListener() {
-		        			
-		        			@Override
-		        			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
-		        				dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
-		        				return false;
-		        			}
-		                });        
-		        		// .
-		        		dlg.show();
+		            	try {
+							File F = new File(fileName);
+							final byte[] Data;
+					    	long FileSize = F.length();
+					    	FileInputStream FIS = new FileInputStream(F);
+					    	try {
+					    		Data = new byte[(int)FileSize];
+					    		FIS.read(Data);
+					    	}
+					    	finally {
+					    		FIS.close();
+					    	}
+		                    //.
+				    		final com.geoscope.GeoEye.Space.URL.TURL URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlData(Data, URLList.User);
+				    		//.
+				    		if (URL != null) {
+				        		final EditText input = new EditText(ParentActivity);
+				        		input.setInputType(InputType.TYPE_CLASS_TEXT);
+				        		if (URL.Name != null)
+				        			input.setText(URL.Name);
+				        		//.
+				        		final AlertDialog dlg = new AlertDialog.Builder(ParentActivity)
+				        		//.
+				        		.setTitle(R.string.SDataName)
+				        		.setMessage(R.string.SEnterName)
+				        		//.
+				        		.setView(input)
+				        		.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+				        			
+				        			@Override
+				        			public void onClick(DialogInterface dialog, int whichButton) {
+				        				//. hide keyboard
+				        				InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+				        				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+				        				//.
+		        						try {
+		        							String Name = input.getText().toString();
+		        					    	//.
+		        					    	if (URLList != null) {
+		        					    		if (Name.length() == 0)
+		        					    			Name = "?";
+		        					    		if (URL != null)
+		        					    			URLList.Add(Name, Data,URL);
+		        					    		//.
+		        					    		Update();
+		        					    	}
+		        						} catch (Exception E) {
+		        							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+		        						}
+				        			}
+				        		})
+				        		//.
+				        		.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+				        			
+				        			@Override
+				        			public void onClick(DialogInterface dialog, int whichButton) {
+				        				// . hide keyboard
+				        				InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+				        				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+				        			}
+				        		}).create();
+				        		//.
+				        		input.setOnEditorActionListener(new OnEditorActionListener() {
+				        			
+				        			@Override
+				        			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+				        				dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
+				        				return false;
+				        			}
+				                });        
+				        		// .
+				        		dlg.show();
+				    		}
+						} catch (Exception E) {
+							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+						}
 		            }
 
 					@Override

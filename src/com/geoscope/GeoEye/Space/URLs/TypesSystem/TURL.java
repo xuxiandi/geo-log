@@ -18,6 +18,8 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TURL {
 	}
 	
 	public static TURL GetURL(String TypeID, TGeoScopeServerUser pUser, Element pXMLDocumentRootNode) throws Exception {
+		if (com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.TURL.IsTypeOf(TypeID))
+			return com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.TURL.GetURL(TypeID, pUser,pXMLDocumentRootNode); //. ->
 		if (com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.TURL.IsTypeOf(TypeID))
 			return com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.TURL.GetURL(TypeID, pUser,pXMLDocumentRootNode); //. ->
 		if (com.geoscope.GeoEye.Space.URLs.TypesSystem.Positioner.TURL.IsTypeOf(TypeID))

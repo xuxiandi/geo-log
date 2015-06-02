@@ -64,6 +64,8 @@ public class TURL {
 	protected TGeoScopeServerUser User = null;
 	protected Element XMLDocumentRootNode = null;
 	//.
+	public String Name = null;
+	//.
 	protected Node 	URLNode;
 	protected int 	URLVersion;
 	//.
@@ -88,6 +90,14 @@ public class TURL {
 	}
 	
 	protected void Parse() throws Exception {
+		Name = null;
+		Node node = TMyXML.SearchNode(XMLDocumentRootNode,"Name");
+		if (node != null) {
+			node = node.getFirstChild();
+			if (node != null)
+				Name = node.getNodeValue();
+		}
+		//.
 		URLNode = TMyXML.SearchNode(XMLDocumentRootNode,"URL");
 		if (URLNode == null)
 			throw new Exception("there is no URL data node"); //. =>
@@ -96,7 +106,7 @@ public class TURL {
 		case 1:
 			try {
     			Value = "";
-    			Node node = TMyXML.SearchNode(URLNode,"Value");
+    			node = TMyXML.SearchNode(URLNode,"Value");
     			if (node != null) {
     				node = node.getFirstChild();
         			if (node != null)
@@ -131,6 +141,12 @@ public class TURL {
 	        Serializer.startTag("", "TypeID");
 	        Serializer.text(GetTypeID());
 	        Serializer.endTag("", "TypeID");
+	        //. Name
+	        if (Name != null) {
+		        Serializer.startTag("", "Name");
+		        Serializer.text(Name);
+		        Serializer.endTag("", "Name");
+	        }
 	        //. URL
 	        Serializer.startTag("", "URL");
 	        //. Version
@@ -153,6 +169,10 @@ public class TURL {
 	
 	public boolean HasData() {
 		return false;
+	}
+	
+	public boolean IsAvailable() {
+		return true;
 	}
 	
 	public Bitmap GetThumbnailImage() {

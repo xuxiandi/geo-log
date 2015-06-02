@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -22,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Exception.CancelException;
@@ -35,20 +37,97 @@ import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
+import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.Application.THintManager;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 
 @SuppressLint("HandlerLeak")
 public class TUserPanel extends Activity {
 
+	public static final int MODE_NORMAL 			= 0;
+	public static final int MODE_OPENMESSAGING 		= 1;
+	public static final int MODE_OPENLIVEMESSAGING 	= 2;
+	public static final int MODE_OPENVIDEOPHONE 	= 3;
+	
+	public static class TUserCoGeoMonitorObjects {
+		
+		public TCoGeoMonitorObjects.TDescriptors 	Objects;
+		//.
+		public TCoGeoMonitorObject.TDescriptor 		CommunicationObject;
+			    
+		public void Update(TUserAgent UserAgent, long UserID, TCanceller Canceller) throws Exception {
+	    	Objects = UserAgent.User().GetUserCoGeoMonitorObjects(UserID);
+	    	if (Canceller != null)
+	    		Canceller.Check();
+			//.
+			CommunicationObject = GetAnObjectForCommunication();
+			//.
+			if (CommunicationObject != null) {
+				CommunicationObject.Object = new TCoGeoMonitorObject(UserAgent.Server, CommunicationObject.idComponent, CommunicationObject.Name);
+				TGeographServerObjectController GSOC = CommunicationObject.Object.GeographServerObjectController();
+				synchronized (GSOC) {
+					boolean flKeepConnectionLast = GSOC.KeepConnection();
+					try {
+						GSOC.Connect();
+						try {
+					    	if (Canceller != null)
+					    		Canceller.Check();
+		    				//.
+							byte[] ObjectSchemaData = GSOC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
+							//.
+					    	if (Canceller != null)
+					    		Canceller.Check();
+		    				//.
+							if (ObjectSchemaData != null)
+								CommunicationObject.ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
+							//.
+							byte[] ObjectDeviceSchemaData = GSOC.Component_ReadAllCUAC(new int[] {2/*device side*/});
+							//.
+					    	if (Canceller != null)
+					    		Canceller.Check();
+		    				//.
+							if (ObjectDeviceSchemaData != null)
+								CommunicationObject.ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
+						}
+						finally {
+							GSOC.Disconnect();
+						}
+					}
+					finally {
+						GSOC.Connection_flKeepAlive = flKeepConnectionLast;
+					}
+				}
+			}
+	    }
+		
+		public void Update(TUserAgent UserAgent, long UserID) throws Exception {
+			Update(UserAgent, UserID, null);
+		}
+		
+	    private TCoGeoMonitorObject.TDescriptor GetAnObjectForCommunication() throws InterruptedException {
+	    	if (Objects == null)
+	    		return null; //. ->
+	    	int Cnt = Objects.Items.size();
+	    	for (int I = 0; I < Cnt; I++) {
+	    		TCoGeoMonitorObject.TDescriptor Object = Objects.Items.get(I);
+	    		if ((Object.ObjectModel != null) && Object.ObjectModel.UserMessaging_IsSupported() && Object.ObjectModel.UserVideoPhone_IsSupported() && Object.flOnline)
+	    			return Object; //. -> 
+	    	}
+			return null; 
+	    }
+	}
+	
 	public static final int REQUEST_SETUSERACTIVITY = 1;
 	public static final int REQUEST_SHOWONREFLECTOR = 2;
 	
 	public boolean flExists = false;
 	//.
 	private TReflectorComponent Component;
+	//.
+	private int Mode = MODE_NORMAL;
 	//.
 	private ImageView ivUser;
 	private EditText edUserName;
@@ -76,9 +155,8 @@ public class TUserPanel extends Activity {
     private TUserDescriptor UserInfo = null; 
     private TActivity 		UserCurrentActivity = null;
 	//.
-	private TCoGeoMonitorObjects.TDescriptors 	UserCoGeoMonitorObjects = null;
-	private TAsyncProcessing					UserCoGeoMonitorObjects_Updating = null;
-	private TCoGeoMonitorObject.TDescriptor		UserCoGeoMonitorObjects_CommunicationInstance = null;
+	private TUserCoGeoMonitorObjects 	UserCoGeoMonitorObjects = null;
+	private TAsyncProcessing			UserCoGeoMonitorObjects_Updating = null;
 	//.
 	private TUpdating	Updating = null;
 	@SuppressWarnings("unused")
@@ -93,6 +171,7 @@ public class TUserPanel extends Activity {
         if (extras != null) {
 			ComponentID = extras.getInt("ComponentID");
         	UserID = extras.getLong("UserID");
+        	Mode = extras.getInt("Mode");
         }
         Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
@@ -101,6 +180,53 @@ public class TUserPanel extends Activity {
         setContentView(R.layout.user_panel);
         //.
         ivUser = (ImageView)findViewById(R.id.ivUser);
+        ivUser.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+				final CharSequence[] _items;
+				_items = new CharSequence[1];
+				_items[0] = getString(R.string.SGetURLFile);
+				AlertDialog.Builder builder = new AlertDialog.Builder(TUserPanel.this);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: 
+			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+			            		com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.PropsPanel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.PropsPanel.TURL(UserID);
+			            		URL.ConstructURLFile(URLFN);
+			            		//.
+				    		    new AlertDialog.Builder(TUserPanel.this)
+				    	        .setIcon(android.R.drawable.ic_dialog_alert)
+				    	        .setTitle(R.string.SInfo)
+				    	        .setMessage(TUserPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TUserPanel.this.getString(R.string.SUseItForImport))
+				    		    .setPositiveButton(R.string.SOk, null)
+				    		    .show();
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				//.
+				return true;
+			}
+		});
         edUserName = (EditText)findViewById(R.id.edUserName);
         edUserFullName = (EditText)findViewById(R.id.edUserFullName);
         edUserContactInfo = (EditText)findViewById(R.id.edUserContactInfo);
@@ -146,16 +272,67 @@ public class TUserPanel extends Activity {
             	finish();
             }
         });
+        btnUserMessaging.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+        		if (UserInfo == null)
+        			return false; //. ->
+        		//.
+				final CharSequence[] _items;
+				_items = new CharSequence[1];
+				_items[0] = getString(R.string.SGetURLFile);
+				AlertDialog.Builder builder = new AlertDialog.Builder(TUserPanel.this);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: 
+			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+			            		com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Messaging.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Messaging.TURL(UserID);
+			            		URL.Name = TUserPanel.this.getString(R.string.SMessaging)+": "+UserInfo.UserFullName;
+			            		URL.ConstructURLFile(URLFN);
+			            		//.
+				    		    new AlertDialog.Builder(TUserPanel.this)
+				    	        .setIcon(android.R.drawable.ic_dialog_alert)
+				    	        .setTitle(R.string.SInfo)
+				    	        .setMessage(TUserPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TUserPanel.this.getString(R.string.SUseItForImport))
+				    		    .setPositiveButton(R.string.SOk, null)
+				    		    .show();
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				//.
+				return true;
+			}
+		});
         btnUserLiveMessaging = (Button)findViewById(R.id.btnUserLiveMessaging);
         btnUserLiveMessaging.setOnClickListener(new OnClickListener() {
         	
         	@Override
             public void onClick(View v) {
-        		if ((UserCoGeoMonitorObjects_CommunicationInstance == null) || !UserCoGeoMonitorObjects_CommunicationInstance.ObjectModel.UserMessaging_IsSupported())
+        		if ((UserCoGeoMonitorObjects == null) || (UserCoGeoMonitorObjects.CommunicationObject == null) || !UserCoGeoMonitorObjects.CommunicationObject.ObjectModel.UserMessaging_IsSupported())
         			return; //. ->
         		//.
 				try {
-	        		UserCoGeoMonitorObjects_CommunicationInstance.ObjectModel.UserMessaging_Start(UserCoGeoMonitorObjects_CommunicationInstance.Object, TUserPanel.this);            	
+					UserCoGeoMonitorObjects.CommunicationObject.ObjectModel.UserMessaging_Start(UserCoGeoMonitorObjects.CommunicationObject.Object, TUserPanel.this);            	
 	            	//.
 	            	finish();
 		    	}
@@ -164,16 +341,67 @@ public class TUserPanel extends Activity {
 		    	}
             }
         });
+        btnUserLiveMessaging.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+        		if (UserInfo == null)
+        			return false; //. ->
+        		//.
+				final CharSequence[] _items;
+				_items = new CharSequence[1];
+				_items[0] = getString(R.string.SGetURLFile);
+				AlertDialog.Builder builder = new AlertDialog.Builder(TUserPanel.this);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: 
+			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+			            		com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.LiveMessaging.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.LiveMessaging.TURL(UserID);
+			            		URL.Name = TUserPanel.this.getString(R.string.SLiveMessaging)+": "+UserInfo.UserFullName;
+			            		URL.ConstructURLFile(URLFN);
+			            		//.
+				    		    new AlertDialog.Builder(TUserPanel.this)
+				    	        .setIcon(android.R.drawable.ic_dialog_alert)
+				    	        .setTitle(R.string.SInfo)
+				    	        .setMessage(TUserPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TUserPanel.this.getString(R.string.SUseItForImport))
+				    		    .setPositiveButton(R.string.SOk, null)
+				    		    .show();
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				//.
+				return true;
+			}
+		});
         btnUserVideoPhone = (Button)findViewById(R.id.btnUserVideoPhone);
         btnUserVideoPhone.setOnClickListener(new OnClickListener() {
         	
         	@Override
             public void onClick(View v) {
-        		if ((UserCoGeoMonitorObjects_CommunicationInstance == null) || !UserCoGeoMonitorObjects_CommunicationInstance.ObjectModel.UserVideoPhone_IsSupported())
+        		if ((UserCoGeoMonitorObjects == null) || (UserCoGeoMonitorObjects.CommunicationObject == null) || !UserCoGeoMonitorObjects.CommunicationObject.ObjectModel.UserVideoPhone_IsSupported())
         			return; //. ->
 				//.
 				try {
-					UserCoGeoMonitorObjects_CommunicationInstance.ObjectModel.UserVideoPhone_Start(UserCoGeoMonitorObjects_CommunicationInstance.Object, TUserPanel.this);            	
+					UserCoGeoMonitorObjects.CommunicationObject.ObjectModel.UserVideoPhone_Start(UserCoGeoMonitorObjects.CommunicationObject.Object, TUserPanel.this);            	
 	            	//.
 	            	finish();
 		    	}
@@ -182,6 +410,57 @@ public class TUserPanel extends Activity {
 		    	}
             }
         });
+        btnUserVideoPhone.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+        		if (UserInfo == null)
+        			return false; //. ->
+        		//.
+				final CharSequence[] _items;
+				_items = new CharSequence[1];
+				_items[0] = getString(R.string.SGetURLFile);
+				AlertDialog.Builder builder = new AlertDialog.Builder(TUserPanel.this);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: 
+			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+			            		com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.VideoPhone.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.VideoPhone.TURL(UserID);
+			            		URL.Name = TUserPanel.this.getString(R.string.SVideoPhone)+": "+UserInfo.UserFullName;
+			            		URL.ConstructURLFile(URLFN);
+			            		//.
+				    		    new AlertDialog.Builder(TUserPanel.this)
+				    	        .setIcon(android.R.drawable.ic_dialog_alert)
+				    	        .setTitle(R.string.SInfo)
+				    	        .setMessage(TUserPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TUserPanel.this.getString(R.string.SUseItForImport))
+				    		    .setPositiveButton(R.string.SOk, null)
+				    		    .show();
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				//.
+				return true;
+			}
+		});
         btnUserCoGeoMonitorObjects = (Button)findViewById(R.id.btnUserCoGeoMonitorObjects);
         btnUserCoGeoMonitorObjects.setOnClickListener(new OnClickListener() {
         	
@@ -251,8 +530,34 @@ public class TUserPanel extends Activity {
             }
         });
         //.
+        final int HintID = THintManager.HINT__User_panel_hint;
+        final TextView lbHint = (TextView)findViewById(R.id.lbHint);
+        String Hint = THintManager.GetHint(HintID, this);
+        if (Hint != null) {
+        	lbHint.setText(Hint);
+            lbHint.setOnLongClickListener(new OnLongClickListener() {
+            	
+    			@Override
+    			public boolean onLongClick(View v) {
+    				THintManager.SetHintAsDisabled(HintID);
+    	        	lbHint.setVisibility(View.GONE);
+    	        	//.
+    				return true;
+    			}
+    		});
+            //.
+        	lbHint.setVisibility(View.VISIBLE);
+        }
+        else
+        	lbHint.setVisibility(View.GONE);
+        //. UserCoGeoMonitorObjects updating
         try {
-			UserCoGeoMonitorObjects_StartUpdating();
+   		 	switch (Mode) {
+   		 	
+   		 	case MODE_NORMAL:
+   				UserCoGeoMonitorObjects_StartUpdating();
+   				break; //. >
+   		 	}
 		} catch (InterruptedException IE) {
 		}
         //.
@@ -316,6 +621,9 @@ public class TUserPanel extends Activity {
         //.
         private TUserDescriptor UserInfo = null; 
         private TActivity 		UserCurrentActivity = null;
+        //.
+		private TUserCoGeoMonitorObjects _UserCoGeoMonitorObjects = null;
+		
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
     		super();
@@ -347,6 +655,17 @@ public class TUserPanel extends Activity {
 	    					//.
 	    	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
 	    				}
+	    				//. 
+	    	   		 	switch (Mode) {
+	    	   		 	
+	    	   		 	case MODE_OPENLIVEMESSAGING:
+	    	   		 	case MODE_OPENVIDEOPHONE:
+	    					_UserCoGeoMonitorObjects = new TUserCoGeoMonitorObjects();
+	    					//.
+	    					_UserCoGeoMonitorObjects.Update(UserAgent, UserID, Canceller);
+	    	   				break; //. >
+	    	   		 	}
+	    				
 					}
 					finally {
 						if (flShowProgress)
@@ -390,6 +709,50 @@ public class TUserPanel extends Activity {
 		            	TUserPanel.this.UserCurrentActivity = UserCurrentActivity;
 	           		 	//.
 	           		 	TUserPanel.this.Update();
+		            	//.
+		            	if (_UserCoGeoMonitorObjects != null) {
+							UserCoGeoMonitorObjects = _UserCoGeoMonitorObjects;
+							//.
+							UserCoGeoMonitorObjects_UpdateControls();
+		            	}
+	           		 	//.
+	           		 	switch (Mode) {
+	           		 	
+	           		 	case MODE_OPENMESSAGING:
+	                		if (UserInfo != null) {
+		                		User_OpenMessaging(UserInfo);
+		                    	//.
+		                    	finish();
+	                		}
+	                    	//.
+	           		 		break; //. >
+	           		 		
+	           		 	case MODE_OPENLIVEMESSAGING:
+	                		if ((UserCoGeoMonitorObjects != null) && (UserCoGeoMonitorObjects.CommunicationObject != null) && UserCoGeoMonitorObjects.CommunicationObject.ObjectModel.UserMessaging_IsSupported()) 
+		        				try {
+		        					UserCoGeoMonitorObjects.CommunicationObject.ObjectModel.UserMessaging_Start(UserCoGeoMonitorObjects.CommunicationObject.Object, TUserPanel.this);            	
+		        	            	//.
+		        	            	finish();
+		        		    	}
+		        		    	catch (Exception Ex) {
+		        		            Toast.makeText(TUserPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+		        		    	}
+	                		//.
+	           		 		break; //. >
+	           		 		
+	           		 	case MODE_OPENVIDEOPHONE:
+	                		if ((UserCoGeoMonitorObjects != null) && (UserCoGeoMonitorObjects.CommunicationObject != null) && UserCoGeoMonitorObjects.CommunicationObject.ObjectModel.UserMessaging_IsSupported()) 
+		        				try {
+		        					UserCoGeoMonitorObjects.CommunicationObject.ObjectModel.UserVideoPhone_Start(UserCoGeoMonitorObjects.CommunicationObject.Object, TUserPanel.this);            	
+		        	            	//.
+		        	            	finish();
+		        		    	}
+		        		    	catch (Exception Ex) {
+		        		            Toast.makeText(TUserPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+		        		    	}
+		        		    //.
+	           		 		break; //. >
+	           		 	}
 		            	//.
 		            	break; //. >
 		            	
@@ -699,8 +1062,8 @@ public class TUserPanel extends Activity {
     	Intent intent = new Intent(this, TUserCoGeoMonitorObjectsPanel.class);
 		intent.putExtra("UserID", User.UserID);
 		intent.putExtra("ComponentID", Component.ID);
-		if ((UserCoGeoMonitorObjects != null) && (UserCoGeoMonitorObjects.OriginalData != null))
-			intent.putExtra("Data", UserCoGeoMonitorObjects.OriginalData);
+		if ((UserCoGeoMonitorObjects != null) && (UserCoGeoMonitorObjects.Objects != null) && (UserCoGeoMonitorObjects.Objects.OriginalData != null))
+			intent.putExtra("Data", UserCoGeoMonitorObjects.Objects.OriginalData);
     	startActivity(intent);		
     }
 
@@ -709,78 +1072,26 @@ public class TUserPanel extends Activity {
     	//.
     	UserCoGeoMonitorObjects_Updating = new TAsyncProcessing() {
 			
-			private TCoGeoMonitorObjects.TDescriptors 	CoGeoMonitorObjects;
-			private TCoGeoMonitorObject.TDescriptor 	CoGeoMonitorObjects_CommunicationInstance;
+			private TUserCoGeoMonitorObjects _UserCoGeoMonitorObjects;
 			
 			@Override
 			public void Process() throws Exception {
 		    	TUserAgent UserAgent = TUserAgent.GetUserAgent();
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-				CoGeoMonitorObjects = UserAgent.User().GetUserCoGeoMonitorObjects(UserID);
-				Canceller.Check();
 				//.
-				CoGeoMonitorObjects_CommunicationInstance = CoGeoMonitorObjects_GetAnInstanceForCommunication(CoGeoMonitorObjects);
+				_UserCoGeoMonitorObjects = new TUserCoGeoMonitorObjects();
 				//.
-				if (CoGeoMonitorObjects_CommunicationInstance != null) {
-					CoGeoMonitorObjects_CommunicationInstance.Object = new TCoGeoMonitorObject(UserAgent.Server, CoGeoMonitorObjects_CommunicationInstance.idComponent, CoGeoMonitorObjects_CommunicationInstance.Name);
-					TGeographServerObjectController GSOC = CoGeoMonitorObjects_CommunicationInstance.Object.GeographServerObjectController();
-					synchronized (GSOC) {
-						boolean flKeepConnectionLast = GSOC.KeepConnection();
-						try {
-							GSOC.Connect();
-							try {
-			    				Canceller.Check();
-			    				//.
-								byte[] ObjectSchemaData = GSOC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
-								//.
-			    				Canceller.Check();
-			    				//.
-								if (ObjectSchemaData != null)
-									CoGeoMonitorObjects_CommunicationInstance.ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
-								//.
-								byte[] ObjectDeviceSchemaData = GSOC.Component_ReadAllCUAC(new int[] {2/*device side*/});
-								//.
-			    				Canceller.Check();
-			    				//.
-								if (ObjectDeviceSchemaData != null)
-									CoGeoMonitorObjects_CommunicationInstance.ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
-							}
-							finally {
-								GSOC.Disconnect();
-							}
-						}
-						finally {
-							GSOC.Connection_flKeepAlive = flKeepConnectionLast;
-						}
-					}
-				}
+				_UserCoGeoMonitorObjects.Update(UserAgent, UserID, Canceller);
 				//.
 	    		Thread.sleep(100); 
 			}
 			
 			@Override 
 			public void DoOnCompleted() throws Exception {
-				UserCoGeoMonitorObjects = CoGeoMonitorObjects;
-				UserCoGeoMonitorObjects_CommunicationInstance = CoGeoMonitorObjects_CommunicationInstance;
+				UserCoGeoMonitorObjects = _UserCoGeoMonitorObjects;
 				//.
-				btnUserCoGeoMonitorObjects.setEnabled(UserCoGeoMonitorObjects != null);
-				if (UserCoGeoMonitorObjects_CommunicationInstance != null) {
-					btnUserLiveMessaging.setText(R.string.SLiveChat);
-					btnUserLiveMessaging.setEnabled(true);
-					//.
-					btnUserVideoPhone.setText(R.string.SVideoPhone);
-					btnUserVideoPhone.setEnabled(true);
-				}
-				else {
-					String S = getString(R.string.SLiveChat)+" "+"/"+getString(R.string.SOff)+"/";
-					btnUserLiveMessaging.setText(S);
-					btnUserLiveMessaging.setEnabled(false);
-					//.
-					S = getString(R.string.SVideoPhone)+" "+"/"+getString(R.string.SOff)+"/";
-					btnUserVideoPhone.setText(S);
-					btnUserVideoPhone.setEnabled(false);
-				}
+				UserCoGeoMonitorObjects_UpdateControls();
 			}
 
 			@Override
@@ -804,16 +1115,24 @@ public class TUserPanel extends Activity {
     		UserCoGeoMonitorObjects_Updating = null;
     	}
     }
-
-    private TCoGeoMonitorObject.TDescriptor CoGeoMonitorObjects_GetAnInstanceForCommunication(TCoGeoMonitorObjects.TDescriptors CoGeoMonitorObjects) throws InterruptedException {
-    	if (CoGeoMonitorObjects == null)
-    		return null; //. ->
-    	int Cnt = CoGeoMonitorObjects.Items.size();
-    	for (int I = 0; I < Cnt; I++) {
-    		TCoGeoMonitorObject.TDescriptor Object = CoGeoMonitorObjects.Items.get(I);
-    		if ((Object.ObjectModel != null) && Object.ObjectModel.UserMessaging_IsSupported() && Object.ObjectModel.UserVideoPhone_IsSupported() && Object.flOnline)
-    			return Object; //. -> 
-    	}
-		return null; 
+    
+    private void UserCoGeoMonitorObjects_UpdateControls() {
+		btnUserCoGeoMonitorObjects.setEnabled(UserCoGeoMonitorObjects != null);
+		if ((UserCoGeoMonitorObjects != null) && (UserCoGeoMonitorObjects.CommunicationObject != null)) {
+			btnUserLiveMessaging.setText(R.string.SLiveChat);
+			btnUserLiveMessaging.setEnabled(true);
+			//.
+			btnUserVideoPhone.setText(R.string.SVideoPhone);
+			btnUserVideoPhone.setEnabled(true);
+		}
+		else {
+			String S = getString(R.string.SLiveChat)+" "+"/"+getString(R.string.SOff)+"/";
+			btnUserLiveMessaging.setText(S);
+			btnUserLiveMessaging.setEnabled(false);
+			//.
+			S = getString(R.string.SVideoPhone)+" "+"/"+getString(R.string.SOff)+"/";
+			btnUserVideoPhone.setText(S);
+			btnUserVideoPhone.setEnabled(false);
+		}
     }
 }

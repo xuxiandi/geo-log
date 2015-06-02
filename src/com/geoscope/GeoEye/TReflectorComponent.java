@@ -176,6 +176,13 @@ public class TReflectorComponent extends TUIComponent {
 		return null;	
 	}
 
+	public static synchronized TReflectorComponent GetAComponent() {
+		if (ComponentsList.size() > 0)
+			return ComponentsList.get(0); //. ->
+		else
+			return null; //. ->
+	}
+	
 	public static synchronized int ComponentsCount() {
 		return ComponentsList.size();
 	}

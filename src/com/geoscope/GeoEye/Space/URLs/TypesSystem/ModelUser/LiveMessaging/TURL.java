@@ -46,6 +46,11 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.T
 	}
 	
 	@Override
+	public int GetThumbnailImageResID() {
+		return R.drawable.offlineuserlivemessaging;
+	}
+	
+	@Override
 	public Bitmap GetThumbnailImage() {
 		if (IsUserAvailable())
 			return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.onlineuserlivemessaging); //. ->

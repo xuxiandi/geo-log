@@ -13,6 +13,8 @@ import org.w3c.dom.Element;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
@@ -61,6 +63,11 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 	@Override
 	public TURL GetDefaultURL() throws Exception {
 		return (new com.geoscope.GeoEye.Space.URLs.TypesSystem.DataStream.PropsPanel.TURL(idComponent));
+	}
+	
+	@Override
+	public Bitmap GetThumbnailImage() throws Exception {
+		return BitmapFactory.decodeResource(Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_component_datastream);
 	}
 	
 	public byte[] GetDescriptorData() throws Exception {

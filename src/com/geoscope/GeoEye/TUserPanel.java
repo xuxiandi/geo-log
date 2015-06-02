@@ -123,6 +123,7 @@ public class TUserPanel extends Activity {
 	public static final int REQUEST_SETUSERACTIVITY = 1;
 	public static final int REQUEST_SHOWONREFLECTOR = 2;
 	
+	
 	public boolean flExists = false;
 	//.
 	private TReflectorComponent Component;
@@ -184,6 +185,8 @@ public class TUserPanel extends Activity {
 			
 			@Override
 			public boolean onLongClick(View v) {
+        		if (UserInfo == null)
+        			return false; //. ->
 				final CharSequence[] _items;
 				_items = new CharSequence[1];
 				_items[0] = getString(R.string.SGetURLFile);
@@ -202,6 +205,7 @@ public class TUserPanel extends Activity {
 							case 0: 
 			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
 			            		com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.PropsPanel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.PropsPanel.TURL(UserID);
+			            		URL.Name = UserInfo.UserFullName;
 			            		URL.ConstructURLFile(URLFN);
 			            		//.
 				    		    new AlertDialog.Builder(TUserPanel.this)
@@ -487,6 +491,57 @@ public class TUserPanel extends Activity {
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
         });
+        btnUserCurrentActivityComponentList.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+        		if (UserInfo == null)
+        			return false; //. ->
+        		//.
+				final CharSequence[] _items;
+				_items = new CharSequence[1];
+				_items[0] = getString(R.string.SGetURLFile);
+				AlertDialog.Builder builder = new AlertDialog.Builder(TUserPanel.this);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: 
+			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+			            		com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.Current.ContentPanel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.Current.ContentPanel.TURL(UserID);
+			            		URL.Name = getString(R.string.SActivityContent)+": "+UserInfo.UserFullName;
+			            		URL.ConstructURLFile(URLFN);
+			            		//.
+				    		    new AlertDialog.Builder(TUserPanel.this)
+				    	        .setIcon(android.R.drawable.ic_dialog_alert)
+				    	        .setTitle(R.string.SInfo)
+				    	        .setMessage(TUserPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TUserPanel.this.getString(R.string.SUseItForImport))
+				    		    .setPositiveButton(R.string.SOk, null)
+				    		    .show();
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				//.
+				return true;
+			}
+		});
         btnUserLastActivities = (Button)findViewById(R.id.btnUserLastActivities);
         btnUserLastActivities.setOnClickListener(new OnClickListener() {
         	
@@ -500,6 +555,57 @@ public class TUserPanel extends Activity {
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
         });
+        btnUserLastActivities.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+        		if (UserInfo == null)
+        			return false; //. ->
+        		//.
+				final CharSequence[] _items;
+				_items = new CharSequence[1];
+				_items[0] = getString(R.string.SGetURLFile);
+				AlertDialog.Builder builder = new AlertDialog.Builder(TUserPanel.this);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: 
+			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+			            		com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.Panel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.Panel.TURL(UserID);
+			            		URL.Name = getString(R.string.SActivityList1)+": "+UserInfo.UserFullName;
+			            		URL.ConstructURLFile(URLFN);
+			            		//.
+				    		    new AlertDialog.Builder(TUserPanel.this)
+				    	        .setIcon(android.R.drawable.ic_dialog_alert)
+				    	        .setTitle(R.string.SInfo)
+				    	        .setMessage(TUserPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TUserPanel.this.getString(R.string.SUseItForImport))
+				    		    .setPositiveButton(R.string.SOk, null)
+				    		    .show();
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				//.
+				return true;
+			}
+		});
         llUserTasks = (LinearLayout)findViewById(R.id.llUserTasks);
     	btnUserTasks = (Button)findViewById(R.id.btnUserTasks);
     	btnUserTasks.setOnClickListener(new OnClickListener() {

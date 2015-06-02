@@ -1050,11 +1050,13 @@
     <string name="SMovingAndScaling">moving and scaling</string>
     <string name="STakePictureWithCameraAndEdit">Take a picture with camera and edit</string>
     <string name="SMyUserPanelHint">Long click on the [+Image] button to view a context menu.\n(long click on the hint to remove it)</string>
-    <string name="SUserPanelHint">Long click on user image, "Messaging" button, "Live chat" button, "Video-phone" button to view a context menu.\n(long click on the hint to remove it)</string>
+    <string name="SUserPanelHint">Long click on user image, "Messaging" button, "Live chat" button, "Video-phone" button, "Content" button, "Show all list" button to view a context menu.\n(long click on the hint to remove it)</string>
     <string name="SResourceIsNotAvailableAtTheMoment">resource is not available at the moment</string>
     <string name="SUserIsNotAvailableForMessaging">user is not available for live messaging</string>
     <string name="SLiveChatIsNotSupportedForUser">live chat is not supported for the user</string>
     <string name="SVideoPhoneIsNotSupportedForUser">video-phone is not supported for the user</string>
     <string name="SUserIsNotAvailableForVideoPhoneCommunication">user is not available for video-phone communication</string>
+    <string name="SActivityContent">Activity content</string>
+    <string name="SActivityList1">Activity list</string>
     
 </resources>

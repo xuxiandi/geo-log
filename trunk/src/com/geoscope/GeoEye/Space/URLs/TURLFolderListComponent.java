@@ -706,7 +706,7 @@ public class TURLFolderListComponent extends TUIComponent {
 				holder.ivImage.setOnClickListener(ImageClickListener);
 			}
 			else {
-				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_text));
+				holder.ivImage.setImageDrawable(context.getResources().getDrawable(holder.Item.Item.URL.GetThumbnailImageResID()));
 				holder.ivImage.setOnClickListener(null);
 			}
 			//. show selection

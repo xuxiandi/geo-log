@@ -21,6 +21,8 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.TURL {
 			return com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.LiveMessaging.TURL.GetURL(TypeID, pUser,pXMLDocumentRootNode); //. ->
 		if (com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.VideoPhone.TURL.IsTypeOf(TypeID))
 			return com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.VideoPhone.TURL.GetURL(TypeID, pUser,pXMLDocumentRootNode); //. ->
+		if (com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.TURL.IsTypeOf(TypeID))
+			return com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.TURL.GetURL(TypeID, pUser,pXMLDocumentRootNode); //. ->
 		else
 			return null; //. ->
 	}

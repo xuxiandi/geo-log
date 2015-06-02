@@ -4,8 +4,6 @@ import org.w3c.dom.Element;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
@@ -41,8 +39,8 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.Positioner.
 	}
 	
 	@Override
-	public Bitmap GetThumbnailImage() {
-		return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_component_positioner);
+	public int GetThumbnailImageResID() {
+		return R.drawable.user_activity_component_list_placeholder_component_positioner;
 	}
 	
 	@Override

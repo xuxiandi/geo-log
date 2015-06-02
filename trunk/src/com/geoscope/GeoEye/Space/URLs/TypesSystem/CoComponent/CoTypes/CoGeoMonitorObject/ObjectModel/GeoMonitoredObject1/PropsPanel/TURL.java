@@ -87,8 +87,13 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent
 	}
 
 	@Override
+	public int GetThumbnailImageResID() {
+		return R.drawable.user_activity_component_list_placeholder_cocomponent_geomonitorobject1;
+	}
+	
+	@Override
 	public Bitmap GetThumbnailImage() {
-		return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_cocomponent_geomonitorobject1);
+		return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_cocomponent_geomonitorobject1); 
 	}
 	
 	@Override

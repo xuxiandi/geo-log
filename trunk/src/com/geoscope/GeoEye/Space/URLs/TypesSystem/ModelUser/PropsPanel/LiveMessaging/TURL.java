@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.TUserPanel;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor;
@@ -45,6 +46,11 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.P
 	}
 	
 	@Override
+	public int GetThumbnailImageResID() {
+		return R.drawable.offlineuserlivemessaging;
+	}
+	
+	@Override
 	public Bitmap GetThumbnailImage() {
 		if (IsUserAvailable())
 			return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.onlineuserlivemessaging); //. ->
@@ -55,6 +61,9 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.P
 	@Override
 	public void Open(Context context) throws Exception {
     	Intent intent = new Intent(context, TUserPanel.class);
+    	TReflectorComponent Component = TReflectorComponent.GetAComponent(); 
+    	if (Component != null)
+    		intent.putExtra("ComponentID", Component.ID);
     	intent.putExtra("UserID",idComponent);
     	intent.putExtra("Mode",TUserPanel.MODE_OPENLIVEMESSAGING);
     	context.startActivity(intent);

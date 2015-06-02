@@ -17,6 +17,7 @@ import android.graphics.Bitmap;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 
 public class TURL {
@@ -173,6 +174,10 @@ public class TURL {
 	
 	public boolean IsAvailable() {
 		return true;
+	}
+	
+	public int GetThumbnailImageResID() {
+		return R.drawable.user_activity_component_list_placeholder_text;
 	}
 	
 	public Bitmap GetThumbnailImage() {

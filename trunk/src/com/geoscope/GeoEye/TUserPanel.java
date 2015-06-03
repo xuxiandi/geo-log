@@ -939,13 +939,13 @@ public class TUserPanel extends Activity {
         	}
         	//.
         	if (UserInfo.UserIsOnline) {
-        		ivUser.setImageDrawable(getResources().getDrawable(R.drawable.onlineuser));
+        		ivUser.setImageDrawable(getResources().getDrawable(R.drawable.onlineuser1));
         		edUserConnectionState.setText(getString(R.string.SOnline));
         		edUserConnectionState.setTextColor(Color.GREEN);
         		btnUserLocation.setEnabled(true);
         	}
         	else {
-        		ivUser.setImageDrawable(getResources().getDrawable(R.drawable.offlineuser));
+        		ivUser.setImageDrawable(getResources().getDrawable(R.drawable.offlineuser1));
         		edUserConnectionState.setText(getString(R.string.SOffline));
         		edUserConnectionState.setTextColor(Color.RED);
         		btnUserLocation.setEnabled(false);

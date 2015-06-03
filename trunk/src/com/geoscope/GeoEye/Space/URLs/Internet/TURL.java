@@ -4,6 +4,8 @@ import org.w3c.dom.Element;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 
 import com.geoscope.GeoEye.R;
@@ -32,8 +34,13 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TURL {
 	}
 	
 	@Override
-	public int GetThumbnailImageResID() {
+	public int GetThumbnailImageResID(int ImageMaxSize) {
 		return R.drawable.user_activity_component_list_placeholder_internet;
+	}
+	
+	@Override
+	public Bitmap GetThumbnailImage() {
+		return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_internet); 
 	}
 	
 	@Override

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import com.geoscope.GeoEye.Space.URLs.TURLFolderListComponent;
@@ -31,6 +32,7 @@ public class TReflectorURLListPanel extends Activity {
 		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //. 
         setContentView(R.layout.reflector_urllist_panel); 
         //.

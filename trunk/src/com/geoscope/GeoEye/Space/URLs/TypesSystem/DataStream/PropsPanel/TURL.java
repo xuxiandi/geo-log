@@ -39,7 +39,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.DataStream.
 	}
 		
 	@Override
-	public int GetThumbnailImageResID() {
+	public int GetThumbnailImageResID(int ImageMaxSize) {
 		return R.drawable.user_activity_component_list_placeholder_component_datastream;
 	}
 	

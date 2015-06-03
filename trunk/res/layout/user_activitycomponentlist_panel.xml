@@ -2,6 +2,7 @@
     android:id="@+id/llParent"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
+    android:background="@android:color/white"
     android:orientation="vertical" >
 
     <RelativeLayout
@@ -37,6 +38,7 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:cacheColorHint="#00000000"
         android:dividerHeight="1dp"
         android:listSelector="@drawable/user_activity_component_list_selector_flatcolor" />
 
@@ -48,6 +50,6 @@
         android:gravity="left"
         android:textColor="#ff000000"
         android:textSize="12sp"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
 </LinearLayout>

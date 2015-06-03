@@ -383,7 +383,8 @@ public class TUserChatPanel extends Activity {
 	            						}
 	            					}
 	            					finally {
-	            						resizedBitmap.recycle();
+	            						if (resizedBitmap != bitmap)
+	            							resizedBitmap.recycle();
 	            					}
 	            				}
 	            				finally {
@@ -478,7 +479,8 @@ public class TUserChatPanel extends Activity {
 	            						}
 	            					}
 	            					finally {
-	            						resizedBitmap.recycle();
+	            						if (resizedBitmap != bitmap)
+	            							resizedBitmap.recycle();
 	            					}
 	            				}
 	            				finally {

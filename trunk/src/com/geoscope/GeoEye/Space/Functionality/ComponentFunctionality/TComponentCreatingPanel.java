@@ -374,7 +374,8 @@ public class TComponentCreatingPanel extends Activity {
 	            						}
 	            					}
 	            					finally {
-	            						resizedBitmap.recycle();
+	            						if (resizedBitmap != bitmap)
+	            							resizedBitmap.recycle();
 	            					}
 	            				}
 	            				finally {
@@ -756,7 +757,8 @@ public class TComponentCreatingPanel extends Activity {
 						}
 					}
 					finally {
-						resizedBitmap.recycle();
+						if (resizedBitmap != bitmap)
+							resizedBitmap.recycle();
 					}
 				}
 				finally {

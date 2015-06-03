@@ -35,6 +35,7 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:cacheColorHint="#00000000"
         android:dividerHeight="1dp"
         android:listSelector="@drawable/user_activity_component_list_selector_flatcolor" />
 

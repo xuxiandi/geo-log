@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#FF000000"
     android:minHeight="50dp"
     android:orientation="horizontal" >
 
@@ -12,8 +11,9 @@
         android:layout_height="256dp"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:background="@drawable/url_list_placeholder"
-        android:contentDescription="@string/SGeoLog" />
+        android:background="@drawable/url_list_whiteplaceholder"
+        android:contentDescription="@string/SGeoLog"
+        android:padding="2dp" />
 
     <TextView
         android:id="@+id/lbName"
@@ -23,8 +23,6 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/ivImage"
         android:fontFamily="Tahoma"
-        android:paddingLeft="5dp"
-        android:paddingTop="5dp"
         android:textColor="@drawable/url_list_row_text_selector"
         android:textSize="24sp"
         android:typeface="sans" />
@@ -36,7 +34,6 @@
         android:layout_alignParentRight="true"
         android:layout_alignTop="@+id/lbName"
         android:layout_toRightOf="@+id/ivImage"
-        android:paddingLeft="5dp"
         android:textColor="@color/brightinfo_color_default"
         android:textSize="14sp"
         android:visibility="visible" />

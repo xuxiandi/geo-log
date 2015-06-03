@@ -279,7 +279,8 @@ public class SpaceDefines {
 							Result = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true); //. ->
 						}
 						finally {
-							bitmap.recycle();
+							if (Result != bitmap)
+								bitmap.recycle();
 						}
 					}
 				}

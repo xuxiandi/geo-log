@@ -355,6 +355,10 @@ public class TURLFolderListComponent extends TUIComponent {
 	public static final int LIST_ROW_SIZE_SMALL_ID 	= 1;
 	public static final int LIST_ROW_SIZE_NORMAL_ID = 2;
 	public static final int LIST_ROW_SIZE_BIG_ID 	= 3;
+	//.
+	public static final int LIST_ROW_IMAGESIZE_SMALL 	= 64;
+	public static final int LIST_ROW_IMAGESIZE_NORMAL 	= 128;
+	public static final int LIST_ROW_IMAGESIZE_BIG 		= 256;
 	
 	public static class TOnListItemClickHandler {
 		
@@ -366,8 +370,8 @@ public class TURLFolderListComponent extends TUIComponent {
 		
 		public TURLFolderList.TItem Item;
 		//.
-		public boolean BMP_flLoaded = false;
-		public boolean BMP_flNull = false;
+		public boolean 		BMP_flLoaded = false;
+		public boolean 		BMP_flNull = false;
 		
 		public TURLListItem(TURLFolderList.TItem pItem) {
 			Item = pItem;
@@ -399,11 +403,15 @@ public class TURLFolderListComponent extends TUIComponent {
 		
 		private class TImageLoadTask extends AsyncTask<Void, Void, Bitmap> {
 			
+			private TURLListAdapter Adapter;
+			//.
 			private TURLListItem Item;
-			
+			//.
 			private TViewHolder ViewHolder;
+			
 
-			public TImageLoadTask(TURLListItem pItem, TViewHolder pViewHolder) {
+			public TImageLoadTask(TURLListAdapter pAdapter, TURLListItem pItem, TViewHolder pViewHolder) {
+				Adapter = pAdapter;
 				Item = pItem;
 				ViewHolder = pViewHolder;
 			}
@@ -459,7 +467,7 @@ public class TURLFolderListComponent extends TUIComponent {
 				//.
 				Bitmap Result = null;
 				if (Item.Item.URL != null)
-					Result = Item.Item.URL.GetThumbnailImage(); 
+					Result = Item.Item.URL.GetThumbnailImage(Adapter.Panel.ListRowImageSize); 
 				//.
 				if (Result != null) 
 					ImageCache.put(Item.Item.ID, Result);
@@ -686,7 +694,7 @@ public class TURLFolderListComponent extends TUIComponent {
 			Bitmap BMP = null;
 			//.
 			if (!Item.BMP_flLoaded)
-				new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				new TImageLoadTask(this,Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			else {
 				if (!Item.BMP_flNull)
 					if (flListIsScrolling)
@@ -696,7 +704,7 @@ public class TURLFolderListComponent extends TUIComponent {
 						if (BMP == null) {
 							Item.BMP_flLoaded = false;
 							//.
-							new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+							new TImageLoadTask(this,Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 						}
 					}
 			}
@@ -706,7 +714,7 @@ public class TURLFolderListComponent extends TUIComponent {
 				holder.ivImage.setOnClickListener(ImageClickListener);
 			}
 			else {
-				holder.ivImage.setImageDrawable(context.getResources().getDrawable(holder.Item.Item.URL.GetThumbnailImageResID()));
+				holder.ivImage.setImageDrawable(context.getResources().getDrawable(holder.Item.Item.URL.GetThumbnailImageResID(Panel.ListRowImageSize)));
 				holder.ivImage.setOnClickListener(null);
 			}
 			//. show selection
@@ -731,6 +739,7 @@ public class TURLFolderListComponent extends TUIComponent {
 	private String URLListFolder;
 	//.
 	private int ListRowSizeID;
+	private int ListRowImageSize;
 	//.
 	private TReflectorComponent Component;
 	//.
@@ -760,6 +769,26 @@ public class TURLFolderListComponent extends TUIComponent {
 		Component = pComponent;
 		//.
 		OnListItemClickHandler = pOnListItemClickHandler;
+		//.
+		switch (ListRowSizeID) {
+
+		case LIST_ROW_SIZE_SMALL_ID:
+			ListRowImageSize = LIST_ROW_IMAGESIZE_SMALL;
+			break;
+
+		case LIST_ROW_SIZE_NORMAL_ID:
+			ListRowImageSize = LIST_ROW_IMAGESIZE_NORMAL;
+			break;
+
+		case LIST_ROW_SIZE_BIG_ID:
+			ListRowImageSize = LIST_ROW_IMAGESIZE_BIG;
+			break;
+
+		default:
+			ListRowImageSize = LIST_ROW_IMAGESIZE_NORMAL;
+			break;
+		}
+		ListRowImageSize *= ParentActivity.getResources().getDisplayMetrics().density; 
         //.
 		lvURLList = (ListView)ParentLayout.findViewById(R.id.lvURLList);
 		lvURLList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);

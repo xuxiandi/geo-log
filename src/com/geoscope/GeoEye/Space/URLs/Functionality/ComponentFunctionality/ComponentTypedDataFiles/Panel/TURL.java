@@ -52,6 +52,11 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 	private static final String 	ThumbnailImage_Drawings_ItemImageDataParams = "0;"+Integer.toString(ThumbnailImage_Drawings_MaxDataSize);
 	
 	@Override
+	public int GetThumbnailImageResID(int ImageMaxSize) {
+		return R.drawable.user_activity_component_list_placeholder_data;
+	}
+	
+	@Override
 	public Bitmap GetThumbnailImage() {
 		Bitmap Result = null;
 		try {
@@ -159,6 +164,11 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 			Result = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_componentpropspanel);
 		}
 		return Result;
+	}
+	
+	@Override
+	public Bitmap GetThumbnailImage(int ImageMaxSize) {
+		return GetThumbnailImage();
 	}
 	
 	@Override

@@ -40,7 +40,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.P
 	}
 		
 	@Override
-	public int GetThumbnailImageResID() {
+	public int GetThumbnailImageResID(int ImageMaxSize) {
 		return R.drawable.offlineusermessaging;
 	}
 	

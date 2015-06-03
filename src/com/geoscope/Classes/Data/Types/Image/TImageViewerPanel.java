@@ -325,7 +325,8 @@ public class TImageViewerPanel extends Activity {
     					_ImageBitmap = Bitmap.createBitmap(bitmap, 0,0,options.outWidth,options.outHeight, matrix, true);
     				}
     				finally {
-    					bitmap.recycle();
+    					if (_ImageBitmap != bitmap)
+    						bitmap.recycle();
     				}
 				}
 				finally {

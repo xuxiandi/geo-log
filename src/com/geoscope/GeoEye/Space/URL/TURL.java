@@ -14,6 +14,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
@@ -176,12 +177,36 @@ public class TURL {
 		return true;
 	}
 	
-	public int GetThumbnailImageResID() {
+	public int GetThumbnailImageResID(int ImageMaxSize) {
 		return R.drawable.user_activity_component_list_placeholder_text;
 	}
 	
 	public Bitmap GetThumbnailImage() {
 		return null;
+	}
+	
+	public Bitmap GetThumbnailImage(int ImageMaxSize) {
+		Bitmap Result = null;
+		//.
+		Bitmap BMP = GetThumbnailImage();
+		if (BMP != null) 
+			try {
+				int Width = BMP.getWidth();
+				int Height = BMP.getHeight();
+				int MaxSize = Width;
+				if (Height > MaxSize)
+					MaxSize = Height;
+				float Scale = (ImageMaxSize+0.0F)/MaxSize; 
+				Matrix matrix = new Matrix();     
+				matrix.postScale(Scale,Scale);
+				//.
+				Result = Bitmap.createBitmap(BMP, 0,0,Width,Height, matrix, true);
+			}
+			finally {
+				if (Result != BMP)
+					BMP.recycle();
+			}
+		return Result;
 	}
 	
 	public void Open(Context context) throws Exception {

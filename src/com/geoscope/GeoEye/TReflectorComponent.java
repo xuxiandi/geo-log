@@ -2784,8 +2784,11 @@ public class TReflectorComponent extends TUIComponent {
 				break; //. >
 			}
 			//.
-			Buttons.Items[BUTTON_UPDATE].Top = Y+(1.0F*Reflector.metrics.density);
-			Buttons.Items[BUTTON_UPDATE].Height = YStep-(1.0F*Reflector.metrics.density);
+			Buttons.Items[BUTTON_URLS].Top = Y+(1.0F*Reflector.metrics.density);
+			Buttons.Items[BUTTON_URLS].Height = YStep-(1.0F*Reflector.metrics.density);
+			Y += YStep;
+			Buttons.Items[BUTTON_UPDATE].Top = Y;
+			Buttons.Items[BUTTON_UPDATE].Height = YStep;
 			Y += YStep;
 			Buttons.Items[BUTTON_SHOWREFLECTIONPARAMETERS].Top = Y;
 			Buttons.Items[BUTTON_SHOWREFLECTIONPARAMETERS].Height = YStep;
@@ -2798,9 +2801,6 @@ public class TReflectorComponent extends TUIComponent {
 			Y += YStep;
 			Buttons.Items[BUTTON_ELECTEDPLACES].Top = Y;
 			Buttons.Items[BUTTON_ELECTEDPLACES].Height = YStep;
-			Y += YStep;
-			Buttons.Items[BUTTON_URLS].Top = Y;
-			Buttons.Items[BUTTON_URLS].Height = YStep;
 			Y += YStep;
 			Buttons.Items[BUTTON_MAPOBJECTSEARCH].Top = Y;
 			Buttons.Items[BUTTON_MAPOBJECTSEARCH].Height = YStep;
@@ -3358,6 +3358,15 @@ public class TReflectorComponent extends TUIComponent {
 				if ((idxButton == idxDownButton)
 						&& (Buttons.Items[idxButton].flEnabled)) {
 					switch (idxButton) {
+					
+					case BUTTON_URLS:
+						Intent intent = new Intent(Reflector.context, TReflectorURLListPanel.class);
+						intent.putExtra("ComponentID", Reflector.ID);
+						intent.putExtra("URLListFolder", URLListFolder);
+						Reflector.ParentActivity.startActivity(intent);
+						//.
+						break; //. >
+
 					case BUTTON_UPDATE:
 						Reflector.StartUpdatingCurrentSpaceImage();
 						if (flPlayGeoLog) {
@@ -3371,7 +3380,7 @@ public class TReflectorComponent extends TUIComponent {
 									+ "/"
 									+ "GeoLog.dat");
 							if (GF.exists()) {
-								Intent intent = new Intent();
+								intent = new Intent();
 								intent.setDataAndType(Uri.fromFile(GF), "audio/*");
 								intent.setAction(android.content.Intent.ACTION_VIEW);
 								Reflector.ParentActivity.startActivityForResult(intent, 0);
@@ -3380,7 +3389,7 @@ public class TReflectorComponent extends TUIComponent {
 						break; // . >
 
 					case BUTTON_SHOWREFLECTIONPARAMETERS:
-						Intent intent = Reflector.ReflectionWindow.CreateConfigurationPanel(Reflector.ParentActivity);
+						intent = Reflector.ReflectionWindow.CreateConfigurationPanel(Reflector.ParentActivity);
 						Reflector.ParentActivity.startActivity(intent);
 						break; // . >
 
@@ -3395,14 +3404,6 @@ public class TReflectorComponent extends TUIComponent {
 						intent.putExtra("ComponentID", Reflector.ID);
 						Reflector.ParentActivity.startActivity(intent);
 						break; // . >
-
-					case BUTTON_URLS:
-						intent = new Intent(Reflector.context, TReflectorURLListPanel.class);
-						intent.putExtra("ComponentID", Reflector.ID);
-						intent.putExtra("URLListFolder", URLListFolder);
-						Reflector.ParentActivity.startActivity(intent);
-						//.
-						break; //. >
 
 					case BUTTON_USERSEARCH:
 						intent = new Intent(Reflector.context, TUserListPanel.class);
@@ -4085,8 +4086,8 @@ public class TReflectorComponent extends TUIComponent {
 
 			private TRWLevelTileContainer[] LevelTileContainers;
 
-			public TActiveCompilationUpLevelsTilesPreparing(TRWLevelTileContainer[] pLevelTileContainers) {
-	    		super();
+			public TActiveCompilationUpLevelsTilesPreparing(TRWLevelTileContainer[] pLevelTileContainers, TCanceller pCanceller) {
+	    		super(pCanceller);
 	    		//.
 				LevelTileContainers = pLevelTileContainers;
 				// .
@@ -4317,7 +4318,7 @@ public class TReflectorComponent extends TUIComponent {
 					if (flPrepareUpLevels) {
 						//. flPrepareUpLevels = false;
 						//.
-						TActiveCompilationUpLevelsTilesPreparing _ActiveCompilationUpLevelsTilesPreparing = new TActiveCompilationUpLevelsTilesPreparing(_LevelTileContainers);
+						TActiveCompilationUpLevelsTilesPreparing _ActiveCompilationUpLevelsTilesPreparing = new TActiveCompilationUpLevelsTilesPreparing(_LevelTileContainers, Canceller);
 						_ActiveCompilationUpLevelsTilesPreparing.Start();
 					}
 					break; // . >
@@ -7187,11 +7188,11 @@ public class TReflectorComponent extends TUIComponent {
 	// .
 	private static final int BUTTONS_COUNT = 13;
 	// .
-	private static final int BUTTON_UPDATE 						= 0;
-	private static final int BUTTON_SHOWREFLECTIONPARAMETERS 	= 1;
-	private static final int BUTTON_ELECTEDPLACES 				= 2;
-	private static final int BUTTON_OBJECTS 					= 3;
-	private static final int BUTTON_URLS 						= 4;
+	private static final int BUTTON_URLS 						= 0;
+	private static final int BUTTON_UPDATE 						= 1;
+	private static final int BUTTON_SHOWREFLECTIONPARAMETERS 	= 2;
+	private static final int BUTTON_ELECTEDPLACES 				= 3;
+	private static final int BUTTON_OBJECTS 					= 4;
 	private static final int BUTTON_MAPOBJECTSEARCH 			= 5;
 	private static final int BUTTON_PREVWINDOW 					= 6;
 	private static final int BUTTON_CREATINGGALLERY 			= 7;
@@ -8042,6 +8043,8 @@ public class TReflectorComponent extends TUIComponent {
 		switch (ButtonsStyle) {
 			
 		case BUTTONS_STYLE_BRIEF:
+			Buttons[BUTTON_URLS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "B", Color.BLUE);
+			Y += ButtonHeight;
 			Buttons[BUTTON_UPDATE] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "!", Color.YELLOW);
 			Y += ButtonHeight;
 			Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "=", Color.YELLOW);
@@ -8049,8 +8052,6 @@ public class TReflectorComponent extends TUIComponent {
 			Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "O", Color.GREEN);
 			Y += ButtonHeight;
 			Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "*", Color.GREEN);
-			Y += ButtonHeight;
-			Buttons[BUTTON_URLS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "B", Color.GREEN);
 			Y += ButtonHeight;
 			Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, X, Y, ButtonWidth, ButtonHeight, "?", Color.GREEN);
 			Y += ButtonHeight;
@@ -8082,6 +8083,8 @@ public class TReflectorComponent extends TUIComponent {
 			break; //. >
 
 		case BUTTONS_STYLE_NORMAL:
+			Buttons[BUTTON_URLS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, ParentActivity.getString(R.string.SBookmarks), Color.BLUE);
+			Y += ButtonHeight;
 			Buttons[BUTTON_UPDATE] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, context.getString(R.string.SUpdate1), Color.YELLOW);
 			Y += ButtonHeight;
 			Buttons[BUTTON_SHOWREFLECTIONPARAMETERS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, context.getString(R.string.SViewConfiguration), Color.YELLOW);
@@ -8089,8 +8092,6 @@ public class TReflectorComponent extends TUIComponent {
 			Buttons[BUTTON_OBJECTS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, context.getString(R.string.SObjects), Color.GREEN);
 			Y += ButtonHeight;
 			Buttons[BUTTON_ELECTEDPLACES] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, context.getString(R.string.SPlaces), Color.GREEN);
-			Y += ButtonHeight;
-			Buttons[BUTTON_URLS] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, ParentActivity.getString(R.string.SBookmarks), Color.GREEN);
 			Y += ButtonHeight;
 			Buttons[BUTTON_MAPOBJECTSEARCH] = new TWorkSpace.TButtons.TButton(BUTTONS_GROUP_LEFT, TWorkSpace.TButtons.TButton.STYLE_RECTANGLE, X, Y, ButtonWidth, ButtonHeight, context.getString(R.string.SSearch2), Color.GREEN);
 			Y += ButtonHeight;

@@ -812,7 +812,8 @@ public class TMyUserPanel extends Activity {
 	            						}
 	            					}
 	            					finally {
-	            						resizedBitmap.recycle();
+	            						if (resizedBitmap != bitmap)
+	            							resizedBitmap.recycle();
 	            					}
 	            				}
 	            				finally {
@@ -1278,7 +1279,8 @@ public class TMyUserPanel extends Activity {
 						}
 					}
 					finally {
-						resizedBitmap.recycle();
+						if (resizedBitmap != bitmap)
+							resizedBitmap.recycle();
 					}
 				}
 				finally {

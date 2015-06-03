@@ -11,7 +11,7 @@
         android:layout_height="64dp"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:background="@drawable/user_activity_component_list_placeholder"
+        android:background="@drawable/user_activity_component_list_whiteplaceholder"
         android:contentDescription="@string/SGeoLog" />
 
     <TextView

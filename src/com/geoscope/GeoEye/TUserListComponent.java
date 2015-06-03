@@ -230,9 +230,9 @@ public class TUserListComponent extends TUIComponent {
 			holder.lbInfo.setText(S);
 			//.
 			if (Item.User.UserIsOnline)
-				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.onlineuser));
+				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.onlineuser1));
 			else
-				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.offlineuser));
+				holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.offlineuser1));
 			//.
 			holder.ivImage.setOnClickListener(null);
 			//. show selection

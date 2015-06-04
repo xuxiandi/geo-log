@@ -504,6 +504,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					//.
             		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
             		com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL URL = new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL(RootItem.DataComponentType,RootItem.DataComponentID);
+        			URL.Name = lbName.getText().toString();
             		URL.ConstructURLFile(URLFN);
             		//.
 	    		    new AlertDialog.Builder(TComponentTypedDataFilesPanel.this)
@@ -632,6 +633,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	    												}
 	    	    										//.
 		    											URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+		    											URL.Name = ComponentTypedDataFile.DataName;
 		    											URL.ConstructURLFile(URLFN);
 	    											}
 	    											finally {

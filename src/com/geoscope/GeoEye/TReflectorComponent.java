@@ -3144,9 +3144,8 @@ public class TReflectorComponent extends TUIComponent {
 			int ProgressValue = -1;
 			int ProgressPercentage = -1;
 			// .
-			TSpaceImageUpdating SpaceImageUpdating = Reflector
-					.GetSpaceImageUpdating();
-			if (SpaceImageUpdating != null) {
+			TSpaceImageUpdating SpaceImageUpdating = Reflector.GetSpaceImageUpdating();
+			if ((SpaceImageUpdating != null) && !SpaceImageUpdating.flDone) {
 				S = getContext().getString(R.string.SImageUpdating);
 				ProgressSummaryValue = SpaceImageUpdating.ImageProgressor
 						.GetSummaryValue();
@@ -4086,8 +4085,8 @@ public class TReflectorComponent extends TUIComponent {
 
 			private TRWLevelTileContainer[] LevelTileContainers;
 
-			public TActiveCompilationUpLevelsTilesPreparing(TRWLevelTileContainer[] pLevelTileContainers, TCanceller pCanceller) {
-	    		super(pCanceller);
+			public TActiveCompilationUpLevelsTilesPreparing(TCancelableThread pParentThread, TRWLevelTileContainer[] pLevelTileContainers) {
+	    		super(pParentThread);
 	    		//.
 				LevelTileContainers = pLevelTileContainers;
 				// .
@@ -4151,6 +4150,8 @@ public class TReflectorComponent extends TUIComponent {
 		}
 
 		private TReflectorComponent Reflector;
+		//.
+		public boolean flDone = false;
 		//.
 		private int Delay;
 		private boolean flUpdateProxySpace;
@@ -4243,6 +4244,8 @@ public class TReflectorComponent extends TUIComponent {
 					//.
 					if (Reflector.SpaceImage != null)
 						Reflector.SpaceImage.GetSegmentsFromServer(Reflector.ReflectionWindow, flUpdateProxySpace, Canceller, ImageUpdater, null);
+					//. Done.
+					flDone = true;
 					//. raise event
 					Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
 					break; //. >
@@ -4302,8 +4305,10 @@ public class TReflectorComponent extends TUIComponent {
 						//.
 						throw CE; //. =>
 					}
+					//. Done.
+					flDone = true;
 					//. raise event
-					if (!Canceller.flCancel)
+					if (!Canceller.flCancel) 
 						Reflector.MessageHandler.obtainMessage(TReflectorComponent.MESSAGE_UPDATESPACEIMAGE).sendToTarget();
 					//.
 					TRWLevelTileContainer[] _LevelTileContainers = new TRWLevelTileContainer[LevelTileContainers.length];
@@ -4318,7 +4323,7 @@ public class TReflectorComponent extends TUIComponent {
 					if (flPrepareUpLevels) {
 						//. flPrepareUpLevels = false;
 						//.
-						TActiveCompilationUpLevelsTilesPreparing _ActiveCompilationUpLevelsTilesPreparing = new TActiveCompilationUpLevelsTilesPreparing(_LevelTileContainers, Canceller);
+						TActiveCompilationUpLevelsTilesPreparing _ActiveCompilationUpLevelsTilesPreparing = new TActiveCompilationUpLevelsTilesPreparing(this, _LevelTileContainers);
 						_ActiveCompilationUpLevelsTilesPreparing.Start();
 					}
 					break; // . >
@@ -5185,8 +5190,7 @@ public class TReflectorComponent extends TUIComponent {
 							if (flUpdateImage) {
 								Reflector.WorkSpace.Update();
 								// .
-								TSpaceImageUpdating SIU = Reflector
-										.GetSpaceImageUpdating();
+								TSpaceImageUpdating SIU = Reflector.GetSpaceImageUpdating();
 								if (SIU != null)
 									SIU.Join();
 								MessageHandler.obtainMessage(
@@ -7347,10 +7351,6 @@ public class TReflectorComponent extends TUIComponent {
 				case MESSAGE_UPDATESPACEIMAGE:
 					if (!flExists)
 						return; // . ->
-					// .
-					synchronized (TReflectorComponent.this) {
-						_SpaceImageUpdating = null;
-					}
 					//. check the EditingObj for completion
 					if ((EditingObj != null) && EditingObj.EditingIsFinished) 
 						EditingObj_Clear();

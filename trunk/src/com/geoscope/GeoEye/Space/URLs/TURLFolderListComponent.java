@@ -876,9 +876,7 @@ public class TURLFolderListComponent extends TUIComponent {
 		    		    				@Override
 		    		    				public void onClick(DialogInterface dialog, int whichButton) {
 		    		    					try {
-	    		    							URLList.Remove(URLItem.ID);
-	    		    							//.
-	    		    							Update();    		    							
+		    		    						RemoveURLByID(URLItem.ID);
 				    						}
 				    						catch (Exception E) {
 				    			                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -930,83 +928,46 @@ public class TURLFolderListComponent extends TUIComponent {
         	
 			@Override
             public void onClick(View v) {
+            	try {
+    				String IFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+    				File IF = new File(IFN);
+    				if (IF.exists())
+    					ImportURLFromFile(IFN);
+    				else {
+    					TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(ParentActivity, TGeoLogApplication.GetTempFolder(), ".XML", new TFileSystemFileSelector.OpenDialogListener() {
+    			        	
+    			            @Override
+    			            public void OnSelectedFile(String fileName) {
+    			            	try {
+    			            		ImportURLFromFile(fileName);
+    							} catch (Exception E) {
+    								Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+    							}
+    			            }
+
+    						@Override
+    						public void OnCancel() {
+    						}
+    			        });
+    			    	FileSelector.show();
+    			    	//.
+    					Toast.makeText(ParentActivity, R.string.SNoUrlFound,	Toast.LENGTH_LONG).show();
+    				}
+				} catch (Exception E) {
+					Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+				}
+            }
+        });
+        btnImportURL.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
 				TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(ParentActivity, TGeoLogApplication.GetTempFolder(), ".XML", new TFileSystemFileSelector.OpenDialogListener() {
 		        	
 		            @Override
 		            public void OnSelectedFile(String fileName) {
 		            	try {
-							File F = new File(fileName);
-							final byte[] Data;
-					    	long FileSize = F.length();
-					    	FileInputStream FIS = new FileInputStream(F);
-					    	try {
-					    		Data = new byte[(int)FileSize];
-					    		FIS.read(Data);
-					    	}
-					    	finally {
-					    		FIS.close();
-					    	}
-		                    //.
-				    		final com.geoscope.GeoEye.Space.URL.TURL URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlData(Data, URLList.User);
-				    		//.
-				    		if (URL != null) {
-				        		final EditText input = new EditText(ParentActivity);
-				        		input.setInputType(InputType.TYPE_CLASS_TEXT);
-				        		if (URL.Name != null)
-				        			input.setText(URL.Name);
-				        		//.
-				        		final AlertDialog dlg = new AlertDialog.Builder(ParentActivity)
-				        		//.
-				        		.setTitle(R.string.SDataName)
-				        		.setMessage(R.string.SEnterName)
-				        		//.
-				        		.setView(input)
-				        		.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
-				        			
-				        			@Override
-				        			public void onClick(DialogInterface dialog, int whichButton) {
-				        				//. hide keyboard
-				        				InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-				        				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-				        				//.
-		        						try {
-		        							String Name = input.getText().toString();
-		        					    	//.
-		        					    	if (URLList != null) {
-		        					    		if (Name.length() == 0)
-		        					    			Name = "?";
-		        					    		if (URL != null)
-		        					    			URLList.Add(Name, Data,URL);
-		        					    		//.
-		        					    		Update();
-		        					    	}
-		        						} catch (Exception E) {
-		        							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
-		        						}
-				        			}
-				        		})
-				        		//.
-				        		.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
-				        			
-				        			@Override
-				        			public void onClick(DialogInterface dialog, int whichButton) {
-				        				// . hide keyboard
-				        				InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-				        				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-				        			}
-				        		}).create();
-				        		//.
-				        		input.setOnEditorActionListener(new OnEditorActionListener() {
-				        			
-				        			@Override
-				        			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
-				        				dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
-				        				return false;
-				        			}
-				                });        
-				        		// .
-				        		dlg.show();
-				    		}
+		            		ImportURLFromFile(fileName);
 						} catch (Exception E) {
 							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
 						}
@@ -1016,9 +977,11 @@ public class TURLFolderListComponent extends TUIComponent {
 					public void OnCancel() {
 					}
 		        });
-		    	FileSelector.show();    	
-            }
-        });
+		    	FileSelector.show();
+		    	//.
+				return false;
+			}
+		});
         //.
         btnUpItem = (Button)ParentLayout.findViewById(R.id.btnUpItem);
         btnUpItem.setOnClickListener(new OnClickListener() {
@@ -1365,7 +1328,102 @@ public class TURLFolderListComponent extends TUIComponent {
 		MessageHandler.obtainMessage(MESSAGE_STARTUPDATING).sendToTarget();
 	}
 
-    private class TURLsToUserSending extends TCancelableThread {
+	private void ImportURLFromFile(String FN) throws Exception {
+		File F = new File(FN);
+		final byte[] Data;
+    	long FileSize = F.length();
+    	FileInputStream FIS = new FileInputStream(F);
+    	try {
+    		Data = new byte[(int)FileSize];
+    		FIS.read(Data);
+    	}
+    	finally {
+    		FIS.close();
+    	}
+        //.
+		final com.geoscope.GeoEye.Space.URL.TURL URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlData(Data, URLList.User);
+		//.
+		if (URL != null) {
+    		final EditText input = new EditText(ParentActivity);
+    		input.setInputType(InputType.TYPE_CLASS_TEXT);
+    		if (URL.Name != null)
+    			input.setText(URL.Name);
+    		//.
+    		final AlertDialog dlg = new AlertDialog.Builder(ParentActivity)
+    		//.
+    		.setTitle(R.string.SDataName)
+    		.setMessage(R.string.SEnterName)
+    		//.
+    		.setView(input)
+    		.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+    			
+    			@Override
+    			public void onClick(DialogInterface dialog, int whichButton) {
+    				//. hide keyboard
+    				InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+    				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+    				//.
+					try {
+						String Name = input.getText().toString();
+				    	//.
+				    	if (URLList != null) {
+				    		if (Name.length() == 0)
+				    			Name = "?";
+				    		if (URL != null) {
+				    			URLList.Add(Name, Data,URL);
+					    		//.
+					    		Update();
+					    		//.
+				    			SelectedURL_SetByIndex(URLList.Count()-1, true, true);
+				    			//.
+								Toast.makeText(ParentActivity, R.string.SURLHasBeenImportedSuccessfully,	Toast.LENGTH_LONG).show();
+				    		}
+				    	}
+					} catch (Exception E) {
+						Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+					}
+    			}
+    		})
+    		//.
+    		.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+    			
+    			@Override
+    			public void onClick(DialogInterface dialog, int whichButton) {
+    				// . hide keyboard
+    				InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+    				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+    			}
+    		}).create();
+    		//.
+    		input.setOnEditorActionListener(new OnEditorActionListener() {
+    			
+    			@Override
+    			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+    				dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
+    				return false;
+    			}
+            });        
+    		// .
+    		dlg.show();
+		}
+	}
+	
+	private void RemoveURLByID(String ID) throws Exception {
+		int Index = URLList.GetItemIndex(ID);
+		if (Index >= 0) {
+			URLList.Remove(Index);
+			//.
+			Update();    		    							
+			//.
+			int Cnt = URLList.Count();
+			if (Index >= Cnt)
+				Index = Cnt-1;
+			if (Index >= 0)
+				SelectedURL_SetByIndex(Index, true, true);
+		}
+	}
+
+	private class TURLsToUserSending extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION 				= 0;
     	private static final int MESSAGE_DONE 					= 1;
@@ -1483,6 +1541,14 @@ public class TURLFolderListComponent extends TUIComponent {
 	    };
     }		
 
+	private void SelectedURL_SetByIndex(int Index, boolean flNotify, boolean flMakeVisible) throws Exception {
+		lvURLListAdapter.Items_SetSelectedIndex(Index, flNotify);
+		if (flMakeVisible) {
+			lvURLList.setItemChecked(Index, true);
+			lvURLList.setSelection(Index);
+		}
+	}
+	
 	private void SelectedURL_MoveUp() throws Exception {
 		String SelectedItemID = lvURLListAdapter.Items_GetSelectedItemID();
 		int ItemIndex  = URLList.GetItemIndex(SelectedItemID);
@@ -1514,6 +1580,16 @@ public class TURLFolderListComponent extends TUIComponent {
 					lvURLList.setSelection(ItemIndex);
 				}
 			}
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	private void SelectedURL_MakeVisible() throws Exception {
+		String SelectedItemID = lvURLListAdapter.Items_GetSelectedItemID();
+		int ItemIndex  = URLList.GetItemIndex(SelectedItemID);
+		if (ItemIndex >= 0) {
+			lvURLList.setItemChecked(ItemIndex, true);
+			lvURLList.setSelection(ItemIndex);
 		}
 	}
 	

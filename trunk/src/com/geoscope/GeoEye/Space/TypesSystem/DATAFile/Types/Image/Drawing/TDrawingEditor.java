@@ -1641,16 +1641,17 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
             			} catch (Exception E) {
             				return; //. ->
             			} 
-                    	if (SpaceImageUpdating != null) {
-                    		if ((Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter % Containers_CurrentContainer_Updater_ImageUpdateIntervalCount) == 0) {
-                    			int ProgressPercentage = SpaceImageUpdating.ImageProgressor.ProgressPercentage(); 
-                				Containers_CurrentContainer_Updater_DoOnUpdating(ProgressPercentage);  
-                    		}
-                    		//.
-                    		Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter++;
-                    	}
-                    	else 
-                    		Containers_CurrentContainer_Updater_DoOnUpdated();  
+            			if (SpaceImageUpdating != null)
+                        	if (!SpaceImageUpdating.flDone) {
+                        		if ((Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter % Containers_CurrentContainer_Updater_ImageUpdateIntervalCount) == 0) {
+                        			int ProgressPercentage = SpaceImageUpdating.ImageProgressor.ProgressPercentage(); 
+                    				Containers_CurrentContainer_Updater_DoOnUpdating(ProgressPercentage);  
+                        		}
+                        		//.
+                        		Containers_CurrentContainer_Updater_ImageUpdateIntervalCounter++;
+                        	}
+                        	else 
+                        		Containers_CurrentContainer_Updater_DoOnUpdated();  
     		        } 
     		        catch (Exception E) {
     					Toast.makeText(TDrawingEditor.this, E.getMessage(), Toast.LENGTH_LONG).show();  

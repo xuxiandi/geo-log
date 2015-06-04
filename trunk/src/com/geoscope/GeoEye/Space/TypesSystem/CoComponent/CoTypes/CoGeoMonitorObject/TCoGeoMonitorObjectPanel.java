@@ -420,6 +420,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 	            	try {
 	            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
 	            		com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.PropsPanel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.PropsPanel.TURL(Object.ID,Object.Name);
+	            		if (Object != null)
+	            			URL.Name = Object.LabelText();
 	            		URL.ConstructURLFile(URLFN);
 	            		//.
 		    		    new AlertDialog.Builder(TCoGeoMonitorObjectPanel.this)

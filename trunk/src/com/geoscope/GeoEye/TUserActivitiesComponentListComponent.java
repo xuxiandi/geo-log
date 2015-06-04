@@ -744,6 +744,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	    	    												}
 	    	    	    										//.
 	    		    											URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+	    		    											URL.Name = ComponentTypedDataFile.DataName;
 	    		    											URL.ConstructURLFile(URLFN);
 	    	    											}
 	    	    											finally {

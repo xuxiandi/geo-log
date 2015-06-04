@@ -1036,7 +1036,7 @@
     <string name="SURLFileNameHasBeenSaved">"URL file has been saved to "</string>
     <string name="SGetURLFile">Copy URL-link</string>
     <string name="SBookmarks">Bookmarks</string>
-    <string name="SImport">Import &#8230;</string>
+    <string name="SImport">Import</string>
     <string name="SUpItem">up item</string>
     <string name="SDownItem">down item</string>
     <string name="SRemoveSelectedBookmark">Remove selected bookmark ?</string>
@@ -1058,5 +1058,7 @@
     <string name="SUserIsNotAvailableForVideoPhoneCommunication">user is not available for video-phone communication</string>
     <string name="SActivityContent">Activity content</string>
     <string name="SActivityList1">Activity list</string>
+    <string name="SURLHasBeenImportedSuccessfully">URL has been imported successfully.</string>
+    <string name="SNoUrlFound">There is no URL found. Please choose a file for import.</string>
     
 </resources>

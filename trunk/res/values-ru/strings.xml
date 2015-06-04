@@ -1036,7 +1036,7 @@
     <string name="SURLFileNameHasBeenSaved">"URL файл сохранён в "</string>
     <string name="SGetURLFile">Копировать URL-ссылку</string>
     <string name="SBookmarks">Закладки</string>
-    <string name="SImport">Импорт &#8230;</string>
+    <string name="SImport">Импорт</string>
     <string name="SUpItem">вверх</string>
     <string name="SDownItem">вниз</string>
     <string name="SRemoveSelectedBookmark">Удалить выделенную закладку ?</string>
@@ -1058,5 +1058,7 @@
     <string name="SUserIsNotAvailableForVideoPhoneCommunication">пользователь недоступен для связи через видеофон</string>
     <string name="SActivityContent">Содержимое активности</string>
     <string name="SActivityList1">Список активностей</string>
+    <string name="SURLHasBeenImportedSuccessfully">Сслыка импортирована успешно.</string>
+    <string name="SNoUrlFound">Ссылка не найдена. Выберите файл для импорта.</string>
     
 </resources>

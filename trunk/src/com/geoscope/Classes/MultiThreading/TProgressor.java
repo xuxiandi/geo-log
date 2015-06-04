@@ -3,9 +3,12 @@ package com.geoscope.Classes.MultiThreading;
 public abstract class TProgressor {
 
 	protected int Percentage = -1;
+	//.
+	private int SummaryValue = 0;
+	private int ProgressValue = 0;
 	
-	public synchronized boolean DoOnProgress(int Percentage) {
-		this.Percentage = Percentage;
+	public synchronized boolean DoOnProgress(int pPercentage) {
+		Percentage = pPercentage;
 		return true; 
 	}
 	
@@ -13,9 +16,6 @@ public abstract class TProgressor {
 		return Percentage;
 	}
 	
-	private int SummaryValue = 0;
-	private int ProgressValue = 0;
-
 	public synchronized int GetSummaryValue() {
 		return SummaryValue;
 	}
@@ -45,5 +45,9 @@ public abstract class TProgressor {
 	public synchronized boolean DecProgressValue() {
 		ProgressValue--;
 		return true;
+	}
+
+	public synchronized boolean IsDone() {
+		return (ProgressValue >= SummaryValue);
 	}
 }

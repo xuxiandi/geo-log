@@ -337,7 +337,7 @@ public final class TDiskLruCache implements Closeable {
      * @param maxSize the maximum number of bytes this cache should use to store
      * @throws java.io.IOException if reading or writing the cache directory fails
      */
-    public static TDiskLruCache open(File directory, int appVersion, int valueCount, long maxSize)
+    public static TDiskLruCache open(File directory, int appVersion, int valueCount, long maxSize, boolean flReadLast)
             throws IOException {
         if (maxSize <= 0) {
             throw new IllegalArgumentException("maxSize <= 0");
@@ -348,19 +348,21 @@ public final class TDiskLruCache implements Closeable {
 
         // prefer to pick up where we left off
         TDiskLruCache cache = new TDiskLruCache(directory, appVersion, valueCount, maxSize);
-        if (cache.journalFile.exists()) {
-            try {
-                cache.readJournal();
-                cache.processJournal();
-                cache.journalWriter = new BufferedWriter(new FileWriter(cache.journalFile, true),
-                        IO_BUFFER_SIZE);
-                return cache;
-            } catch (IOException journalIsCorrupt) {
-//                System.logW("DiskLruCache " + directory + " is corrupt: "
-//                        + journalIsCorrupt.getMessage() + ", removing");
-                cache.delete();
-            }
-        }
+        if (cache.journalFile.exists()) 
+        	if (flReadLast)
+                try {
+                    cache.readJournal();
+                    cache.processJournal();
+                    cache.journalWriter = new BufferedWriter(new FileWriter(cache.journalFile, true),
+                            IO_BUFFER_SIZE);
+                    return cache;
+                } catch (IOException journalIsCorrupt) {
+//                    System.logW("DiskLruCache " + directory + " is corrupt: "
+//                            + journalIsCorrupt.getMessage() + ", removing");
+                    cache.delete();
+                }
+                else   
+                    cache.delete();
 
         // create a new empty cache
         directory.mkdirs();

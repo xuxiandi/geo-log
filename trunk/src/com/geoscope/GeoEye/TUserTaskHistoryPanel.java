@@ -150,6 +150,7 @@ public class TUserTaskHistoryPanel extends Activity {
 					intent.putExtra("ComponentID", Component.ID);
 	            	intent.putExtra("UserID",ActivityHistoryItem.Activity.idUser);
 	            	intent.putExtra("ActivityID",ActivityHistoryItem.Activity.ID);
+	            	intent.putExtra("ActivityInfo",ActivityHistoryItem.Activity.GetInfo(TUserTaskHistoryPanel.this));
 	            	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
 				}
         	}              

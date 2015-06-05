@@ -14,6 +14,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -955,14 +956,20 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
         //.
         Bundle extras = getIntent().getExtras();
     	//.
-    	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Session.Object, Session.flAudio, Session.flVideo, Session.GetValue(), new TExceptionHandler() {
+        int AudioDestination;
+        if (Session.flVideo)
+        	AudioDestination = AudioManager.STREAM_MUSIC;
+        else
+        	AudioDestination = AudioManager.STREAM_VOICE_CALL;
+        //.
+    	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Session.Object, Session.flAudio,AudioDestination, Session.flVideo, Session.GetValue(), new TExceptionHandler() {
 			@Override
 			public void DoOnException(Throwable E) {
 				TVideoRecorderServerVideoPhoneServer.this.DoOnException(E);
 			}
 		}, lbStatus,ivAudioOnly);
     	//.
-        SetSurface(true);
+        SetSurface(true,Session.flVideo);
     }
 	
     public void onDestroy() {

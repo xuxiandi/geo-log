@@ -488,6 +488,7 @@ public class TUserPanel extends Activity {
 				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserInfo.UserID);
             	intent.putExtra("ActivityID",UserCurrentActivity.ID);
+            	intent.putExtra("ActivityInfo",UserCurrentActivity.GetInfo(TUserPanel.this));
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
             }
         });

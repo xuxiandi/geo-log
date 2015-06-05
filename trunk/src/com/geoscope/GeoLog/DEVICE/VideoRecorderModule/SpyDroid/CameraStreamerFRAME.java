@@ -114,7 +114,7 @@ public class CameraStreamerFRAME extends Camera {
 	    private void Microphone_Initialize() throws IOException {
 	    	Microphone_BufferSize = AudioRecord.getMinBufferSize(Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 	        if (Microphone_BufferSize != AudioRecord.ERROR_BAD_VALUE && Microphone_BufferSize != AudioRecord.ERROR) {
-	            Microphone_Recorder = new AudioRecord(Microphone_Source, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize*10);
+	            Microphone_Recorder = new AudioRecord(Microphone_Source, Microphone_SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Microphone_BufferSize);
 	            if (Microphone_Recorder != null && Microphone_Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
 	            	Microphone_Recorder.startRecording();
 	            else 
@@ -138,7 +138,7 @@ public class CameraStreamerFRAME extends Camera {
 		public void run() {
 			try {
 				//. try to connect to an AudioModule.MicrophoneCapturingServer
-				TMicrophoneCapturingServer.TConfiguration Configuration = new TMicrophoneCapturingServer.TConfiguration(Microphone_SamplePerSec);
+				TMicrophoneCapturingServer.TConfiguration Configuration = new TMicrophoneCapturingServer.TConfiguration(Microphone_Source,Microphone_SamplePerSec);
 				TMicrophoneCapturingServer.TPacketSubscriber PacketSubscriber = new TMicrophoneCapturingServer.TPacketSubscriber() {
 					@Override
 					protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {

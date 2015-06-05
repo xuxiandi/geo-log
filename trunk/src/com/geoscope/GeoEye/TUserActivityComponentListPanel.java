@@ -12,8 +12,10 @@ public class TUserActivityComponentListPanel extends Activity {
 	//.
 	private TReflectorComponent Component;
 	//.
-	private long UserID = 0;	
-	private long ActivityID = 0;
+	private long UserID = 0;
+	//.
+	private long 	ActivityID = 0;
+	private String	ActivityInfo;
 	//.
 	private TUserActivityComponentListComponent ListComponent = null;
 	
@@ -27,6 +29,7 @@ public class TUserActivityComponentListPanel extends Activity {
 			ComponentID = extras.getInt("ComponentID");
         	UserID = extras.getLong("UserID");
         	ActivityID = extras.getLong("ActivityID");
+        	ActivityInfo = extras.getString("ActivityInfo");
         }
 		Component = TReflectorComponent.GetComponent(ComponentID);
 		//.
@@ -36,7 +39,7 @@ public class TUserActivityComponentListPanel extends Activity {
         //.
         LinearLayout ParentLayout = (LinearLayout)findViewById(R.id.llParent);
         //.
-        ListComponent = new TUserActivityComponentListComponent(this, ParentLayout, UserID, ActivityID, TUserActivityComponentListComponent.LIST_ROW_SIZE_NORMAL_ID, Component, null);
+        ListComponent = new TUserActivityComponentListComponent(this, ParentLayout, UserID, ActivityID,ActivityInfo, TUserActivityComponentListComponent.LIST_ROW_SIZE_NORMAL_ID, Component, null);
         //.
         setResult(RESULT_CANCELED);
         //.

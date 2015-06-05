@@ -68,6 +68,7 @@ public class TUserActivityListPanel extends Activity {
 				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserID);
             	intent.putExtra("ActivityID",UserActivities.Items[arg2].ID);
+            	intent.putExtra("ActivityInfo",UserActivities.Items[arg2].GetInfo(TUserActivityListPanel.this));
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
         	}              
         });

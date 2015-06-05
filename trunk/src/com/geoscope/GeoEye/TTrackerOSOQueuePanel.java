@@ -253,7 +253,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 			Items = pItems;
 			layoutInflater = LayoutInflater.from(context);
 			//.
-			ImageCache = new TDiskImageCache(context, ImageCache_Name,ImageCache_Size,ImageCache_CompressFormat,ImageCache_CompressQuality);
+			ImageCache = new TDiskImageCache(context, ImageCache_Name,ImageCache_Size,ImageCache_CompressFormat,ImageCache_CompressQuality, false);
 			//.
 			ProgressHandler = new TProgressHandler() {
 				@Override

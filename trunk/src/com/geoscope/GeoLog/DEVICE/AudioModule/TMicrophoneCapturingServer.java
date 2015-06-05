@@ -27,6 +27,10 @@ public class TMicrophoneCapturingServer extends TCancelableThread {
 			BufferSize = pBufferSize;
 		}
 		
+		public TConfiguration(int pSource, int pSamplePerSec) {
+			this(pSource, pSamplePerSec, BUFFERSIZE_ANY);
+		}
+		
 		public TConfiguration(int pSamplePerSec) {
 			this(SOURCE_ANY, pSamplePerSec, BUFFERSIZE_ANY);
 		}
@@ -179,7 +183,7 @@ public class TMicrophoneCapturingServer extends TCancelableThread {
     		Configuration.BufferSize = AudioRecord.getMinBufferSize(Configuration.SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
     	//.
         if (Configuration.BufferSize != AudioRecord.ERROR_BAD_VALUE && Configuration.BufferSize != AudioRecord.ERROR) {
-            Microphone = new AudioRecord(Configuration.Source, Configuration.SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Configuration.BufferSize*2);
+            Microphone = new AudioRecord(Configuration.Source, Configuration.SamplePerSec, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Configuration.BufferSize);
             if (Microphone != null && Microphone.getState() == AudioRecord.STATE_INITIALIZED) 
             	Microphone.startRecording();
             else 

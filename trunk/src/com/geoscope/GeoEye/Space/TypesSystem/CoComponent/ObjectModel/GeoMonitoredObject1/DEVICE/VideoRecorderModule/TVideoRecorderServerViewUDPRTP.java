@@ -13,7 +13,6 @@ import java.util.Random;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaCodec;
@@ -179,6 +178,8 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 		
 		private int Port;
 		//.
+		private int Destination;
+		//.
 		private TExceptionHandler ExceptionHandler;
 		//.
 		private Socket socket = null;
@@ -193,10 +194,11 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 		private AudioTrack 			AudioPlayer;
 		private TAudioBufferPlaying AudioBufferPlaying;
 
-		public TAudioClient(int pPort, TExceptionHandler pExceptionHandler) {
+		public TAudioClient(int pPort, int pDestination, TExceptionHandler pExceptionHandler) {
     		super();
     		//.
 			Port = pPort;
+			Destination = pDestination;
 			ExceptionHandler = pExceptionHandler;
 			//.
 			socket = new Socket();
@@ -386,7 +388,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 		    	if (AudioPlayer != null) 
 		    		AudioPlayer.stop();
 		    	BufferSize = TAudioBufferPlaying.BufferPlayPortion*2;
-				AudioPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SampleRate, ChannelConfig, AudioFormat.ENCODING_PCM_16BIT, BufferSize, AudioTrack.MODE_STREAM);
+				AudioPlayer = new AudioTrack(Destination, SampleRate, ChannelConfig, AudioFormat.ENCODING_PCM_16BIT, BufferSize, AudioTrack.MODE_STREAM);
 		    	AudioPlayer.setStereoVolume(1.0F,1.0F);
 		    	AudioPlayer.play();
 			}
@@ -582,8 +584,8 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 	private TLANConnectionUDPRepeater	VideoLocalServer = null;
 	private TVideoClient				VideoClient = null;
 	
-    public TVideoRecorderServerViewUDPRTP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer, ImageView pivAudioOnly) {
-    	super(pcontext, pGeographProxyServerAddress,pGeographProxyServerPort, pUserID,pUserPassword, pObject, pflAudio,pflVideo, pUserAccessKey, pExceptionHandler, plbVideoRecorderServer,pivAudioOnly);
+    public TVideoRecorderServerViewUDPRTP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, int pAudioDestination, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer, ImageView pivAudioOnly) {
+    	super(pcontext, pGeographProxyServerAddress,pGeographProxyServerPort, pUserID,pUserPassword, pObject, pflAudio,pAudioDestination, pflVideo, pUserAccessKey, pExceptionHandler, plbVideoRecorderServer,pivAudioOnly);
 		if (GeographProxyServerPort == TUDPEchoServerClient.ServerDefaultPort) {
 	    	TTracker Tracker = TTracker.GetTracker();
 	    	if (Tracker != null) {
@@ -604,7 +606,7 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 	public void AudioClient_Initialize() throws Exception {
 		AudioClient_Finalize();
 		if (flAudio) {
-			AudioClient = new TAudioClient(AudioLocalServer.GetPort(), new TExceptionHandler() {
+			AudioClient = new TAudioClient(AudioLocalServer.GetPort(), AudioDestination, new TExceptionHandler() {
 				@Override
 				public void DoOnException(Throwable E) {
 					if (!(E instanceof SocketException))

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -84,7 +85,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         	}
         	//.
             //. TCP version VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
-        	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
+        	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled,AudioManager.STREAM_MUSIC, flVideoEnabled, null, new TExceptionHandler() {
 				@Override
 				public void DoOnException(Throwable E) {
 					TVideoRecorderServerViewer.this.DoOnException(E);

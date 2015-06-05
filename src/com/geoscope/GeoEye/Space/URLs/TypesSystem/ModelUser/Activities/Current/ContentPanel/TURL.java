@@ -74,6 +74,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.A
             		intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",idComponent);
             	intent.putExtra("ActivityID",UserCurrentActivity.ID);
+            	intent.putExtra("ActivityInfo",UserCurrentActivity.GetInfo(context));
             	context.startActivity(intent);
 			}
 

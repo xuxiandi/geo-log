@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.widget.ImageView;
@@ -25,6 +26,7 @@ public abstract class TVideoRecorderServerView {
 	public boolean 					flActive = false;
 	//.
 	public boolean 						flAudio = false;
+	protected int						AudioDestination = AudioManager.STREAM_MUSIC;
 	//.
 	public boolean 						flVideo = false;
 	protected Surface					VideoSurface = null;
@@ -35,7 +37,7 @@ public abstract class TVideoRecorderServerView {
 	//.
 	private TExceptionHandler ExceptionHandler;
 	
-    public TVideoRecorderServerView(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer, ImageView pivAudioOnly) {
+    public TVideoRecorderServerView(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, int pAudioDestination, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer, ImageView pivAudioOnly) {
     	context = pcontext;
     	//.
     	GeographProxyServerAddress = pGeographProxyServerAddress;
@@ -43,7 +45,10 @@ public abstract class TVideoRecorderServerView {
     	UserID = pUserID;
     	UserPassword = pUserPassword;
     	Object = pObject;
+    	//.
     	flAudio = pflAudio;
+    	AudioDestination = pAudioDestination;
+    	//.
     	flVideo = pflVideo;
     	//.
     	UserAccessKey = pUserAccessKey;  

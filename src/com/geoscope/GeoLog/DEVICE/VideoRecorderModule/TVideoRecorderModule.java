@@ -772,6 +772,9 @@ public class TVideoRecorderModule extends TModule {
     public synchronized boolean LoadVideoPhoneProfile() throws Exception {
 		String PFN = Folder()+"/"+VideoPhoneProfileFileName;
 		if (LoadProfileFromFile(PFN)) {
+			if (CameraConfiguration.Camera_Audio_Source == MediaRecorder.AudioSource.DEFAULT)
+				CameraConfiguration.Camera_Audio_Source = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+			//.
 			Profile_flDefault = false;
 			return true; //. ->
 		}

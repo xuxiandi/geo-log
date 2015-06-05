@@ -26,12 +26,10 @@ public class TDiskImageCache {
 	private static final int APP_VERSION = 1;
 	private static final int VALUE_COUNT = 1;
 
-	public TDiskImageCache(Context context, String uniqueName,
-			int diskCacheSize, CompressFormat compressFormat, int quality) {
+	public TDiskImageCache(Context context, String uniqueName, int diskCacheSize, CompressFormat compressFormat, int quality, boolean flReadLast) {
 		try {
 			final File diskCacheDir = getDiskCacheDir(context, uniqueName);
-			mDiskCache = TDiskLruCache.open(diskCacheDir, APP_VERSION,
-					VALUE_COUNT, diskCacheSize);
+			mDiskCache = TDiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize, flReadLast);
 			mCompressFormat = compressFormat;
 			mCompressQuality = quality;
 		} catch (IOException e) {

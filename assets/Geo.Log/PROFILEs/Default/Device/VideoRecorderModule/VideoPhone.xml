@@ -22,7 +22,7 @@
     </Measurement>
     <Camera>
       <Audio>
-        <AudioSource>0</AudioSource>
+        <AudioSource>7</AudioSource>
         <SampleRate>8000</SampleRate>
         <ABitRate>8000</ABitRate>
       </Audio>

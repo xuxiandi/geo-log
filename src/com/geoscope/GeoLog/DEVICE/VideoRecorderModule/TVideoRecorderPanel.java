@@ -143,7 +143,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
     		//.
     		SetVideoRecorderPanel(TVideoRecorderPanel.this);
     		//.
-    		SetSurface(false);
+    		SetSurface(false,true);
     	}
     	finally {
     		flStarting = false;
@@ -254,18 +254,31 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 	public void DoOnSurfaceIsDestroyed(SurfaceHolder SH) {
 	}
 	
-    public void SetSurface(boolean flVisible) {
+    public void SetSurface(boolean flVisible, boolean flNativeVisible) {
+    	LinearLayout SurfaceParentLayout = (LinearLayout)findViewById(R.id.VideoRecorderPanelSurfaceParentLayout);
     	if (flVisible) {
-    		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(256,256);
-    		VideoRecorder_SurfaceLayout.setLayoutParams(params);    	
-    		params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT);
-    		SurfaceLayout.setLayoutParams(params);
-    		SurfaceLayout.setVisibility(View.VISIBLE);
+    		if (flNativeVisible) {
+        		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(256,256);
+        		VideoRecorder_SurfaceLayout.setLayoutParams(params);
+    			VideoRecorder_SurfaceLayout.setVisibility(View.VISIBLE);
+    		}
+    		else {
+    			VideoRecorder_SurfaceLayout.setVisibility(View.GONE);
+    			//.
+    			View vSurfaceDelimiter = (View)SurfaceParentLayout.findViewById(R.id.vSurfaceDelimiter);
+    			vSurfaceDelimiter.setVisibility(View.GONE);
+    		}
+    		//.
+    		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT);
+    		SurfaceParentLayout.setLayoutParams(params);
+    		SurfaceParentLayout.setVisibility(View.VISIBLE);
     	}
     	else {
-    		SurfaceLayout.setVisibility(View.GONE);
+    		SurfaceParentLayout.setVisibility(View.GONE);
+    		//.
     		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT);
     		VideoRecorder_SurfaceLayout.setLayoutParams(params);    	
+			VideoRecorder_SurfaceLayout.setVisibility(View.VISIBLE);
     	}
     	SurfaceIsVisible = flVisible;
     	//.

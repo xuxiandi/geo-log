@@ -82,6 +82,7 @@ public class TUserTaskActivityListPanel extends Activity {
 				intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",TaskActivities.Items[arg2].idUser);
             	intent.putExtra("ActivityID",TaskActivities.Items[arg2].ID);
+            	intent.putExtra("ActivityInfo",TaskActivities.Items[arg2].GetInfo(TUserTaskActivityListPanel.this));
             	startActivityForResult(intent,REQUEST_SHOWONREFLECTOR);
         	}              
         });

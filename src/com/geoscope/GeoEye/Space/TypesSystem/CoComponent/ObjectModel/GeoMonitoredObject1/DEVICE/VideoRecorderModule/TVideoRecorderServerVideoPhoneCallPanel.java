@@ -120,7 +120,7 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 			if (InitiatorComponentID == 0)
 				throw new Exception(getString(R.string.SUnknownTrackerComponentID)); //. =>
 			//.
-			Session = new TSession("",0,"",SpaceDefines.idTCoComponent,ObjectID,true,true, Tracker.GeoLog,UserAgent);
+			Session = new TSession("",0,"",SpaceDefines.idTCoComponent,ObjectID, true,false, Tracker.GeoLog,UserAgent);
 			Session.Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
 		} catch (Exception E) {
 	    	Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -133,7 +133,8 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
         cbCallUserWithAudio = (CheckBox)findViewById(R.id.cbCallUserWithAudio);
         cbCallUserWithAudio.setChecked(Session.flAudio);
         cbCallUserWithAudio.setOnClickListener(new OnClickListener() {
-			@Override
+			
+        	@Override
 			public void onClick(View arg0) {
 				Session.flAudio = ((CheckBox)arg0).isChecked();
 			}
@@ -142,7 +143,8 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
         cbCallUserWithVideo = (CheckBox)findViewById(R.id.cbCallUserWithVideo);
         cbCallUserWithVideo.setChecked(Session.flVideo);
         cbCallUserWithVideo.setOnClickListener(new OnClickListener() {
-			@Override
+			
+        	@Override
 			public void onClick(View arg0) {
 				Session.flVideo = ((CheckBox)arg0).isChecked();
 			}
@@ -150,6 +152,8 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
 		//.
         btnCallUser = (Button)findViewById(R.id.btnCallUser);
         btnCallUser.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
             public void onClick(View v) {
                 try {
         			Call();

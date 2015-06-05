@@ -363,7 +363,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 			Items = pItems;
 			layoutInflater = LayoutInflater.from(context);
 			//.
-			ImageCache = new TDiskImageCache(context, ImageCache_Name,ImageCache_Size,ImageCache_CompressFormat,ImageCache_CompressQuality);
+			ImageCache = new TDiskImageCache(context, ImageCache_Name,ImageCache_Size,ImageCache_CompressFormat,ImageCache_CompressQuality, false);
 			//.
 			ProgressHandler = new TProgressHandler() {
 				@Override
@@ -539,6 +539,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	//.
     private TActivity.TComponents 	ActivityComponents = null;
     //.
+    private TextView				lbName;
+    //.
     private TComponentListAdapter	lvActivityComponentListAdapter = null;
 	private ListView 				lvActivityComponentList;
 	//.
@@ -548,7 +550,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	//.
 	private TComponentTypedDataFileLoading ComponentTypedDataFileLoading = null;
 	
-	public TUserActivityComponentListComponent(Activity pParentActivity, LinearLayout pParentLayout, long pUserID, long pActivityID, int pListRowSizeID, TReflectorComponent pComponent, TOnListItemClickHandler pOnListItemClickHandler) {
+	public TUserActivityComponentListComponent(Activity pParentActivity, LinearLayout pParentLayout, long pUserID, long pActivityID, String pActivityInfo, int pListRowSizeID, TReflectorComponent pComponent, TOnListItemClickHandler pOnListItemClickHandler) {
 		ParentActivity = pParentActivity;
 		ParentLayout = pParentLayout;
 		//.
@@ -560,6 +562,10 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		Component = pComponent;
 		//.
 		OnListItemClickHandler = pOnListItemClickHandler;
+		//.
+		lbName = (TextView)ParentLayout.findViewById(R.id.lbName);
+		if (pActivityInfo != null)
+			lbName.setText(ParentActivity.getString(R.string.SActivityComponentList)+": "+pActivityInfo);
         //.
         lvActivityComponentList = (ListView)ParentLayout.findViewById(R.id.lvActivityComponentList);
         lvActivityComponentList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);

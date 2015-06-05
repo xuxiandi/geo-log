@@ -21,12 +21,13 @@
     </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/VideoRecorderPanelSurfaceParentLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
         <View
-            android:id="@+id/view1"
-            android:layout_width="5dp"
+            android:id="@+id/vSurfaceDelimiter"
+            android:layout_width="4dp"
             android:layout_height="wrap_content" />
 
         <FrameLayout

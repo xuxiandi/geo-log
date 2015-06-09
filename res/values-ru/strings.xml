@@ -1060,5 +1060,10 @@
     <string name="SActivityList1">Список активностей</string>
     <string name="SURLHasBeenImportedSuccessfully">Сслыка импортирована успешно.</string>
     <string name="SNoUrlFound">Ссылка не найдена. Выберите файл для импорта.</string>
+    <string name="SImportFromFile">Импорт из файла &#8230;</string>
+    <string name="SCreateInternetAddressBookmark">Создать ссылку на Интернет ресурс</string>
+    <string name="SAddress">Адрес</string>
+    <string name="SInternetAddressURL">Адрес интернет ресурса</string>
+    <string name="SURLFolderListHint">Долгое нажатие на кнопку [Импорт] открывает контекстное меню.\n(долгое нажатие на подсказке убирает её)</string>
     
 </resources>

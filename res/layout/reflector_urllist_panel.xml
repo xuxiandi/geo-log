@@ -86,4 +86,14 @@
             android:textSize="16sp" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/lbHint"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#E7C04A"
+        android:gravity="left"
+        android:textColor="#ff000000"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
 </LinearLayout>

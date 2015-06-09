@@ -1060,5 +1060,10 @@
     <string name="SActivityList1">Activity list</string>
     <string name="SURLHasBeenImportedSuccessfully">URL has been imported successfully.</string>
     <string name="SNoUrlFound">There is no URL found. Please choose a file for import.</string>
+    <string name="SImportFromFile">Import from a file &#8230;</string>
+    <string name="SCreateInternetAddressBookmark">Create an Internet address bookmark</string>
+    <string name="SAddress">Address</string>
+    <string name="SInternetAddressURL">Internet address URL</string>
+    <string name="SURLFolderListHint">Long click on the [Import] button to view a context menu.\n(long click on the hint to remove it)</string>
     
 </resources>

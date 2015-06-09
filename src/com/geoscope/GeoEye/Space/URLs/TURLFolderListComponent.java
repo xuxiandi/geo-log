@@ -70,6 +70,7 @@ import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.TUserListComponent;
 import com.geoscope.GeoEye.TUserListPanel;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.THintManager;
@@ -101,7 +102,9 @@ public class TURLFolderListComponent extends TUIComponent {
 		TURLFolderListComponent.TURLFolderList URLFolderList = new TURLFolderListComponent.TURLFolderList(URLListFolder, User);
 		com.geoscope.GeoEye.Space.URL.TURL URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlData(URLData, User);
 		if (URL != null) {
-			URLFolderList.Add(URLName,URLData,URL);
+			URL.XMLDocumentData = URLData;
+			//.
+			URLFolderList.Add(URLName, URL);
 			//.
 			TURLFolderListComponent Component = Components_GetComponent(URLListFolder);
 			if (Component != null)
@@ -290,7 +293,7 @@ public class TURLFolderListComponent extends TUIComponent {
 				return null; //. ->
 		}
 		
-		public String Add(String Name, byte[] Data, com.geoscope.GeoEye.Space.URL.TURL URL) throws Exception {
+		public String Add(String Name, com.geoscope.GeoEye.Space.URL.TURL URL) throws Exception {
 	        File F = new File(Folder);
 		    if (!F.exists()) 
 		    	F.mkdirs();
@@ -299,7 +302,7 @@ public class TURLFolderListComponent extends TUIComponent {
 		    String URLFileName = Folder+"/"+ID+".xml";
 			FileOutputStream FOS = new FileOutputStream(URLFileName);
 			try {
-				FOS.write(Data);
+				FOS.write(URL.XMLDocumentData);
 			}
 			finally {
 				FOS.close();
@@ -962,22 +965,135 @@ public class TURLFolderListComponent extends TUIComponent {
 			
 			@Override
 			public boolean onLongClick(View v) {
-				TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(ParentActivity, TGeoLogApplication.GetTempFolder(), ".XML", new TFileSystemFileSelector.OpenDialogListener() {
-		        	
-		            @Override
-		            public void OnSelectedFile(String fileName) {
-		            	try {
-		            		ImportURLFromFile(fileName);
-						} catch (Exception E) {
-							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
-						}
-		            }
-
+				final CharSequence[] _items;
+				_items = new CharSequence[2];
+				_items[0] = ParentActivity.getString(R.string.SImportFromFile);
+				_items[1] = ParentActivity.getString(R.string.SCreateInternetAddressBookmark);
+				AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(ParentActivity.getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
 					@Override
-					public void OnCancel() {
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: 
+								TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(ParentActivity, TGeoLogApplication.GetTempFolder(), ".XML", new TFileSystemFileSelector.OpenDialogListener() {
+						        	
+						            @Override
+						            public void OnSelectedFile(String fileName) {
+						            	try {
+						            		ImportURLFromFile(fileName);
+										} catch (Exception E) {
+											Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+										}
+						            }
+
+									@Override
+									public void OnCancel() {
+									}
+						        });
+						    	FileSelector.show();
+						    	//.
+								break; //. >
+								
+							case 1: 
+				                final LinearLayout layout = new LinearLayout(ParentActivity);
+				                layout.setOrientation(LinearLayout.VERTICAL);
+				                TextView label = new TextView(ParentActivity);
+				                label.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+				                label.setText(R.string.SName1);
+				                layout.addView(label);
+								final EditText edName = new EditText(ParentActivity);
+				                layout.addView(edName);
+				                label = new TextView(ParentActivity);
+				                label.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+				                label.setText(R.string.SAddress);
+				                layout.addView(label);
+				                final EditText edInternetURL = new EditText(ParentActivity);
+				                edInternetURL.setText("http://");
+				                layout.addView(edInternetURL);
+				                //.
+								final AlertDialog dlg = new AlertDialog.Builder(ParentActivity)
+								//.
+								.setTitle(R.string.SInternetAddressURL)
+								//.
+				                .setView(layout)
+								//.
+								.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+									
+									@Override
+									public void onClick(DialogInterface dialog, int whichButton) {
+										//. hide keyboard
+										InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+										imm.hideSoftInputFromWindow(layout.getWindowToken(), 0);
+										//.
+										try {
+											String Name = edName.getText().toString();
+											String InternetURL = edInternetURL.getText().toString();
+											//.
+						            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+						            		com.geoscope.GeoEye.Space.URLs.Internet.TURL URL = new com.geoscope.GeoEye.Space.URLs.Internet.TURL(Name, InternetURL);
+						            		URL.ConstructURLFile(URLFN);
+						            		//.
+						            		com.geoscope.GeoEye.Space.URL.TURL _URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlFile(URLFN, URLList.User);
+						            		if (_URL != null) {
+							            		ImportURL(_URL, Name);
+							            		//.
+												Toast.makeText(ParentActivity, R.string.SURLHasBeenImportedSuccessfully, Toast.LENGTH_LONG).show();
+						            		}
+										} catch (Exception E) {
+											Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+										}
+									}
+								})
+								//.
+								.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+									
+									@Override
+									public void onClick(DialogInterface dialog, int whichButton) {
+										// . hide keyboard
+										InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+										imm.hideSoftInputFromWindow(layout.getWindowToken(), 0);
+									}
+								}).create();
+								//.
+								edName.setOnEditorActionListener(new OnEditorActionListener() {
+									
+									@Override
+									public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+										dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
+										return false;
+									}
+						        });        
+								//.
+								edInternetURL.setOnEditorActionListener(new OnEditorActionListener() {
+									
+									@Override
+									public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+										dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
+										return false;
+									}
+						        });        
+								//.
+								dlg.show();
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
 					}
-		        });
-		    	FileSelector.show();
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
 		    	//.
 				return false;
 			}
@@ -1031,6 +1147,27 @@ public class TURLFolderListComponent extends TUIComponent {
         }
         else
         	lbListHint.setVisibility(View.GONE);
+        //.
+        final int Hint1ID = THintManager.HINT__URLFolderList;
+        final TextView lbHint = (TextView)ParentLayout.findViewById(R.id.lbHint);
+        Hint = THintManager.GetHint(Hint1ID, ParentActivity);
+        if (Hint != null) {
+        	lbHint.setText(Hint);
+            lbHint.setOnLongClickListener(new OnLongClickListener() {
+            	
+    			@Override
+    			public boolean onLongClick(View v) {
+    				THintManager.SetHintAsDisabled(Hint1ID);
+    	        	lbHint.setVisibility(View.GONE);
+    	        	//.
+    				return true;
+    			}
+    		});
+            //.
+        	lbHint.setVisibility(View.VISIBLE);
+        }
+        else
+        	lbHint.setVisibility(View.GONE);
         //.
         Components_Add(this);
         //.
@@ -1328,20 +1465,19 @@ public class TURLFolderListComponent extends TUIComponent {
 		MessageHandler.obtainMessage(MESSAGE_STARTUPDATING).sendToTarget();
 	}
 
+	private void ImportURL(com.geoscope.GeoEye.Space.URL.TURL URL, String Name) throws Exception {
+    	if (URLList == null)
+    		return; //. ->
+    	//.
+		URLList.Add(Name, URL);
+		//.
+		Update();
+		//.
+		SelectedURL_SetByIndex(URLList.Count()-1, true, true);
+	}
+	
 	private void ImportURLFromFile(String FN) throws Exception {
-		File F = new File(FN);
-		final byte[] Data;
-    	long FileSize = F.length();
-    	FileInputStream FIS = new FileInputStream(F);
-    	try {
-    		Data = new byte[(int)FileSize];
-    		FIS.read(Data);
-    	}
-    	finally {
-    		FIS.close();
-    	}
-        //.
-		final com.geoscope.GeoEye.Space.URL.TURL URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlData(Data, URLList.User);
+		final com.geoscope.GeoEye.Space.URL.TURL URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlFile(FN, URLList.User);
 		//.
 		if (URL != null) {
     		final EditText input = new EditText(ParentActivity);
@@ -1370,13 +1506,9 @@ public class TURLFolderListComponent extends TUIComponent {
 				    		if (Name.length() == 0)
 				    			Name = "?";
 				    		if (URL != null) {
-				    			URLList.Add(Name, Data,URL);
-					    		//.
-					    		Update();
-					    		//.
-				    			SelectedURL_SetByIndex(URLList.Count()-1, true, true);
+				    			ImportURL(URL, Name);
 				    			//.
-								Toast.makeText(ParentActivity, R.string.SURLHasBeenImportedSuccessfully,	Toast.LENGTH_LONG).show();
+								Toast.makeText(ParentActivity, R.string.SURLHasBeenImportedSuccessfully, Toast.LENGTH_LONG).show();
 				    		}
 				    	}
 					} catch (Exception E) {

@@ -637,7 +637,7 @@ public class TUserPanel extends Activity {
             }
         });
         //.
-        final int HintID = THintManager.HINT__User_panel_hint;
+        final int HintID = THintManager.HINT__UserPanel;
         final TextView lbHint = (TextView)findViewById(R.id.lbHint);
         String Hint = THintManager.GetHint(HintID, this);
         if (Hint != null) {

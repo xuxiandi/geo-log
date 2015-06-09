@@ -30,6 +30,14 @@ public class TURL extends com.geoscope.GeoEye.Space.URL.TURL {
 		super();
 	}
 	
+	public TURL(String pValue) {
+		super(pValue);
+	}
+	
+	public TURL(String pName, String pValue) {
+		super(pName, pValue);
+	}
+	
 	public TURL(TGeoScopeServerUser pUser, Element pXMLDocumentRootNode) throws Exception {
 		super(pUser,pXMLDocumentRootNode);
 	}

@@ -1,6 +1,8 @@
 package com.geoscope.GeoEye.Space.URL;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -57,14 +59,37 @@ public class TURL {
 			if (node != null)
 				TypeID = node.getNodeValue();
 		}
-		return GetURL(TypeID, pUser, XMLDocumentRootNode);
+		//.
+		TURL Result = GetURL(TypeID, pUser, XMLDocumentRootNode);
+		//.
+		Result.XMLDocumentData = XmlData;
+		//.
+		return Result;
 	}
 	
+	public static TURL GetURLFromXmlFile(String XmlFileName, TGeoScopeServerUser pUser) throws Exception {
+		byte[] Data;
+		File F = new File(XmlFileName);
+		long FileSize = F.length();
+		FileInputStream FIS = new FileInputStream(F);
+		try {
+			Data = new byte[(int)FileSize];
+			FIS.read(Data);
+		}
+		finally {
+			FIS.close();
+		}
+		//.
+		return GetURLFromXmlData(Data, pUser);
+	}
+
 	public static final String DefaultURLFileName = "URL.xml";
 	
 	
 	protected TGeoScopeServerUser User = null;
-	protected Element XMLDocumentRootNode = null;
+	//.
+	public byte[] 		XMLDocumentData = null;
+	protected Element 	XMLDocumentRootNode = null;
 	//.
 	public String Name = null;
 	//.
@@ -74,6 +99,15 @@ public class TURL {
 	protected String Value = "";
 	
 	public TURL() {
+	}
+	
+	public TURL(String pValue) {
+		Value = pValue;
+	}
+	
+	public TURL(String pName, String pValue) {
+		Name = pName;
+		Value = pValue;
 	}
 	
 	public TURL(TGeoScopeServerUser pUser, Element pXMLDocumentRootNode) throws Exception {
@@ -125,6 +159,11 @@ public class TURL {
 	}
 	
 	protected void ToXMLSerializer(XmlSerializer Serializer) throws IOException {
+		if ((Value != null) && (Value.length() > 0)) {
+	        Serializer.startTag("", "Value");
+	        Serializer.text(Value);
+	        Serializer.endTag("", "Value");
+		}
 	}
 	
 	public void ConstructURLFile(String URLFileName) throws IOException {

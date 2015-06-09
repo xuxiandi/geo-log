@@ -1062,15 +1062,6 @@ public class TURLFolderListComponent extends TUIComponent {
 									}
 								}).create();
 								//.
-								edName.setOnEditorActionListener(new OnEditorActionListener() {
-									
-									@Override
-									public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
-										dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
-										return false;
-									}
-						        });        
-								//.
 								edInternetURL.setOnEditorActionListener(new OnEditorActionListener() {
 									
 									@Override

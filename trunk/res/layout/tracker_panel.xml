@@ -613,7 +613,6 @@
                         android:layout_centerVertical="true"
                         android:layout_toLeftOf="@+id/btnComponentFileStreamingCommands"
                         android:background="#ff000000"
-                        android:ems="10"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:gravity="right"

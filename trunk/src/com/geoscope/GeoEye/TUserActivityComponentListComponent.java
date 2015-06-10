@@ -62,6 +62,7 @@ import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponent
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
@@ -527,7 +528,9 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	private Activity ParentActivity;
 	private LinearLayout ParentLayout;
 	//.
-	private long	UserID = 0;	
+	private long								UserID = 0;	
+	private TGeoScopeServerUser.TUserDescriptor UserDescriptor = null;
+	//.
 	private long	ActivityID = 0;
 	private String	ActivityInfo;
 	//.
@@ -586,8 +589,9 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 							
 							case 0: 
 			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
-			            		com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.Instance.ContentPanel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.Instance.ContentPanel.TURL(UserID, ActivityID,ActivityInfo);
-			        			URL.Name = lbName.getText().toString();
+			            		String _ActivityInfo = ((UserDescriptor != null) ? UserDescriptor.UserFullName : "")+", "+ActivityInfo;
+			            		com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.Instance.ContentPanel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.Instance.ContentPanel.TURL(UserID, ActivityID,_ActivityInfo);
+			        			URL.Name = ParentActivity.getString(R.string.SActivityComponentList)+": "+_ActivityInfo;
 			            		URL.ConstructURLFile(URLFN);
 			            		//.
 				    		    new AlertDialog.Builder(ParentActivity)
@@ -983,6 +987,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
     	
         private ProgressDialog progressDialog;
         //.
+        private TGeoScopeServerUser.TUserDescriptor UserDescriptor = null;
+        //.
         private TActivity.TComponents ActivityComponents = null;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
@@ -1005,6 +1011,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
 	    				if (UserAgent == null)
 	    					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
+	    				//.
+	    				UserDescriptor = UserAgent.Server.User.GetUserInfo(UserID);
 	    				//.
 	    				ActivityComponents = UserAgent.Server.User.GetUserActivityComponentList(UserID, ActivityID);
 	    				if (ActivityComponents != null) {
@@ -1076,6 +1084,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		            case MESSAGE_COMPLETEDBYCANCEL:
 						if (!flExists)
 			            	break; //. >
+						TUserActivityComponentListComponent.this.UserDescriptor = UserDescriptor; 
 		            	TUserActivityComponentListComponent.this.ActivityComponents = ActivityComponents;
 	           		 	//.
 	           		 	TUserActivityComponentListComponent.this.Update();

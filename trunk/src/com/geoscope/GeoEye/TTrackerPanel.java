@@ -3291,7 +3291,7 @@ public class TTrackerPanel extends Activity {
                 }
             	edComponentFileStreaming.setText(S);
             	if (ItemsStatistics.FileSize > 0)
-            		pbComponentFileStreaming.setProgress((int)(100*(ItemsStatistics.TransferredSize+ItemsStatistics.RemovedFileSize+0.0)/ItemsStatistics.FileSize));
+            		pbComponentFileStreaming.setProgress((int)ItemsStatistics.TransmissionPercentage());
             	else
             		pbComponentFileStreaming.setProgress(0);
             }

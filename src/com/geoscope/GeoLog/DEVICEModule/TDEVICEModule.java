@@ -1184,7 +1184,11 @@ public class TDEVICEModule extends TModule
     		public long FileSize = 0;
     		public long RemovedFileSize = 0;
     		public long Size = 0;
-    		public long TransferredSize = 0;
+    		public long TransmittedSize = 0;
+    		
+    		public double TransmissionPercentage() {
+    			return (100.0*(TransmittedSize+RemovedFileSize)/FileSize);
+    		}
     	}
     	
     	public synchronized TItemsStatistics GetItemsStatistics() {
@@ -1195,10 +1199,10 @@ public class TDEVICEModule extends TModule
     			TItem Item = Items.get(I);
     			File F = new File(Item.FileName);
     			Result.Size += F.length();
-    			Result.TransferredSize += Item.TransmittedSize;
+    			Result.TransmittedSize += Item.TransmittedSize;
     			Result.Count++;
     		}
-    		Result.Size -= Result.TransferredSize; 
+    		Result.Size -= Result.TransmittedSize; 
     		return Result;
     	}
     	

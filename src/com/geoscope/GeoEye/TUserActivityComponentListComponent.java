@@ -248,7 +248,6 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 					break; //. >
 
 				case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-				case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
 				case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
 					flProcessAsDefault = false;
 					break; //. >
@@ -529,7 +528,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	private LinearLayout ParentLayout;
 	//.
 	private long	UserID = 0;	
-	private long	ActivityID = 0;	
+	private long	ActivityID = 0;
+	private String	ActivityInfo;
 	//.
 	private int ListRowSizeID;
 	//.
@@ -556,6 +556,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		//.
 		UserID = pUserID;
 		ActivityID = pActivityID;
+		ActivityInfo = pActivityInfo;
 		//.
 		ListRowSizeID = pListRowSizeID;
         //.
@@ -564,8 +565,56 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		OnListItemClickHandler = pOnListItemClickHandler;
 		//.
 		lbName = (TextView)ParentLayout.findViewById(R.id.lbName);
+        lbName.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+				final CharSequence[] _items;
+				_items = new CharSequence[1];
+				_items[0] = ParentActivity.getString(R.string.SGetURLFile);
+				AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(ParentActivity.getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: 
+			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+			            		com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.Instance.ContentPanel.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Activities.Instance.ContentPanel.TURL(UserID, ActivityID,ActivityInfo);
+			        			URL.Name = lbName.getText().toString();
+			            		URL.ConstructURLFile(URLFN);
+			            		//.
+				    		    new AlertDialog.Builder(ParentActivity)
+				    	        .setIcon(android.R.drawable.ic_dialog_alert)
+				    	        .setTitle(R.string.SInfo)
+				    	        .setMessage(ParentActivity.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+ParentActivity.getString(R.string.SUseItForImport))
+				    		    .setPositiveButton(R.string.SOk, null)
+				    		    .show();
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				//.
+				return true;
+			}
+		});
 		if (pActivityInfo != null)
-			lbName.setText(ParentActivity.getString(R.string.SActivityComponentList)+": "+pActivityInfo);
+			lbName.setText(ParentActivity.getString(R.string.SActivityComponentList)+": "+ActivityInfo);
         //.
         lvActivityComponentList = (ListView)ParentLayout.findViewById(R.id.lvActivityComponentList);
         lvActivityComponentList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);

@@ -102,7 +102,6 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 				break; //. >
 				
 			case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-			case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
 			case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
 				flProcessAsDefault = false;
 				break; //. >

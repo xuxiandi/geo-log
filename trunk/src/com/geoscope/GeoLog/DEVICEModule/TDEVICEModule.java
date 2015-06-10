@@ -906,7 +906,9 @@ public class TDEVICEModule extends TModule
         public InputStream 	ConnectionInputStream = null;
         public OutputStream ConnectionOutputStream = null;
     	//.
-    	private ArrayList<TItem> Items = new ArrayList<TItem>();
+    	private ArrayList<TItem> 	Items = new ArrayList<TItem>();
+    	private long				Items_FileSize = 0;
+    	private long				Items_RemovedFileSize = 0;
     	
     	public TComponentFileStreaming(TDEVICEModule pDEVICEModule, boolean pflEnabledStreaming) throws Exception {
     		super();
@@ -940,6 +942,7 @@ public class TDEVICEModule extends TModule
     	
     	private synchronized void Load() throws Exception {
 			Items.clear();
+			//.
     		String FN = TDEVICEModule.DeviceFolder()+"/"+ItemsFileName;
     		File F = new File(FN);
     		if (!F.exists()) 
@@ -988,8 +991,12 @@ public class TDEVICEModule extends TModule
     					//.
     					Item.ErrorCount = Integer.parseInt(ItemChilds.item(3).getFirstChild().getNodeValue());
     					//.
-    					if (Item.FileName != null)
+    					if (Item.FileName != null) {
     						Items.add(Item);
+    						//.
+    		    			File IF = new File(Item.FileName);
+    		    			Items_FileSize += IF.length();
+    					}
     				}
     			}
     			break; //. >
@@ -1015,8 +1022,12 @@ public class TDEVICEModule extends TModule
     					//.
     					Item.ErrorCount = Integer.parseInt(ItemChilds.item(5).getFirstChild().getNodeValue());
     					//.
-    					if (Item.FileName != null)
+    					if (Item.FileName != null) {
     						Items.add(Item);
+    						//.
+    		    			File IF = new File(Item.FileName);
+    		    			Items_FileSize += IF.length();
+    					}
     				}
     			}
     			break; //. >
@@ -1096,6 +1107,9 @@ public class TDEVICEModule extends TModule
         		F.delete();
         	}
         	//.
+			Items_FileSize = 0;
+			Items_RemovedFileSize = 0;
+			//.
     		Items.clear();
     		//.
     		Save();
@@ -1110,6 +1124,9 @@ public class TDEVICEModule extends TModule
     		//.
     		Items.add(0,NewItem);
     		//.
+			File F = new File(NewItem.FileName);
+			Items_FileSize += F.length();
+    		//.
     		Save();
     		//.
     		Process();
@@ -1117,6 +1134,9 @@ public class TDEVICEModule extends TModule
     	
     	private synchronized void RemoveItem(TItem Item) throws Exception {
     		File F = new File(Item.FileName);
+    		//.
+    		Items_RemovedFileSize += F.length();
+			//.
     		F.delete();
     		//.
     		Items.remove(Item);
@@ -1158,18 +1178,27 @@ public class TDEVICEModule extends TModule
     	}
     	
     	public static class TItemsStatistics {
+    		
     		public int Count = 0;
+    		//.
+    		public long FileSize = 0;
+    		public long RemovedFileSize = 0;
     		public long Size = 0;
+    		public long TransferredSize = 0;
     	}
     	
     	public synchronized TItemsStatistics GetItemsStatistics() {
     		TItemsStatistics Result = new TItemsStatistics();
+			Result.FileSize = Items_FileSize;
+			Result.RemovedFileSize = Items_RemovedFileSize;
     		for (int I = 0; I < Items.size(); I++) {
     			TItem Item = Items.get(I);
     			File F = new File(Item.FileName);
-    			Result.Size += (F.length()-Item.TransmittedSize);
+    			Result.Size += F.length();
+    			Result.TransferredSize += Item.TransmittedSize;
     			Result.Count++;
     		}
+    		Result.Size -= Result.TransferredSize; 
     		return Result;
     	}
     	

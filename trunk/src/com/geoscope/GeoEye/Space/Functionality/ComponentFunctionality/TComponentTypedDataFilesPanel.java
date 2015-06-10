@@ -66,6 +66,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality
 import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.Application.THintManager;
 
 @SuppressLint("HandlerLeak")
 public class TComponentTypedDataFilesPanel extends Activity {
@@ -230,7 +231,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					break; //. >
 
 				case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-				case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
 				case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
 					flProcessAsDefault = false;
 					break; //. >
@@ -495,28 +495,53 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			
 			@Override
 			public boolean onLongClick(View v) {
-            	try {
-            		if (DataFiles == null)
-            			return false; //. ->
-					TComponentTypedDataFile RootItem = DataFiles.GetRootItem();
-					if (RootItem == null)
-						throw new Exception("there is no a root element of the data files"); //. =>
-					//.
-            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
-            		com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL URL = new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL(RootItem.DataComponentType,RootItem.DataComponentID);
-        			URL.Name = lbName.getText().toString();
-            		URL.ConstructURLFile(URLFN);
-            		//.
-	    		    new AlertDialog.Builder(TComponentTypedDataFilesPanel.this)
-	    	        .setIcon(android.R.drawable.ic_dialog_alert)
-	    	        .setTitle(R.string.SInfo)
-	    	        .setMessage(TComponentTypedDataFilesPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TComponentTypedDataFilesPanel.this.getString(R.string.SUseItForImport))
-	    		    .setPositiveButton(R.string.SOk, null)
-	    		    .show();
-            	}
-            	catch (Exception E) {
-            		Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-            	}
+				final CharSequence[] _items;
+				_items = new CharSequence[1];
+				_items[0] = TComponentTypedDataFilesPanel.this.getString(R.string.SGetURLFile);
+				AlertDialog.Builder builder = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(TComponentTypedDataFilesPanel.this.getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: 
+			            		if (DataFiles == null)
+			            			return; //. ->
+								TComponentTypedDataFile RootItem = DataFiles.GetRootItem();
+								if (RootItem == null)
+									throw new Exception("there is no a root element of the data files"); //. =>
+								//.
+			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+			            		com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL URL = new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL(RootItem.DataComponentType,RootItem.DataComponentID);
+			        			URL.Name = lbName.getText().toString();
+			            		URL.ConstructURLFile(URLFN);
+			            		//.
+				    		    new AlertDialog.Builder(TComponentTypedDataFilesPanel.this)
+				    	        .setIcon(android.R.drawable.ic_dialog_alert)
+				    	        .setTitle(R.string.SInfo)
+				    	        .setMessage(TComponentTypedDataFilesPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TComponentTypedDataFilesPanel.this.getString(R.string.SUseItForImport))
+				    		    .setPositiveButton(R.string.SOk, null)
+				    		    .show();
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TComponentTypedDataFilesPanel.this, TComponentTypedDataFilesPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				//.
 				return true;
 			}
 		});
@@ -763,6 +788,27 @@ public class TComponentTypedDataFilesPanel extends Activity {
         		CreateNewComponent();
             }
         });
+        //.
+        final int HintID = THintManager.HINT__ComponentTypedDataFilesPanel;
+        final TextView lbListHint = (TextView)findViewById(R.id.lbHint);
+        String Hint = THintManager.GetHint(HintID, this);
+        if (Hint != null) {
+        	lbListHint.setText(Hint);
+            lbListHint.setOnLongClickListener(new OnLongClickListener() {
+            	
+    			@Override
+    			public boolean onLongClick(View v) {
+    				THintManager.SetHintAsDisabled(HintID);
+    	        	lbListHint.setVisibility(View.GONE);
+    	        	//.
+    				return true;
+    			}
+    		});
+            //.
+        	lbListHint.setVisibility(View.VISIBLE);
+        }
+        else
+        	lbListHint.setVisibility(View.GONE);
         //.
         setResult(RESULT_CANCELED);
         //.

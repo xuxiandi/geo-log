@@ -56,6 +56,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -602,6 +603,7 @@ public class TTrackerPanel extends Activity {
     private EditText edOpQueue;
     private Button btnOpQueueCommands;	
     private EditText edComponentFileStreaming;
+    private ProgressBar pbComponentFileStreaming;
     private Button btnComponentFileStreamingCommands;
     //.
 	private TReflectorComponent Component = null;
@@ -1230,6 +1232,7 @@ public class TTrackerPanel extends Activity {
             }
         });
         edComponentFileStreaming = (EditText)findViewById(R.id.edComponentFileStreaming);
+        pbComponentFileStreaming = (ProgressBar)findViewById(R.id.pbComponentFileStreaming);
         btnComponentFileStreamingCommands = (Button)findViewById(R.id.btnComponentFileStreamingCommands);
         btnComponentFileStreamingCommands.setOnClickListener(new OnClickListener() {
         	
@@ -3111,6 +3114,7 @@ public class TTrackerPanel extends Activity {
         edOpQueue.setEnabled(flEnabled);
         btnOpQueueCommands.setEnabled(flEnabled);
         edComponentFileStreaming.setEnabled(flEnabled);
+        pbComponentFileStreaming.setEnabled(flEnabled);
         btnComponentFileStreamingCommands.setEnabled(flEnabled);
     }
     
@@ -3254,10 +3258,19 @@ public class TTrackerPanel extends Activity {
             edOpQueue.setText(Integer.toString(POC)+" ");
             if (Tracker.GeoLog.ComponentFileStreaming != null) {
                 TDEVICEModule.TComponentFileStreaming.TItemsStatistics ItemsStatistics = Tracker.GeoLog.ComponentFileStreaming.GetItemsStatistics();
-                if (ItemsStatistics.Count > 0)
+                if (ItemsStatistics.Count > 0) {
                 	edComponentFileStreaming.setTextColor(Color.RED);
-                else
+                	//.
+                	if (Tracker.GeoLog.ComponentFileStreaming.flEnabledStreaming)
+                		pbComponentFileStreaming.setVisibility(View.VISIBLE);
+                	else
+                    	pbComponentFileStreaming.setVisibility(View.GONE);
+                }
+                else {
                 	edComponentFileStreaming.setTextColor(Color.GREEN);
+                	//.
+                	pbComponentFileStreaming.setVisibility(View.GONE);
+                }
                 String SS = null;
                 int Size = (int)(ItemsStatistics.Size/1024);
                 if (Size < 1024) {
@@ -3277,6 +3290,10 @@ public class TTrackerPanel extends Activity {
                 	edComponentFileStreaming.setTextColor(Color.YELLOW);
                 }
             	edComponentFileStreaming.setText(S);
+            	if (ItemsStatistics.FileSize > 0)
+            		pbComponentFileStreaming.setProgress((int)(100*(ItemsStatistics.TransferredSize+ItemsStatistics.RemovedFileSize+0.0)/ItemsStatistics.FileSize));
+            	else
+            		pbComponentFileStreaming.setProgress(0);
             }
             else {
             	edComponentFileStreaming.setTextColor(Color.GRAY);

@@ -255,7 +255,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 					break; //. >
 					
 				case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-				case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
 				case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
 					flProcessAsDefault = false;
 					break; //. >

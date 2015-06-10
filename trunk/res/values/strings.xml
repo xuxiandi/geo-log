@@ -796,7 +796,7 @@
     <string name="SInfo1">"Info: "</string>
     <string name="SStream">Stream</string>
     <string name="SHint">"Hint: "</string>
-    <string name="SLongClickToShowItemLocation">long click to show an item location  (long click on the hint to remove it)</string>
+    <string name="SLongClickToShowItemLocation">Long click on the title to view a context menu.\nLong click on an item to show its context menu.\n(long click on the hint to remove it)</string>
     <string name="SLongClickToShowAnObjectPanel">long click to show an object panel</string>
     <string name="SLongClickToShowAPlace">long click to show a place</string>
     <string name="SGeoLog1">GeoLog</string>
@@ -1065,5 +1065,6 @@
     <string name="SAddress">Address</string>
     <string name="SInternetAddressURL">Internet address URL</string>
     <string name="SURLFolderListHint">Long click on the [Import] button to view a context menu.\n(long click on the hint to remove it)</string>
+    <string name="SComponentTypedDataFilesPanelHint">Long click on the title to view a context menu.\nLong click on an item to show its context menu.\n(long click on the hint to remove it)</string>
     
 </resources>

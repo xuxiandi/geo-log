@@ -388,7 +388,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
-                        android:layout_alignParentTop="true"
+                        android:layout_alignParentTop="false"
+                        android:layout_centerVertical="true"
                         android:text="@string/SServerConnection1"
                         android:textColor="#ffbbbbbb"
                         android:textSize="18sp" />
@@ -397,7 +398,8 @@
                         android:id="@+id/edConnectorInfo"
                         android:layout_width="302dp"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
+                        android:layout_alignParentTop="false"
+                        android:layout_centerVertical="true"
                         android:layout_toLeftOf="@+id/btnConnectorCommands"
                         android:layout_toRightOf="@+id/TextView03"
                         android:background="#ff000000"
@@ -415,12 +417,14 @@
                         android:layout_height="wrap_content"
                         android:layout_alignBottom="@+id/edConnectorInfo"
                         android:layout_alignParentRight="true"
-                        android:layout_alignParentTop="true"
+                        android:layout_alignParentTop="false"
+                        android:layout_centerVertical="true"
                         android:background="#ff000000"
                         android:minWidth="32dp"
                         android:text="@string/SQueueMenu"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
+
                 </RelativeLayout>
 
                 <LinearLayout
@@ -537,7 +541,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
-                        android:layout_alignParentTop="true"
                         android:layout_centerVertical="true"
                         android:text="@string/SQueueToTransmite"
                         android:textColor="#ffbbbbbb"
@@ -550,6 +553,7 @@
                         android:layout_alignBottom="@+id/edOpQueue"
                         android:layout_alignParentRight="true"
                         android:layout_alignTop="@+id/edOpQueue"
+                        android:layout_centerVertical="true"
                         android:background="#ff000000"
                         android:minWidth="32dp"
                         android:text="@string/SQueueMenu"
@@ -560,7 +564,7 @@
                         android:id="@+id/edOpQueue"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
+                        android:layout_centerVertical="true"
                         android:layout_toLeftOf="@+id/btnOpQueueCommands"
                         android:layout_toRightOf="@+id/TextView06"
                         android:background="#ff000000"
@@ -571,6 +575,7 @@
                         android:inputType="none"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
+
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -582,7 +587,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
-                        android:layout_alignParentTop="true"
                         android:layout_centerVertical="true"
                         android:text="@string/SDataStreamingQueue"
                         android:textColor="#ffbbbbbb"
@@ -595,6 +599,7 @@
                         android:layout_alignBottom="@+id/edComponentFileStreaming"
                         android:layout_alignParentRight="true"
                         android:layout_alignTop="@+id/edComponentFileStreaming"
+                        android:layout_centerVertical="true"
                         android:background="#ff000000"
                         android:minWidth="32dp"
                         android:text="@string/SQueueMenu"
@@ -603,11 +608,10 @@
 
                     <EditText
                         android:id="@+id/edComponentFileStreaming"
-                        android:layout_width="fill_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
+                        android:layout_centerVertical="true"
                         android:layout_toLeftOf="@+id/btnComponentFileStreamingCommands"
-                        android:layout_toRightOf="@+id/TextView08"
                         android:background="#ff000000"
                         android:ems="10"
                         android:focusable="false"
@@ -616,6 +620,17 @@
                         android:inputType="none"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
+
+                    <ProgressBar
+                        android:id="@+id/pbComponentFileStreaming"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toLeftOf="@+id/edComponentFileStreaming"
+                        android:layout_toRightOf="@+id/TextView08"
+                        android:visibility="gone" />
+
                 </RelativeLayout>
             </LinearLayout>
         </LinearLayout>

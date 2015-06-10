@@ -19,6 +19,7 @@ public class THintManager {
 	public static final int HINT__MyUserPanel								= R.string.SMyUserPanelHint;
 	public static final int HINT__UserPanel									= R.string.SUserPanelHint;
 	public static final int HINT__URLFolderList								= R.string.SURLFolderListHint;
+	public static final int HINT__ComponentTypedDataFilesPanel				= R.string.SComponentTypedDataFilesPanelHint;
 	
 	public static String GetHint(int HintID, Context context) {
 		try {

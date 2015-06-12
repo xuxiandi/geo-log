@@ -512,7 +512,7 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
 			
 			@Override
 	        public void onClick(View v) {
-	            int position = MyListView.getPositionForView((View)v.getParent());
+	            final int position = MyListView.getPositionForView((View)v.getParent());
 	            //.
 				TListItem Item = (TListItem)Items[position];
 				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
@@ -523,6 +523,18 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
 		        	View layout = factory.inflate(R.layout.image_preview_dialog_layout, null);
 		        	ImageView IV = (ImageView)layout.findViewById(R.id.ivPreview);
 		        	IV.setImageDrawable(((ImageView)v).getDrawable());
+		        	IV.setOnClickListener(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							try {
+								Panel.FolderList_OpenItem(position);
+							}
+							catch (Exception E) {
+				                Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
+							}
+						}
+					});
 		        	alert.setView(layout);
 		        	//.
 		        	alert.show();    
@@ -718,18 +730,7 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				if (FolderList == null)
 					return; //. ->
-				TFolderFileList.TItem Item = FolderList.Items.get(arg2);
-				if (Item.FileType != TFolderFileList.TItem.FILETYPE_BACKFOLDER) 
-					if (Item.FileType != TFolderFileList.TItem.FILETYPE_FOLDER) 
-						lvListAdapter.Items_SetSelectedIndex(arg2, true);
-					else
-						SetFolder(Folder+"/"+Item.Name);
-				else {
-					File F = new File(Folder);
-					String ParentFolder = F.getParent();
-					if (ParentFolder != null)
-						SetFolder(ParentFolder);
-				}
+				FolderList_OpenItem(arg2);				
         	}              
         });         
 		lvList.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -859,6 +860,22 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
     	Folder = pFolder;
     	//.
     	StartUpdating();
+    }
+
+    public void FolderList_OpenItem(int ItemIndex) {
+		TFolderFileList.TItem Item = FolderList.Items.get(ItemIndex);
+		//.
+    	if (Item.FileType != TFolderFileList.TItem.FILETYPE_BACKFOLDER) 
+    		if (Item.FileType != TFolderFileList.TItem.FILETYPE_FOLDER) 
+    			lvListAdapter.Items_SetSelectedIndex(ItemIndex, true);
+    		else
+    			SetFolder(Folder+"/"+Item.Name);
+    	else {
+    		File F = new File(Folder);
+    		String ParentFolder = F.getParent();
+    		if (ParentFolder != null)
+    			SetFolder(ParentFolder);
+    	}
     }
     
 	private class TUpdating extends TCancelableThread {

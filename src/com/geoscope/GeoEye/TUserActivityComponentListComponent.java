@@ -337,7 +337,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 			
 			@Override
 	        public void onClick(View v) {
-	            int position = MyListView.getPositionForView((View)v.getParent());
+	            final int position = MyListView.getPositionForView((View)v.getParent());
 	            //.
 				TComponentListItem Item = (TComponentListItem)Items[position];
 				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
@@ -348,6 +348,19 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		        	View layout = factory.inflate(R.layout.image_preview_dialog_layout, null);
 		        	ImageView IV = (ImageView)layout.findViewById(R.id.ivPreview);
 		        	IV.setImageDrawable(((ImageView)v).getDrawable());
+		        	IV.setOnClickListener(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							try {
+								TComponentTypedDataFiles ComponentTypedDataFiles = Panel.ActivityComponents.Items[position].TypedDataFiles;
+								Panel.ComponentTypedDataFiles_Process(ComponentTypedDataFiles);
+							}
+							catch (Exception E) {
+				                Toast.makeText(Panel.ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+							}
+						}
+					});
 		        	alert.setView(layout);
 		        	//.
 		        	alert.show();    

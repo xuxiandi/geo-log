@@ -347,7 +347,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	            //.
 				TComponentListItem Item = (TComponentListItem)Items[position];
 				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
-		        	AlertDialog alert = new AlertDialog.Builder(context).create();
+		        	final AlertDialog alert = new AlertDialog.Builder(context).create();
 		        	alert.setCancelable(true);
 		        	alert.setCanceledOnTouchOutside(true);
 		        	LayoutInflater factory = LayoutInflater.from(context);
@@ -361,6 +361,8 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 							try {
 								TComponentTypedDataFiles ComponentTypedDataFiles = Panel.ActivitiesComponents.Items[position].TypedDataFiles;
 								Panel.ComponentTypedDataFiles_Process(ComponentTypedDataFiles);
+								//.
+								alert.dismiss();
 							}
 							catch (Exception E) {
 				                Toast.makeText(Panel.ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();

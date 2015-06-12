@@ -516,7 +516,7 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
 	            //.
 				TListItem Item = (TListItem)Items[position];
 				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
-		        	AlertDialog alert = new AlertDialog.Builder(context).create();
+		        	final AlertDialog alert = new AlertDialog.Builder(context).create();
 		        	alert.setCancelable(true);
 		        	alert.setCanceledOnTouchOutside(true);
 		        	LayoutInflater factory = LayoutInflater.from(context);
@@ -528,7 +528,9 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
 						@Override
 						public void onClick(View v) {
 							try {
-								Panel.FolderList_OpenItem(position);
+								Panel.FolderList_PreviewItem(position);
+								//.
+								alert.dismiss();
 							}
 							catch (Exception E) {
 				                Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -784,21 +786,8 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
         	
 			@Override
             public void onClick(View v) {
-				if (lvListAdapter.Items_SelectedIndex > 0) {
-	    			String FileName = FolderList.Items.get(lvListAdapter.Items_SelectedIndex).FileName;
-	    			//.
-	        		File file = new File(FileName);
-	        	    MimeTypeMap map = MimeTypeMap.getSingleton();
-	        	    String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
-	        	    String type = map.getMimeTypeFromExtension(ext);
-	        	    if (type == null)
-	        	        type = "*/*";
-	        	    Intent intent = new Intent(Intent.ACTION_VIEW);
-	        	    Uri data = Uri.fromFile(file);
-	        	    intent.setDataAndType(data, type);
-	        	    //.
-	        	    context.startActivity(intent);        	
-				}
+				if (lvListAdapter.Items_SelectedIndex > 0) 
+					FolderList_PreviewItem(lvListAdapter.Items_SelectedIndex);					
 			}
         });
         //.
@@ -862,6 +851,22 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
     	StartUpdating();
     }
 
+    private void FolderList_PreviewItem(int ItemIndex) {
+		String FileName = FolderList.Items.get(ItemIndex).FileName;
+		//.
+		File file = new File(FileName);
+	    MimeTypeMap map = MimeTypeMap.getSingleton();
+	    String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+	    String type = map.getMimeTypeFromExtension(ext);
+	    if (type == null)
+	        type = "*/*";
+	    Intent intent = new Intent(Intent.ACTION_VIEW);
+	    Uri data = Uri.fromFile(file);
+	    intent.setDataAndType(data, type);
+	    //.
+	    context.startActivity(intent);        	
+    }
+    
     public void FolderList_OpenItem(int ItemIndex) {
 		TFolderFileList.TItem Item = FolderList.Items.get(ItemIndex);
 		//.

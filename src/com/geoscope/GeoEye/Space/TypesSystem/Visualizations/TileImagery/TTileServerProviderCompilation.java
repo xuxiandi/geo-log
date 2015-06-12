@@ -667,13 +667,13 @@ public class TTileServerProviderCompilation {
 		RemoveDownLevelsTiles(LevelIndex, Tiles, Canceller, Updater);
 	}
 	
-	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace, boolean flEnqueue) throws Exception {
+	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace, byte[] PreviewImage, boolean flEnqueue) throws Exception {
 		double Result = Double.MIN_VALUE;
 		if (!flInitialized)
 			return Result; //. ->
 		if (Levels != null) 
 			for (int L = 0; L < LevelsCount; L++) {
-				double R = Levels[L].CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace, flEnqueue);
+				double R = Levels[L].CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace,PreviewImage, flEnqueue);
 				if (R > Result)
 					Result = R;
 			}

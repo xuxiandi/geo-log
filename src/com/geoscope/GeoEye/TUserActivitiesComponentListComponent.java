@@ -8,6 +8,8 @@ import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -171,9 +173,9 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 				if (!Panel.flExists)
 					return; //. ->
 				//.
-				ImageLoaderCount++;
+				ImageLoadingCount++;
 				//.
-				if (ImageLoaderCount > 0) 
+				if (ImageLoadingCount > 0) 
 					ProgressHandler.DoOnStart();
 			}
 			
@@ -202,8 +204,8 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 					ViewHolder.ivImage.setOnClickListener(ImageClickListener);
 				}
 				//.
-				ImageLoaderCount--;
-				if (ImageLoaderCount == 0) 
+				ImageLoadingCount--;
+				if (ImageLoadingCount == 0) 
 					ProgressHandler.DoOnFinish();
 			}
 
@@ -261,7 +263,8 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 				}
 				//.
 				if (flProcessAsDefault) {
-					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, (Item.Component.idTComponent == SpaceDefines.idTCoComponent), Item.Server);
+					boolean flWithComponents = ((Item.Component.idTComponent == SpaceDefines.idTCoComponent) || (Item.Component.idTComponent == SpaceDefines.idTPositioner)); 
+					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, flWithComponents, Item.Server);
 					TComponentTypedDataFile DataFile = Item.Component.TypedDataFiles.GetRootItem(); 
 					if ((DataFile != null) && (DataFile.Data != null)) 
 						Result = BitmapFactory.decodeByteArray(DataFile.Data, 0,DataFile.Data.length); 
@@ -331,7 +334,8 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		//.
 		private LayoutInflater layoutInflater;
 		//.
-		private int ImageLoaderCount = 0;
+		private Executor 	ImageLoadingExecutor = Executors.newFixedThreadPool(5);
+		private int 		ImageLoadingCount = 0;
 		//.
 		private TDiskImageCache ImageCache;
 		//.
@@ -449,7 +453,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 			Bitmap BMP = null;
 			//.
 			if (!Item.BMP_flLoaded)
-				new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+				new TImageLoadTask(Item,holder).executeOnExecutor(ImageLoadingExecutor);
 			else {
 				if (!Item.BMP_flNull) 
 					if (flListIsScrolling)
@@ -459,7 +463,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 						if (BMP == null) {
 							Item.BMP_flLoaded = false;
 							//.
-							new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+							new TImageLoadTask(Item,holder).executeOnExecutor(ImageLoadingExecutor);
 						}
 					}
 			}
@@ -595,18 +599,8 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 							if (ActivitiesComponents.Items[arg2].TypedDataFiles.Count() == 0)
 								return; //. ->
 							//.
-							if ((Component != null) && (ActivitiesComponents.Items[arg2].TypedDataFiles.Count() > 1)) {
-								Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
-								intent.putExtra("ComponentID", Component.ID);
-								intent.putExtra("DataFiles", ActivitiesComponents.Items[arg2].TypedDataFiles.ToByteArrayV0());
-								intent.putExtra("AutoStart", true);
-								//.
-								ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
-							}
-							else {
-								TComponentTypedDataFile ComponentTypedDataFile = ActivitiesComponents.Items[arg2].TypedDataFiles.Items[0];
-								ComponentTypedDataFile_Process(ComponentTypedDataFile);
-							}
+							TComponentTypedDataFiles ComponentTypedDataFiles = ActivitiesComponents.Items[arg2].TypedDataFiles;
+							ComponentTypedDataFiles_Process(ComponentTypedDataFiles);
 						}
 						catch (Exception E) {
 			                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -1578,6 +1572,32 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		};
 	}
 
+	public void ComponentTypedDataFiles_Process(TComponentTypedDataFiles ComponentTypedDataFiles) throws IOException {
+		TComponentTypedDataFile ComponentTypedDataFile = ComponentTypedDataFiles.Items[0];
+		if (ComponentTypedDataFiles.Count() > 1) {
+			boolean flProcessAsSingle = false;
+			switch (ComponentTypedDataFile.DataComponentType) {
+			
+			case SpaceDefines.idTPositioner:
+				flProcessAsSingle = (ComponentTypedDataFiles.Count() == 2);
+				break; // . >
+			}							
+			if (flProcessAsSingle) 
+				ComponentTypedDataFile_Process(ComponentTypedDataFile);
+			else {
+				Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
+				if (Component != null)
+					intent.putExtra("ComponentID", Component.ID);
+				intent.putExtra("DataFiles", ComponentTypedDataFiles.ToByteArrayV0());
+				intent.putExtra("AutoStart", true);
+				//.
+				ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
+			}
+		}
+		else 
+			ComponentTypedDataFile_Process(ComponentTypedDataFile);
+	}
+	
 	public void ComponentTypedDataFile_Process(TComponentTypedDataFile ComponentTypedDataFile) {
 		if (ComponentTypedDataFile.IsLoaded()) {
 			ComponentTypedDataFile_Open(ComponentTypedDataFile);

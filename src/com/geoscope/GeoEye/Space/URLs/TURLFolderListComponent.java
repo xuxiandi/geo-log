@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -424,9 +426,9 @@ public class TURLFolderListComponent extends TUIComponent {
 				if (!Panel.flExists)
 					return; //. ->
 				//.
-				ImageLoaderCount++;
+				ImageLoadingCount++;
 				//.
-				if (ImageLoaderCount > 0) 
+				if (ImageLoadingCount > 0) 
 					ProgressHandler.DoOnStart();
 			}
 			
@@ -455,8 +457,8 @@ public class TURLFolderListComponent extends TUIComponent {
 					ViewHolder.ivImage.setOnClickListener(ImageClickListener);
 				}
 				//.
-				ImageLoaderCount--;
-				if (ImageLoaderCount == 0) 
+				ImageLoadingCount--;
+				if (ImageLoadingCount == 0) 
 					ProgressHandler.DoOnFinish();
 			}
 
@@ -536,7 +538,8 @@ public class TURLFolderListComponent extends TUIComponent {
 		//.
 		private LayoutInflater layoutInflater;
 		//.
-		private int ImageLoaderCount = 0;
+		private Executor 	ImageLoadingExecutor = Executors.newFixedThreadPool(5);
+		private int 		ImageLoadingCount = 0;
 		//.
 		private TDiskImageCache ImageCache;
 		//.
@@ -697,7 +700,7 @@ public class TURLFolderListComponent extends TUIComponent {
 			Bitmap BMP = null;
 			//.
 			if (!Item.BMP_flLoaded)
-				new TImageLoadTask(this,Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				new TImageLoadTask(this,Item,holder).executeOnExecutor(ImageLoadingExecutor);
 			else {
 				if (!Item.BMP_flNull)
 					if (flListIsScrolling)
@@ -707,7 +710,7 @@ public class TURLFolderListComponent extends TUIComponent {
 						if (BMP == null) {
 							Item.BMP_flLoaded = false;
 							//.
-							new TImageLoadTask(this,Item,holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+							new TImageLoadTask(this,Item,holder).executeOnExecutor(ImageLoadingExecutor);
 						}
 					}
 			}

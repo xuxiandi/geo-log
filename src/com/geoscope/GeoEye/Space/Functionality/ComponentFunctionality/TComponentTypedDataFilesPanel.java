@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.util.Locale;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -31,8 +33,10 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -147,9 +151,9 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				if (!Panel.flExists)
 					return; //. ->
 				//.
-				ImageLoaderCount++;
+				ImageLoadingCount++;
 				//.
-				if (ImageLoaderCount > 0) 
+				if (ImageLoadingCount > 0) 
 					ProgressHandler.DoOnStart();
 			}
 			
@@ -178,8 +182,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					ViewHolder.ivImage.setOnClickListener(ImageClickListener);
 				}
 				//.
-				ImageLoaderCount--;
-				if (ImageLoaderCount == 0) 
+				ImageLoadingCount--;
+				if (ImageLoadingCount == 0) 
 					ProgressHandler.DoOnFinish();
 			}
 
@@ -306,7 +310,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		//.
 		private LayoutInflater layoutInflater;
 		//.
-		private int ImageLoaderCount = 0;
+		private Executor 	ImageLoadingExecutor = Executors.newFixedThreadPool(5);
+		private int 		ImageLoadingCount = 0;
 		//.
 		private TDiskImageCache ImageCache;
 		//.
@@ -330,6 +335,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				}
 	        }
 		};
+		//.
+		public boolean flListIsScrolling = false;
 	        
 		public TComponentListAdapter(TComponentTypedDataFilesPanel pPanel, ListView pMyListView, View pProgressBar, TComponentListItem[] pItems) {
 			context = pPanel;
@@ -373,7 +380,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			return position;
 		}
 
-		@SuppressWarnings("unused")
 		public View getView(int position, View convertView, ViewGroup parent) {
 			TViewHolder holder;
 			if (convertView == null) {
@@ -399,11 +405,19 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			Bitmap BMP = null;
 			//.
 			if (!Item.BMP_flLoaded)
-				new TImageLoadTask(Item,holder).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+				new TImageLoadTask(Item,holder).executeOnExecutor(ImageLoadingExecutor);
 			else {
-				if (!Item.BMP_flNull) 
-					//. last version: BMP = ImageCache.getBitmap(Item.Component.GetKey());
-					new TImageRestoreTask(Item,holder).Start();
+				if (!Item.BMP_flNull)
+					if (flListIsScrolling)
+						new TImageRestoreTask(Item,holder).Start();
+					else {
+						BMP = ImageCache.getBitmap(Item.Component.GetKey());
+						if (BMP == null) {
+							Item.BMP_flLoaded = false;
+							//.
+							new TImageLoadTask(Item,holder).executeOnExecutor(ImageLoadingExecutor);
+						}
+					}
 			}
 			//.
 			if (BMP != null) {
@@ -455,6 +469,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	//.
     private byte[] 						DataFilesBA = null;
     private TComponentTypedDataFiles 	DataFiles = null;
+	private TComponentListAdapter 		lvDataFilesAdapter; 
 	private ListView 					lvDataFiles;
 	//.
 	private TextView lbName;
@@ -768,6 +783,16 @@ public class TComponentTypedDataFilesPanel extends Activity {
             	return true; 
 			}
 		}); 
+        lvDataFiles.setOnScrollListener(new OnScrollListener() {
+        	
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            }
+
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            	if (lvDataFilesAdapter != null)
+            		lvDataFilesAdapter.flListIsScrolling = (scrollState != OnScrollListener.SCROLL_STATE_IDLE); 
+            }
+        });
         //.
         ProgressBar = findViewById(R.id.pbProgress);
         //.
@@ -1057,7 +1082,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataFile.DataType,DataFile.DataFormat,Name,"", _Component);
 			Items[I] = Item;
 		}
-		lvDataFiles.setAdapter(new TComponentListAdapter(this, lvDataFiles, ProgressBar, Items));
+		lvDataFilesAdapter = new TComponentListAdapter(this, lvDataFiles, ProgressBar, Items); 
+		lvDataFiles.setAdapter(lvDataFilesAdapter);
 		//.
 		UpdateCount++;
     }

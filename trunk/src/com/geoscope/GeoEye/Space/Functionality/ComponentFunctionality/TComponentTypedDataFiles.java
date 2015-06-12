@@ -40,9 +40,20 @@ public class TComponentTypedDataFiles {
 	}
 
 	public TComponentTypedDataFile GetRootItem() {
-		if (Items.length == 0)
+		if (Items.length > 0)
+			return Items[0]; //. ->
+		else
 			return null; //. ->
-		return Items[0];
+	}
+	
+	public TComponentTypedDataFile GetAnItemByDataType(int pDataType) {
+		int Cnt = Items.length;
+		for (int I = 0; I < Cnt; I++) {
+			TComponentTypedDataFile Item = Items[I]; 
+			if (Item.DataType == pDataType)
+				return Item; //. ->
+		}
+		return null;
 	}
 	
 	public boolean DataIsNull() {

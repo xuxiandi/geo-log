@@ -138,6 +138,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	public static final int 	DrawingsVisualizationPrototypeTypeID = 2015;
 	public static final long 	DrawingsVisualizationPrototypeID = 1740;
 	
+	public static final boolean flCommitWithPreviewImage = true;
+	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
 		
 		public SurfaceHolder _SurfaceHolder;
@@ -1825,10 +1827,29 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			try {
 				//. commit drawings into tiles locally
 				Drawings_Commit();
-				//. committing on the server
+				//. 
+				byte[] PreviewImage = null;
+				if (flCommitWithPreviewImage) {
+					Bitmap PreviewBitmap = Drawings_GetImageBitmap();
+					try {
+						ByteArrayOutputStream BOS = new ByteArrayOutputStream(1024);
+						try {
+							PreviewBitmap.compress(CompressFormat.JPEG, 50, BOS);
+							PreviewImage = BOS.toByteArray(); 
+						}
+						finally {
+							BOS.close();
+						}
+					}
+					finally {
+						PreviewBitmap.recycle();
+					}
+				}
+				//.
 				if (Commit_flEnqueueChangedTiles)
-					TilesPlace.Timestamp = -TilesPlace.Timestamp; //. use TilesPlace.Timestamp as changed tiles timestamp 
-				Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace, Commit_flEnqueueChangedTiles);
+					TilesPlace.Timestamp = -TilesPlace.Timestamp; //. use TilesPlace.Timestamp as changed tiles timestamp
+				//. committing on the server
+				Result = TileImagery.ActiveCompilationSet_CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace,PreviewImage, Commit_flEnqueueChangedTiles);
 			}
 			catch (Throwable T) {
 				Containers_RestoreTileModifications();
@@ -3349,6 +3370,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			else
 				throw new Exception(getString(R.string.SThereIsNoVisibleUserDrawableTilesLayer)); //. =>
 		}
+	}
+	
+	public Bitmap Drawings_GetImageBitmap() {
+		Bitmap Result = Bitmap.createBitmap(DrawableImage.getWidth(),DrawableImage.getHeight(), Bitmap.Config.ARGB_8888);
+		Canvas ResultCanvas = new Canvas(Result);			
+		synchronized (Drawings_ImageLock) {
+			ResultCanvas.drawBitmap(Background, 0,0, null);
+			ResultCanvas.drawBitmap(BackgroundImage, 0,0, null);
+			ResultCanvas.drawBitmap(DrawableImage, 0,0, null);
+			ResultCanvas.drawBitmap(ForegroundImage, 0,0, null);
+		}
+		return Result;
 	}
 	
 	private Object 			Moving_Lock = new Object();

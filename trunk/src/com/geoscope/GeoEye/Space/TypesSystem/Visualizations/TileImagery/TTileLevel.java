@@ -1182,7 +1182,9 @@ public class TTileLevel {
 		GetTiles(RWLevelTileContainer.Xmn,RWLevelTileContainer.Xmx, RWLevelTileContainer.Ymn,RWLevelTileContainer.Ymx, flRemoveOldTiles, Canceller, Updater, Progressor);
 	}
 
-	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace, boolean flEnqueue) throws Exception {
+	private static final long PreviewImageTileMarker = Long.MAX_VALUE;
+	
+	public double CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace, byte[] PreviewImage, boolean flEnqueue) throws Exception {
 		double Result = Double.MIN_VALUE;
 		//.
 		ArrayList<TTile> ModifiedTiles = new ArrayList<TTile>(); 
@@ -1201,6 +1203,16 @@ public class TTileLevel {
 			//.
 			ByteArrayOutputStream TilesStream = new ByteArrayOutputStream();
 			try {
+				if (PreviewImage != null) { //. set PreviewImage as a first tile
+	        		byte[] PreviewImageTileMarkerBA = TDataConverter.ConvertInt64ToLEByteArray(PreviewImageTileMarker);
+	        		TilesStream.write(PreviewImageTileMarkerBA); //. TileX(Int64) 
+	        		TilesStream.write(PreviewImageTileMarkerBA); //. TileY(Int64) 
+	        		int SegmentSize = PreviewImage.length;
+	        		byte[] SegmentSizeBA = TDataConverter.ConvertInt32ToLEByteArray(SegmentSize);
+	        		TilesStream.write(SegmentSizeBA);
+	        		if (SegmentSize > 0) 
+	        			TilesStream.write(PreviewImage);
+				}
 				for (int I = 0; I < ModifiedTiles.size(); I++) {
 					TTile Item = ModifiedTiles.get(I);
 					ByteArrayOutputStream DataStream = new ByteArrayOutputStream();
@@ -1211,8 +1223,8 @@ public class TTileLevel {
 						byte[] R64 = new byte[4];
 		        		byte[] XBA = TDataConverter.ConvertInt32ToLEByteArray(Item.X);
 		        		byte[] YBA = TDataConverter.ConvertInt32ToLEByteArray(Item.Y);
-		        		TilesStream.write(XBA); TilesStream.write(R64); //. Int64
-		        		TilesStream.write(YBA); TilesStream.write(R64); //. Int64
+		        		TilesStream.write(XBA); TilesStream.write(R64); //. TileX(Int64)
+		        		TilesStream.write(YBA); TilesStream.write(R64); //. TileY(Int64)
 		        		int SegmentSize = DataStream.size();
 		        		byte[] SegmentSizeBA = TDataConverter.ConvertInt32ToLEByteArray(SegmentSize);
 		        		TilesStream.write(SegmentSizeBA);

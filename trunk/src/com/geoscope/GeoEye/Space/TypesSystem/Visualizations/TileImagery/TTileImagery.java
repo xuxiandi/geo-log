@@ -549,12 +549,12 @@ public class TTileImagery {
 					ATSPC[I].ResetAllTiles();
 	}
 	
-	public double ActiveCompilationSet_CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace, boolean flEnqueue) throws Exception {
+	public double ActiveCompilationSet_CommitModifiedTiles(int SecurityFileID, boolean flReSet, double ReSetInterval, TTilesPlace TilesPlace, byte[] PreviewImage, boolean flEnqueue) throws Exception {
 		double Result = Double.MIN_VALUE;
 		TTileServerProviderCompilation[] ATSPC = ActiveCompilationSet();
 		if (ATSPC != null) 
 			for (int I = 0; I < ATSPC.length; I++) {	
-				double R = ATSPC[I].CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace, flEnqueue);
+				double R = ATSPC[I].CommitModifiedTiles(SecurityFileID,flReSet,ReSetInterval,TilesPlace,PreviewImage, flEnqueue);
 				if (R > Result)
 					Result = R;
 			}

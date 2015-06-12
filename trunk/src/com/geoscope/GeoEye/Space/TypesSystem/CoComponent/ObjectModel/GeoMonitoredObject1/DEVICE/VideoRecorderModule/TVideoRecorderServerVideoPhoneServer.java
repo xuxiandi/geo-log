@@ -1119,7 +1119,8 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
     	if (Finalizing == null)
     		Finalizing = StartFinalizing();
 		//.
-		VideoRecorderServerView.VideoSurface_Clear(SH);
+    	if (VideoRecorderServerView != null)
+    		VideoRecorderServerView.VideoSurface_Clear(SH);
 	}
 	
 	private void ShowInitializationDialog() {

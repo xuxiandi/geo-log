@@ -73,9 +73,11 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 		}
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
-			VideoRecorder.FinalizeRecorder();
-			//.
-			VideoRecorder.camera_Surface_Clear(holder);
+			if (VideoRecorder != null) {
+				VideoRecorder.FinalizeRecorder();
+				//.
+				VideoRecorder.camera_Surface_Clear(holder);
+			}
 		}
 		@Override
 		public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {

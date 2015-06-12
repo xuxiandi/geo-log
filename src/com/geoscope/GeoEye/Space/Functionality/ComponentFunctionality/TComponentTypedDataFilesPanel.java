@@ -318,17 +318,32 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		public OnClickListener ImageClickListener = new OnClickListener() {
 			@Override
 	        public void onClick(View v) {
-	            int position = MyListView.getPositionForView((View)v.getParent());
+	            final int position = MyListView.getPositionForView((View)v.getParent());
 	            //.
 				TComponentListItem Item = (TComponentListItem)Items[position];
 				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
-		        	AlertDialog alert = new AlertDialog.Builder(context).create();
+		        	final AlertDialog alert = new AlertDialog.Builder(context).create();
 		        	alert.setCancelable(true);
 		        	alert.setCanceledOnTouchOutside(true);
 		        	LayoutInflater factory = LayoutInflater.from(context);
 		        	View layout = factory.inflate(R.layout.image_preview_dialog_layout, null);
 		        	ImageView IV = (ImageView)layout.findViewById(R.id.ivPreview);
 		        	IV.setImageDrawable(((ImageView)v).getDrawable());
+		        	IV.setOnClickListener(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							try {
+								TComponentTypedDataFile ComponentTypedDataFile = Panel.DataFiles.Items[position];
+								Panel.ComponentTypedDataFile_Process(ComponentTypedDataFile);
+								//.
+								alert.dismiss();
+							}
+							catch (Exception E) {
+				                Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
+							}
+						}
+					});
 		        	alert.setView(layout);
 		        	//.
 		        	alert.show();    

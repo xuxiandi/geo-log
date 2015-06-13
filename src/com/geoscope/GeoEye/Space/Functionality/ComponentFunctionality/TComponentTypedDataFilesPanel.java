@@ -93,6 +93,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	public static final int REQUEST_ADD_COMPONENT 		= 2;
 	
 	public static Bitmap GetImagesComposition(ArrayList<TComponentTypedDataFile> ImageDataFiles, int Size) {
+		float Padding = 2.0F;
 		int ImageCount = ImageDataFiles.size();
 		switch (ImageCount) {
 		
@@ -118,7 +119,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					DestRect.left = 0;
 					DestRect.right = Size;
 					DestRect.top = Y*Step;
-					DestRect.bottom = (Y+1)*Step-1.0f;
+					DestRect.bottom = (Y+1)*Step-Padding;
 					//.
 					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
 				}
@@ -137,7 +138,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					//.
 					DestRect.left = 0;
 					DestRect.right = Size;
-					DestRect.top = Y*Step+1.0f;
+					DestRect.top = Y*Step+Padding;
 					DestRect.bottom = (Y+1)*Step;
 					//.
 					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
@@ -169,9 +170,9 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					SrcRect.bottom = TileImage.getHeight();
 					//.
 					DestRect.left = X*Step;
-					DestRect.right = (X+1)*Step-1.0F;
+					DestRect.right = (X+1)*Step-Padding;
 					DestRect.top = Y*Step;
-					DestRect.bottom = (Y+1)*Step-1.0F;
+					DestRect.bottom = (Y+1)*Step-Padding;
 					//.
 					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
 				}
@@ -189,10 +190,10 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					SrcRect.right = TileImage.getWidth();
 					SrcRect.bottom = TileImage.getHeight();
 					//.
-					DestRect.left = X*Step+1.0F;
+					DestRect.left = X*Step+Padding;
 					DestRect.right = (X+1)*Step;
 					DestRect.top = Y*Step;
-					DestRect.bottom = (Y+1)*Step-1.0F;
+					DestRect.bottom = (Y+1)*Step-Padding;
 					//.
 					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
 				}
@@ -211,8 +212,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					SrcRect.bottom = TileImage.getHeight();
 					//.
 					DestRect.left = X*Step;
-					DestRect.right = (X+1)*Step-1.0F;
-					DestRect.top = Y*Step+1.0F;
+					DestRect.right = (X+1)*Step-Padding;
+					DestRect.top = Y*Step+Padding;
 					DestRect.bottom = (Y+1)*Step;
 					//.
 					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
@@ -245,9 +246,9 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						SrcRect.bottom = TileImage.getHeight();
 						//.
 						DestRect.left = X*Step;
-						DestRect.right = (X+1)*Step-1.0F;
+						DestRect.right = (X+1)*Step-Padding;
 						DestRect.top = Y*Step;
-						DestRect.bottom = (Y+1)*Step-1.0F;
+						DestRect.bottom = (Y+1)*Step-Padding;
 						//.
 						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
 					}
@@ -265,10 +266,10 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						SrcRect.right = TileImage.getWidth();
 						SrcRect.bottom = TileImage.getHeight();
 						//.
-						DestRect.left = X*Step+1.0F;
+						DestRect.left = X*Step+Padding;
 						DestRect.right = (X+1)*Step;
 						DestRect.top = Y*Step;
-						DestRect.bottom = (Y+1)*Step-1.0F;
+						DestRect.bottom = (Y+1)*Step-Padding;
 						//.
 						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
 					}
@@ -287,8 +288,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						SrcRect.bottom = TileImage.getHeight();
 						//.
 						DestRect.left = X*Step;
-						DestRect.right = (X+1)*Step-1.0F;
-						DestRect.top = Y*Step+1.0F;
+						DestRect.right = (X+1)*Step-Padding;
+						DestRect.top = Y*Step+Padding;
 						DestRect.bottom = (Y+1)*Step;
 						//.
 						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
@@ -307,9 +308,9 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						SrcRect.right = TileImage.getWidth();
 						SrcRect.bottom = TileImage.getHeight();
 						//.
-						DestRect.left = X*Step+1.0F;
+						DestRect.left = X*Step+Padding;
 						DestRect.right = (X+1)*Step;
-						DestRect.top = Y*Step+1.0F;
+						DestRect.top = Y*Step+Padding;
 						DestRect.bottom = (Y+1)*Step;
 						//.
 						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
@@ -335,6 +336,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		public String 	Name;
 		public String 	Info;
 		//.
+		@SuppressWarnings("unused")
 		public boolean flRootItem;
 		//.
 		public TComponent Component;
@@ -485,7 +487,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				}
 				//.
 				if (flProcessAsDefault) {
-					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, !Item.flRootItem, Item.Server);
+					boolean flWithComponents = false; //. using caching (!Item.flRootItem) 
+					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, flWithComponents, Item.Server);
 					ArrayList<TComponentTypedDataFile> ImageDataFiles = Item.Component.TypedDataFiles.GetItemsByDataType(SpaceDefines.TYPEDDATAFILE_TYPE_Image);
 					int Cnt = ImageDataFiles.size();
 					switch (Cnt) {

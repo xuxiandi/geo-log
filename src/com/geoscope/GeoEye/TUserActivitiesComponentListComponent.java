@@ -263,11 +263,24 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 				}
 				//.
 				if (flProcessAsDefault) {
-					boolean flWithComponents = ((Item.Component.idTComponent == SpaceDefines.idTCoComponent) || (Item.Component.idTComponent == SpaceDefines.idTPositioner)); 
-					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, flWithComponents, Item.Server);
-					TComponentTypedDataFile DataFile = Item.Component.TypedDataFiles.GetRootItem(); 
-					if ((DataFile != null) && (DataFile.Data != null)) 
-						Result = BitmapFactory.decodeByteArray(DataFile.Data, 0,DataFile.Data.length); 
+					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, true, Item.Server);
+					ArrayList<TComponentTypedDataFile> ImageDataFiles = Item.Component.TypedDataFiles.GetItemsByDataType(SpaceDefines.TYPEDDATAFILE_TYPE_Image);
+					int Cnt = ImageDataFiles.size();
+					switch (Cnt) {
+					
+					case 0:
+						break; //. >
+						
+					case 1:
+						TComponentTypedDataFile ImageDataFile = ImageDataFiles.get(0); 
+						if (ImageDataFile.Data != null) 
+							Result = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
+						break; //. >
+						
+					default:
+						Result = TComponentTypedDataFilesPanel.GetImagesComposition(ImageDataFiles, ItemImageSize);
+						break; //. >
+					}
 				}
 				//.
 				if (Result != null) 

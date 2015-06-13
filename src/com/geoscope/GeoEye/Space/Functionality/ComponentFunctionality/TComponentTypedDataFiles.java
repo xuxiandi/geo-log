@@ -56,6 +56,17 @@ public class TComponentTypedDataFiles {
 		return null;
 	}
 	
+	public ArrayList<TComponentTypedDataFile> GetItemsByDataType(int pDataType) {
+		ArrayList<TComponentTypedDataFile> Result = new ArrayList<TComponentTypedDataFile>(); 
+		int Cnt = Items.length;
+		for (int I = 0; I < Cnt; I++) {
+			TComponentTypedDataFile Item = Items[I]; 
+			if (Item.DataType == pDataType)
+				Result.add(Item); //. ->
+		}
+		return Result;
+	}
+	
 	public boolean DataIsNull() {
 		for (int I = 0; I < Items.length; I++) 
 			if (Items[I].DataIsNull())

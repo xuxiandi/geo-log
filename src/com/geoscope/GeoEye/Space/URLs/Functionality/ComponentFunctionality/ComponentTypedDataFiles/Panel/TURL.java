@@ -1,5 +1,7 @@
 package com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel;
 
+import java.util.ArrayList;
+
 import org.w3c.dom.Element;
 
 import android.content.Context;
@@ -109,10 +111,24 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 			//.
 			if (flProcessAsDefault) {
 				TypedDataFiles = new TComponentTypedDataFiles(User.Server.context, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);
-				TypedDataFiles.PrepareForComponent(idTComponent,idComponent, ThumbnailImage_DataParams, false, User.Server);
-				TComponentTypedDataFile _DataFile = TypedDataFiles.GetRootItem(); 
-				if ((_DataFile != null) && (_DataFile.Data != null)) 
-					Result = BitmapFactory.decodeByteArray(_DataFile.Data, 0,_DataFile.Data.length); 
+				TypedDataFiles.PrepareForComponent(idTComponent,idComponent, ThumbnailImage_DataParams, true, User.Server);
+				ArrayList<TComponentTypedDataFile> ImageDataFiles = TypedDataFiles.GetItemsByDataType(SpaceDefines.TYPEDDATAFILE_TYPE_Image);
+				int Cnt = ImageDataFiles.size();
+				switch (Cnt) {
+				
+				case 0:
+					break; //. >
+					
+				case 1:
+					TComponentTypedDataFile ImageDataFile = ImageDataFiles.get(0); 
+					if (ImageDataFile.Data != null) 
+						Result = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
+					break; //. >
+					
+				default:
+					Result = TComponentTypedDataFilesPanel.GetImagesComposition(ImageDataFiles, ThumbnailImage_Size);
+					break; //. >
+				}
 			}
 			//.
 			if (Result == null) {

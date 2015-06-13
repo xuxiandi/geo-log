@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -21,6 +22,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,11 +38,11 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.AdapterView;
+import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -86,6 +92,240 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	public static final int REQUEST_COMPONENT_CONTENT 	= 1;
 	public static final int REQUEST_ADD_COMPONENT 		= 2;
 	
+	public static Bitmap GetImagesComposition(ArrayList<TComponentTypedDataFile> ImageDataFiles, int Size) {
+		int ImageCount = ImageDataFiles.size();
+		switch (ImageCount) {
+		
+		case 2:
+			float Step = Size/2.0F;
+			//.
+			Bitmap Result = Bitmap.createBitmap(Size,Size, Bitmap.Config.ARGB_8888);
+			Result.eraseColor(Color.LTGRAY);
+			//.
+			Canvas ResultCanvas = new Canvas(Result);
+			Paint DrawPaint = new Paint();
+			Rect SrcRect = new Rect(); 
+			RectF DestRect = new RectF(); 
+			//. 0;0
+			int Y = 0;
+			TComponentTypedDataFile ImageFile = ImageDataFiles.get(0);
+			if (ImageFile.Data != null) {
+				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
+				try {
+					SrcRect.right = TileImage.getWidth();
+					SrcRect.bottom = TileImage.getHeight();
+					//.
+					DestRect.left = 0;
+					DestRect.right = Size;
+					DestRect.top = Y*Step;
+					DestRect.bottom = (Y+1)*Step-1.0f;
+					//.
+					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+				}
+				finally {
+					TileImage.recycle();
+				}
+			}
+			//. 0;1
+			Y = 1;
+			ImageFile = ImageDataFiles.get(1);
+			if (ImageFile.Data != null) {
+				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
+				try {
+					SrcRect.right = TileImage.getWidth();
+					SrcRect.bottom = TileImage.getHeight();
+					//.
+					DestRect.left = 0;
+					DestRect.right = Size;
+					DestRect.top = Y*Step+1.0f;
+					DestRect.bottom = (Y+1)*Step;
+					//.
+					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+				}
+				finally {
+					TileImage.recycle();
+				}
+			}
+			return Result; //. ->
+			
+		case 3:
+			Step = Size/2.0F;
+			//.
+			Result = Bitmap.createBitmap(Size,Size, Bitmap.Config.ARGB_8888);
+			Result.eraseColor(Color.TRANSPARENT);
+			//.
+			ResultCanvas = new Canvas(Result);
+			DrawPaint = new Paint();
+			SrcRect = new Rect(); 
+			DestRect = new RectF(); 
+			//. 0;0
+			int X = 0;
+			Y = 0;
+			ImageFile = ImageDataFiles.get(0);
+			if (ImageFile.Data != null) {
+				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
+				try {
+					SrcRect.right = TileImage.getWidth();
+					SrcRect.bottom = TileImage.getHeight();
+					//.
+					DestRect.left = X*Step;
+					DestRect.right = (X+1)*Step-1.0F;
+					DestRect.top = Y*Step;
+					DestRect.bottom = (Y+1)*Step-1.0F;
+					//.
+					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+				}
+				finally {
+					TileImage.recycle();
+				}
+			}
+			//. 1;0
+			X = 1;
+			Y = 0;
+			ImageFile = ImageDataFiles.get(1);
+			if (ImageFile.Data != null) {
+				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
+				try {
+					SrcRect.right = TileImage.getWidth();
+					SrcRect.bottom = TileImage.getHeight();
+					//.
+					DestRect.left = X*Step+1.0F;
+					DestRect.right = (X+1)*Step;
+					DestRect.top = Y*Step;
+					DestRect.bottom = (Y+1)*Step-1.0F;
+					//.
+					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+				}
+				finally {
+					TileImage.recycle();
+				}
+			}
+			//. 0;1
+			X = 0;
+			Y = 1;
+			ImageFile = ImageDataFiles.get(2);
+			if (ImageFile.Data != null) {
+				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
+				try {
+					SrcRect.right = TileImage.getWidth();
+					SrcRect.bottom = TileImage.getHeight();
+					//.
+					DestRect.left = X*Step;
+					DestRect.right = (X+1)*Step-1.0F;
+					DestRect.top = Y*Step+1.0F;
+					DestRect.bottom = (Y+1)*Step;
+					//.
+					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+				}
+				finally {
+					TileImage.recycle();
+				}
+			}
+			return Result; //. ->
+		
+		default: 
+			if (ImageCount >= 4) {
+				Step = Size/2.0F;
+				//.
+				Result = Bitmap.createBitmap(Size,Size, Bitmap.Config.ARGB_8888);
+				Result.eraseColor(Color.TRANSPARENT);
+				//.
+				ResultCanvas = new Canvas(Result);
+				DrawPaint = new Paint();
+				SrcRect = new Rect(); 
+				DestRect = new RectF(); 
+				//. 0;0
+				X = 0;
+				Y = 0;
+				ImageFile = ImageDataFiles.get(0);
+				if (ImageFile.Data != null) {
+					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
+					try {
+						SrcRect.right = TileImage.getWidth();
+						SrcRect.bottom = TileImage.getHeight();
+						//.
+						DestRect.left = X*Step;
+						DestRect.right = (X+1)*Step-1.0F;
+						DestRect.top = Y*Step;
+						DestRect.bottom = (Y+1)*Step-1.0F;
+						//.
+						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+					}
+					finally {
+						TileImage.recycle();
+					}
+				}
+				//. 1;0
+				X = 1;
+				Y = 0;
+				ImageFile = ImageDataFiles.get(1);
+				if (ImageFile.Data != null) {
+					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
+					try {
+						SrcRect.right = TileImage.getWidth();
+						SrcRect.bottom = TileImage.getHeight();
+						//.
+						DestRect.left = X*Step+1.0F;
+						DestRect.right = (X+1)*Step;
+						DestRect.top = Y*Step;
+						DestRect.bottom = (Y+1)*Step-1.0F;
+						//.
+						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+					}
+					finally {
+						TileImage.recycle();
+					}
+				}
+				//. 0;1
+				X = 0;
+				Y = 1;
+				ImageFile = ImageDataFiles.get(2);
+				if (ImageFile.Data != null) {
+					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
+					try {
+						SrcRect.right = TileImage.getWidth();
+						SrcRect.bottom = TileImage.getHeight();
+						//.
+						DestRect.left = X*Step;
+						DestRect.right = (X+1)*Step-1.0F;
+						DestRect.top = Y*Step+1.0F;
+						DestRect.bottom = (Y+1)*Step;
+						//.
+						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+					}
+					finally {
+						TileImage.recycle();
+					}
+				}
+				//. 1;1
+				X = 1;
+				Y = 1;
+				ImageFile = ImageDataFiles.get(3);
+				if (ImageFile.Data != null) {
+					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
+					try {
+						SrcRect.right = TileImage.getWidth();
+						SrcRect.bottom = TileImage.getHeight();
+						//.
+						DestRect.left = X*Step+1.0F;
+						DestRect.right = (X+1)*Step;
+						DestRect.top = Y*Step+1.0F;
+						DestRect.bottom = (Y+1)*Step;
+						//.
+						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+					}
+					finally {
+						TileImage.recycle();
+					}
+				}
+				//.
+				return Result; //. ->
+			}
+			else
+				return null; //. ->
+		}
+	}
+	
 	private static class TComponentListItem {
 		
 		public TGeoScopeServer Server;
@@ -95,18 +335,22 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		public String 	Name;
 		public String 	Info;
 		//.
+		public boolean flRootItem;
+		//.
 		public TComponent Component;
 		//.
 		public boolean BMP_flLoaded = false;
 		public boolean BMP_flNull = false;
 		
-		public TComponentListItem(TGeoScopeServer pServer, int pDataType, String pDataFormat, String pName, String pInfo, TComponent pComponent) {
+		public TComponentListItem(TGeoScopeServer pServer, int pDataType, String pDataFormat, String pName, String pInfo, boolean pflRootItem, TComponent pComponent) {
 			Server = pServer;
 			//.
 			DataType = pDataType;
 			DataFormat = pDataFormat;
 			Name = pName;
 			Info = pInfo;
+			//.
+			flRootItem = pflRootItem;
 			//.
 			Component = pComponent;
 		}
@@ -241,10 +485,24 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				}
 				//.
 				if (flProcessAsDefault) {
-					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, (Item.Component.idTComponent == SpaceDefines.idTCoComponent), Item.Server);
-					TComponentTypedDataFile DataFile = Item.Component.TypedDataFiles.GetRootItem(); 
-					if ((DataFile != null) && (DataFile.Data != null)) 
-						Result = BitmapFactory.decodeByteArray(DataFile.Data, 0,DataFile.Data.length); 
+					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, !Item.flRootItem, Item.Server);
+					ArrayList<TComponentTypedDataFile> ImageDataFiles = Item.Component.TypedDataFiles.GetItemsByDataType(SpaceDefines.TYPEDDATAFILE_TYPE_Image);
+					int Cnt = ImageDataFiles.size();
+					switch (Cnt) {
+					
+					case 0:
+						break; //. >
+						
+					case 1:
+						TComponentTypedDataFile ImageDataFile = ImageDataFiles.get(0); 
+						if (ImageDataFile.Data != null) 
+							Result = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
+						break; //. >
+						
+					default:
+						Result = TComponentTypedDataFilesPanel.GetImagesComposition(ImageDataFiles, ItemImageSize);
+						break; //. >
+					}
 				}
 				//.
 				if (Result != null) 
@@ -1094,7 +1352,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 			TComponent _Component = new TComponent(0, DataFile.DataComponentType,DataFile.DataComponentID, 0.0);
 			_Component.TypedDataFiles = new TComponentTypedDataFiles(this, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);
 			//.
-			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataFile.DataType,DataFile.DataFormat,Name,"", _Component);
+			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataFile.DataType,DataFile.DataFormat,Name,"",(I == 0), _Component);
 			Items[I] = Item;
 		}
 		lvDataFilesAdapter = new TComponentListAdapter(this, lvDataFiles, ProgressBar, Items); 

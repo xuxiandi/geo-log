@@ -547,17 +547,31 @@ public class TURLFolderListComponent extends TUIComponent {
 			
 			@Override
 	        public void onClick(View v) {
-	            int position = MyListView.getPositionForView((View)v.getParent());
+	            final int position = MyListView.getPositionForView((View)v.getParent());
 	            //.
 				TURLListItem Item = (TURLListItem)Items[position];
 				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
-		        	AlertDialog alert = new AlertDialog.Builder(context).create();
+		        	final AlertDialog alert = new AlertDialog.Builder(context).create();
 		        	alert.setCancelable(true);
 		        	alert.setCanceledOnTouchOutside(true);
 		        	LayoutInflater factory = LayoutInflater.from(context);
 		        	View layout = factory.inflate(R.layout.image_preview_dialog_layout, null);
 		        	ImageView IV = (ImageView)layout.findViewById(R.id.ivPreview);
 		        	IV.setImageDrawable(((ImageView)v).getDrawable());
+		        	IV.setOnClickListener(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							try {
+								Panel.OpenURL(position);
+								//.
+								alert.dismiss();
+							}
+							catch (Exception E) {
+				                Toast.makeText(Panel.ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+							}
+						}
+					});
 		        	alert.setView(layout);
 		        	//.
 		        	alert.show();    
@@ -804,24 +818,7 @@ public class TURLFolderListComponent extends TUIComponent {
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				if (URLList == null)
 					return; //. ->
-				com.geoscope.GeoEye.Space.URL.TURL URL = URLList.Items.get(arg2).URL;
-				if (URL == null)
-					return; //. ->
-				//.
-				try {
-					if (OnListItemClickHandler != null)
-						OnListItemClickHandler.DoOnListItemClick(URL);
-					else
-						try {
-							URL.Open(ParentActivity);
-						}
-						catch (Exception E) {
-			                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
-						}
-				}
-				finally {
-					lvURLListAdapter.Items_SetSelectedIndex(arg2, true);
-				}
+				OpenURL(arg2);
         	}              
         });         
 		lvURLList.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -1459,6 +1456,27 @@ public class TURLFolderListComponent extends TUIComponent {
 		MessageHandler.obtainMessage(MESSAGE_STARTUPDATING).sendToTarget();
 	}
 
+	private void OpenURL(int URLIndex) {
+		com.geoscope.GeoEye.Space.URL.TURL URL = URLList.Items.get(URLIndex).URL;
+		if (URL == null)
+			return; //. ->
+		//.
+		try {
+			if (OnListItemClickHandler != null)
+				OnListItemClickHandler.DoOnListItemClick(URL);
+			else
+				try {
+					URL.Open(ParentActivity);
+				}
+				catch (Exception E) {
+	                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
+		}
+		finally {
+			lvURLListAdapter.Items_SetSelectedIndex(URLIndex, true);
+		}
+	}
+	
 	private void ImportURL(com.geoscope.GeoEye.Space.URL.TURL URL, String Name) throws Exception {
     	if (URLList == null)
     		return; //. ->

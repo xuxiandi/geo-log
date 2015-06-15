@@ -4989,34 +4989,36 @@ public class TReflectorComponent extends TUIComponent {
 								Canceller.Check();
 								//.
 								int RetSize = Connection.getContentLength();
-								if (RetSize == 0) {
+								if (RetSize > 0) {
+									byte[] Data = new byte[RetSize];
+									int Size;
+									SummarySize = 0;
+									int ReadSize;
+									while (SummarySize < Data.length) {
+										ReadSize = Data.length - SummarySize;
+										Size = in.read(Data, SummarySize, ReadSize);
+										if (Size <= 0)
+											throw new Exception(
+													Reflector.context
+															.getString(R.string.SConnectionIsClosedUnexpectedly)); // .
+																													// =>
+										SummarySize += Size;
+										//.
+										Canceller.Check();
+										//.
+										MessageHandler
+												.obtainMessage(
+														MESSAGE_PROGRESSBAR_PROGRESS,
+														(Integer) (100 * SummarySize / Data.length))
+												.sendToTarget();
+									}
+									//.
+									ComponentTypedDataFile.FromByteArrayV0(Data);
+								}
+								else {
+									ComponentTypedDataFile.DataType += SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
 									ComponentTypedDataFile.Data = null;
-									return; // . ->
 								}
-								byte[] Data = new byte[RetSize];
-								int Size;
-								SummarySize = 0;
-								int ReadSize;
-								while (SummarySize < Data.length) {
-									ReadSize = Data.length - SummarySize;
-									Size = in.read(Data, SummarySize, ReadSize);
-									if (Size <= 0)
-										throw new Exception(
-												Reflector.context
-														.getString(R.string.SConnectionIsClosedUnexpectedly)); // .
-																												// =>
-									SummarySize += Size;
-									//.
-									Canceller.Check();
-									//.
-									MessageHandler
-											.obtainMessage(
-													MESSAGE_PROGRESSBAR_PROGRESS,
-													(Integer) (100 * SummarySize / Data.length))
-											.sendToTarget();
-								}
-								//.
-								ComponentTypedDataFile.FromByteArrayV0(Data);
 								//.
 								Canceller.Check();
 								//.

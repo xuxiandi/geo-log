@@ -62,6 +62,7 @@ import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
+import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
@@ -701,34 +702,49 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				holder.ivImage.setOnClickListener(ImageClickListener);
 			}
 			else {
-				switch (Item.DataType) {
+				boolean flImageAssigned = false;
+				switch (Item.Component.idTComponent) {
 				
-				case SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_text));
+				case SpaceDefines.idTPositioner:
+					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_component_positioner));
+					flImageAssigned = true;
 					break; //. >
+
+				case SpaceDefines.idTMapFormatObject:
+					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_component_mapformatobject));
+					flImageAssigned = true;
+					break; //. >
+				}
+				if (!flImageAssigned) {
+					switch (Item.DataType) {
 					
-				case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
-					if ((Item.DataFormat != null) && Item.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat))
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image_drawing));
-					else 
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image));
-					break; //. >
-					
-				case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_audio));
-					break; //. >
-					
-				case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_video));
-					break; //. >
-					
-				case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_measurement));
-					break; //. >
-					
-				default:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder));
-					break; //. >
+					case SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName:
+						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_text));
+						break; //. >
+						
+					case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
+						if ((Item.DataFormat != null) && Item.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat))
+							holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image_drawing));
+						else 
+							holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image));
+						break; //. >
+						
+					case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
+						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_audio));
+						break; //. >
+						
+					case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
+						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_video));
+						break; //. >
+						
+					case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
+						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_measurement));
+						break; //. >
+						
+					default:
+						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder));
+						break; //. >
+					}
 				}
 				holder.ivImage.setOnClickListener(null);
 			}
@@ -839,7 +855,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
         //.
         lvDataFiles = (ListView)findViewById(R.id.lvDataFiles);
         lvDataFiles.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lvDataFiles.setOnItemClickListener(new OnItemClickListener() {         
+        lvDataFiles.setOnItemClickListener(new OnItemClickListener() { 
+        	
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				if ((DataFiles == null) || (DataFiles.Count() == 0))
@@ -849,6 +866,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
         	}              
         });         
         lvDataFiles.setOnItemLongClickListener(new OnItemLongClickListener() {
+        	
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				if ((DataFiles == null) || (DataFiles.Count() == 0))
@@ -1510,33 +1528,37 @@ public class TComponentTypedDataFilesPanel extends Activity {
 									return; // . ->
 								// .
 								int RetSize = Connection.getContentLength();
-								if (RetSize == 0) {
+								if (RetSize > 0) {
+									byte[] Data = new byte[RetSize];
+									int Size;
+									SummarySize = 0;
+									int ReadSize;
+									while (SummarySize < Data.length) {
+										ReadSize = Data.length - SummarySize;
+										Size = in.read(Data, SummarySize, ReadSize);
+										if (Size <= 0)
+											throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
+										SummarySize += Size;
+										// .
+										if (Canceller.flCancel)
+											return; // . ->
+										// .
+										MessageHandler
+												.obtainMessage(
+														MESSAGE_PROGRESSBAR_PROGRESS,
+														(Integer) (100 * SummarySize / Data.length))
+												.sendToTarget();
+									}
+									// .
+									ComponentTypedDataFile.FromByteArrayV0(Data);
+								}
+								else {
+									ComponentTypedDataFile.DataType += SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
 									ComponentTypedDataFile.Data = null;
-									return; // . ->
 								}
-								byte[] Data = new byte[RetSize];
-								int Size;
-								SummarySize = 0;
-								int ReadSize;
-								while (SummarySize < Data.length) {
-									ReadSize = Data.length - SummarySize;
-									Size = in.read(Data, SummarySize, ReadSize);
-									if (Size <= 0)
-										throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
-									SummarySize += Size;
-									// .
-									if (Canceller.flCancel)
-										return; // . ->
-									// .
-									MessageHandler
-											.obtainMessage(
-													MESSAGE_PROGRESSBAR_PROGRESS,
-													(Integer) (100 * SummarySize / Data.length))
-											.sendToTarget();
-								}
-								// .
-								ComponentTypedDataFile.FromByteArrayV0(Data);
-								// .
+								//.
+								Canceller.Check();
+								//.
 								TComponentTypedDataFilesPanel.this.MessageHandler
 										.obtainMessage(OnCompletionMessage,
 												ComponentTypedDataFile)
@@ -1628,7 +1650,62 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		};
 	}
 
-	public void ComponentTypedDataFile_Process(TComponentTypedDataFile ComponentTypedDataFile) {
+	public void ComponentTypedDataFile_Process(final TComponentTypedDataFile ComponentTypedDataFile) {
+		switch (ComponentTypedDataFile.DataComponentType) {
+		
+		case SpaceDefines.idTMapFormatObject:
+			TAsyncProcessing Processing = new TAsyncProcessing(TComponentTypedDataFilesPanel.this,TComponentTypedDataFilesPanel.this.getString(R.string.SWaitAMoment)) {
+				
+				private TXYCoord VisualizationPosition = null;
+				
+				@Override
+				public void Process() throws Exception {
+					TUserAgent UserAgent = TUserAgent.GetUserAgent();
+					if (UserAgent == null)
+						throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SUserAgentIsNotInitialized)); //. =>
+					//.
+					TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+					try {
+						VisualizationPosition = CF.GetVisualizationPosition(); 
+					}
+					finally {
+						CF.Release();
+					}
+				}
+				
+				@Override 
+				public void DoOnCompleted() throws Exception {
+					if (VisualizationPosition != null) {
+						/*//. last version 
+						Component.MoveReflectionWindow(VisualizationPosition);
+						//.
+				        setResult(RESULT_OK);
+				        //.
+						TUserActivityComponentListPanel.this.finish();*/
+						Intent intent = new Intent(TComponentTypedDataFilesPanel.this,TReflector.class);
+						intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATION);
+						intent.putExtra("LocationXY", VisualizationPosition.ToByteArray());
+						TComponentTypedDataFilesPanel.this.startActivity(intent);
+					}
+					else
+						throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SCouldNotGetPosition)); //. =>
+				}
+				@Override
+				public void DoOnException(Exception E) {
+					Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
+			};
+			Processing.Start();
+			return; //. ->
+			
+		default:
+			break; // . >
+		}
+		//. 
+		ComponentTypedDataFile_DoProcess(ComponentTypedDataFile);
+	}
+	
+	public void ComponentTypedDataFile_DoProcess(TComponentTypedDataFile ComponentTypedDataFile) {
 		if (ComponentTypedDataFile.IsLoaded()) {
 			ComponentTypedDataFile_Open(ComponentTypedDataFile);
 		} else {
@@ -1638,7 +1715,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		}
 	}
 	
-	public void ComponentTypedDataFile_Open(final TComponentTypedDataFile ComponentTypedDataFile) {
+	public void ComponentTypedDataFile_Open(TComponentTypedDataFile ComponentTypedDataFile) {
 		try {
 			if (ComponentTypedDataFile.FileIsEmpty())
 				throw new Exception(getString(R.string.SThereIsNoDataYet)); //. =>

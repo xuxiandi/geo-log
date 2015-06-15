@@ -373,7 +373,20 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 						public void onClick(View v) {
 							try {
 								TComponentTypedDataFiles ComponentTypedDataFiles = Panel.ActivitiesComponents.Items[position].TypedDataFiles;
-								Panel.ComponentTypedDataFiles_Process(ComponentTypedDataFiles);
+								int FC = ComponentTypedDataFiles.Count();
+								if (FC > 0) {
+									if (FC == 1)
+										Panel.ComponentTypedDataFiles_Process(ComponentTypedDataFiles);
+									else {
+	    								Intent intent = new Intent(Panel.ParentActivity, TComponentTypedDataFilesPanel.class);
+	    								if (Panel.Component != null)
+	    									intent.putExtra("ComponentID", Panel.Component.ID);
+	    								intent.putExtra("DataFiles", ComponentTypedDataFiles.ToByteArrayV0());
+	    								intent.putExtra("AutoStart", true);
+	    								//.
+	    								Panel.ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
+									}
+								}
 								//.
 								alert.dismiss();
 							}
@@ -1482,33 +1495,37 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 									return; // . ->
 								// .
 								int RetSize = Connection.getContentLength();
-								if (RetSize == 0) {
+								if (RetSize > 0) {
+									byte[] Data = new byte[RetSize];
+									int Size;
+									SummarySize = 0;
+									int ReadSize;
+									while (SummarySize < Data.length) {
+										ReadSize = Data.length - SummarySize;
+										Size = in.read(Data, SummarySize, ReadSize);
+										if (Size <= 0)
+											throw new Exception(ParentActivity.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
+										SummarySize += Size;
+										// .
+										if (Canceller.flCancel)
+											return; // . ->
+										// .
+										MessageHandler
+												.obtainMessage(
+														MESSAGE_PROGRESSBAR_PROGRESS,
+														(Integer) (100 * SummarySize / Data.length))
+												.sendToTarget();
+									}
+									// .
+									ComponentTypedDataFile.FromByteArrayV0(Data);
+								}
+								else {
+									ComponentTypedDataFile.DataType += SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
 									ComponentTypedDataFile.Data = null;
-									return; // . ->
 								}
-								byte[] Data = new byte[RetSize];
-								int Size;
-								SummarySize = 0;
-								int ReadSize;
-								while (SummarySize < Data.length) {
-									ReadSize = Data.length - SummarySize;
-									Size = in.read(Data, SummarySize, ReadSize);
-									if (Size <= 0)
-										throw new Exception(ParentActivity.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
-									SummarySize += Size;
-									// .
-									if (Canceller.flCancel)
-										return; // . ->
-									// .
-									MessageHandler
-											.obtainMessage(
-													MESSAGE_PROGRESSBAR_PROGRESS,
-													(Integer) (100 * SummarySize / Data.length))
-											.sendToTarget();
-								}
-								// .
-								ComponentTypedDataFile.FromByteArrayV0(Data);
-								// .
+								//.
+								Canceller.Check();
+								//.
 								TUserActivitiesComponentListComponent.this.MessageHandler
 										.obtainMessage(OnCompletionMessage,
 												ComponentTypedDataFile)
@@ -1601,29 +1618,73 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	}
 
 	public void ComponentTypedDataFiles_Process(TComponentTypedDataFiles ComponentTypedDataFiles) throws IOException {
-		TComponentTypedDataFile ComponentTypedDataFile = ComponentTypedDataFiles.Items[0];
-		if (ComponentTypedDataFiles.Count() > 1) {
-			boolean flProcessAsSingle = false;
-			switch (ComponentTypedDataFile.DataComponentType) {
-			
-			case SpaceDefines.idTPositioner:
-				flProcessAsSingle = (ComponentTypedDataFiles.Count() == 2);
-				break; // . >
-			}							
-			if (flProcessAsSingle) 
+		final TComponentTypedDataFile ComponentTypedDataFile = ComponentTypedDataFiles.Items[0];
+		//.
+		switch (ComponentTypedDataFile.DataComponentType) {
+		
+		case SpaceDefines.idTPositioner:
+			if (ComponentTypedDataFiles.Count() == 2) {
 				ComponentTypedDataFile_Process(ComponentTypedDataFile);
-			else {
-				Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
-				if (Component != null)
-					intent.putExtra("ComponentID", Component.ID);
-				intent.putExtra("DataFiles", ComponentTypedDataFiles.ToByteArrayV0());
-				intent.putExtra("AutoStart", true);
-				//.
-				ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
+				return; //. ->
 			}
+			break; // . >
+			
+		case SpaceDefines.idTMapFormatObject:
+			TAsyncProcessing Processing = new TAsyncProcessing(ParentActivity,ParentActivity.getString(R.string.SWaitAMoment)) {
+				
+				private TXYCoord VisualizationPosition = null;
+				
+				@Override
+				public void Process() throws Exception {
+					TUserAgent UserAgent = TUserAgent.GetUserAgent();
+					if (UserAgent == null)
+						throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
+					//.
+					TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+					try {
+						VisualizationPosition = CF.GetVisualizationPosition(); 
+					}
+					finally {
+						CF.Release();
+					}
+				}
+				
+				@Override 
+				public void DoOnCompleted() throws Exception {
+					if (VisualizationPosition != null) {
+						/*//. last version 
+						Component.MoveReflectionWindow(VisualizationPosition);
+						//.
+				        setResult(RESULT_OK);
+				        //.
+						TUserActivityComponentListPanel.this.finish();*/
+						Intent intent = new Intent(ParentActivity,TReflector.class);
+						intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATION);
+						intent.putExtra("LocationXY", VisualizationPosition.ToByteArray());
+						ParentActivity.startActivity(intent);
+					}
+					else
+						throw new Exception(ParentActivity.getString(R.string.SCouldNotGetPosition)); //. =>
+				}
+				@Override
+				public void DoOnException(Exception E) {
+					Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
+			};
+			Processing.Start();
+			return; //. ->
+			
+		default:
+			break; // . >
 		}
-		else 
-			ComponentTypedDataFile_Process(ComponentTypedDataFile);
+		//. 
+		Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
+		if (Component != null)
+			intent.putExtra("ComponentID", Component.ID);
+		intent.putExtra("DataFiles", ComponentTypedDataFiles.ToByteArrayV0());
+		intent.putExtra("AutoStart", true);
+		//.
+		ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
 	}
 	
 	public void ComponentTypedDataFile_Process(TComponentTypedDataFile ComponentTypedDataFile) {

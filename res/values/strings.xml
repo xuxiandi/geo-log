@@ -71,8 +71,8 @@
     <string name="SPermanentlyUnavailable">permanently unavailable</string>
     <string name="STemporarilyUnavailable">temporarily unavailable</string>
     <string name="SVRModeIsUnknown">None</string>
-    <string name="SVRModeStreamH263">H264 A/V Stream Format</string>
-    <string name="SVRModeStreamH264">H263 A/V Stream Format</string>
+    <string name="SVRModeStreamH263">H263 A/V Stream Format</string>
+    <string name="SVRModeStreamH264">H264 A/V Stream Format</string>
     <string name="SVRModeMPEG4">MPEG4 A/V Stream Format</string>
     <string name="SVRMode3GP">3GP A/V Stream Format</string>
     <string name="SActive">Active</string>

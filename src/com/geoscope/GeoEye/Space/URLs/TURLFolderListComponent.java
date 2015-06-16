@@ -74,6 +74,7 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.TUserListComponent;
 import com.geoscope.GeoEye.TUserListPanel;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
@@ -587,7 +588,7 @@ public class TURLFolderListComponent extends TUIComponent {
 						@Override
 						public void onClick(View v) {
 							try {
-								Panel.OpenURL(position);
+								Panel.OpenURL(position, null);
 								//.
 								alert.dismiss();
 							}
@@ -600,8 +601,10 @@ public class TURLFolderListComponent extends TUIComponent {
 						
 						@Override
 						public boolean onLongClick(View v) {
-							/* if ((Item.Item.Composition != null) && (Item.Item.Composition.Map.ItemByPosition != null))
-								Panel.ComponentTypedDataFile_Process((TComponentTypedDataFile)Item.Item.Composition.Map.ItemByPosition.LinkedObject); */
+							if ((Item.Item.Composition != null) && (Item.Item.Composition.Map.ItemByPosition != null) && (Item.Item.Composition.Map.ItemByPosition.LinkedObject instanceof TComponentTypedDataFile)) {
+								com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.TOpenComponentTypedDataFileParams Params = new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.TOpenComponentTypedDataFileParams((TComponentTypedDataFile)Item.Item.Composition.Map.ItemByPosition.LinkedObject, Panel.ParentActivity, Panel.Component); 
+								Panel.OpenURL(position, Params);
+							}
 							return false;
 						}
 					});
@@ -851,7 +854,7 @@ public class TURLFolderListComponent extends TUIComponent {
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				if (URLList == null)
 					return; //. ->
-				OpenURL(arg2);
+				OpenURL(arg2, null);
         	}              
         });         
 		lvURLList.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -884,7 +887,7 @@ public class TURLFolderListComponent extends TUIComponent {
 		    		    		
 		    		    		case 0: //. open URL
 		    						try {
-		    							URLItem.URL.Open(ParentActivity);
+		    							URLItem.URL.Open(ParentActivity, null);
 			    						//.
 			        		    		arg0.dismiss();
 		    						}
@@ -1489,7 +1492,7 @@ public class TURLFolderListComponent extends TUIComponent {
 		MessageHandler.obtainMessage(MESSAGE_STARTUPDATING).sendToTarget();
 	}
 
-	private void OpenURL(int URLIndex) {
+	private void OpenURL(int URLIndex, Object Params) {
 		com.geoscope.GeoEye.Space.URL.TURL URL = URLList.Items.get(URLIndex).URL;
 		if (URL == null)
 			return; //. ->
@@ -1499,7 +1502,7 @@ public class TURLFolderListComponent extends TUIComponent {
 				OnListItemClickHandler.DoOnListItemClick(URL);
 			else
 				try {
-					URL.Open(ParentActivity);
+					URL.Open(ParentActivity, Params);
 				}
 				catch (Exception E) {
 	                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();

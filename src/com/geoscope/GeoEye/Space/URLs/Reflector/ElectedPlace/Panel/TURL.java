@@ -50,7 +50,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.
 	}
 	
 	@Override
-	public void Open(Context context) throws Exception {
+	public void Open(Context context, Object Params) throws Exception {
 		TReflector Reflector = TReflector.GetReflector();
 		if (Reflector == null) 
 			throw new Exception(context.getString(R.string.SReflectorIsNull)); //. =>

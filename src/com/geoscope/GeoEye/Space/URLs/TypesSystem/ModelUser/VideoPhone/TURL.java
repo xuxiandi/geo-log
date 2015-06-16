@@ -59,7 +59,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.T
 	}
 	
 	@Override
-	public void Open(Context context) throws Exception {
+	public void Open(Context context, Object Params) throws Exception {
 		TAsyncProcessing Opening = new TAsyncProcessing(context) {
 			
 			private TUserPanel.TUserCoGeoMonitorObjects UserCoGeoMonitorObjects = null;

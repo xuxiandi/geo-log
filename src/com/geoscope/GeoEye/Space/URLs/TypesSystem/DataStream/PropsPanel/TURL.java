@@ -49,7 +49,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.DataStream.
 	}
 	
 	@Override
-	public void Open(Context context) throws Exception {
+	public void Open(Context context, Object Params) throws Exception {
     	Intent intent = new Intent(context, TDataStreamPropsPanel.class);
 		intent.putExtra("idTComponent",SpaceDefines.idTDataStream);
 		intent.putExtra("idComponent",idComponent);

@@ -48,7 +48,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TURL {
 	}
 	
 	@Override
-	public void Open(Context context) throws Exception {
+	public void Open(Context context, Object Params) throws Exception {
     	Intent intent = new Intent(Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(Value));
     	context.startActivity(intent);

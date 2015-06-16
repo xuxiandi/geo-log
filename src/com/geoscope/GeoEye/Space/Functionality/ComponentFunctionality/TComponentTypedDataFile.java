@@ -4,11 +4,35 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.net.HttpURLConnection;
 import java.util.Locale;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.widget.Toast;
+
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.TProgressor;
+import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
+import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
+import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessorPanel;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TDATAFileFunctionality;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
+import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
+import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 public class TComponentTypedDataFile {
@@ -156,6 +180,119 @@ public class TComponentTypedDataFile {
 			DataType = ((int)(DataType/SpaceDefines.TYPEDDATAFILE_TYPE_RANGE))*SpaceDefines.TYPEDDATAFILE_TYPE_RANGE+SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull;
 	}
 	
+	public void PrepareAsFullFromServer(TGeoScopeServerUser User, TCanceller Canceller, TProgressor Progressor) throws Exception {
+		switch (DataComponentType) {
+
+		case SpaceDefines.idTDATAFile:
+			TGeoScopeServerInfo.TInfo ServersInfo = User.Server.Info.GetInfo();
+			TComponentStreamServer CSS = new TComponentStreamServer(TypedDataFiles.context, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, User.UserID, User.UserPassword);
+			try {
+				String CFN = TTypesSystem.TypesSystem.SystemTDATAFile.Context_GetFolder()+"/"+FileName();
+				//.
+				CSS.ComponentStreamServer_GetComponentStream_Begin(DataComponentType,DataComponentID);
+				try {
+					File CF = new File(CFN);
+					RandomAccessFile ComponentStream = new RandomAccessFile(CF,"rw");
+					try {
+						ComponentStream.seek(ComponentStream.length());
+						//.
+						CSS.ComponentStreamServer_GetComponentStream_Read(Long.toString(DataComponentID),ComponentStream, Canceller, Progressor);
+					}
+					finally {
+						ComponentStream.close();
+					}
+				}
+				finally {
+					CSS.ComponentStreamServer_GetComponentStream_End();						
+				}
+				//.
+				PrepareAsFullFromFile(CFN);
+				//.
+				if (Canceller != null)
+					Canceller.Check();
+			}
+			finally {
+				CSS.Destroy();
+			}
+			break; //. >
+
+		default:
+			String URL1 = User.Server.Address;
+			//. add command path
+			URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/* URLProtocolVersion */+"/"+Long.toString(User.UserID);
+			String URL2 = "Functionality"+"/"+"ComponentDataDocument.dat";
+			//. add command parameters
+			int WithComponentsFlag = 0;
+			URL2 = URL2+"?"+"1"/* command version */+","+Integer.toString(DataComponentType)+","+Long.toString(DataComponentID)+","+Integer.toString(SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION)+","+Integer.toString(((int)(DataType/SpaceDefines.TYPEDDATAFILE_TYPE_RANGE))*SpaceDefines.TYPEDDATAFILE_TYPE_RANGE+SpaceDefines.TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)+","+Integer.toString(WithComponentsFlag);
+			//.
+			byte[] URL2_Buffer;
+			try {
+				URL2_Buffer = URL2.getBytes("windows-1251");
+			} catch (Exception E) {
+				URL2_Buffer = null;
+			}
+			byte[] URL2_EncryptedBuffer = User.EncryptBufferV2(URL2_Buffer);
+			//. encode string
+			StringBuffer sb = new StringBuffer();
+			for (int I = 0; I < URL2_EncryptedBuffer.length; I++) {
+				String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+				while (h.length() < 2)
+					h = "0"+h;
+				sb.append(h);
+			}
+			URL2 = sb.toString();
+			//.
+			String URL = URL1+"/"+URL2+".dat";
+			//.
+			if (Canceller.flCancel)
+				return; // . ->
+			//.
+			HttpURLConnection Connection = User.Server.OpenConnection(URL);
+			try {
+				if (Canceller.flCancel)
+					return; // . ->
+				// .
+				InputStream in = Connection.getInputStream();
+				try {
+					if (Canceller.flCancel)
+						return; // . ->
+					// .
+					int RetSize = Connection.getContentLength();
+					if (RetSize > 0) {
+						byte[] Data = new byte[RetSize];
+						int Size;
+						int SummarySize = 0;
+						int ReadSize;
+						while (SummarySize < Data.length) {
+							ReadSize = Data.length - SummarySize;
+							Size = in.read(Data, SummarySize, ReadSize);
+							if (Size <= 0)
+								throw new Exception(TypedDataFiles.context.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
+							SummarySize += Size;
+							//.
+							if (Canceller.flCancel)
+								return; // . ->
+							//.
+							if (Progressor != null) 
+								Progressor.DoOnProgress((Integer)(100*SummarySize/Data.length));
+						}
+						//.
+						FromByteArrayV0(Data);
+					}
+					else {
+						PrepareAsFull();
+						Data = null;
+					}
+				} finally {
+					in.close();
+				}
+			} finally {
+				Connection.disconnect();
+			}
+			break; //. >
+		}
+	}
+	
 	public void PrepareForComponent(int idTComponent, long idComponent, String pDataParams, boolean flWithComponents, TGeoScopeServer Server) throws Exception {
 		DataParams = pDataParams;
 		//.
@@ -243,5 +380,161 @@ public class TComponentTypedDataFile {
 		}
 		else
 			return (!((Data != null) && (Data.length > 0))); //. ->
+	}
+	
+	public void Open(TGeoScopeServerUser User, Activity ParentActivity, TReflectorComponent Component) {
+		try {
+			if (FileIsEmpty())
+				throw new Exception(ParentActivity.getString(R.string.SThereIsNoDataYet)); //. =>
+			//.
+			Intent intent = null;
+			switch (DataType) {
+
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Document:
+				try {
+					if (DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_TXT)) {
+						String Text = new String(GetFileData(),"windows-1251");
+						byte[] TextData = Text.getBytes("utf-16");
+						// .
+						File TempFile = GetTempFile();
+						FileOutputStream fos = new FileOutputStream(TempFile);
+						try {
+							fos.write(TextData, 0, TextData.length);
+						} finally {
+							fos.close();
+						}
+						// . open appropriate extent
+						intent = new Intent();
+						intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");
+					}
+					else
+						if (DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
+							TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(DataComponentType,DataComponentID);
+							if (CF != null)
+								try {
+									int Version = CF.ParseFromXMLDocument(GetFileData());
+									if (Version > 0) 
+										switch (CF.TypeFunctionality.idType) {
+										
+										case SpaceDefines.idTDATAFile:
+											TDATAFileFunctionality DFF = (TDATAFileFunctionality)CF;
+											DFF.Open(ParentActivity, null);
+											return; // . ->
+
+										case SpaceDefines.idTPositioner:
+											TPositionerFunctionality PF = (TPositionerFunctionality)CF;
+											//.
+											TLocation P = new TLocation(PF._Name);
+											P.RW.Assign(Component.ReflectionWindow.GetWindow());
+											P.RW.X0 = PF._X0; P.RW.Y0 = PF._Y0;
+											P.RW.X1 = PF._X1; P.RW.Y1 = PF._Y1;
+											P.RW.X2 = PF._X2; P.RW.Y2 = PF._Y2;
+											P.RW.X3 = PF._X3; P.RW.Y3 = PF._Y3;
+											P.RW.BeginTimestamp = PF._Timestamp; P.RW.EndTimestamp = PF._Timestamp;
+											P.RW.Normalize();
+											/*//. last version: Reflector.SetReflectionWindowByLocation(P);
+											//.
+									        setResult(RESULT_OK);
+									        //.
+											finish();*/
+											intent = new Intent(ParentActivity,TReflector.class);
+											intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATIONWINDOW);
+											intent.putExtra("LocationWindow", P.ToByteArray());
+											ParentActivity.startActivity(intent);
+											return; // . ->
+
+										default:
+											TComponentFunctionality.TPropsPanel PropsPanel = CF.TPropsPanel_Create(ParentActivity);
+											if (PropsPanel != null)
+												ParentActivity.startActivity(PropsPanel.PanelActivity);
+											return; // . ->
+										}
+								}
+							finally {
+								CF.Release();
+							}
+						}
+				} catch (Exception E) {
+					Toast.makeText(
+							ParentActivity,
+							ParentActivity.getString(R.string.SErrorOfPreparingDataFile)+FileName(),
+							Toast.LENGTH_LONG).show();
+					return; // . ->
+				}
+				break; // . >
+
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
+				try {
+					if (DataFormat.toLowerCase(Locale.ENGLISH).equals("."+TDrawingDefines.FileExtension)) {
+			    		intent = new Intent(ParentActivity, TDrawingEditor.class);
+			  		    intent.putExtra("FileName", GetFile().getAbsolutePath()); 
+			  		    intent.putExtra("ReadOnly", true); 
+			  		    ParentActivity.startActivity(intent);
+			  		    //.
+						return; // . ->
+					}
+					else {
+			    		intent = new Intent(ParentActivity, TImageViewerPanel.class);
+			  		    intent.putExtra("FileName", GetFile().getAbsolutePath()); 
+			  		    ParentActivity.startActivity(intent);
+			  		    //.
+						return; // . ->
+					}
+				} catch (Exception E) {
+					Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
+					return; // . ->
+				}
+
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Audio:
+				try {
+					// . open appropriate extent
+					intent = new Intent();
+					intent.setDataAndType(Uri.fromFile(GetFile()), "audio/*");
+				} catch (Exception E) {
+					Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
+					return; // . ->
+				}
+				break; // . >
+
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Video:
+				try {
+					// . open appropriate extent
+					intent = new Intent();
+					intent.setDataAndType(Uri.fromFile(GetFile()),"video/*");
+				} catch (Exception E) {
+					Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
+					return; // . ->
+				}
+				break; // . >
+				
+			case SpaceDefines.TYPEDDATAFILE_TYPE_Measurement:
+				try {
+					String MeasurementID = Integer.toString(DataComponentType)+"_"+Long.toString(DataComponentID);
+					//. open appropriate extent
+		            Intent ProcessorPanel = new Intent(ParentActivity, TMeasurementProcessorPanel.class);
+		            ProcessorPanel.putExtra("MeasurementDatabaseFolder",TGeoLogApplication.GetTempFolder());
+		            ProcessorPanel.putExtra("MeasurementID",MeasurementID);
+		            ProcessorPanel.putExtra("MeasurementDataFile",GetFile().getAbsolutePath());
+		            ProcessorPanel.putExtra("MeasurementStartPosition",0);
+		            ParentActivity.startActivity(ProcessorPanel);	            	
+		  		    //.
+					return; // . ->
+				} catch (Exception E) {
+					Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
+					return; // . ->
+				}
+
+			default:
+				Toast.makeText(ParentActivity, R.string.SUnknownDataFileFormat,
+						Toast.LENGTH_LONG).show();
+				return; // . ->
+			}
+			if (intent != null) {
+				intent.setAction(android.content.Intent.ACTION_VIEW);
+				ParentActivity.startActivity(intent);
+			}
+		} catch (Exception E) {
+			Toast.makeText(ParentActivity, E.getMessage(),Toast.LENGTH_LONG).show();
+		}
 	}
 }

@@ -4,9 +4,9 @@ import org.w3c.dom.Element;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.TUserPanel;
@@ -52,16 +52,16 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.T
 	}
 	
 	@Override
-	public Bitmap GetThumbnailImage() {
+	public TThumbnailImageComposition GetThumbnailImageComposition() {
 		try {
 			TUserDescriptor UserInfo = User.GetUserInfo(idComponent);
 			if (UserInfo.UserIsOnline)
-				return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.onlineuser); //. ->
+				return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.onlineuser))); //. ->
 			else
-				return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.offlineuser); //. ->
+				return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.offlineuser))); //. ->
 		}
 		catch (Exception E) {
-			return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.offlineuser); //. ->
+			return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.offlineuser))); //. ->
 		}
 	}
 	

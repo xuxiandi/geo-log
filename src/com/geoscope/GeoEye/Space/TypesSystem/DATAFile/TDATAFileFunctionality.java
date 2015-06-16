@@ -9,9 +9,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.URL.TURL;
@@ -67,11 +67,11 @@ public class TDATAFileFunctionality extends TComponentFunctionality {
 	}
 
 	@Override
-	public Bitmap GetThumbnailImage() throws Exception {
+	public TThumbnailImageComposition GetThumbnailImageComposition() throws Exception {
 		TURL URL = GetAsURL();
 		if (URL != null)
-			return URL.GetThumbnailImage(); //. ->
-		return super.GetThumbnailImage();
+			return URL.GetThumbnailImageComposition(); //. ->
+		return super.GetThumbnailImageComposition();
 	}
 	
 	private TURL GetAsURL() throws Exception {

@@ -20,6 +20,7 @@ import android.graphics.Matrix;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 
@@ -220,16 +221,16 @@ public class TURL {
 		return R.drawable.user_activity_component_list_placeholder_text;
 	}
 	
-	public Bitmap GetThumbnailImage() {
+	public TThumbnailImageComposition GetThumbnailImageComposition() {
 		return null;
 	}
 	
-	public Bitmap GetThumbnailImage(int ImageMaxSize) {
-		Bitmap Result = null;
-		//.
-		Bitmap BMP = GetThumbnailImage();
-		if (BMP != null) 
-			try {
+	public TThumbnailImageComposition GetThumbnailImageComposition(int ImageMaxSize) {
+		TThumbnailImageComposition TIC = GetThumbnailImageComposition();
+		if (TIC != null) {
+			if (TIC.BMP != null) {
+				Bitmap BMP = TIC.BMP;
+				//.
 				int Width = BMP.getWidth();
 				int Height = BMP.getHeight();
 				int MaxSize = Width;
@@ -239,13 +240,14 @@ public class TURL {
 				Matrix matrix = new Matrix();     
 				matrix.postScale(Scale,Scale);
 				//.
-				Result = Bitmap.createBitmap(BMP, 0,0,Width,Height, matrix, true);
-			}
-			finally {
-				if (Result != BMP)
+				TIC.BMP = Bitmap.createBitmap(BMP, 0,0,Width,Height, matrix, true);
+				if (BMP != TIC.BMP)
 					BMP.recycle();
+				//.
+				TIC.ScaleMap(Scale);
 			}
-		return Result;
+		}
+		return TIC;
 	}
 	
 	public void Open(Context context) throws Exception {

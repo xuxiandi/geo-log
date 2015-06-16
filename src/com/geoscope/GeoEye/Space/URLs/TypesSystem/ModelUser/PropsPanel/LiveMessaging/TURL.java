@@ -4,9 +4,9 @@ import org.w3c.dom.Element;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.TUserPanel;
@@ -51,11 +51,11 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.P
 	}
 	
 	@Override
-	public Bitmap GetThumbnailImage() {
+	public TThumbnailImageComposition GetThumbnailImageComposition() {
 		if (IsUserAvailable())
-			return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.onlineuserlivemessaging); //. ->
+			return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.onlineuserlivemessaging))); //. ->
 		else
-			return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.offlineuserlivemessaging); //. ->
+			return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.offlineuserlivemessaging))); //. ->
 	}
 	
 	@Override

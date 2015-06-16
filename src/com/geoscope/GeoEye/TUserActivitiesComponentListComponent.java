@@ -21,16 +21,20 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -47,6 +51,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.TDiskImageCache;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.UI.TUIComponent;
@@ -121,6 +126,8 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		//.
 		public boolean BMP_flLoaded = false;
 		public boolean BMP_flNull = false;
+		//.
+		public TThumbnailImageComposition Composition = null;
 		
 		public TComponentListItem(TGeoScopeServer pServer, int pDataType, String pDataFormat, String pName, String pInfo, TComponent pComponent) {
 			Server = pServer;
@@ -233,8 +240,13 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 							if (CF != null) 
 								try {
 									CF.ParseFromXMLDocument(ComponentTypedDataFile.GetFileData());
-									Result = CF.GetThumbnailImage();
-									flProcessAsDefault = (Result == null);
+									Item.Composition = CF.GetThumbnailImageComposition();
+									if (Item.Composition != null) {
+										Result = Item.Composition.TakeBitmap();
+										flProcessAsDefault = false;
+									}
+									else
+										flProcessAsDefault = true;
 								}
 								finally {
 									CF.Release();
@@ -266,25 +278,37 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, true, Item.Server);
 					ArrayList<TComponentTypedDataFile> ImageDataFiles = Item.Component.TypedDataFiles.GetItemsByDataType(SpaceDefines.TYPEDDATAFILE_TYPE_Image);
 					int Cnt = ImageDataFiles.size();
-					switch (Cnt) {
-					
-					case 0:
-						break; //. >
-						
-					case 1:
-						TComponentTypedDataFile ImageDataFile = ImageDataFiles.get(0); 
-						if (ImageDataFile.Data != null) 
-							Result = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-						break; //. >
-						
-					default:
-						Result = TComponentTypedDataFilesPanel.GetImagesComposition(ImageDataFiles, ItemImageSize);
-						break; //. >
+					if (Cnt > 0) {
+						Item.Composition = TComponentTypedDataFiles.GetImageComposition(ImageDataFiles, ItemImageSize);
+						if (Item.Composition != null)
+							Result = Item.Composition.TakeBitmap();
 					}
 				}
 				//.
-				if (Result != null) 
+				if (Result != null) {
+					//. draw the type image on the result
+					int ResourceImageID = 0;
+					TTypeFunctionality TF = Panel.UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(Item.Component.idTComponent);
+					if (TF != null)
+						try {
+							ResourceImageID = TF.GetImageResID();
+						} finally {
+							TF.Release();
+						}
+					if (ResourceImageID == 0) 
+						ResourceImageID = SpaceDefines.TYPEDDATAFILE_TYPE_GetResID(Item.DataType,Item.DataFormat);
+					if (ResourceImageID != 0) {
+						Drawable D = context.getResources().getDrawable(ResourceImageID).mutate();
+						D.setBounds(0,0, (ItemImageSize >> 2),(ItemImageSize >> 2));
+						D.setAlpha(128);
+						Bitmap LastResult = Result;
+						Result = Result.copy(Config.ARGB_8888,true);
+						LastResult.recycle();
+						D.draw(new Canvas(Result));
+					}
+					//.
 					ImageCache.put(Item.Component.GetKey(), Result);
+				}
 				else
 					Item.BMP_flNull = true;
 				Item.BMP_flLoaded = true;
@@ -358,7 +382,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	        public void onClick(View v) {
 	            final int position = MyListView.getPositionForView((View)v.getParent());
 	            //.
-				TComponentListItem Item = (TComponentListItem)Items[position];
+				final TComponentListItem Item = (TComponentListItem)Items[position];
 				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
 		        	final AlertDialog alert = new AlertDialog.Builder(context).create();
 		        	alert.setCancelable(true);
@@ -367,6 +391,23 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		        	View layout = factory.inflate(R.layout.image_preview_dialog_layout, null);
 		        	ImageView IV = (ImageView)layout.findViewById(R.id.ivPreview);
 		        	IV.setImageDrawable(((ImageView)v).getDrawable());
+		        	IV.setOnTouchListener(new OnTouchListener() {
+						
+						@Override
+						public boolean onTouch(View v, MotionEvent event) {
+							int action = event.getAction();
+							switch (action & MotionEvent.ACTION_MASK) {
+							
+							case MotionEvent.ACTION_DOWN: 
+								float X = event.getX();
+								float Y = event.getY();
+								if (Item.Composition != null)
+									Item.Composition.Map.CheckItemByPosition(X,Y);
+								break; //. >							
+							}
+						      return false;
+						}
+					});
 		        	IV.setOnClickListener(new OnClickListener() {
 						
 						@Override
@@ -393,6 +434,15 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 							catch (Exception E) {
 				                Toast.makeText(Panel.ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
 							}
+						}
+					});
+		        	IV.setOnLongClickListener(new OnLongClickListener() {
+						
+						@Override
+						public boolean onLongClick(View v) {
+							if ((Item.Composition != null) && (Item.Composition.Map.ItemByPosition != null))
+								Panel.ComponentTypedDataFile_Process((TComponentTypedDataFile)Item.Composition.Map.ItemByPosition.LinkedObject);
+							return false;
 						}
 					});
 		        	alert.setView(layout);
@@ -514,50 +564,20 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 				holder.ivImage.setOnClickListener(ImageClickListener);
 			}
 			else {
-				boolean flImageAssigned = false;
-				switch (Item.Component.idTComponent) {
-				
-				case SpaceDefines.idTPositioner:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_component_positioner));
-					flImageAssigned = true;
-					break; //. >
-
-				case SpaceDefines.idTMapFormatObject:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_component_mapformatobject));
-					flImageAssigned = true;
-					break; //. >
-				}
-				if (!flImageAssigned) {
-					switch (Item.DataType) {
-					
-					case SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName:
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_text));
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
-						if ((Item.DataFormat != null) && Item.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat))
-							holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image_drawing));
-						else 
-							holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image));
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_audio));
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_video));
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_measurement));
-						break; //. >
-						
-					default:
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder));
-						break; //. >
+				int ResourceImageID = 0;
+				TTypeFunctionality TF = Panel.UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(Item.Component.idTComponent);
+				if (TF != null)
+					try {
+						ResourceImageID = TF.GetImageResID();
+					} finally {
+						TF.Release();
 					}
+				if (ResourceImageID == 0) {
+					ResourceImageID = SpaceDefines.TYPEDDATAFILE_TYPE_GetResID(Item.DataType,Item.DataFormat);
+					if (ResourceImageID == 0)
+						ResourceImageID = R.drawable.user_activity_component_list_placeholder;
 				}
+				holder.ivImage.setImageDrawable(context.getResources().getDrawable(ResourceImageID));
 				holder.ivImage.setOnClickListener(null);
 			}
 			//. show selection
@@ -583,6 +603,8 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	private Activity ParentActivity;
 	private LinearLayout ParentLayout;
 	//.
+	private TUserAgent UserAgent;
+	//.
 	private long	UserID = 0;	
 	private double BeginTimestamp;
 	private double EndTimestamp;
@@ -607,9 +629,13 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	//.
 	private TComponentTypedDataFileLoading ComponentTypedDataFileLoading = null;
 	
-	public TUserActivitiesComponentListComponent(Activity pParentActivity, LinearLayout pParentLayout, long pUserID, double pBeginTimestamp, double pEndTimestamp, int pListRowSizeID, TReflectorComponent pComponent, TOnItemsLoadedHandler pOnItemsLoadedHandler, TOnListItemClickHandler pOnListItemClickHandler) {
+	public TUserActivitiesComponentListComponent(Activity pParentActivity, LinearLayout pParentLayout, long pUserID, double pBeginTimestamp, double pEndTimestamp, int pListRowSizeID, TReflectorComponent pComponent, TOnItemsLoadedHandler pOnItemsLoadedHandler, TOnListItemClickHandler pOnListItemClickHandler) throws Exception {
 		ParentActivity = pParentActivity;
 		ParentLayout = pParentLayout;
+		//.
+		UserAgent = TUserAgent.GetUserAgent();
+		if (UserAgent == null)
+			throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		//.
 		UserID = pUserID;
 		BeginTimestamp = pBeginTimestamp;
@@ -760,10 +786,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	    		    						
 	    		    						@Override
 	    		    						public void Process() throws Exception {
-	    	    								TUserAgent UserAgent = TUserAgent.GetUserAgent();
-	    	    								if (UserAgent == null)
-	    	    									throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    	    								//.
 	    	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 	    	    								if (CF != null) 
 	    	    									try {
@@ -831,10 +853,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 
 		    		    						@Override
 		    		    						public void Process() throws Exception {
-		    		    		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-		    		    		    				if (UserAgent == null)
-		    		    		    					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-		    		    		    				//.
 		    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(_Component.idTComponent);
 		    		    							if (TF != null)
 		    		    								try {
@@ -925,7 +943,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
         flExists = true;
 	}
 
-	public TUserActivitiesComponentListComponent(Activity pParentActivity, LinearLayout pParentLayout, long pUserID, double pBeginTimestamp, double pEndTimestamp, int pListRowSizeID, TReflectorComponent pComponent, TOnListItemClickHandler pOnListItemClickHandler) {
+	public TUserActivitiesComponentListComponent(Activity pParentActivity, LinearLayout pParentLayout, long pUserID, double pBeginTimestamp, double pEndTimestamp, int pListRowSizeID, TReflectorComponent pComponent, TOnListItemClickHandler pOnListItemClickHandler) throws Exception {
 		this(pParentActivity,pParentLayout, pUserID, pBeginTimestamp,pEndTimestamp, pListRowSizeID, pComponent, null, pOnListItemClickHandler);
 	}
 	
@@ -1043,10 +1061,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-	    				if (UserAgent == null)
-	    					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    				//.
 	    				Activities = UserAgent.Server.User.GetUserActivityList(UserID, BeginTimestamp,EndTimestamp);
 	    				//.
 	    				ActivitiesComponents = UserAgent.Server.User.GetUserActivitiesComponentList(UserID, BeginTimestamp,EndTimestamp);
@@ -1230,10 +1244,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
         		lvActivitiesComponentList.setAdapter(null);
         		return; //. ->
         	}
-    		TUserAgent UserAgent = TUserAgent.GetUserAgent();
-    		if (UserAgent == null)
-    			throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-    		//.
     		long LastActivityID = 0;
     		TComponentListItem[] Items = new TComponentListItem[ActivitiesComponents.Items.length];
     		for (int I = 0; I < ActivitiesComponents.Items.length; I++) {
@@ -1381,10 +1391,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		@Override
 		public void run() {
 			try {
-				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-				if (UserAgent == null)
-					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-				//.
 				switch (ComponentTypedDataFile.DataComponentType) {
 
 				case SpaceDefines.idTDATAFile:
@@ -1618,12 +1624,13 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	}
 
 	public void ComponentTypedDataFiles_Process(TComponentTypedDataFiles ComponentTypedDataFiles) throws IOException {
+		int FC = ComponentTypedDataFiles.Count();
 		final TComponentTypedDataFile ComponentTypedDataFile = ComponentTypedDataFiles.Items[0];
 		//.
 		switch (ComponentTypedDataFile.DataComponentType) {
 		
 		case SpaceDefines.idTPositioner:
-			if (ComponentTypedDataFiles.Count() == 2) {
+			if (FC == 2) {
 				ComponentTypedDataFile_Process(ComponentTypedDataFile);
 				return; //. ->
 			}
@@ -1636,10 +1643,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 				
 				@Override
 				public void Process() throws Exception {
-					TUserAgent UserAgent = TUserAgent.GetUserAgent();
-					if (UserAgent == null)
-						throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-					//.
 					TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 					try {
 						VisualizationPosition = CF.GetVisualizationPosition(); 
@@ -1678,13 +1681,17 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 			break; // . >
 		}
 		//. 
-		Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
-		if (Component != null)
-			intent.putExtra("ComponentID", Component.ID);
-		intent.putExtra("DataFiles", ComponentTypedDataFiles.ToByteArrayV0());
-		intent.putExtra("AutoStart", true);
-		//.
-		ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
+		if (FC == 1)
+			ComponentTypedDataFile_Process(ComponentTypedDataFile);
+		else {
+			Intent intent = new Intent(ParentActivity, TComponentTypedDataFilesPanel.class);
+			if (Component != null)
+				intent.putExtra("ComponentID", Component.ID);
+			intent.putExtra("DataFiles", ComponentTypedDataFiles.ToByteArrayV0());
+			intent.putExtra("AutoStart", true);
+			//.
+			ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
+		}
 	}
 	
 	public void ComponentTypedDataFile_Process(TComponentTypedDataFile ComponentTypedDataFile) {
@@ -1701,10 +1708,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		try {
 			if (ComponentTypedDataFile.FileIsEmpty())
 				throw new Exception(ParentActivity.getString(R.string.SThereIsNoDataYet)); //. =>
-			//.
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
-			if (UserAgent == null)
-				throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 			//.
 			Intent intent = null;
 			switch (ComponentTypedDataFile.DataType) {
@@ -1884,10 +1887,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 			private TXYCoord VisualizationPosition = null;
 			@Override
 			public void Process() throws Exception {
-				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-				if (UserAgent == null)
-					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-				//.
 				TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_Component.idTComponent,_Component.idComponent);
 				try {
 					VisualizationPosition = CF.GetVisualizationPosition(); 

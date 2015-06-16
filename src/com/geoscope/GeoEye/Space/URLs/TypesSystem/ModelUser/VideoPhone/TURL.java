@@ -3,10 +3,10 @@ package com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.VideoPhone;
 import org.w3c.dom.Element;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TUserPanel;
@@ -51,11 +51,11 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.T
 	}
 	
 	@Override
-	public Bitmap GetThumbnailImage() {
+	public TThumbnailImageComposition GetThumbnailImageComposition() {
 		if (IsUserAvailable())
-			return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.onlineuservideophone); //. ->
+			return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.onlineuservideophone))); //. ->
 		else
-			return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.offlineuservideophone); //. ->
+			return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.offlineuservideophone))); //. ->
 	}
 	
 	@Override

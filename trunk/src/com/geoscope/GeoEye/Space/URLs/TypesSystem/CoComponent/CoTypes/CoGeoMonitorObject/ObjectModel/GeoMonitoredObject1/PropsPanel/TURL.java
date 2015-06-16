@@ -97,7 +97,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent
 	}
 	
 	@Override
-	public void Open(Context context) throws Exception {
+	public void Open(Context context, Object Params) throws Exception {
     	Intent intent = new Intent(context, TCoGeoMonitorObjectPanel.class);
 		intent.putExtra("ComponentID", 0);
     	intent.putExtra("ParametersType", TCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);

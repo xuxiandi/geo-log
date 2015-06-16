@@ -250,6 +250,6 @@ public class TURL {
 		return TIC;
 	}
 	
-	public void Open(Context context) throws Exception {
+	public void Open(Context context, Object Params) throws Exception {
 	}
 }

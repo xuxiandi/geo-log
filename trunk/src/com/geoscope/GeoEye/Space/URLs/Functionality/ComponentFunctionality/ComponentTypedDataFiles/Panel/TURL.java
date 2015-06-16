@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.w3c.dom.Element;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -17,6 +18,7 @@ import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposi
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
@@ -176,33 +178,77 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 		return GetThumbnailImageComposition();
 	}
 	
+	public static class TOpenComponentTypedDataFileParams {
+		
+		public TComponentTypedDataFile ComponentTypedDataFile;
+		//.
+		public Activity ParentActivity;
+		//.
+		public TReflectorComponent Component;
+		
+		public TOpenComponentTypedDataFileParams(TComponentTypedDataFile pComponentTypedDataFile, Activity pParentActivity, TReflectorComponent pComponent) {
+			ComponentTypedDataFile = pComponentTypedDataFile;
+			ParentActivity = pParentActivity;
+			Component = pComponent;
+		}
+	}
+	
 	@Override
-	public void Open(Context context) throws Exception {
-		TAsyncProcessing Opening = new TAsyncProcessing(context) {
-			
-			private TComponentTypedDataFiles TypedDataFiles;
-			
-			@Override
-			public void Process() throws Exception {
-				TypedDataFiles = new TComponentTypedDataFiles(context, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
-				TypedDataFiles.PrepareForComponent(idTComponent,idComponent, true, User.Server);
-			}
-			
-			@Override 
-			public void DoOnCompleted() throws Exception {
-				Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
-				intent.putExtra("ComponentID", 0);
-				intent.putExtra("DataFiles", TypedDataFiles.ToByteArrayV0());
-				intent.putExtra("AutoStart", true);
+	public void Open(Context context, Object Params) throws Exception {
+		if (Params == null) {
+			TAsyncProcessing Opening = new TAsyncProcessing(context) {
+				
+				private TComponentTypedDataFiles TypedDataFiles;
+				
+				@Override
+				public void Process() throws Exception {
+					TypedDataFiles = new TComponentTypedDataFiles(context, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
+					TypedDataFiles.PrepareForComponent(idTComponent,idComponent, true, User.Server);
+				}
+				
+				@Override 
+				public void DoOnCompleted() throws Exception {
+					Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
+					intent.putExtra("ComponentID", 0);
+					intent.putExtra("DataFiles", TypedDataFiles.ToByteArrayV0());
+					intent.putExtra("AutoStart", true);
+					//.
+					context.startActivity(intent);
+				}
+				
+				@Override
+				public void DoOnException(Exception E) {
+	    			Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
+			};
+			Opening.Start();
+		}
+		else
+			if (Params instanceof TOpenComponentTypedDataFileParams) {
+				final TOpenComponentTypedDataFileParams OpenComponentTypedDataFileParams = (TOpenComponentTypedDataFileParams)Params;
 				//.
-				context.startActivity(intent);
+				if (OpenComponentTypedDataFileParams.ComponentTypedDataFile.IsLoaded())
+					OpenComponentTypedDataFileParams.ComponentTypedDataFile.Open(User, OpenComponentTypedDataFileParams.ParentActivity, OpenComponentTypedDataFileParams.Component);
+				else {
+					TAsyncProcessing Opening = new TAsyncProcessing(context) {
+						
+						@Override
+						public void Process() throws Exception {
+							OpenComponentTypedDataFileParams.ComponentTypedDataFile.PrepareAsFullFromServer(User, Canceller, null/*Progressor*/);
+						}
+						
+						@Override 
+						public void DoOnCompleted() throws Exception {
+							OpenComponentTypedDataFileParams.ComponentTypedDataFile.Open(User, OpenComponentTypedDataFileParams.ParentActivity, OpenComponentTypedDataFileParams.Component);
+						}
+						
+						@Override
+						public void DoOnException(Exception E) {
+			    			Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
+						}
+					};
+					Opening.Start();
+				}
 			}
-			
-			@Override
-			public void DoOnException(Exception E) {
-    			Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
-			}
-		};
-		Opening.Start();
 	}
 }

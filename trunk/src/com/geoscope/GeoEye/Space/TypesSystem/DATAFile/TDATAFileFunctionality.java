@@ -81,9 +81,9 @@ public class TDATAFileFunctionality extends TComponentFunctionality {
 			return null; //. ->
 	}
 	
-	public void Open(Context context) throws Exception {
+	public void Open(Context context, Object Params) throws Exception {
 		TURL URL = GetAsURL();
 		if (URL != null)
-			URL.Open(context);
+			URL.Open(context, Params);
 	}
 }

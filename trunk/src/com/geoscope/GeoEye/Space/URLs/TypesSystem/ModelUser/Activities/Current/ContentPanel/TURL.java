@@ -4,10 +4,10 @@ import org.w3c.dom.Element;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectorComponent;
@@ -46,8 +46,8 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.A
 	}
 	
 	@Override
-	public Bitmap GetThumbnailImage() {
-		return BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_content); 
+	public TThumbnailImageComposition GetThumbnailImageComposition() {
+		return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_content))); 
 	}
 	
 	@Override

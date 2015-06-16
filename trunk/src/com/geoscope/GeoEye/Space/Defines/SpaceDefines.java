@@ -41,6 +41,11 @@ public class SpaceDefines {
 	public static final String TYPEDDATAFILE_TYPE_All_String(Context context) {
 		return context.getString(R.string.SUnknown1);   
 	}
+	//.
+	public static final int TYPEDDATAFILE_TYPE_All_GetImageResID(String DataFormat) {
+		return R.drawable.user_activity_component_list_placeholder;   
+	}
+	//.
 	public static final int TYPEDDATAFILE_TYPE_AllName 			= 0;   
 	public static final int TYPEDDATAFILE_TYPE_AllBrief 		= 50;   
 	public static final int TYPEDDATAFILE_TYPE_All 				= 99;
@@ -48,6 +53,11 @@ public class SpaceDefines {
 	public static final String TYPEDDATAFILE_TYPE_UriData_String(Context context) {
 		return context.getString(R.string.SURIData);   
 	}
+	//.
+	public static final int TYPEDDATAFILE_TYPE_UriData_GetImageResID(String DataFormat) {
+		return R.drawable.user_activity_component_list_placeholder;   
+	}
+	//.
 	public static final int TYPEDDATAFILE_TYPE_UriDataName 		= 100;   
 	public static final int TYPEDDATAFILE_TYPE_UriDataBrief 	= 150;   
 	public static final int TYPEDDATAFILE_TYPE_UriData 			= 199;   
@@ -55,6 +65,11 @@ public class SpaceDefines {
 	public static final String TYPEDDATAFILE_TYPE_Document_String(Context context) {
 		return context.getString(R.string.SDocument);   
 	}
+	//.
+	public static final int TYPEDDATAFILE_TYPE_Document_GetImageResID(String DataFormat) {
+		return R.drawable.user_activity_component_list_placeholder_text;   
+	}
+	//.
 	public static final int TYPEDDATAFILE_TYPE_DocumentName 	= 200;   
 	public static final int TYPEDDATAFILE_TYPE_DocumentBrief 	= 250;   
 	public static final int TYPEDDATAFILE_TYPE_Document 		= 299;   
@@ -74,6 +89,14 @@ public class SpaceDefines {
 	public static final String TYPEDDATAFILE_TYPE_Image_String(Context context) {
 		return context.getString(R.string.SImage1);   
 	}
+	//.
+	public static final int TYPEDDATAFILE_TYPE_Image_GetImageResID(String DataFormat) {
+		if ((DataFormat != null) && DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat))
+			return R.drawable.user_activity_component_list_placeholder_image_drawing; //. ->
+		else 
+			return R.drawable.user_activity_component_list_placeholder_image; //. ->
+	}
+	//.
 	public static final int TYPEDDATAFILE_TYPE_ImageName 		= 300;   
 	public static final int TYPEDDATAFILE_TYPE_ImageBrief 		= 350;   
 	public static final int TYPEDDATAFILE_TYPE_Image 			= 399;
@@ -91,6 +114,11 @@ public class SpaceDefines {
 	public static final String TYPEDDATAFILE_TYPE_Audio_String(Context context) {
 		return context.getString(R.string.SAudio1);   
 	}
+	//.
+	public static final int TYPEDDATAFILE_TYPE_Audio_GetImageResID(String DataFormat) {
+		return R.drawable.user_activity_component_list_placeholder_audio;   
+	}
+	//.
 	public static final int TYPEDDATAFILE_TYPE_AudioName 		= 400;   
 	public static final int TYPEDDATAFILE_TYPE_AudioBrief 		= 450;   
 	public static final int TYPEDDATAFILE_TYPE_Audio 			= 499;   
@@ -105,6 +133,11 @@ public class SpaceDefines {
 	public static final String TYPEDDATAFILE_TYPE_Video_String(Context context) {
 		return context.getString(R.string.SVideo2);   
 	}
+	//.
+	public static final int TYPEDDATAFILE_TYPE_Video_GetImageResID(String DataFormat) {
+		return R.drawable.user_activity_component_list_placeholder_video;   
+	}
+	//.
 	public static final int TYPEDDATAFILE_TYPE_VideoName 		= 500;   
 	public static final int TYPEDDATAFILE_TYPE_VideoBrief 		= 550;   
 	public static final int TYPEDDATAFILE_TYPE_Video 			= 599;   
@@ -123,6 +156,11 @@ public class SpaceDefines {
 	public static final String TYPEDDATAFILE_TYPE_Measurement_String(Context context) {
 		return context.getString(R.string.SMeasurement1);   
 	}
+	//.
+	public static final int TYPEDDATAFILE_TYPE_Measurement_GetImageResID(String DataFormat) {
+		return R.drawable.user_activity_component_list_placeholder_measurement;   
+	}
+	//.
 	public static final int TYPEDDATAFILE_TYPE_MeasurementName 	= 600;   
 	public static final int TYPEDDATAFILE_TYPE_MeasurementBrief = 650;   
 	public static final int TYPEDDATAFILE_TYPE_Measurement 		= 699;
@@ -153,6 +191,28 @@ public class SpaceDefines {
 								return TYPEDDATAFILE_TYPE_Measurement_String(context); //. ->
 							else 
 								return "?"; //. ->
+	}
+	//.
+	public static int TYPEDDATAFILE_TYPE_GetResID(int Type, String Format) {
+		if ((TYPEDDATAFILE_TYPE_AllName <= Type) && (Type <= (TYPEDDATAFILE_TYPE_AllName+TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)))
+			return TYPEDDATAFILE_TYPE_All_GetImageResID(Format); //. ->
+		else
+			if ((TYPEDDATAFILE_TYPE_DocumentName <= Type) && (Type <= (TYPEDDATAFILE_TYPE_DocumentName+TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)))
+				return TYPEDDATAFILE_TYPE_Document_GetImageResID(Format); //. ->
+			else
+				if ((TYPEDDATAFILE_TYPE_ImageName <= Type) && (Type <= (TYPEDDATAFILE_TYPE_ImageName+TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)))
+					return TYPEDDATAFILE_TYPE_Image_GetImageResID(Format); //. ->
+				else
+					if ((TYPEDDATAFILE_TYPE_AudioName <= Type) && (Type <= (TYPEDDATAFILE_TYPE_AudioName+TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)))
+						return TYPEDDATAFILE_TYPE_Audio_GetImageResID(Format); //. ->
+					else
+						if ((TYPEDDATAFILE_TYPE_VideoName <= Type) && (Type <= (TYPEDDATAFILE_TYPE_VideoName+TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)))
+							return TYPEDDATAFILE_TYPE_Video_GetImageResID(Format); //. ->
+						else 
+							if ((TYPEDDATAFILE_TYPE_MeasurementName <= Type) && (Type <= (TYPEDDATAFILE_TYPE_MeasurementName+TYPEDDATAFILE_TYPE_SHIFT_FromName_ToFull)))
+								return TYPEDDATAFILE_TYPE_Measurement_GetImageResID(Format); //. ->
+							else 
+								return 0; //. ->
 	}
 	//.
 	public static class TTypedDataFileDescriptor {

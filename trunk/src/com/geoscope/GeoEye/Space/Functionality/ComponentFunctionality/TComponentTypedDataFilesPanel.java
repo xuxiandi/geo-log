@@ -21,21 +21,20 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AbsListView;
@@ -52,6 +51,7 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Image.TDiskImageCache;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
@@ -93,241 +93,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	public static final int REQUEST_COMPONENT_CONTENT 	= 1;
 	public static final int REQUEST_ADD_COMPONENT 		= 2;
 	
-	public static Bitmap GetImagesComposition(ArrayList<TComponentTypedDataFile> ImageDataFiles, int Size) {
-		float Padding = 2.0F;
-		int ImageCount = ImageDataFiles.size();
-		switch (ImageCount) {
-		
-		case 2:
-			float Step = Size/2.0F;
-			//.
-			Bitmap Result = Bitmap.createBitmap(Size,Size, Bitmap.Config.ARGB_8888);
-			Result.eraseColor(Color.LTGRAY);
-			//.
-			Canvas ResultCanvas = new Canvas(Result);
-			Paint DrawPaint = new Paint();
-			Rect SrcRect = new Rect(); 
-			RectF DestRect = new RectF(); 
-			//. 0;0
-			int Y = 0;
-			TComponentTypedDataFile ImageFile = ImageDataFiles.get(0);
-			if (ImageFile.Data != null) {
-				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
-				try {
-					SrcRect.right = TileImage.getWidth();
-					SrcRect.bottom = TileImage.getHeight();
-					//.
-					DestRect.left = 0;
-					DestRect.right = Size;
-					DestRect.top = Y*Step;
-					DestRect.bottom = (Y+1)*Step-Padding;
-					//.
-					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-				}
-				finally {
-					TileImage.recycle();
-				}
-			}
-			//. 0;1
-			Y = 1;
-			ImageFile = ImageDataFiles.get(1);
-			if (ImageFile.Data != null) {
-				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
-				try {
-					SrcRect.right = TileImage.getWidth();
-					SrcRect.bottom = TileImage.getHeight();
-					//.
-					DestRect.left = 0;
-					DestRect.right = Size;
-					DestRect.top = Y*Step+Padding;
-					DestRect.bottom = (Y+1)*Step;
-					//.
-					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-				}
-				finally {
-					TileImage.recycle();
-				}
-			}
-			return Result; //. ->
-			
-		case 3:
-			Step = Size/2.0F;
-			//.
-			Result = Bitmap.createBitmap(Size,Size, Bitmap.Config.ARGB_8888);
-			Result.eraseColor(Color.TRANSPARENT);
-			//.
-			ResultCanvas = new Canvas(Result);
-			DrawPaint = new Paint();
-			SrcRect = new Rect(); 
-			DestRect = new RectF(); 
-			//. 0;0
-			int X = 0;
-			Y = 0;
-			ImageFile = ImageDataFiles.get(0);
-			if (ImageFile.Data != null) {
-				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
-				try {
-					SrcRect.right = TileImage.getWidth();
-					SrcRect.bottom = TileImage.getHeight();
-					//.
-					DestRect.left = X*Step;
-					DestRect.right = (X+1)*Step-Padding;
-					DestRect.top = Y*Step;
-					DestRect.bottom = (Y+1)*Step-Padding;
-					//.
-					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-				}
-				finally {
-					TileImage.recycle();
-				}
-			}
-			//. 1;0
-			X = 1;
-			Y = 0;
-			ImageFile = ImageDataFiles.get(1);
-			if (ImageFile.Data != null) {
-				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
-				try {
-					SrcRect.right = TileImage.getWidth();
-					SrcRect.bottom = TileImage.getHeight();
-					//.
-					DestRect.left = X*Step+Padding;
-					DestRect.right = (X+1)*Step;
-					DestRect.top = Y*Step;
-					DestRect.bottom = (Y+1)*Step-Padding;
-					//.
-					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-				}
-				finally {
-					TileImage.recycle();
-				}
-			}
-			//. 0;1
-			X = 0;
-			Y = 1;
-			ImageFile = ImageDataFiles.get(2);
-			if (ImageFile.Data != null) {
-				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
-				try {
-					SrcRect.right = TileImage.getWidth();
-					SrcRect.bottom = TileImage.getHeight();
-					//.
-					DestRect.left = X*Step;
-					DestRect.right = (X+1)*Step-Padding;
-					DestRect.top = Y*Step+Padding;
-					DestRect.bottom = (Y+1)*Step;
-					//.
-					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-				}
-				finally {
-					TileImage.recycle();
-				}
-			}
-			return Result; //. ->
-		
-		default: 
-			if (ImageCount >= 4) {
-				Step = Size/2.0F;
-				//.
-				Result = Bitmap.createBitmap(Size,Size, Bitmap.Config.ARGB_8888);
-				Result.eraseColor(Color.TRANSPARENT);
-				//.
-				ResultCanvas = new Canvas(Result);
-				DrawPaint = new Paint();
-				SrcRect = new Rect(); 
-				DestRect = new RectF(); 
-				//. 0;0
-				X = 0;
-				Y = 0;
-				ImageFile = ImageDataFiles.get(0);
-				if (ImageFile.Data != null) {
-					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
-					try {
-						SrcRect.right = TileImage.getWidth();
-						SrcRect.bottom = TileImage.getHeight();
-						//.
-						DestRect.left = X*Step;
-						DestRect.right = (X+1)*Step-Padding;
-						DestRect.top = Y*Step;
-						DestRect.bottom = (Y+1)*Step-Padding;
-						//.
-						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-					}
-					finally {
-						TileImage.recycle();
-					}
-				}
-				//. 1;0
-				X = 1;
-				Y = 0;
-				ImageFile = ImageDataFiles.get(1);
-				if (ImageFile.Data != null) {
-					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
-					try {
-						SrcRect.right = TileImage.getWidth();
-						SrcRect.bottom = TileImage.getHeight();
-						//.
-						DestRect.left = X*Step+Padding;
-						DestRect.right = (X+1)*Step;
-						DestRect.top = Y*Step;
-						DestRect.bottom = (Y+1)*Step-Padding;
-						//.
-						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-					}
-					finally {
-						TileImage.recycle();
-					}
-				}
-				//. 0;1
-				X = 0;
-				Y = 1;
-				ImageFile = ImageDataFiles.get(2);
-				if (ImageFile.Data != null) {
-					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
-					try {
-						SrcRect.right = TileImage.getWidth();
-						SrcRect.bottom = TileImage.getHeight();
-						//.
-						DestRect.left = X*Step;
-						DestRect.right = (X+1)*Step-Padding;
-						DestRect.top = Y*Step+Padding;
-						DestRect.bottom = (Y+1)*Step;
-						//.
-						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-					}
-					finally {
-						TileImage.recycle();
-					}
-				}
-				//. 1;1
-				X = 1;
-				Y = 1;
-				ImageFile = ImageDataFiles.get(3);
-				if (ImageFile.Data != null) {
-					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageFile.Data, 0,ImageFile.Data.length);
-					try {
-						SrcRect.right = TileImage.getWidth();
-						SrcRect.bottom = TileImage.getHeight();
-						//.
-						DestRect.left = X*Step+Padding;
-						DestRect.right = (X+1)*Step;
-						DestRect.top = Y*Step+Padding;
-						DestRect.bottom = (Y+1)*Step;
-						//.
-						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-					}
-					finally {
-						TileImage.recycle();
-					}
-				}
-				//.
-				return Result; //. ->
-			}
-			else
-				return null; //. ->
-		}
-	}
-	
 	private static class TComponentListItem {
 		
 		public TGeoScopeServer Server;
@@ -344,6 +109,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		//.
 		public boolean BMP_flLoaded = false;
 		public boolean BMP_flNull = false;
+		//.
+		public TThumbnailImageComposition Composition = null;
 		
 		public TComponentListItem(TGeoScopeServer pServer, int pDataType, String pDataFormat, String pName, String pInfo, boolean pflRootItem, TComponent pComponent) {
 			Server = pServer;
@@ -458,8 +225,13 @@ public class TComponentTypedDataFilesPanel extends Activity {
 							if (CF != null) 
 								try {
 									CF.ParseFromXMLDocument(ComponentTypedDataFile.GetFileData());
-									Result = CF.GetThumbnailImage();
-									flProcessAsDefault = (Result == null);
+									Item.Composition = CF.GetThumbnailImageComposition();
+									if (Item.Composition != null) {
+										Result = Item.Composition.TakeBitmap();
+										flProcessAsDefault = false;
+									}
+									else
+										flProcessAsDefault = true;
 								}
 								finally {
 									CF.Release();
@@ -492,25 +264,37 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ItemImageDataParams, flWithComponents, Item.Server);
 					ArrayList<TComponentTypedDataFile> ImageDataFiles = Item.Component.TypedDataFiles.GetItemsByDataType(SpaceDefines.TYPEDDATAFILE_TYPE_Image);
 					int Cnt = ImageDataFiles.size();
-					switch (Cnt) {
-					
-					case 0:
-						break; //. >
-						
-					case 1:
-						TComponentTypedDataFile ImageDataFile = ImageDataFiles.get(0); 
-						if (ImageDataFile.Data != null) 
-							Result = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-						break; //. >
-						
-					default:
-						Result = TComponentTypedDataFilesPanel.GetImagesComposition(ImageDataFiles, ItemImageSize);
-						break; //. >
+					if (Cnt > 0) {
+						Item.Composition = TComponentTypedDataFiles.GetImageComposition(ImageDataFiles, ItemImageSize);
+						if (Item.Composition != null)
+							Result = Item.Composition.TakeBitmap();
 					}
 				}
 				//.
-				if (Result != null) 
+				if (Result != null) {
+					//. draw the type image on the result
+					int ResourceImageID = 0;
+					TTypeFunctionality TF = Panel.UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(Item.Component.idTComponent);
+					if (TF != null)
+						try {
+							ResourceImageID = TF.GetImageResID();
+						} finally {
+							TF.Release();
+						}
+					if (ResourceImageID == 0) 
+						ResourceImageID = SpaceDefines.TYPEDDATAFILE_TYPE_GetResID(Item.DataType,Item.DataFormat);
+					if (ResourceImageID != 0) {
+						Drawable D = context.getResources().getDrawable(ResourceImageID).mutate();
+						D.setBounds(0,0, (ItemImageSize >> 2),(ItemImageSize >> 2));
+						D.setAlpha(128);
+						Bitmap LastResult = Result;
+						Result = Result.copy(Config.ARGB_8888,true);
+						LastResult.recycle();
+						D.draw(new Canvas(Result));
+					}
+					//.
 					ImageCache.put(Item.Component.GetKey(), Result);
+				}
 				else
 					Item.BMP_flNull = true;
 				Item.BMP_flLoaded = true;
@@ -582,7 +366,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	        public void onClick(View v) {
 	            final int position = MyListView.getPositionForView((View)v.getParent());
 	            //.
-				TComponentListItem Item = (TComponentListItem)Items[position];
+				final TComponentListItem Item = (TComponentListItem)Items[position];
 				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
 		        	final AlertDialog alert = new AlertDialog.Builder(context).create();
 		        	alert.setCancelable(true);
@@ -591,6 +375,23 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		        	View layout = factory.inflate(R.layout.image_preview_dialog_layout, null);
 		        	ImageView IV = (ImageView)layout.findViewById(R.id.ivPreview);
 		        	IV.setImageDrawable(((ImageView)v).getDrawable());
+		        	IV.setOnTouchListener(new OnTouchListener() {
+						
+						@Override
+						public boolean onTouch(View v, MotionEvent event) {
+							int action = event.getAction();
+							switch (action & MotionEvent.ACTION_MASK) {
+							
+							case MotionEvent.ACTION_DOWN: 
+								float X = event.getX();
+								float Y = event.getY();
+								if (Item.Composition != null)
+									Item.Composition.Map.CheckItemByPosition(X,Y);
+								break; //. >							
+							}
+						      return false;
+						}
+					});
 		        	IV.setOnClickListener(new OnClickListener() {
 						
 						@Override
@@ -604,6 +405,15 @@ public class TComponentTypedDataFilesPanel extends Activity {
 							catch (Exception E) {
 				                Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
 							}
+						}
+					});
+		        	IV.setOnLongClickListener(new OnLongClickListener() {
+						
+						@Override
+						public boolean onLongClick(View v) {
+							if ((Item.Composition != null) && (Item.Composition.Map.ItemByPosition != null))
+								Panel.ComponentTypedDataFile_Process((TComponentTypedDataFile)Item.Composition.Map.ItemByPosition.LinkedObject);
+							return false;
 						}
 					});
 		        	alert.setView(layout);
@@ -702,50 +512,20 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				holder.ivImage.setOnClickListener(ImageClickListener);
 			}
 			else {
-				boolean flImageAssigned = false;
-				switch (Item.Component.idTComponent) {
-				
-				case SpaceDefines.idTPositioner:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_component_positioner));
-					flImageAssigned = true;
-					break; //. >
-
-				case SpaceDefines.idTMapFormatObject:
-					holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_component_mapformatobject));
-					flImageAssigned = true;
-					break; //. >
-				}
-				if (!flImageAssigned) {
-					switch (Item.DataType) {
-					
-					case SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName:
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_text));
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
-						if ((Item.DataFormat != null) && Item.DataFormat.toUpperCase(Locale.US).equals(TDrawingDefines.DataFormat))
-							holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image_drawing));
-						else 
-							holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_image));
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_audio));
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_video));
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder_measurement));
-						break; //. >
-						
-					default:
-						holder.ivImage.setImageDrawable(context.getResources().getDrawable(R.drawable.user_activity_component_list_placeholder));
-						break; //. >
+				int ResourceImageID = 0;
+				TTypeFunctionality TF = Panel.UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(Item.Component.idTComponent);
+				if (TF != null)
+					try {
+						ResourceImageID = TF.GetImageResID();
+					} finally {
+						TF.Release();
 					}
+				if (ResourceImageID == 0) {
+					ResourceImageID = SpaceDefines.TYPEDDATAFILE_TYPE_GetResID(Item.DataType,Item.DataFormat);
+					if (ResourceImageID == 0)
+						ResourceImageID = R.drawable.user_activity_component_list_placeholder;
 				}
+				holder.ivImage.setImageDrawable(context.getResources().getDrawable(ResourceImageID));
 				holder.ivImage.setOnClickListener(null);
 			}
 			//.
@@ -758,6 +538,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	private boolean flAutoStart = false; 
     //.
 	private TReflectorComponent Component;
+	//.
+	private TUserAgent UserAgent;
 	//.
     private byte[] 						DataFilesBA = null;
     private TComponentTypedDataFiles 	DataFiles = null;
@@ -792,6 +574,12 @@ public class TComponentTypedDataFilesPanel extends Activity {
         	return; //. ->
         }
 		Component = TReflectorComponent.GetComponent(ComponentID);
+		//.
+		UserAgent = TUserAgent.GetUserAgent();
+		if (UserAgent == null) {
+        	finish();
+        	return; //. ->
+		}
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //. 
@@ -906,10 +694,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
     		    						
     		    						@Override
     		    						public void Process() throws Exception {
-    		    		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-    		    		    				if (UserAgent == null)
-    		    		    					throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-    		    		    				//.
     				    					TypedDataFiles = new TComponentTypedDataFiles(context, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
     				    					TypedDataFiles.PrepareForComponent(_ComponentTypedDataFile.DataComponentType,_ComponentTypedDataFile.DataComponentID, true, UserAgent.Server);
     		    						}
@@ -949,10 +733,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		    						
 		    						@Override
 		    						public void Process() throws Exception {
-	    								TUserAgent UserAgent = TUserAgent.GetUserAgent();
-	    								if (UserAgent == null)
-	    									throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    								//.
 	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_ComponentTypedDataFile.DataComponentType,_ComponentTypedDataFile.DataComponentID);
 	    								if (CF != null) 
 	    									try {
@@ -1021,10 +801,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 
 	    		    						@Override
 	    		    						public void Process() throws Exception {
-	    		    		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-	    		    		    				if (UserAgent == null)
-	    		    		    					throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    		    		    				//.
 	    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(ComponentTypedDataFile.DataComponentType);
 	    		    							if (TF != null)
 	    		    								try {
@@ -1224,9 +1000,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	    					TComponentTypedDataFile RootItem = _DataFiles.GetRootItem();
 	    					if (RootItem == null)
 	    						throw new Exception("there is no a root element of the data files"); //. =>
-		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-		    				if (UserAgent == null)
-		    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		    				//.
 		    	        	_DataFiles.PrepareAsNames();
 	    					_DataFiles.PrepareForComponent(RootItem.DataComponentType,RootItem.DataComponentID, true, UserAgent.Server);
@@ -1360,10 +1133,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
     	//.
     	lbName.setText(DataFiles.Items[0].DataName);
     	//.
-		TUserAgent UserAgent = TUserAgent.GetUserAgent();
-		if (UserAgent == null)
-			throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-		//.
 		TComponentListItem[] Items = new TComponentListItem[DataFiles.Items.length];
 		for (int I = 0; I < Items.length; I++) {
 			TComponentTypedDataFile DataFile = DataFiles.Items[I];
@@ -1414,10 +1183,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		@Override
 		public void run() {
 			try {
-				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-				if (UserAgent == null)
-					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-				//.
 				switch (ComponentTypedDataFile.DataComponentType) {
 
 				case SpaceDefines.idTDATAFile:
@@ -1660,10 +1425,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 				
 				@Override
 				public void Process() throws Exception {
-					TUserAgent UserAgent = TUserAgent.GetUserAgent();
-					if (UserAgent == null)
-						throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SUserAgentIsNotInitialized)); //. =>
-					//.
 					TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
 					try {
 						VisualizationPosition = CF.GetVisualizationPosition(); 
@@ -1719,10 +1480,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		try {
 			if (ComponentTypedDataFile.FileIsEmpty())
 				throw new Exception(getString(R.string.SThereIsNoDataYet)); //. =>
-			//.
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
-			if (UserAgent == null)
-				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 			//.
 			Intent intent = null;
 			switch (ComponentTypedDataFile.DataType) {

@@ -1831,7 +1831,7 @@ public class TObjectModelHistoryPanel extends Activity {
 		return ObjectModel.ObjectUserID() != 0;
 	}
 	
-	private void UserActivitiesComponentList_Initialize() {
+	private void UserActivitiesComponentList_Initialize() throws Exception {
 		TReflectorComponent Reflector = null; 
 		TReflector RFL = TReflector.GetReflector();
 		if (RFL != null)

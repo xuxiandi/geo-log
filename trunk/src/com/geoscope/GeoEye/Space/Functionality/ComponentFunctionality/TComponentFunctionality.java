@@ -11,9 +11,9 @@ import org.w3c.dom.Element;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TSpace;
@@ -403,7 +403,7 @@ public class TComponentFunctionality extends TFunctionality {
 		return (new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL(idTComponent(),idComponent));
 	}
 	
-	public Bitmap GetThumbnailImage() throws Exception {
+	public TThumbnailImageComposition GetThumbnailImageComposition() throws Exception {
 		return null;
 	}
 	

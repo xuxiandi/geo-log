@@ -13,9 +13,9 @@ import org.w3c.dom.Element;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
@@ -66,8 +66,8 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 	}
 	
 	@Override
-	public Bitmap GetThumbnailImage() throws Exception {
-		return BitmapFactory.decodeResource(Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_component_datastream);
+	public TThumbnailImageComposition GetThumbnailImageComposition() throws Exception {
+		return (new TThumbnailImageComposition(BitmapFactory.decodeResource(Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_component_datastream)));
 	}
 	
 	public byte[] GetDescriptorData() throws Exception {

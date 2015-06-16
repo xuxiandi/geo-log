@@ -38,9 +38,11 @@ import android.text.InputType;
 import android.util.Xml;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
@@ -61,6 +63,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.Data.Types.Image.TDiskImageCache;
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
 import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
@@ -121,6 +124,7 @@ public class TURLFolderListComponent extends TUIComponent {
 			public String ID = "";
 			public String Name = "";
 			public com.geoscope.GeoEye.Space.URL.TURL URL = null;
+			public TThumbnailImageComposition Composition = null;
 		}
 	
 		public static final String ItemsFileName = "URLs.xml";
@@ -471,8 +475,11 @@ public class TURLFolderListComponent extends TUIComponent {
 				}
 				//.
 				Bitmap Result = null;
-				if (Item.Item.URL != null)
-					Result = Item.Item.URL.GetThumbnailImage(Adapter.Panel.ListRowImageSize); 
+				if (Item.Item.URL != null) {
+					Item.Item.Composition = Item.Item.URL.GetThumbnailImageComposition(Adapter.Panel.ListRowImageSize);
+					if (Item.Item.Composition != null)
+						Result = Item.Item.Composition.BMP; 
+				}
 				//.
 				if (Result != null) 
 					ImageCache.put(Item.Item.ID, Result);
@@ -549,7 +556,7 @@ public class TURLFolderListComponent extends TUIComponent {
 	        public void onClick(View v) {
 	            final int position = MyListView.getPositionForView((View)v.getParent());
 	            //.
-				TURLListItem Item = (TURLListItem)Items[position];
+				final TURLListItem Item = (TURLListItem)Items[position];
 				if (Item.BMP_flLoaded && (!Item.BMP_flNull)) {
 		        	final AlertDialog alert = new AlertDialog.Builder(context).create();
 		        	alert.setCancelable(true);
@@ -558,6 +565,23 @@ public class TURLFolderListComponent extends TUIComponent {
 		        	View layout = factory.inflate(R.layout.image_preview_dialog_layout, null);
 		        	ImageView IV = (ImageView)layout.findViewById(R.id.ivPreview);
 		        	IV.setImageDrawable(((ImageView)v).getDrawable());
+		        	IV.setOnTouchListener(new OnTouchListener() {
+						
+						@Override
+						public boolean onTouch(View v, MotionEvent event) {
+							int action = event.getAction();
+							switch (action & MotionEvent.ACTION_MASK) {
+							
+							case MotionEvent.ACTION_DOWN: 
+								float X = event.getX();
+								float Y = event.getY();
+								if (Item.Item.Composition != null)
+									Item.Item.Composition.Map.CheckItemByPosition(X,Y);
+								break; //. >							
+							}
+						      return false;
+						}
+					});
 		        	IV.setOnClickListener(new OnClickListener() {
 						
 						@Override
@@ -570,6 +594,15 @@ public class TURLFolderListComponent extends TUIComponent {
 							catch (Exception E) {
 				                Toast.makeText(Panel.ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
 							}
+						}
+					});
+		        	IV.setOnLongClickListener(new OnLongClickListener() {
+						
+						@Override
+						public boolean onLongClick(View v) {
+							/* if ((Item.Item.Composition != null) && (Item.Item.Composition.Map.ItemByPosition != null))
+								Panel.ComponentTypedDataFile_Process((TComponentTypedDataFile)Item.Item.Composition.Map.ItemByPosition.LinkedObject); */
+							return false;
 						}
 					});
 		        	alert.setView(layout);

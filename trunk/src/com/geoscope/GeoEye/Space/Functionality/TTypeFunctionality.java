@@ -3,6 +3,8 @@ package com.geoscope.GeoEye.Space.Functionality;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
+import android.graphics.Bitmap;
+
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
@@ -74,5 +76,13 @@ public class TTypeFunctionality extends TFunctionality {
 		finally {
 			HttpConnection.disconnect();
 		}
+	}
+	
+	public int GetImageResID() {
+		return 0;
+	}
+	
+	public Bitmap GetImage() {
+		return null;
 	}
 }

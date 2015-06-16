@@ -7,13 +7,18 @@ import org.w3c.dom.Element;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
+import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFiles;
@@ -59,8 +64,9 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 	}
 	
 	@Override
-	public Bitmap GetThumbnailImage() {
-		Bitmap Result = null;
+	public TThumbnailImageComposition GetThumbnailImageComposition() {
+		TThumbnailImageComposition Result = null; 
+		Bitmap ResultBMP = null;
 		try {
 			TComponentTypedDataFiles TypedDataFiles = new TComponentTypedDataFiles(User.Server.context, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
 			TypedDataFiles.PrepareForComponent(idTComponent,idComponent, false, User.Server);
@@ -79,8 +85,13 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 						if (CF != null) 
 							try {
 								CF.ParseFromXMLDocument(_DataFile.GetFileData());
-								Result = CF.GetThumbnailImage();
-								flProcessAsDefault = (Result == null);
+								Result = CF.GetThumbnailImageComposition();
+								if (Result != null) {
+									ResultBMP = Result.BMP;
+									flProcessAsDefault = false;
+								}
+								else
+									flProcessAsDefault = true;
 							}
 							finally {
 								CF.Release();
@@ -97,7 +108,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 					if ((_DataFile != null) && (_DataFile.Data != null)) {
 						TDrawings Drawings = new TDrawings();
 						Drawings.LoadFromByteArray(_DataFile.Data,0);
-						Result = Drawings.ToBitmap(ThumbnailImage_Size);
+						ResultBMP = Drawings.ToBitmap(ThumbnailImage_Size);
 					}
 					flProcessAsDefault = false;
 				}
@@ -114,76 +125,55 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 				TypedDataFiles.PrepareForComponent(idTComponent,idComponent, ThumbnailImage_DataParams, true, User.Server);
 				ArrayList<TComponentTypedDataFile> ImageDataFiles = TypedDataFiles.GetItemsByDataType(SpaceDefines.TYPEDDATAFILE_TYPE_Image);
 				int Cnt = ImageDataFiles.size();
-				switch (Cnt) {
-				
-				case 0:
-					break; //. >
-					
-				case 1:
-					TComponentTypedDataFile ImageDataFile = ImageDataFiles.get(0); 
-					if (ImageDataFile.Data != null) 
-						Result = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-					break; //. >
-					
-				default:
-					Result = TComponentTypedDataFilesPanel.GetImagesComposition(ImageDataFiles, ThumbnailImage_Size);
-					break; //. >
+				if (Cnt > 0) {
+					Result = TComponentTypedDataFiles.GetImageComposition(ImageDataFiles, ThumbnailImage_Size);
+					if (Result != null)
+						ResultBMP = Result.BMP;
 				}
 			}
 			//.
-			if (Result == null) {
-				switch (idTComponent) {
-				
-				case SpaceDefines.idTPositioner:
-					Result = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_component_positioner);
-					break; //. >
-
-				case SpaceDefines.idTMapFormatObject:
-					Result = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_component_mapformatobject);
-					break; //. >
+			int ResourceImageID = 0;
+			TTypeFunctionality TF = User.Space.TypesSystem.TTypeFunctionality_Create(idTComponent);
+			if (TF != null)
+				try {
+					ResourceImageID = TF.GetImageResID();
+				} finally {
+					TF.Release();
 				}
-				if (Result == null) {
-					switch (DataFile.DataType) {
-					
-					case SpaceDefines.TYPEDDATAFILE_TYPE_DocumentName:
-						Result = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_text);
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
-						if ((DataFile.DataFormat != null) && DataFile.DataFormat.equals(TDrawingDefines.DataFormat))
-							Result = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_image_drawing);
-						else 
-							Result = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_image);
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-						Result = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_audio);
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_VideoName:
-						Result = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_video);
-						break; //. >
-						
-					case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
-						Result = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_measurement);
-						break; //. >
-						
-					default:
-						Result = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_componentpropspanel);
-						break; //. >
-					}
-				}
+			if (ResourceImageID == 0) {
+				ResourceImageID = SpaceDefines.TYPEDDATAFILE_TYPE_GetResID(DataFile.DataType,DataFile.DataFormat);
+				if (ResourceImageID == 0)
+					ResourceImageID = R.drawable.user_activity_component_list_placeholder_componentpropspanel;
 			}
+			//.
+			if (ResultBMP != null) {
+				int ImageSize = ResultBMP.getWidth();
+				Drawable D = User.Server.context.getResources().getDrawable(ResourceImageID).mutate();
+				D.setBounds(0,0, (ImageSize >> 2),(ImageSize >> 2));
+				D.setAlpha(128);
+				Bitmap LastResult = ResultBMP;
+				ResultBMP = ResultBMP.copy(Config.ARGB_8888,true);
+				LastResult.recycle();
+				D.draw(new Canvas(ResultBMP));
+			}
+			else
+				ResultBMP = BitmapFactory.decodeResource(User.Server.context.getResources(), ResourceImageID);
 		}
 		catch (Exception E) {
-			Result = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_componentpropspanel);
+			ResultBMP = BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_componentpropspanel);
 		}
+		//.
+		if (Result == null)
+			Result = new TThumbnailImageComposition(ResultBMP);
+		else
+			Result.BMP = ResultBMP; //. update the bitmap to ensure that it does not recycled
+		//.
 		return Result;
 	}
 	
 	@Override
-	public Bitmap GetThumbnailImage(int ImageMaxSize) {
-		return GetThumbnailImage();
+	public TThumbnailImageComposition GetThumbnailImageComposition(int ImageMaxSize) {
+		return GetThumbnailImageComposition();
 	}
 	
 	@Override

@@ -15,7 +15,6 @@ import android.graphics.drawable.Drawable;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
-import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectorComponent;
@@ -26,7 +25,6 @@ import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponent
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFiles;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFilesPanel;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 
 public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.TURL {
 
@@ -56,9 +54,6 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 
 	private static final int		ThumbnailImage_Size = 512;
 	private static final String 	ThumbnailImage_DataParams = "2;"+Integer.toString(ThumbnailImage_Size)+";"+"50"/*50% quality*/;
-	//.
-	private static final int		ThumbnailImage_Drawings_MaxDataSize = 1024*100; //. Kb
-	private static final String 	ThumbnailImage_Drawings_ItemImageDataParams = "0;"+Integer.toString(ThumbnailImage_Drawings_MaxDataSize);
 	
 	@Override
 	public int GetThumbnailImageResID(int ImageMaxSize) {
@@ -100,25 +95,6 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 							}
 					}
 				}
-				break; //. >
-				
-			case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
-				if ((DataFile.DataFormat != null) && DataFile.DataFormat.equals(TDrawingDefines.DataFormat)) {
-					TypedDataFiles = new TComponentTypedDataFiles(User.Server.context, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);
-					TypedDataFiles.PrepareForComponent(idTComponent,idComponent, ThumbnailImage_Drawings_ItemImageDataParams, false, User.Server);
-					TComponentTypedDataFile _DataFile = TypedDataFiles.GetRootItem(); 
-					if ((_DataFile != null) && (_DataFile.Data != null)) {
-						TDrawings Drawings = new TDrawings();
-						Drawings.LoadFromByteArray(_DataFile.Data,0);
-						ResultBMP = Drawings.ToBitmap(ThumbnailImage_Size);
-					}
-					flProcessAsDefault = false;
-				}
-				break; //. >
-				
-			case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-			case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
-				flProcessAsDefault = false;
 				break; //. >
 			}
 			//.

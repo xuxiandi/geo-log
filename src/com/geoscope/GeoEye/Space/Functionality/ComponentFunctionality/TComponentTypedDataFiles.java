@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -20,7 +19,7 @@ import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 
 public class TComponentTypedDataFiles {
 	
-	public static TThumbnailImageComposition GetImageComposition(ArrayList<TComponentTypedDataFile> ImageDataFiles, int Size) {
+	public static TThumbnailImageComposition GetImageComposition(ArrayList<TComponentTypedDataFile> ImageDataFiles, int Size) throws Exception {
 		float Padding = 4.0F;
 		int ImageCount = ImageDataFiles.size();
 		switch (ImageCount) {
@@ -28,8 +27,11 @@ public class TComponentTypedDataFiles {
 		case 1:
 			Bitmap Result;
 			TComponentTypedDataFile ImageDataFile = ImageDataFiles.get(0);
-			if (ImageDataFile.Data != null) 
-				Result = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
+			if (ImageDataFile.Data != null) {
+				Result = ImageDataFile.AsImageBitmap(Size);
+				if (Result == null)
+					return null; //. ->
+			}
 			else
 				Result = Bitmap.createBitmap(Size,Size, Bitmap.Config.ARGB_8888);
 			RectF DestRect = new RectF(0,0, Result.getWidth(),Result.getHeight()); 
@@ -52,45 +54,47 @@ public class TComponentTypedDataFiles {
 			int Y = 0;
 			ImageDataFile = ImageDataFiles.get(0);
 			if (ImageDataFile.Data != null) {
-				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-				try {
-					SrcRect.right = TileImage.getWidth();
-					SrcRect.bottom = TileImage.getHeight();
-					//.
-					DestRect.left = 0;
-					DestRect.right = Size;
-					DestRect.top = Y*Step;
-					DestRect.bottom = (Y+1)*Step-Padding;
-					//.
-					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-					//.
-					Composition.Map.AddItem(DestRect, ImageDataFile);
-				}
-				finally {
-					TileImage.recycle();
-				}
+				Bitmap TileImage = ImageDataFile.AsImageBitmap(Size);
+				if (TileImage != null)
+					try {
+						SrcRect.right = TileImage.getWidth();
+						SrcRect.bottom = TileImage.getHeight();
+						//.
+						DestRect.left = 0;
+						DestRect.right = Size;
+						DestRect.top = Y*Step;
+						DestRect.bottom = (Y+1)*Step-Padding;
+						//.
+						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+						//.
+						Composition.Map.AddItem(DestRect, ImageDataFile);
+					}
+					finally {
+						TileImage.recycle();
+					}
 			}
 			//. 0;1
 			Y = 1;
 			ImageDataFile = ImageDataFiles.get(1);
 			if (ImageDataFile.Data != null) {
-				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-				try {
-					SrcRect.right = TileImage.getWidth();
-					SrcRect.bottom = TileImage.getHeight();
-					//.
-					DestRect.left = 0;
-					DestRect.right = Size;
-					DestRect.top = Y*Step+Padding;
-					DestRect.bottom = (Y+1)*Step;
-					//.
-					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-					//.
-					Composition.Map.AddItem(DestRect, ImageDataFile);
-				}
-				finally {
-					TileImage.recycle();
-				}
+				Bitmap TileImage = ImageDataFile.AsImageBitmap(Size);
+				if (TileImage != null)
+					try {
+						SrcRect.right = TileImage.getWidth();
+						SrcRect.bottom = TileImage.getHeight();
+						//.
+						DestRect.left = 0;
+						DestRect.right = Size;
+						DestRect.top = Y*Step+Padding;
+						DestRect.bottom = (Y+1)*Step;
+						//.
+						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+						//.
+						Composition.Map.AddItem(DestRect, ImageDataFile);
+					}
+					finally {
+						TileImage.recycle();
+					}
 			}
 			return Composition; //. ->
 			
@@ -111,69 +115,72 @@ public class TComponentTypedDataFiles {
 			Y = 0;
 			ImageDataFile = ImageDataFiles.get(0);
 			if (ImageDataFile.Data != null) {
-				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-				try {
-					SrcRect.right = TileImage.getWidth();
-					SrcRect.bottom = TileImage.getHeight();
-					//.
-					DestRect.left = X*Step;
-					DestRect.right = (X+1)*Step-Padding;
-					DestRect.top = Y*Step;
-					DestRect.bottom = (Y+1)*Step-Padding;
-					//.
-					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-					//.
-					Composition.Map.AddItem(DestRect, ImageDataFile);
-				}
-				finally {
-					TileImage.recycle();
-				}
+				Bitmap TileImage = ImageDataFile.AsImageBitmap(Size);
+				if (TileImage != null)
+					try {
+						SrcRect.right = TileImage.getWidth();
+						SrcRect.bottom = TileImage.getHeight();
+						//.
+						DestRect.left = X*Step;
+						DestRect.right = (X+1)*Step-Padding;
+						DestRect.top = Y*Step;
+						DestRect.bottom = (Y+1)*Step-Padding;
+						//.
+						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+						//.
+						Composition.Map.AddItem(DestRect, ImageDataFile);
+					}
+					finally {
+						TileImage.recycle();
+					}
 			}
 			//. 1;0
 			X = 1;
 			Y = 0;
 			ImageDataFile = ImageDataFiles.get(1);
 			if (ImageDataFile.Data != null) {
-				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-				try {
-					SrcRect.right = TileImage.getWidth();
-					SrcRect.bottom = TileImage.getHeight();
-					//.
-					DestRect.left = X*Step+Padding;
-					DestRect.right = (X+1)*Step;
-					DestRect.top = Y*Step;
-					DestRect.bottom = (Y+1)*Step-Padding;
-					//.
-					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-					//.
-					Composition.Map.AddItem(DestRect, ImageDataFile);
-				}
-				finally {
-					TileImage.recycle();
-				}
+				Bitmap TileImage = ImageDataFile.AsImageBitmap(Size);
+				if (TileImage != null)
+					try {
+						SrcRect.right = TileImage.getWidth();
+						SrcRect.bottom = TileImage.getHeight();
+						//.
+						DestRect.left = X*Step+Padding;
+						DestRect.right = (X+1)*Step;
+						DestRect.top = Y*Step;
+						DestRect.bottom = (Y+1)*Step-Padding;
+						//.
+						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+						//.
+						Composition.Map.AddItem(DestRect, ImageDataFile);
+					}
+					finally {
+						TileImage.recycle();
+					}
 			}
 			//. 0;1
 			X = 0;
 			Y = 1;
 			ImageDataFile = ImageDataFiles.get(2);
 			if (ImageDataFile.Data != null) {
-				Bitmap TileImage = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-				try {
-					SrcRect.right = TileImage.getWidth();
-					SrcRect.bottom = TileImage.getHeight();
-					//.
-					DestRect.left = X*Step;
-					DestRect.right = (X+1)*Step-Padding;
-					DestRect.top = Y*Step+Padding;
-					DestRect.bottom = (Y+1)*Step;
-					//.
-					ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-					//.
-					Composition.Map.AddItem(DestRect, ImageDataFile);
-				}
-				finally {
-					TileImage.recycle();
-				}
+				Bitmap TileImage = ImageDataFile.AsImageBitmap(Size);
+				if (TileImage != null)
+					try {
+						SrcRect.right = TileImage.getWidth();
+						SrcRect.bottom = TileImage.getHeight();
+						//.
+						DestRect.left = X*Step;
+						DestRect.right = (X+1)*Step-Padding;
+						DestRect.top = Y*Step+Padding;
+						DestRect.bottom = (Y+1)*Step;
+						//.
+						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+						//.
+						Composition.Map.AddItem(DestRect, ImageDataFile);
+					}
+					finally {
+						TileImage.recycle();
+					}
 			}
 			return Composition; //. ->
 		
@@ -195,92 +202,96 @@ public class TComponentTypedDataFiles {
 				Y = 0;
 				ImageDataFile = ImageDataFiles.get(0);
 				if (ImageDataFile.Data != null) {
-					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-					try {
-						SrcRect.right = TileImage.getWidth();
-						SrcRect.bottom = TileImage.getHeight();
-						//.
-						DestRect.left = X*Step;
-						DestRect.right = (X+1)*Step-Padding;
-						DestRect.top = Y*Step;
-						DestRect.bottom = (Y+1)*Step-Padding;
-						//.
-						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-						//.
-						Composition.Map.AddItem(DestRect, ImageDataFile);
-					}
-					finally {
-						TileImage.recycle();
-					}
+					Bitmap TileImage = ImageDataFile.AsImageBitmap(Size);
+					if (TileImage != null)
+						try {
+							SrcRect.right = TileImage.getWidth();
+							SrcRect.bottom = TileImage.getHeight();
+							//.
+							DestRect.left = X*Step;
+							DestRect.right = (X+1)*Step-Padding;
+							DestRect.top = Y*Step;
+							DestRect.bottom = (Y+1)*Step-Padding;
+							//.
+							ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+							//.
+							Composition.Map.AddItem(DestRect, ImageDataFile);
+						}
+						finally {
+							TileImage.recycle();
+						}
 				}
 				//. 1;0
 				X = 1;
 				Y = 0;
 				ImageDataFile = ImageDataFiles.get(1);
 				if (ImageDataFile.Data != null) {
-					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-					try {
-						SrcRect.right = TileImage.getWidth();
-						SrcRect.bottom = TileImage.getHeight();
-						//.
-						DestRect.left = X*Step+Padding;
-						DestRect.right = (X+1)*Step;
-						DestRect.top = Y*Step;
-						DestRect.bottom = (Y+1)*Step-Padding;
-						//.
-						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-						//.
-						Composition.Map.AddItem(DestRect, ImageDataFile);
-					}
-					finally {
-						TileImage.recycle();
-					}
+					Bitmap TileImage = ImageDataFile.AsImageBitmap(Size);
+					if (TileImage != null)
+						try {
+							SrcRect.right = TileImage.getWidth();
+							SrcRect.bottom = TileImage.getHeight();
+							//.
+							DestRect.left = X*Step+Padding;
+							DestRect.right = (X+1)*Step;
+							DestRect.top = Y*Step;
+							DestRect.bottom = (Y+1)*Step-Padding;
+							//.
+							ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+							//.
+							Composition.Map.AddItem(DestRect, ImageDataFile);
+						}
+						finally {
+							TileImage.recycle();
+						}
 				}
 				//. 0;1
 				X = 0;
 				Y = 1;
 				ImageDataFile = ImageDataFiles.get(2);
 				if (ImageDataFile.Data != null) {
-					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-					try {
-						SrcRect.right = TileImage.getWidth();
-						SrcRect.bottom = TileImage.getHeight();
-						//.
-						DestRect.left = X*Step;
-						DestRect.right = (X+1)*Step-Padding;
-						DestRect.top = Y*Step+Padding;
-						DestRect.bottom = (Y+1)*Step;
-						//.
-						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-						//.
-						Composition.Map.AddItem(DestRect, ImageDataFile);
-					}
-					finally {
-						TileImage.recycle();
-					}
+					Bitmap TileImage = ImageDataFile.AsImageBitmap(Size);
+					if (TileImage != null)
+						try {
+							SrcRect.right = TileImage.getWidth();
+							SrcRect.bottom = TileImage.getHeight();
+							//.
+							DestRect.left = X*Step;
+							DestRect.right = (X+1)*Step-Padding;
+							DestRect.top = Y*Step+Padding;
+							DestRect.bottom = (Y+1)*Step;
+							//.
+							ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+							//.
+							Composition.Map.AddItem(DestRect, ImageDataFile);
+						}
+						finally {
+							TileImage.recycle();
+						}
 				}
 				//. 1;1
 				X = 1;
 				Y = 1;
 				ImageDataFile = ImageDataFiles.get(3);
 				if (ImageDataFile.Data != null) {
-					Bitmap TileImage = BitmapFactory.decodeByteArray(ImageDataFile.Data, 0,ImageDataFile.Data.length);
-					try {
-						SrcRect.right = TileImage.getWidth();
-						SrcRect.bottom = TileImage.getHeight();
-						//.
-						DestRect.left = X*Step+Padding;
-						DestRect.right = (X+1)*Step;
-						DestRect.top = Y*Step+Padding;
-						DestRect.bottom = (Y+1)*Step;
-						//.
-						ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
-						//.
-						Composition.Map.AddItem(DestRect, ImageDataFile);
-					}
-					finally {
-						TileImage.recycle();
-					}
+					Bitmap TileImage = ImageDataFile.AsImageBitmap(Size);
+					if (TileImage != null)
+						try {
+							SrcRect.right = TileImage.getWidth();
+							SrcRect.bottom = TileImage.getHeight();
+							//.
+							DestRect.left = X*Step+Padding;
+							DestRect.right = (X+1)*Step;
+							DestRect.top = Y*Step+Padding;
+							DestRect.bottom = (Y+1)*Step;
+							//.
+							ResultCanvas.drawBitmap(TileImage, SrcRect, DestRect, DrawPaint);
+							//.
+							Composition.Map.AddItem(DestRect, ImageDataFile);
+						}
+						finally {
+							TileImage.recycle();
+						}
 				}
 				return Composition; //. ->
 			}
@@ -353,6 +364,11 @@ public class TComponentTypedDataFiles {
 	
 	public boolean DataActualityIsExpired() {
 		return DataIsNull();
+	}
+	
+	public void ClearData() {
+		for (int I = 0; I < Items.length; I++)
+			Items[I].ClearData();
 	}
 	
 	public void FromByteArrayV0(byte[] BA, int Index) throws IOException {

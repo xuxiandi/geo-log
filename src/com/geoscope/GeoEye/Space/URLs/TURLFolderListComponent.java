@@ -602,7 +602,9 @@ public class TURLFolderListComponent extends TUIComponent {
 						@Override
 						public boolean onLongClick(View v) {
 							if ((Item.Item.Composition != null) && (Item.Item.Composition.Map.ItemByPosition != null) && (Item.Item.Composition.Map.ItemByPosition.LinkedObject instanceof TComponentTypedDataFile)) {
-								com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.TOpenComponentTypedDataFileParams Params = new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.TOpenComponentTypedDataFileParams((TComponentTypedDataFile)Item.Item.Composition.Map.ItemByPosition.LinkedObject, Panel.ParentActivity, Panel.Component); 
+								com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.TOpenComponentTypedDataFileParams Params = new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.TOpenComponentTypedDataFileParams((TComponentTypedDataFile)Item.Item.Composition.Map.ItemByPosition.LinkedObject, Panel.ParentActivity, Panel.Component);
+								Params.ComponentTypedDataFile.ClearData();
+								//.
 								Panel.OpenURL(position, Params);
 							}
 							return false;

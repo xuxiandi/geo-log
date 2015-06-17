@@ -7415,7 +7415,7 @@ public class TReflectorComponent extends TUIComponent {
 							Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
 							intent.putExtra("ComponentID", ID);
 							intent.putExtra("DataFiles", Obj.OwnerTypedDataFiles.ToByteArrayV0());
-							intent.putExtra("AutoStart", true);
+							intent.putExtra("AutoStart", false);
 							// .
 							ParentActivity.startActivity(intent);
 						}
@@ -7458,7 +7458,7 @@ public class TReflectorComponent extends TUIComponent {
 								Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
 								intent.putExtra("ComponentID", ID);
 								intent.putExtra("DataFiles", OwnerTypedDataFiles.ToByteArrayV0());
-								intent.putExtra("AutoStart", true);
+								intent.putExtra("AutoStart", false);
 								//.
 								ParentActivity.startActivity(intent);
 							}

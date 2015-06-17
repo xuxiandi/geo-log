@@ -48,7 +48,6 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.TDiskImageCache;
 import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
-import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
@@ -69,7 +68,6 @@ import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
-import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -80,15 +78,12 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 
 	public static final int		ItemImageSize = 512;
 	public static final String 	ItemImageDataParams = "2;"+Integer.toString(ItemImageSize)+";"+"50"/*50% quality*/;
-	//.
-	public static final int		ImageDrawings_MaxDataSize = 1024*100; //. Kb
-	public static final String 	ImageDrawings_ItemImageDataParams = "0;"+Integer.toString(ImageDrawings_MaxDataSize);
 	
 	public static final int LIST_ROW_SIZE_SMALL_ID 	= 1;
 	public static final int LIST_ROW_SIZE_NORMAL_ID = 2;
 	public static final int LIST_ROW_SIZE_BIG_ID 	= 3;
 
-	private static final int 	MESSAGE_TYPEDDATAFILE_LOADED = 1;
+	private static final int MESSAGE_TYPEDDATAFILE_LOADED = 1;
 	
 	public static final int REQUEST_COMPONENT_CONTENT = 1;
 	
@@ -245,24 +240,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 						}
 					}
 					break; //. >
-					
-				case SpaceDefines.TYPEDDATAFILE_TYPE_ImageName:
-					if ((Item.DataFormat != null) && Item.DataFormat.equals(TDrawingDefines.DataFormat)) {
-						Item.Component.TypedDataFiles.PrepareForComponent(Item.Component.idTComponent,Item.Component.idComponent, ImageDrawings_ItemImageDataParams, (Item.Component.idTComponent == SpaceDefines.idTCoComponent), Item.Server);
-						TComponentTypedDataFile DataFile = Item.Component.TypedDataFiles.GetRootItem(); 
-						if ((DataFile != null) && (DataFile.Data != null)) {
-							TDrawings Drawings = new TDrawings();
-							Drawings.LoadFromByteArray(DataFile.Data,0);
-							Result = Drawings.ToBitmap(ItemImageSize);
-						}
-						flProcessAsDefault = false;
-					}
-					break; //. >
-					
-				case SpaceDefines.TYPEDDATAFILE_TYPE_AudioName:
-				case SpaceDefines.TYPEDDATAFILE_TYPE_MeasurementName:
-					flProcessAsDefault = false;
-					break; //. >
 				}
 				//.
 				if (flProcessAsDefault) {
@@ -414,7 +391,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	    								if (Panel.Component != null)
 	    									intent.putExtra("ComponentID", Panel.Component.ID);
 	    								intent.putExtra("DataFiles", ComponentTypedDataFiles.ToByteArrayV0());
-	    								intent.putExtra("AutoStart", true);
+	    								intent.putExtra("AutoStart", false);
 	    								//.
 	    								Panel.ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
 									}
@@ -431,8 +408,12 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 						
 						@Override
 						public boolean onLongClick(View v) {
-							if ((Item.Composition != null) && (Item.Composition.Map.ItemByPosition != null))
-								Panel.ComponentTypedDataFile_Process((TComponentTypedDataFile)Item.Composition.Map.ItemByPosition.LinkedObject);
+							if ((Item.Composition != null) && (Item.Composition.Map.ItemByPosition != null)) {
+								TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile)Item.Composition.Map.ItemByPosition.LinkedObject;
+								ComponentTypedDataFile.ClearData();
+								//.
+								Panel.ComponentTypedDataFile_Process(ComponentTypedDataFile);
+							}
 							return false;
 						}
 					});
@@ -721,7 +702,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		    								if (Component != null)
 		    									intent.putExtra("ComponentID", Component.ID);
 		    								intent.putExtra("DataFiles", _Component.TypedDataFiles.ToByteArrayV0());
-		    								intent.putExtra("AutoStart", true);
+		    								intent.putExtra("AutoStart", false);
 		    								//.
 		    								ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
 	    								}
@@ -1679,7 +1660,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 			if (Component != null)
 				intent.putExtra("ComponentID", Component.ID);
 			intent.putExtra("DataFiles", ComponentTypedDataFiles.ToByteArrayV0());
-			intent.putExtra("AutoStart", true);
+			intent.putExtra("AutoStart", false);
 			//.
 			ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
 		}

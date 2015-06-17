@@ -11,11 +11,14 @@ import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Image.TImageViewerPanel;
+import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.GeoEye.R;
@@ -47,6 +50,8 @@ public class TComponentTypedDataFile {
 	public String 	DataName = "";
 	public byte[]	Data = null;
 	public String 	DataFileName = null;
+	//.
+	public TComponentTypedDataFile[] Components = null;
 	
 	public TComponentTypedDataFile(TComponentTypedDataFiles pTypedDataFiles) {
 		TypedDataFiles = pTypedDataFiles;
@@ -82,6 +87,10 @@ public class TComponentTypedDataFile {
 	
 	public boolean DataActualityIsExpired() {
 		return DataIsNull();
+	}
+	
+	public void ClearData() {
+		Data = null;
 	}
 	
 	public boolean IsLoaded() {
@@ -380,6 +389,24 @@ public class TComponentTypedDataFile {
 		}
 		else
 			return (!((Data != null) && (Data.length > 0))); //. ->
+	}
+	
+	public Bitmap AsImageBitmap(int ImageMaxSize) throws Exception {
+		if (DataType == SpaceDefines.TYPEDDATAFILE_TYPE_Image) {
+			if ((DataFormat != null) && (Data != null)) {
+				if (DataFormat.equals(TDrawingDefines.DataFormat)) {
+					TDrawings Drawings = new TDrawings();
+					Drawings.LoadFromByteArray(Data,0);
+					return Drawings.ToBitmap(ImageMaxSize); //. ->
+				}
+				else
+					return BitmapFactory.decodeByteArray(Data, 0,Data.length); //. ->		
+			}
+			else
+				return null; //. ->
+		}
+		else
+			return null; //. ->
 	}
 	
 	public void Open(TGeoScopeServerUser User, Activity ParentActivity, TReflectorComponent Component) {

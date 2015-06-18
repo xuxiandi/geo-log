@@ -552,8 +552,7 @@ public class TComponentTypedDataFile {
 				}
 
 			default:
-				Toast.makeText(ParentActivity, R.string.SUnknownDataFileFormat,
-						Toast.LENGTH_LONG).show();
+				Toast.makeText(ParentActivity, R.string.SUnknownDataFileFormat,	Toast.LENGTH_LONG).show();
 				return; // . ->
 			}
 			if (intent != null) {

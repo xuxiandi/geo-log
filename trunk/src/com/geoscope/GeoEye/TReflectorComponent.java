@@ -7677,6 +7677,11 @@ public class TReflectorComponent extends TUIComponent {
 					byte[] LocationXY_BA = extras.getByteArray("LocationXY");
 					TXYCoord LocationXY = new TXYCoord();
 					LocationXY.FromByteArray(LocationXY_BA);
+					//.
+					double Timestamp = extras.getDouble("Timestamp");
+					//.
+					if (Timestamp > 0.0) 
+	    	            ReflectionWindow.SetActualityTime(Timestamp, false);
 					MoveReflectionWindow(LocationXY);
 				} catch (Exception E) {
 					throw E; //. =>
@@ -7761,10 +7766,8 @@ public class TReflectorComponent extends TUIComponent {
 
 							@Override
 							public void DoOnCompleted() throws Exception {
-								ReflectionWindow.SetActualityInterval(
-										GeoLocation.Timestamp - 1.0,
-										GeoLocation.Timestamp, false);
-								// .
+								if (GeoLocation.Timestamp > 0.0) 
+									ReflectionWindow.SetActualityTime(GeoLocation.Timestamp, false);
 								MoveReflectionWindow(LocationXY);
 							}
 

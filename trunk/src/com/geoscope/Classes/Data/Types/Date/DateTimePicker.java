@@ -166,7 +166,7 @@ public class DateTimePicker extends RelativeLayout implements View.OnClickListen
         
         public void setDateTime(double DT) {
         	OleDate ODT = new OleDate(DT);
-            datePicker.updateDate(ODT.year,ODT.month,ODT.date);
+            datePicker.updateDate(ODT.year, ODT.month-1, ODT.date);
             timePicker.setCurrentHour(ODT.hrs);
             timePicker.setCurrentMinute(ODT.min);
         }

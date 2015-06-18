@@ -260,8 +260,9 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 					if (ResourceImageID == 0) 
 						ResourceImageID = SpaceDefines.TYPEDDATAFILE_TYPE_GetResID(Item.DataType,Item.DataFormat);
 					if (ResourceImageID != 0) {
+						int ImageSize = Result.getWidth();
 						Drawable D = context.getResources().getDrawable(ResourceImageID).mutate();
-						D.setBounds(0,0, (ItemImageSize >> 2),(ItemImageSize >> 2));
+						D.setBounds(0,0, (ImageSize >> 2),(ImageSize >> 2));
 						D.setAlpha(128);
 						Bitmap LastResult = Result;
 						Result = Result.copy(Config.ARGB_8888,true);
@@ -561,6 +562,10 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	}
 	
 	public boolean flExists = false;
+	//.
+	public boolean flStarted = false;
+	//.
+	public boolean flUpdated = false;
 	//.
 	private Activity ParentActivity;
 	private LinearLayout ParentLayout;
@@ -946,7 +951,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 
 	@Override
 	public void Start() {
-        StartUpdating();
+        flStarted = true;
 	}
 	
 	@Override
@@ -962,6 +967,16 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	@Override
 	public boolean IsVisible() {
 		return ParentLayout.isShown();
+	}
+	
+	public void DoOnResume() {
+		if (flStarted && !flUpdated)
+	        StartUpdating();
+	}
+	
+	public void DoOnPause() {
+		if (flStarted)
+	        StopUpdating();
 	}
 	
 	protected void FilterActivityComponents(TActivity.TComponents ActivityComponents) {
@@ -1207,54 +1222,59 @@ public class TUserActivityComponentListComponent extends TUIComponent {
     }   
 	
     private void Update() throws Exception {
-    	if (ActivityComponents == null) {
-    		lvActivityComponentList.setAdapter(null);
-    		return; //. ->
+    	try {
+        	if (ActivityComponents == null) {
+        		lvActivityComponentList.setAdapter(null);
+        		return; //. ->
+        	}
+    		//.
+    		TComponentListItem[] Items = new TComponentListItem[ActivityComponents.Items.length];
+    		for (int I = 0; I < ActivityComponents.Items.length; I++) {
+    			TActivity.TComponent Component = ActivityComponents.Items[I];
+    			//.
+    			int 	DataType = SpaceDefines.TYPEDDATAFILE_TYPE_All;
+    			String 	DataFormat = null;
+    			String Name = Component.GetName().split("\n")[0];
+    			TComponentTypedDataFile DataFile = Component.TypedDataFiles.GetRootItem();
+    			TComponent _Component;
+    			if (DataFile != null) {
+    				DataType = DataFile.DataType;
+    				DataFormat = DataFile.DataFormat;
+    				switch (DataFile.DataComponentType) {
+    				
+    				case SpaceDefines.idTPositioner:
+    					Name = Name+" "+"/"+SpaceDefines.ComponentType_GetName(DataFile.DataComponentType,ParentActivity)+"/";
+    					break; //. >
+    					
+    				case SpaceDefines.idTMapFormatObject:
+    					break; //. >
+    					
+    				default:
+    					if (!SpaceDefines.TYPEDDATAFILE_TYPE_Document_IsXMLFormat(DataType,DataFormat))
+    						Name = Name+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataType,ParentActivity)+"/";
+    					break; //. >
+    				}
+    				//.
+    				_Component = new TComponent(Component.idActivity, DataFile.DataComponentType,DataFile.DataComponentID, Component.Timestamp);
+    			}
+    			else
+    				_Component = new TComponent(Component.idActivity, Component.idTComponent,Component.idComponent, Component.Timestamp);
+    			_Component.GeoLocation = Component.GeoLocation;
+    			_Component.TypedDataFiles = new TComponentTypedDataFiles(ParentActivity, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);
+    			//.
+    			String Info = "";
+    			if (_Component.TimestampIsValid())
+    				Info = OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(_Component.Timestamp)); 
+    			//.
+    			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataType,DataFormat,Name,Info, _Component);
+    			Items[I] = Item;
+    		}
+    		lvActivityComponentListAdapter = new TComponentListAdapter(this, lvActivityComponentList, ProgressBar, Items);
+    		lvActivityComponentList.setAdapter(lvActivityComponentListAdapter);
     	}
-		//.
-		TComponentListItem[] Items = new TComponentListItem[ActivityComponents.Items.length];
-		for (int I = 0; I < ActivityComponents.Items.length; I++) {
-			TActivity.TComponent Component = ActivityComponents.Items[I];
-			//.
-			int 	DataType = SpaceDefines.TYPEDDATAFILE_TYPE_All;
-			String 	DataFormat = null;
-			String Name = Component.GetName().split("\n")[0];
-			TComponentTypedDataFile DataFile = Component.TypedDataFiles.GetRootItem();
-			TComponent _Component;
-			if (DataFile != null) {
-				DataType = DataFile.DataType;
-				DataFormat = DataFile.DataFormat;
-				switch (DataFile.DataComponentType) {
-				
-				case SpaceDefines.idTPositioner:
-					Name = Name+" "+"/"+SpaceDefines.ComponentType_GetName(DataFile.DataComponentType,ParentActivity)+"/";
-					break; //. >
-					
-				case SpaceDefines.idTMapFormatObject:
-					break; //. >
-					
-				default:
-					if (!SpaceDefines.TYPEDDATAFILE_TYPE_Document_IsXMLFormat(DataType,DataFormat))
-						Name = Name+" "+"/"+SpaceDefines.TYPEDDATAFILE_TYPE_String(DataType,ParentActivity)+"/";
-					break; //. >
-				}
-				//.
-				_Component = new TComponent(Component.idActivity, DataFile.DataComponentType,DataFile.DataComponentID, Component.Timestamp);
-			}
-			else
-				_Component = new TComponent(Component.idActivity, Component.idTComponent,Component.idComponent, Component.Timestamp);
-			_Component.GeoLocation = Component.GeoLocation;
-			_Component.TypedDataFiles = new TComponentTypedDataFiles(ParentActivity, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION,SpaceDefines.TYPEDDATAFILE_TYPE_Image);
-			//.
-			String Info = "";
-			if (_Component.TimestampIsValid())
-				Info = OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(_Component.Timestamp)); 
-			//.
-			TComponentListItem Item = new TComponentListItem(UserAgent.Server, DataType,DataFormat,Name,Info, _Component);
-			Items[I] = Item;
-		}
-		lvActivityComponentListAdapter = new TComponentListAdapter(this, lvActivityComponentList, ProgressBar, Items);
-		lvActivityComponentList.setAdapter(lvActivityComponentListAdapter);
+    	finally {
+    		flUpdated = true;    	
+    	}
     }
 
     private void StartUpdating() {
@@ -1262,6 +1282,13 @@ public class TUserActivityComponentListComponent extends TUIComponent {
     		Updating.Cancel();
     	Updating = new TUpdating(true,false);
     }    
+    
+    private void StopUpdating() {
+		if (Updating != null) {
+			Updating.Cancel();
+			Updating = null;
+		}
+    }
     
 	@SuppressWarnings("unused")
 	private AlertDialog ComponentTypedDataFiles_CreateSelectorPanel(TComponentTypedDataFiles pComponentTypedDataFiles) {

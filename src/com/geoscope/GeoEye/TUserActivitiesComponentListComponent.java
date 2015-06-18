@@ -266,8 +266,9 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 					if (ResourceImageID == 0) 
 						ResourceImageID = SpaceDefines.TYPEDDATAFILE_TYPE_GetResID(Item.DataType,Item.DataFormat);
 					if (ResourceImageID != 0) {
+						int ImageSize = Result.getWidth();
 						Drawable D = context.getResources().getDrawable(ResourceImageID).mutate();
-						D.setBounds(0,0, (ItemImageSize >> 2),(ItemImageSize >> 2));
+						D.setBounds(0,0, (ImageSize >> 2),(ImageSize >> 2));
 						D.setAlpha(128);
 						Bitmap LastResult = Result;
 						Result = Result.copy(Config.ARGB_8888,true);
@@ -936,8 +937,6 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 
 	@Override
 	public void Start() {
-        StartUpdating();
-        //.
         flStarted = true;
 	}
 	

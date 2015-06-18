@@ -339,8 +339,10 @@ public class TTrackerPanel extends Activity {
     		}
     	}
     	
-    	private Context context;
+    	public Context context;
+    	//.
     	private TGPSModule GPSModule;
+    	//.
     	private TDoOnFixIsObtainedHandler DoOnFixIsObtainedHandler;
     	//. 
     	private TGPSFixValue CurrentFix = null;

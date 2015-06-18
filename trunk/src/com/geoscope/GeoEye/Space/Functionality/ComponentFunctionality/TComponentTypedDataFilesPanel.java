@@ -252,8 +252,9 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					if (ResourceImageID == 0) 
 						ResourceImageID = SpaceDefines.TYPEDDATAFILE_TYPE_GetResID(Item.DataType,Item.DataFormat);
 					if (ResourceImageID != 0) {
+						int ImageSize = Result.getWidth();
 						Drawable D = context.getResources().getDrawable(ResourceImageID).mutate();
-						D.setBounds(0,0, (ItemImageSize >> 2),(ItemImageSize >> 2));
+						D.setBounds(0,0, (ImageSize >> 2),(ImageSize >> 2));
 						D.setAlpha(128);
 						Bitmap LastResult = Result;
 						Result = Result.copy(Config.ARGB_8888,true);
@@ -909,6 +910,8 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	
 	@Override
 	protected void onPause() {
+		StopUpdating();		
+		//.
 		super.onPause();
 	}
 	
@@ -1128,6 +1131,13 @@ public class TComponentTypedDataFilesPanel extends Activity {
     		Updating.Cancel();
     	Updating = new TUpdating(DataFiles, true, false);
     }    
+    
+    private void StopUpdating() {
+		if (Updating != null) {
+			Updating.Cancel();
+			Updating = null;
+		}
+    }
     
 	private class TComponentTypedDataFileLoading extends TCancelableThread {
 

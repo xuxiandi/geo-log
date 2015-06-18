@@ -74,6 +74,7 @@ import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
+import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
@@ -90,6 +91,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileIma
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTileServerProviderCompilation;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit.TimeIsExpiredException;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSFixValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentFileStreaming;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -234,11 +236,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		        		    	@Override
 		        		    	public void onClick(DialogInterface dialog, int id) {
 		        					try {
-		        	        			if (!Component.flOffline) {
-		        	        				AskForUncommittedDrawings();
-		        	        			}
-		        	        			else
-		        	        				Containers_StartCurrentContainer();
+		    	        				AskForUncommittedDrawings();
 		        			        } 
 		        			        catch (Exception E) {
 		        						Toast.makeText(TReflectionWindowEditorPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();  
@@ -287,13 +285,8 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         		    		Processing.Start();
 	        			}
 	        		}
-	        		else {
-	        			if (!Component.flOffline) {
-	        				AskForUncommittedDrawings();
-	        			}
-	        			else
-	        				Containers_StartCurrentContainer();
-	        		}
+	        		else 
+        				AskForUncommittedDrawings();
 	        	}
 				//.
 				SurfaceUpdating.Start();
@@ -520,6 +513,9 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 								ColorPickerBar.Paint(canvas, 0,OfsY, Surface_Width,Surface_Height-OfsY, CurrentColor);
 								float CurrentBrushWidth = Settings_Brush.getStrokeWidth(); 
 								BrushWidthPickerBar.Paint(canvas, 0,OfsY, Surface_Width,Surface_Height-OfsY, CurrentBrushWidth,CurrentColor);
+								//. draw mark of the center if needed
+								if (SurfaceUpdating_flShowCenterMark)
+									ShowCenterMark(canvas);
 								//. draw status string
 								ShowStatus(canvas);
 							} 
@@ -562,6 +558,23 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     		Join();
 		}
 		
+        private Paint ShowCenterMark_Paint = null;
+        
+		public void ShowCenterMark(Canvas canvas) {
+            if (ShowCenterMark_Paint == null) {
+            	ShowCenterMark_Paint = new Paint();            	
+            	ShowCenterMark_Paint.setStrokeWidth(2.0F*metrics.density);
+    			ShowCenterMark_Paint.setStyle(Paint.Style.STROKE);
+            	ShowCenterMark_Paint.setColor(Color.RED);
+            }
+        	//.
+			float X = (Surface_Width/2);
+			float Y = (Surface_Height/2);
+			int R = 8;
+			canvas.drawLine(X, Y-R, X, Y+R, ShowCenterMark_Paint);
+			canvas.drawLine(X-R, Y, X+R, Y, ShowCenterMark_Paint);
+		}
+
         private Paint ShowStatus_Paint = null;
         
         private void ShowStatus(Canvas canvas) {
@@ -980,6 +993,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	private int								Surface_Height;
 	private TSurfaceHolderCallbackHandler 	SurfaceHolderCallbackHandler = new TSurfaceHolderCallbackHandler();
 	private TSurfaceUpdating 				SurfaceUpdating = null;
+	private boolean							SurfaceUpdating_flShowCenterMark = false;
 	//.
 	private int Mode = MODE_NONE;
 	//.
@@ -1052,6 +1066,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		cbReflectionWindowEditorMode = (CheckBox)findViewById(R.id.cbReflectionWindowEditorMode);
 		cbReflectionWindowEditorMode.setChecked(true);
 		cbReflectionWindowEditorMode.setOnClickListener(new OnClickListener() {
+			
 			@Override
 			public void onClick(View v) {
 				if (cbReflectionWindowEditorMode.isChecked())
@@ -1063,6 +1078,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         //.
 		btnReflectionWindowEditorBrushSelector = (Button)findViewById(R.id.btnReflectionWindowEditorBrushSelector);
 		btnReflectionWindowEditorBrushSelector.setOnClickListener(new OnClickListener() {
+			
 			@Override
             public void onClick(View v) {
             	SetMode(MODE_SETTINGS);
@@ -1072,6 +1088,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		btnReflectionWindowEditorUndo = (Button)findViewById(R.id.btnReflectionWindowEditorUndo);
 		btnReflectionWindowEditorUndo.setEnabled(false);
 		btnReflectionWindowEditorUndo.setOnClickListener(new OnClickListener() {
+			
 			@Override
             public void onClick(View v) {
             	try {
@@ -1090,6 +1107,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		btnReflectionWindowEditorRedo = (Button)findViewById(R.id.btnReflectionWindowEditorRedo);
 		btnReflectionWindowEditorRedo.setEnabled(false);
 		btnReflectionWindowEditorRedo.setOnClickListener(new OnClickListener() {
+			
 			@Override
             public void onClick(View v) {
             	try {
@@ -1107,6 +1125,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		btnReflectionWindowEditorClear = (Button)findViewById(R.id.btnReflectionWindowEditorClear);
 		btnReflectionWindowEditorClear.setOnClickListener(new OnClickListener() {
+			
 			@Override
             public void onClick(View v) {
         		if (Drawings_HistoryIndex > 0) {
@@ -1135,6 +1154,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		btnReflectionWindowEditorOperations = (Button)findViewById(R.id.btnReflectionWindowEditorOperations);
 		btnReflectionWindowEditorOperations.setEnabled(false);
 		btnReflectionWindowEditorOperations.setOnClickListener(new OnClickListener() {
+			
 			@Override
 			public void onClick(View v) {
         		if (GetMode() != MODE_DRAWING) {
@@ -1143,9 +1163,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         		}
         		//.
         		final CharSequence[] _items;
-    			_items = new CharSequence[2];
-    			_items[0] = getString(R.string.SAddImage);
-    			_items[1] = getString(R.string.SAddImageFromFile);
+    			_items = new CharSequence[3];
+    			_items[0] = getString(R.string.SShowCurrentLocation1);
+    			_items[1] = getString(R.string.SAddImage);
+    			_items[2] = getString(R.string.SAddImageFromFile);
         		AlertDialog.Builder builder = new AlertDialog.Builder(TReflectionWindowEditorPanel.this);
         		builder.setTitle(R.string.SOperations);
         		builder.setNegativeButton(TReflectionWindowEditorPanel.this.getString(R.string.SCancel),null);
@@ -1158,13 +1179,17 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	                	try {
 	    					switch (arg1) {
 	    					
-	    					case 0: //. take a picture
+	    					case 0: //. show current location
+	    						Moving_SetCurrentGeoLocation();
+	    						break; //. >
+	    						
+	    					case 1: //. take a picture
 	    		      		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 	    		      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(PictureDrawingProcess_GetPictureTempFile(TReflectionWindowEditorPanel.this))); 
 	    		      		    startActivityForResult(intent, REQUEST_ADDPICTURE);    		
 	    						break; //. >
 	    						
-	    					case 1: //. take a picture form file
+	    					case 2: //. take a picture form file
 	    						TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TReflectionWindowEditorPanel.this, ".BMP,.PNG,.GIF,.JPG,.JPEG", new TFileSystemFileSelector.OpenDialogListener() {
 	    				        	
 	    				            @Override
@@ -1205,6 +1230,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		//.
 		btnReflectionWindowEditorCommit = (Button)findViewById(R.id.btnReflectionWindowEditorCommit);
 		btnReflectionWindowEditorCommit.setOnClickListener(new OnClickListener() {
+			
 			@Override
             public void onClick(View v) {
                 try {
@@ -2628,13 +2654,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     	}
     }
     
-    public void Containers_AddCurrentContainer() {
+    public TImageContainer Containers_AddCurrentContainer() {
     	if (Containers_CurrentContainer != null) {
     		Containers_CurrentContainer_Updater_Stop();
     		//.
+    		TImageContainer Result = Containers_CurrentContainer;
     		Containers.add(Containers_CurrentContainer);
-        	Containers_CurrentContainer =null;
+        	Containers_CurrentContainer = null;
+        	//.
+        	return Result; //. ->
     	}
+    	else
+    		return null; //. ->
     }
     
     public TImageContainer Containers_GetCurrentContainer() {
@@ -2651,12 +2682,14 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
     		Containers_CurrentContainer.flModified = true;
     }
     
-    public void Containers_CompleteCurrentContainer() {
+    public TImageContainer Containers_CompleteCurrentContainer() {
+    	TImageContainer Result = Containers_CurrentContainer;
     	if (Containers_CurrentContainer != null) 
     		if ((Containers_CurrentContainer.LevelTileContainer != null/*finished*/) && Containers_CurrentContainer.flModified) 
     			Containers_AddCurrentContainer();
     		else
     			Containers_CancelCurrentContainer();
+    	return Result;
     }
 
 	public void Containers_RestoreTileModifications() throws Exception {
@@ -3402,7 +3435,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		}
 	}
 	
-	private void Moving_Begin(float X, float Y) {
+	private TImageContainer Moving_Begin(float X, float Y, boolean flUpdate) {
 		synchronized (Moving_Lock) {
 			Moving_OrgX = X;
 			Moving_OrgY = Y;
@@ -3412,9 +3445,18 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 			Moving_flProcessing = true;
 		}
 		//.
-		Containers_CompleteCurrentContainer();
+		TImageContainer Result = Containers_CompleteCurrentContainer();
 		//.
-		SurfaceUpdating.StartUpdate();
+		if (flUpdate) {
+			SurfaceUpdating_flShowCenterMark = false;
+			SurfaceUpdating.StartUpdate();
+		}
+		//.
+		return Result;
+	}
+	
+	private TImageContainer Moving_Begin(float X, float Y) {
+		return Moving_Begin(X,Y, true);
 	}
 	
 	private void Moving_End() throws Exception {
@@ -3437,7 +3479,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		SurfaceUpdating.StartUpdate();
 	}
 	
-	private void Moving_Move(float X, float Y) {
+	private void Moving_Move(float X, float Y, boolean flUpdate) {
 		synchronized (Moving_Lock) {
 			if (Moving_flProcessing) {
 				Moving_X = X;
@@ -3445,9 +3487,69 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 				//.
 				Containers_CompleteCurrentContainer();
 				//.
-				SurfaceUpdating.StartUpdate();
+				if (flUpdate)
+					SurfaceUpdating.StartUpdate();
 			}
 		}
+	}
+
+	private void Moving_Move(float X, float Y) {
+		Moving_Move(X,Y, true);
+	}
+	
+	private void Moving_SetAbsoluteCrdToCenter(double X, double Y) throws Exception {
+		TImageContainer CurrentContainer = Containers_GetCurrentContainer(); 
+		if (CurrentContainer == null)
+			throw new Exception("there is no current container"); //. =>
+		TXYCoord NewCenter = CurrentContainer.RW.ConvertToScreen(X,Y);
+		//.
+		double Center_X = Surface_Width/2.0;
+		double Center_Y = Surface_Height/2.0;
+		//.
+		Moving_Begin((float)NewCenter.X,(float)NewCenter.Y, false);
+		try {
+			Moving_Move((float)Center_X,(float)Center_Y, false);
+			//.
+			SurfaceUpdating_flShowCenterMark = true;
+		}
+		finally {
+			Moving_End();
+		}
+	}
+	
+	private void Moving_SetCurrentGeoLocation() throws Exception{
+    	TTracker Tracker = TTracker.GetTracker();
+    	if (Tracker == null)
+    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+    	//.
+    	new TCurrentFixObtaining(this, Tracker.GeoLog.GPSModule, new TCurrentFixObtaining.TDoOnFixIsObtainedHandler() {
+    		
+    		@Override
+    		public void DoOnFixIsObtained(final TGPSFixValue Fix) {
+				TAsyncProcessing Processing = new TAsyncProcessing(TReflectionWindowEditorPanel.this, TReflectionWindowEditorPanel.this.getString(R.string.SWaitAMoment)) {
+
+					private TXYCoord LocationXY = null;
+
+					@Override
+					public void Process() throws Exception {
+						LocationXY = Component.ConvertGeoCoordinatesToXY(TGPSModule.DatumID, Fix.Latitude,Fix.Longitude,Fix.Altitude);
+						// .
+						Thread.sleep(100);
+					}
+
+					@Override
+					public void DoOnCompleted() throws Exception {
+						Moving_SetAbsoluteCrdToCenter(LocationXY.X,LocationXY.Y);
+					}
+
+					@Override
+					public void DoOnException(Exception E) {
+						Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+				};
+				Processing.Start();
+    		}
+    	});
 	}
 	
 	private TSettingsTestImage 	Settings_TestImage;

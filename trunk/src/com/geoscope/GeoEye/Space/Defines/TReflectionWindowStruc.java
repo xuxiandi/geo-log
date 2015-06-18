@@ -97,6 +97,10 @@ public class TReflectionWindowStruc {
 		return (Ymx-Ymn);
 	}
 	
+	public synchronized TXYCoord Center() {
+		return (new TXYCoord((X0+X2)/2.0,(Y0+Y2)/2.0));
+	}
+	
 	public synchronized void UpdateContainer()
 	{
 		Container_Xmin = X0;

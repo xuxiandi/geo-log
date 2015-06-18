@@ -71,6 +71,20 @@ public class TUserActivityComponentListPanel extends Activity {
 		super.onDestroy();
 	}
 	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		//.
+		ListComponent.DoOnResume();
+	}
+	
+	@Override
+	protected void onPause() {
+		ListComponent.DoOnPause();
+		//.
+		super.onPause();
+	}
+	
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        

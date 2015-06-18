@@ -1069,6 +1069,14 @@ public class TReflectionWindow {
 		SetActualityInterval(pInterval, true);
 	}
 	
+	public synchronized void SetActualityTime(double Timestamp, boolean flUpdateImage) {
+		SetActualityInterval(Timestamp-1.0,Timestamp, flUpdateImage);
+	}
+	
+	public synchronized void SetActualityTime(double Timestamp) {
+		SetActualityTime(Timestamp, true);
+	}
+	
 	public synchronized void ResetActualityInterval(boolean flUpdateImage) {
 		ActualityInterval.Reset();
 		//.
@@ -1089,7 +1097,7 @@ public class TReflectionWindow {
 	}
 	
 	public void DoOnSetActualityInterval(boolean flUpdateImage) throws IOException {
-		Reflector.ResetVisualizations(true);
+		Reflector.ResetVisualizations(flUpdateImage);
 	}
 	
 	public AlertDialog CreateTileServerVisualizationUserDataPanel(Activity ParentActivity) {

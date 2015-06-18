@@ -2235,8 +2235,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		//.
 		if (Containers_IsInitialized())
 			Containers_StartCurrentContainerTranslated(dX,dY);
-		else
-			Drawings_RepaintImage();
+		//.
+		Drawings_RepaintImage();
 		//.
 		SurfaceUpdating.StartUpdate();
 	}
@@ -2306,8 +2306,8 @@ public class TDrawingEditor extends Activity implements OnTouchListener {
 		//.
 		if (Containers_IsInitialized())
 			Containers_StartCurrentContainerScaled(Scale);
-		else
-			Drawings_RepaintImage();
+		//.
+		Drawings_RepaintImage();
 		//.
 		SurfaceUpdating.StartUpdate();
 	}

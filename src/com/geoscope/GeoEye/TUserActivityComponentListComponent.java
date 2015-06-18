@@ -376,16 +376,16 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 						@Override
 						public void onClick(View v) {
 							try {
-								TComponentTypedDataFiles ComponentTypedDataFiles = Panel.ActivityComponents.Items[position].TypedDataFiles;
-								int FC = ComponentTypedDataFiles.Count();
+								TComponent Component = Panel.ActivityComponents.Items[position]; 
+								int FC = Component.TypedDataFiles.Count();
 								if (FC > 0) {
 									if (FC == 1)
-										Panel.ComponentTypedDataFiles_Process(ComponentTypedDataFiles);
+										Panel.ComponentTypedDataFiles_Process(Component, Component.TypedDataFiles);
 									else {
 	    								Intent intent = new Intent(Panel.ParentActivity, TComponentTypedDataFilesPanel.class);
 	    								if (Panel.Component != null)
 	    									intent.putExtra("ComponentID", Panel.Component.ID);
-	    								intent.putExtra("DataFiles", ComponentTypedDataFiles.ToByteArrayV0());
+	    								intent.putExtra("DataFiles", Component.TypedDataFiles.ToByteArrayV0());
 	    								intent.putExtra("AutoStart", false);
 	    								//.
 	    								Panel.ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
@@ -681,10 +681,10 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 						OnListItemClickHandler.DoOnListItemClick(ActivityComponents.Items[arg2]);
 					else
 						try {
-							if (ActivityComponents.Items[arg2].TypedDataFiles.Count() == 0)
+							TComponent Component = ActivityComponents.Items[arg2]; 
+							if (Component.TypedDataFiles.Count() == 0)
 								return; //. ->
-							TComponentTypedDataFiles ComponentTypedDataFiles = ActivityComponents.Items[arg2].TypedDataFiles;
-							ComponentTypedDataFiles_Process(ComponentTypedDataFiles);
+							ComponentTypedDataFiles_Process(Component, Component.TypedDataFiles);
 						}
 						catch (Exception E) {
 			                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -1194,7 +1194,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		                if ((!ParentActivity.isFinishing()) && progressDialog.isShowing()) 
+		                if (!ParentActivity.isFinishing() && progressDialog.isShowing()) 
 		                	progressDialog.dismiss(); 
 		            	//.
 		            	break; //. >
@@ -1572,7 +1572,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		};
 	}
 
-	public void ComponentTypedDataFiles_Process(TComponentTypedDataFiles ComponentTypedDataFiles) throws IOException {
+	public void ComponentTypedDataFiles_Process(final TComponent OwnerComponent, final TComponentTypedDataFiles ComponentTypedDataFiles) throws IOException {
 		int FC = ComponentTypedDataFiles.Count();
 		final TComponentTypedDataFile ComponentTypedDataFile = ComponentTypedDataFiles.Items[0];
 		//.
@@ -1613,6 +1613,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 						Intent intent = new Intent(ParentActivity,TReflector.class);
 						intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATION);
 						intent.putExtra("LocationXY", VisualizationPosition.ToByteArray());
+						if (OwnerComponent.TimestampIsValid())
+							intent.putExtra("Timestamp", OwnerComponent.Timestamp+1.0/*day*/);
 						ParentActivity.startActivity(intent);
 					}
 					else
@@ -1653,16 +1655,14 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		}
 	}
 	
-	private void ShowComponentVisualizationPosition(TActivity.TComponent Component) {
- 		final TActivity.TComponent _Component = Component;
-		//.
+	private void ShowComponentVisualizationPosition(final TActivity.TComponent Component, final double Timestamp) {
 		TAsyncProcessing Processing = new TAsyncProcessing(ParentActivity,ParentActivity.getString(R.string.SWaitAMoment)) {
 			
 			private TXYCoord VisualizationPosition = null;
 			
 			@Override
 			public void Process() throws Exception {
-				TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_Component.idTComponent,_Component.idComponent);
+				TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(Component.idTComponent,Component.idComponent);
 				try {
 					VisualizationPosition = CF.GetVisualizationPosition(); 
 				}
@@ -1683,6 +1683,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 					Intent intent = new Intent(ParentActivity,TReflector.class);
 					intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATION);
 					intent.putExtra("LocationXY", VisualizationPosition.ToByteArray());
+					if (Timestamp > 0.0)
+						intent.putExtra("Timestamp", Timestamp);
 					ParentActivity.startActivity(intent);
 				}
 				else
@@ -1694,6 +1696,10 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 			}
 		};
 		Processing.Start();
+	}
+	
+	private void ShowComponentVisualizationPosition(TActivity.TComponent Component) {
+		ShowComponentVisualizationPosition(Component, Component.Timestamp);
 	}
 	
 	private void ShowComponentGeoLocation(TActivity.TComponent Component) {

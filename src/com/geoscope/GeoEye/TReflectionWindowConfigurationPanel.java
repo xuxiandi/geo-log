@@ -450,8 +450,10 @@ public class TReflectionWindowConfigurationPanel extends Activity {
                 public void onClick(View v) {
                         mDateTimePicker.clearFocus();
                         //.
-                		double EndTimestamp = OleDate.UTCToLocalTime(mDateTimePicker.GetDateTime());
-        	            Component.ReflectionWindow.SetActualityInterval(EndTimestamp-1.0,EndTimestamp);
+                		double Timestamp = OleDate.LocalTimeToUTC(mDateTimePicker.GetDateTime());
+                		//.
+        	            Component.ReflectionWindow.SetActualityTime(Timestamp);
+        	            //.
                         mDateTimeDialog.dismiss();
                 }
         });
@@ -464,6 +466,9 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         });
         // Setup TimePicker
         mDateTimePicker.setIs24HourView(is24h);
+        // 
+        if (!Component.ReflectionWindow.ActualityInterval.IsEndTimestampMax())
+        	mDateTimePicker.setDateTime(OleDate.UTCToLocalTime(Component.ReflectionWindow.ActualityInterval.GetEndTimestamp()));
         // No title on the dialog window
         mDateTimeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         // Set the dialog content view
@@ -490,8 +495,10 @@ public class TReflectionWindowConfigurationPanel extends Activity {
                 public void onClick(View v) {
                         mDateTimePicker.clearFocus();
                         //.
-                		double EndTimestamp = OleDate.UTCToLocalTime(mDateTimePicker.GetDateTime());
-        	            Component.ReflectionWindow.SetActualityInterval(EndTimestamp-1.0,EndTimestamp);
+                		double Timestamp = OleDate.LocalTimeToUTC(mDateTimePicker.GetDateTime());
+                		//.
+        	            Component.ReflectionWindow.SetActualityTime(Timestamp);
+        	            //.
                         mDateTimeDialog.dismiss();
                         //.
 		            	finish();
@@ -506,6 +513,9 @@ public class TReflectionWindowConfigurationPanel extends Activity {
         });
         // Setup TimePicker
         mDateTimePicker.setIs24HourView(is24h);
+        // 
+        if (!Component.ReflectionWindow.ActualityInterval.IsEndTimestampMax())
+        	mDateTimePicker.setDateTime(OleDate.UTCToLocalTime(Component.ReflectionWindow.ActualityInterval.GetEndTimestamp()));
         // No title on the dialog window
         mDateTimeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         // Set the dialog content view

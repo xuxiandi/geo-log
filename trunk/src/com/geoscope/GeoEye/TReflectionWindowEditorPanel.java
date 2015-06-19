@@ -76,6 +76,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.TTrackerPanel.TCurrentFixObtaining;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
+import com.geoscope.GeoEye.Space.Defines.TGeoCoord;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
@@ -1163,10 +1164,12 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         		}
         		//.
         		final CharSequence[] _items;
-    			_items = new CharSequence[3];
-    			_items[0] = getString(R.string.SShowCurrentLocation1);
-    			_items[1] = getString(R.string.SAddImage);
-    			_items[2] = getString(R.string.SAddImageFromFile);
+    			_items = new CharSequence[5];
+    			_items[0] = getString(R.string.SShowDrawingGeoData);
+    			_items[1] = getString(R.string.SShowCurrentLocation1);
+    			_items[2] = getString(R.string.SAddImage);
+    			_items[3] = getString(R.string.SAddImageFromFile);
+    			_items[4] = getString(R.string.SLocateDrawing);
         		AlertDialog.Builder builder = new AlertDialog.Builder(TReflectionWindowEditorPanel.this);
         		builder.setTitle(R.string.SOperations);
         		builder.setNegativeButton(TReflectionWindowEditorPanel.this.getString(R.string.SCancel),null);
@@ -1179,17 +1182,21 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	                	try {
 	    					switch (arg1) {
 	    					
-	    					case 0: //. show current location
+	    					case 0: //. show drawing geo data
+	    						Drawings_ShowLineDrawingsData();
+	    						break; //. >
+	    						
+	    					case 1: //. show current geo location
 	    						Moving_SetCurrentGeoLocation();
 	    						break; //. >
 	    						
-	    					case 1: //. take a picture
+	    					case 2: //. take a picture
 	    		      		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 	    		      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(PictureDrawingProcess_GetPictureTempFile(TReflectionWindowEditorPanel.this))); 
 	    		      		    startActivityForResult(intent, REQUEST_ADDPICTURE);    		
 	    						break; //. >
 	    						
-	    					case 2: //. take a picture form file
+	    					case 3: //. take a picture form file
 	    						TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TReflectionWindowEditorPanel.this, ".BMP,.PNG,.GIF,.JPG,.JPEG", new TFileSystemFileSelector.OpenDialogListener() {
 	    				        	
 	    				            @Override
@@ -1213,6 +1220,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	    				        });
 	    				    	FileSelector.show();    	
 					            break; //. >
+
+	    					case 4: //. locate the drawing
+	    						Drawings_Locate();
+	    						break; //. >
 	    					}
 						}
 						catch (Exception E) {
@@ -3308,7 +3319,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	public TRectangle Drawings_GetRectangle() {
-		int Cnt = Drawings.size();
+		int Cnt = Drawings_HistoryIndex;
 		if (Cnt == 0)
 			return null; //. ->
 		TRectangle Result = Drawings.get(0).GetRectangle(); 
@@ -3417,6 +3428,122 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		return Result;
 	}
 	
+	public void Drawings_Locate() throws Exception {
+		TRectangle Rectangle = Drawings_GetRectangle();
+		if (Rectangle == null)
+			return; //. ->
+		float X = (Rectangle.Xmn+Rectangle.Xmx)/2.0F;
+		float Y = (Rectangle.Ymn+Rectangle.Ymx)/2.0F;
+		Moving_SetToCenter(X,Y);
+	}
+	
+	public static class TLineDrawingsData {
+	
+		public double Length; 
+		public double GeoLength;
+		//.
+		public double Square; 
+		public double GeoSquare; 
+	}
+	
+	public TLineDrawingsData Drawings_GetLineDrawingsData() throws Exception {
+		if (Drawings == null)
+			return null; //. ->
+		TLineDrawingsData Result = new TLineDrawingsData();
+		Result.Length = 0.0;
+		Result.GeoLength = 0.0;
+		Result.Square = 0.0;
+		Result.GeoSquare = 0.0;
+		int DrawingsCount = Drawings_HistoryIndex;
+		for (int I = 0; I < DrawingsCount; I++) {
+			TDrawing Drawing = Drawings.get(I);
+			if (Drawing instanceof TLineDrawing) {
+				TLineDrawing LineDrawing = (TLineDrawing)Drawing;
+				int Cnt = LineDrawing.Nodes.size();
+				if (Cnt > 1) {
+					TDrawingNode Node = LineDrawing.Nodes.get(0);
+					TXYCoord RealStart0 = Component.ReflectionWindow.ConvertToReal(Node.X,Node.Y);
+					TXYCoord RealStart = RealStart0;
+					TGeoCoord GeoStart = Component.ConvertXYCoordinatesToGeo(RealStart.X,RealStart.Y);
+					for (int J = 1; J < Cnt; J++) {
+						Node = LineDrawing.Nodes.get(J);
+						TXYCoord RealFinish = Component.ReflectionWindow.ConvertToReal(Node.X,Node.Y);
+						TGeoCoord GeoFinish = Component.ConvertXYCoordinatesToGeo(RealFinish.X,RealFinish.Y);
+						//.
+						double Distance = Math.sqrt(Math.pow((RealFinish.X-RealStart.X),2)+Math.pow((RealFinish.Y-RealStart.Y),2));
+						Result.Length += Distance;
+						//.
+						double GeoDistance = Component.GetGeoDistance(GeoStart.Latitude,GeoStart.Longitude, GeoFinish.Latitude,GeoFinish.Longitude);
+						Result.GeoLength += GeoDistance;
+						//.
+						double dS = (RealStart.Y+RealFinish.Y)*(RealFinish.X-RealStart.X);
+						Result.Square += dS;
+						//.
+						RealStart = RealFinish;
+						GeoStart = GeoFinish;
+					}
+					double dS = (RealStart.Y+RealStart0.Y)*(RealStart0.X-RealStart.X);
+					Result.Square += dS;
+				}
+			}
+		}
+		//.
+		Result.Square = Math.abs(Result.Square/2.0);
+		//.
+		if (Result.Length > 0) {
+			double GeoScale = Result.GeoLength/Result.Length;
+			Result.GeoSquare = Result.Square*Math.pow(GeoScale,2);
+		}
+		//.
+		return Result;
+	}
+	
+	public void Drawings_ShowLineDrawingsData() {
+		TAsyncProcessing Processing = new TAsyncProcessing(TReflectionWindowEditorPanel.this, TReflectionWindowEditorPanel.this.getString(R.string.SWaitAMoment)) {
+
+			private TLineDrawingsData Data;
+			
+			@Override
+			public void Process() throws Exception {
+				Data = Drawings_GetLineDrawingsData();
+				// .
+				Thread.sleep(100);
+			}
+
+			@Override
+			public void DoOnCompleted() throws Exception {
+				if (Data != null) {
+					String GeoLengthStr;
+					if (Data.GeoLength > 1000.0) 
+						GeoLengthStr = Integer.toString((int)(Data.GeoLength/1000))+" km "+Integer.toString((int)(Data.GeoLength % 1000))+" m";
+					else											
+						GeoLengthStr = Integer.toString((int)Data.GeoLength)+" m";
+					String GeoLengthInfo = getString(R.string.SSummaryDrawingLength)+GeoLengthStr;
+					//.
+					String GeoSquareStr;
+					if (Data.GeoSquare > 1000000.0) 
+						GeoSquareStr = Integer.toString((int)(Data.GeoSquare/1000000))+" km^2 "+Integer.toString((int)(Data.GeoSquare % 1000000))+" m^2";
+					else											
+						GeoSquareStr = Integer.toString((int)Data.GeoSquare)+" m^2";
+					String GeoSquareInfo = getString(R.string.SSummarySquareUnderDrawing)+GeoSquareStr;
+					//.
+	    		    new AlertDialog.Builder(TReflectionWindowEditorPanel.this)
+	    	        .setIcon(android.R.drawable.ic_dialog_alert)
+	    	        .setTitle(R.string.SInfo)
+	    	        .setMessage(GeoLengthInfo+"\n"+GeoSquareInfo)
+	    		    .setPositiveButton(R.string.SOk, null)
+	    		    .show();
+				}
+			}
+
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		Processing.Start();
+	}
+	
 	private Object 			Moving_Lock = new Object();
     public boolean 			Moving_flProcessing = false;
 	private float 			Moving_dX;
@@ -3495,6 +3622,21 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 
 	private void Moving_Move(float X, float Y) {
 		Moving_Move(X,Y, true);
+	}
+	
+	private void Moving_SetToCenter(float X, float Y) throws Exception {
+		float Center_X = Surface_Width/2.0F;
+		float Center_Y = Surface_Height/2.0F;
+		//.
+		Moving_Begin(X,Y, false);
+		try {
+			Moving_Move(Center_X,Center_Y, false);
+			//.
+			SurfaceUpdating_flShowCenterMark = true;
+		}
+		finally {
+			Moving_End();
+		}
 	}
 	
 	private void Moving_SetAbsoluteCrdToCenter(double X, double Y) throws Exception {

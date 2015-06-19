@@ -3,6 +3,7 @@ package com.geoscope.Classes.Data.Types.Image.Drawing;
 import java.io.IOException;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 
 public class TDrawingNode {
 	 
@@ -31,5 +32,9 @@ public class TDrawingNode {
 		X = (float)TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
 		Y = (float)TDataConverter.ConvertLEByteArrayToDouble(BA, Idx); Idx += 8; //. SizeOf(Double)
 		return Idx;
+	}
+	
+	public TXYCoord GetXY() {
+		return (new TXYCoord(X,Y));
 	}
 }

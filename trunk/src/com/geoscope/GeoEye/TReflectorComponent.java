@@ -114,6 +114,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObj
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectPanel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectTrack;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjects;
+import com.geoscope.GeoEye.Space.TypesSystem.GeoCrdSystem.GeoTransformations.TGeoDatum;
 import com.geoscope.GeoEye.Space.TypesSystem.GeoSpace.TGeoSpaceFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHint;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.Hints.TSpaceHints;
@@ -215,6 +216,7 @@ public class TReflectorComponent extends TUIComponent {
 		public boolean 	flSecureConnections = false;
 		// .
 		public int GeoSpaceID = 88;
+		public int GeoSpaceDatumID = 23; // . WGS-84
 		// .
 		public int ReflectionWindow_ViewMode = VIEWMODE_TILES;
 		public byte[] ReflectionWindowData = null;
@@ -8463,8 +8465,7 @@ public class TReflectorComponent extends TUIComponent {
 			Y1 = (ReflectionWindow.Y1 + ReflectionWindow.Y2) / 2.0;
 		}
 		// .
-		int DatumID = 23; // . WGS-84
-		GCRD = ConvertXYCoordinatesToGeo(Geo_X0, Geo_Y0, DatumID);
+		GCRD = ConvertXYCoordinatesToGeo(Geo_X0, Geo_Y0, Configuration.GeoSpaceDatumID);
 		Crd = ConvertGeoCoordinatesToXY(GCRD.Datum, GCRD.Latitude,
 				GCRD.Longitude + (1.0/* Grad */), 0.0/* Altitude */);
 		// .
@@ -8991,8 +8992,7 @@ public class TReflectorComponent extends TUIComponent {
 		ParentActivity.startActivity(intent);
 	}
 
-	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y, int DatumID)
-			throws Exception {
+	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y, int DatumID) throws Exception {
 		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality) (User.Space.TypesSystem.SystemTGeoSpace.TComponentFunctionality_Create(Configuration.GeoSpaceID));
 		try {
 			return GSF.ConvertXYCoordinatesToGeo(X, Y, DatumID);
@@ -9001,6 +9001,10 @@ public class TReflectorComponent extends TUIComponent {
 		}
 	}
 
+	public TGeoCoord ConvertXYCoordinatesToGeo(double X, double Y) throws Exception {
+		return ConvertXYCoordinatesToGeo(X,Y, Configuration.GeoSpaceDatumID);
+	}
+	
 	public TXYCoord ConvertGeoCoordinatesToXY(int DatumID, double Latitude, double Longitude, double Altitude) throws Exception {
 		TGeoSpaceFunctionality GSF = (TGeoSpaceFunctionality)User.Space.TypesSystem.SystemTGeoSpace.TComponentFunctionality_Create(Configuration.GeoSpaceID);
 		try {
@@ -9010,10 +9014,17 @@ public class TReflectorComponent extends TUIComponent {
 		}
 	}
 
-	public TXYCoord ConvertGeoCoordinatesToXY(TGeoCoord GeoCoord)
-			throws Exception {
-		return ConvertGeoCoordinatesToXY(GeoCoord.Datum, GeoCoord.Latitude,
-				GeoCoord.Longitude, GeoCoord.Altitude);
+	public TXYCoord ConvertGeoCoordinatesToXY(double Latitude, double Longitude, double Altitude) throws Exception {
+		return ConvertGeoCoordinatesToXY(Configuration.GeoSpaceDatumID, Latitude,Longitude,Altitude);
+	}
+	
+	public TXYCoord ConvertGeoCoordinatesToXY(TGeoCoord GeoCoord) throws Exception {
+		return ConvertGeoCoordinatesToXY(GeoCoord.Datum, GeoCoord.Latitude,	GeoCoord.Longitude, GeoCoord.Altitude);
+	}
+	
+	public double GetGeoDistance(double Latitude, double Longitude, double Latitude1, double Longitude1) {
+		TGeoDatum Datum = TGeoDatum.GetDatumByID(Configuration.GeoSpaceDatumID);
+		return Datum.GetDistance(Latitude,Longitude, Latitude1,Longitude1);
 	}
 
 	public void Tracker_ShowCurrentLocation() {

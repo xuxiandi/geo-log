@@ -22,6 +22,10 @@ public class TGeoDatum {
 				return List[I]; //. -> 
 		return null;
 	}
+
+	public static final double D2R = Math.PI/180.0; // degree to radians constant
+	public static final double R2D = 180.0/Math.PI; // radians to degree constant
+	
 	
 	public int 		ID;
 	public String 	Name;
@@ -69,6 +73,39 @@ public class TGeoDatum {
 		}
 	}
 	
+    public double GetDistance(double Latitude, double Longitude,  double Latitude1, double Longitude1) { /* COPYRIGHT DelphiWorld */
+        double fPhimean;
+        double fdLambda;
+        double fdPhi; 
+        double fAlpha;
+        double fRho;
+        double fNu;
+        double fR;
+        double fz;
+        double fTemp;
+        double Distance;
+        //. 
+        double a = Ellipsoide_EquatorialRadius;
+        double e2 = (Ellipsoid_EccentricitySquared)/(1.0-Ellipsoid_EccentricitySquared); 
+        if (Double.isNaN(Latitude) || Double.isNaN(Longitude) || Double.isNaN(Latitude1) || Double.isNaN(Longitude1))
+                return Double.NaN; //. ->
+        
+        fdLambda = (Longitude - Longitude1) * D2R;
+        fdPhi = (Latitude - Latitude1) * D2R;
+        fPhimean = ((Latitude + Latitude1) / 2.0) * D2R;
+        fTemp = 1 - e2 * (Math.pow(Math.sin(fPhimean), 2));
+        fRho = (a * (1 - e2)) / Math.pow(fTemp, 1.5);
+        fNu = a / (Math.sqrt(1 - e2 * (Math.sin(fPhimean) * Math.sin(fPhimean))));
+        fz = Math.sqrt(Math.pow(Math.sin(fdPhi / 2.0), 2) + Math.cos(Latitude1 * D2R) * Math.cos(Latitude * D2R) * Math.pow(Math.sin(fdLambda / 2.0), 2));
+        fz = 2 * Math.asin(fz);
+        fAlpha = Math.cos(Latitude1 * D2R) * Math.sin(fdLambda) * 1 / Math.sin(fz);
+        fAlpha = Math.asin(fAlpha);
+        fR = (fRho * fNu) / ((fRho * Math.pow(Math.sin(fAlpha), 2)) + (fNu * Math.pow(Math.cos(fAlpha), 2)));
+        Distance = (fz * fR);
+        //.
+        return Distance;
+    }
+    
 	private static final double ro = 206264.8062; //. number angle seconds in radian
 	private static final double Pulkovo42WGS84_dx = 23.92;
 	private static final double Pulkovo42WGS84_dy = -141.27;

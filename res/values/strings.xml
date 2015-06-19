@@ -1067,5 +1067,9 @@
     <string name="SURLFolderListHint">Long click on the [Import] button to view a context menu.\n(long click on the hint to remove it)</string>
     <string name="SComponentTypedDataFilesPanelHint">Long click on the title to view a context menu.\nLong click on an item to show its context menu.\n(long click on the hint to remove it)</string>
     <string name="SShowCurrentLocation1">Show current location</string>
+    <string name="SShowDrawingGeoData">Show the drawing geo data</string>
+    <string name="SSummaryDrawingLength">"Summary drawing length: "</string>
+    <string name="SSummarySquareUnderDrawing">"Summary square under drawing: "</string>
+    <string name="SLocateDrawing">Locate the drawing</string>
     
 </resources>

@@ -15,6 +15,8 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent
 	public static TURL GetURL(String TypeID, TGeoScopeServerUser pUser, Element pXMLDocumentRootNode) throws Exception {
 		if (com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.PropsPanel.TURL.IsTypeOf(TypeID))
 			return com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.PropsPanel.TURL.GetURL(TypeID, pUser,pXMLDocumentRootNode); //. ->
+		if (com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.Location.TURL.IsTypeOf(TypeID))
+			return com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.Location.TURL.GetURL(TypeID, pUser,pXMLDocumentRootNode); //. ->
 		else
 			return null; //. ->
 	}

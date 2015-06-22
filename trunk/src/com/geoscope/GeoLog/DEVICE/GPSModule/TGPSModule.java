@@ -941,6 +941,11 @@ public class TGPSModule extends TModule implements Runnable
         fz = Math.sqrt(Math.pow(Math.sin(fdPhi / 2.0), 2) + Math.cos(EndLat * D2R) * Math.cos(StartLat * D2R) * Math.pow(Math.sin(fdLambda / 2.0), 2));
         fz = 2 * Math.asin(fz);
         fAlpha = Math.cos(EndLat * D2R) * Math.sin(fdLambda) * 1 / Math.sin(fz);
+        if (fAlpha > 1.0) //. workaround on a case like fAlpha = 1.0000000002
+        	fAlpha = 1.0;
+        else
+            if (fAlpha < -1.0)
+            	fAlpha = -1.0;
         fAlpha = Math.asin(fAlpha);
         fR = (fRho * fNu) / ((fRho * Math.pow(Math.sin(fAlpha), 2)) + (fNu * Math.pow(Math.cos(fAlpha), 2)));
         Distance = (fz * fR);

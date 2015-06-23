@@ -1076,5 +1076,6 @@
     <string name="SWithParameters">with parameters</string>
     <string name="SChangeSecurity">Change security &#8230;</string>
     <string name="SSecurityHasBeenChanged">Security has been changed.</string>
+    <string name="SChangingSecurity">Changing the security &#8230;</string>
     
 </resources>

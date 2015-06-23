@@ -861,7 +861,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		    										return; //. ->
 		    									}
 		    									//.
-			    		    					TAsyncProcessing SecurityChanging = new TAsyncProcessing(ParentActivity, ParentActivity.getString(R.string.SRemoving)) {
+			    		    					TAsyncProcessing SecurityChanging = new TAsyncProcessing(ParentActivity, ParentActivity.getString(R.string.SChangingSecurity)) {
 
 			    		    						@Override
 			    		    						public void Process() throws Exception {

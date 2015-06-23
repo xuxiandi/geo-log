@@ -106,15 +106,15 @@ public class TComponentCreatingPanel extends Activity {
         //. 
         setContentView(R.layout.componentcreating_panel);
         //.
-        cbDataName = (CheckBox)findViewById(R.id.cbDataParameters);
-        cbDataName.setChecked(Configuration.ActivityConfiguration.flDataName);
+        cbDataName = (CheckBox)findViewById(R.id.cbDataName);
+        cbDataName.setChecked(Configuration.ActivityConfiguration.flDataParameters);
         cbDataName.setOnClickListener(new OnClickListener() {
         	
             @Override
             public void onClick(View v) {
                 boolean checked = ((CheckBox)v).isChecked();
                 //.
-                Configuration.ActivityConfiguration.flDataName = checked;
+                Configuration.ActivityConfiguration.flDataParameters = checked;
                 Configuration.flChanged = true;
             }
         });
@@ -269,7 +269,7 @@ public class TComponentCreatingPanel extends Activity {
                 if (extras != null) {
                 	final String POIText = extras.getString("Text");
                 	try {
-                    	if (Configuration.ActivityConfiguration.flDataName) 
+                    	if (Configuration.ActivityConfiguration.flDataParameters) 
                     		DataFileName_Dialog(TMyUserPanel.TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
                     			
                     			@Override
@@ -292,7 +292,7 @@ public class TComponentCreatingPanel extends Activity {
 				final File F = GetImageTempFile(this);
 				if (F.exists()) {
 					try {
-		            	if (Configuration.ActivityConfiguration.flDataName) 
+		            	if (Configuration.ActivityConfiguration.flDataParameters) 
 		            		DataFileName_Dialog(TMyUserPanel.TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
 		            			
 		            			@Override
@@ -431,7 +431,7 @@ public class TComponentCreatingPanel extends Activity {
             	try {
     				final File F = GetVideoTempFile(this);
     				if (F.exists()) {
-		            	if (Configuration.ActivityConfiguration.flDataName) 
+		            	if (Configuration.ActivityConfiguration.flDataParameters) 
 		            		DataFileName_Dialog(TMyUserPanel.TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
 		            			
 		            			@Override
@@ -457,7 +457,7 @@ public class TComponentCreatingPanel extends Activity {
                 if (extras != null) {
                 	final String DrawingFileName = extras.getString("FileName");
                 	try {
-		            	if (Configuration.ActivityConfiguration.flDataName) 
+		            	if (Configuration.ActivityConfiguration.flDataParameters) 
 		            		DataFileName_Dialog(TMyUserPanel.TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
 		            			
 		            			@Override
@@ -532,7 +532,7 @@ public class TComponentCreatingPanel extends Activity {
                             	//.
         						if (ImageFile.exists()) {
         							try {
-        				            	if (Configuration.ActivityConfiguration.flDataName) 
+        				            	if (Configuration.ActivityConfiguration.flDataParameters) 
         				            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
         				            			
         				            			@Override
@@ -623,7 +623,7 @@ public class TComponentCreatingPanel extends Activity {
 	        		final String SelectedFileName = fileName; 
                     //.
 					try {
-		            	if (Configuration.ActivityConfiguration.flDataName) 
+		            	if (Configuration.ActivityConfiguration.flDataParameters) 
 		            		DataFileName_Dialog(TMyUserPanel.TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
 		            			
 		            			@Override

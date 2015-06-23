@@ -114,7 +114,8 @@ public class TMyUserPanel extends Activity {
 			public static final int DataNameMaxSize = 100;
 			
 			
-			public boolean flDataName = false; //. obsolete
+			private boolean flDataName = false; //. obsolete
+			//.
 			public boolean flDataParameters = false;
 		}
 		

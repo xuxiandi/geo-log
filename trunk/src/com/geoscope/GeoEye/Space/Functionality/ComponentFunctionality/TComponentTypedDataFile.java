@@ -9,7 +9,7 @@ import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.util.Locale;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,20 +22,15 @@ import com.geoscope.Classes.Data.Types.Image.Drawing.TDrawings;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.TReflector;
-import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessorPanel;
-import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.TDATAFileFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
-import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TPositionerFunctionality;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 public class TComponentTypedDataFile {
@@ -87,10 +82,6 @@ public class TComponentTypedDataFile {
 	
 	public boolean DataActualityIsExpired() {
 		return DataIsNull();
-	}
-	
-	public void ClearData() {
-		Data = null;
 	}
 	
 	public boolean IsLoaded() {
@@ -409,158 +400,131 @@ public class TComponentTypedDataFile {
 			return null; //. ->
 	}
 	
-	public void Open(TGeoScopeServerUser User, Activity ParentActivity, TReflectorComponent Component) {
+	public void Open(TGeoScopeServerUser User, Context context) {
 		try {
-			if (FileIsEmpty())
-				throw new Exception(ParentActivity.getString(R.string.SThereIsNoDataYet)); //. =>
-			//.
-			Intent intent = null;
-			switch (DataType) {
+			if (!FileIsEmpty()) {
+				Intent intent = null;
+				switch (DataType) {
 
-			case SpaceDefines.TYPEDDATAFILE_TYPE_Document:
-				try {
-					if (DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_TXT)) {
-						String Text = new String(GetFileData(),"windows-1251");
-						byte[] TextData = Text.getBytes("utf-16");
-						// .
-						File TempFile = GetTempFile();
-						FileOutputStream fos = new FileOutputStream(TempFile);
-						try {
-							fos.write(TextData, 0, TextData.length);
-						} finally {
-							fos.close();
+				case SpaceDefines.TYPEDDATAFILE_TYPE_Document:
+					try {
+						if (DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_TXT)) {
+							String Text = new String(GetFileData(),"windows-1251");
+							byte[] TextData = Text.getBytes("utf-16");
+							// .
+							File TempFile = GetTempFile();
+							FileOutputStream fos = new FileOutputStream(TempFile);
+							try {
+								fos.write(TextData, 0, TextData.length);
+							} finally {
+								fos.close();
+							}
+							// . open appropriate extent
+							intent = new Intent();
+							intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");
 						}
+						else
+							if (DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
+								TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(DataComponentType,DataComponentID);
+								if (CF != null)
+									try {
+										int Version = CF.ParseFromXMLDocument(GetFileData());
+										if (Version > 0)
+											CF.Open(context, null);
+									}
+								finally {
+									CF.Release();
+								}
+							}
+					} catch (Exception E) {
+						Toast.makeText(context, context.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_LONG).show();
+						return; // . ->
+					}
+					break; // . >
+
+				case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
+					try {
+						if (DataFormat.toLowerCase(Locale.ENGLISH).equals("."+TDrawingDefines.FileExtension)) {
+				    		intent = new Intent(context, TDrawingEditor.class);
+				  		    intent.putExtra("FileName", GetFile().getAbsolutePath()); 
+				  		    intent.putExtra("ReadOnly", true); 
+				  		    context.startActivity(intent);
+				  		    //.
+							return; // . ->
+						}
+						else {
+				    		intent = new Intent(context, TImageViewerPanel.class);
+				  		    intent.putExtra("FileName", GetFile().getAbsolutePath()); 
+				  		    context.startActivity(intent);
+				  		    //.
+							return; // . ->
+						}
+					} catch (Exception E) {
+						Toast.makeText(context, context.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
+						return; // . ->
+					}
+
+				case SpaceDefines.TYPEDDATAFILE_TYPE_Audio:
+					try {
 						// . open appropriate extent
 						intent = new Intent();
-						intent.setDataAndType(Uri.fromFile(TempFile), "text/plain");
-					}
-					else
-						if (DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
-							TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(DataComponentType,DataComponentID);
-							if (CF != null)
-								try {
-									int Version = CF.ParseFromXMLDocument(GetFileData());
-									if (Version > 0) 
-										switch (CF.TypeFunctionality.idType) {
-										
-										case SpaceDefines.idTDATAFile:
-											TDATAFileFunctionality DFF = (TDATAFileFunctionality)CF;
-											DFF.Open(ParentActivity, null);
-											return; // . ->
-
-										case SpaceDefines.idTPositioner:
-											TPositionerFunctionality PF = (TPositionerFunctionality)CF;
-											//.
-											TLocation P = new TLocation(PF._Name);
-											P.RW.Assign(Component.ReflectionWindow.GetWindow());
-											P.RW.X0 = PF._X0; P.RW.Y0 = PF._Y0;
-											P.RW.X1 = PF._X1; P.RW.Y1 = PF._Y1;
-											P.RW.X2 = PF._X2; P.RW.Y2 = PF._Y2;
-											P.RW.X3 = PF._X3; P.RW.Y3 = PF._Y3;
-											P.RW.BeginTimestamp = PF._Timestamp; P.RW.EndTimestamp = PF._Timestamp;
-											P.RW.Normalize();
-											/*//. last version: Reflector.SetReflectionWindowByLocation(P);
-											//.
-									        setResult(RESULT_OK);
-									        //.
-											finish();*/
-											intent = new Intent(ParentActivity,TReflector.class);
-											intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATIONWINDOW);
-											intent.putExtra("LocationWindow", P.ToByteArray());
-											ParentActivity.startActivity(intent);
-											return; // . ->
-
-										default:
-											TComponentFunctionality.TPropsPanel PropsPanel = CF.TPropsPanel_Create(ParentActivity);
-											if (PropsPanel != null)
-												ParentActivity.startActivity(PropsPanel.PanelActivity);
-											return; // . ->
-										}
-								}
-							finally {
-								CF.Release();
-							}
-						}
-				} catch (Exception E) {
-					Toast.makeText(
-							ParentActivity,
-							ParentActivity.getString(R.string.SErrorOfPreparingDataFile)+FileName(),
-							Toast.LENGTH_LONG).show();
-					return; // . ->
-				}
-				break; // . >
-
-			case SpaceDefines.TYPEDDATAFILE_TYPE_Image:
-				try {
-					if (DataFormat.toLowerCase(Locale.ENGLISH).equals("."+TDrawingDefines.FileExtension)) {
-			    		intent = new Intent(ParentActivity, TDrawingEditor.class);
-			  		    intent.putExtra("FileName", GetFile().getAbsolutePath()); 
-			  		    intent.putExtra("ReadOnly", true); 
-			  		    ParentActivity.startActivity(intent);
-			  		    //.
+						intent.setDataAndType(Uri.fromFile(GetFile()), "audio/*");
+					} catch (Exception E) {
+						Toast.makeText(context, context.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
 						return; // . ->
 					}
-					else {
-			    		intent = new Intent(ParentActivity, TImageViewerPanel.class);
-			  		    intent.putExtra("FileName", GetFile().getAbsolutePath()); 
-			  		    ParentActivity.startActivity(intent);
-			  		    //.
+					break; // . >
+
+				case SpaceDefines.TYPEDDATAFILE_TYPE_Video:
+					try {
+						// . open appropriate extent
+						intent = new Intent();
+						intent.setDataAndType(Uri.fromFile(GetFile()),"video/*");
+					} catch (Exception E) {
+						Toast.makeText(context, context.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
 						return; // . ->
 					}
-				} catch (Exception E) {
-					Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
-					return; // . ->
-				}
+					break; // . >
+					
+				case SpaceDefines.TYPEDDATAFILE_TYPE_Measurement:
+					try {
+						String MeasurementID = Integer.toString(DataComponentType)+"_"+Long.toString(DataComponentID);
+						//. open appropriate extent
+			            Intent ProcessorPanel = new Intent(context, TMeasurementProcessorPanel.class);
+			            ProcessorPanel.putExtra("MeasurementDatabaseFolder",TGeoLogApplication.GetTempFolder());
+			            ProcessorPanel.putExtra("MeasurementID",MeasurementID);
+			            ProcessorPanel.putExtra("MeasurementDataFile",GetFile().getAbsolutePath());
+			            ProcessorPanel.putExtra("MeasurementStartPosition",0);
+			            context.startActivity(ProcessorPanel);	            	
+			  		    //.
+						return; // . ->
+					} catch (Exception E) {
+						Toast.makeText(context, context.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
+						return; // . ->
+					}
 
-			case SpaceDefines.TYPEDDATAFILE_TYPE_Audio:
-				try {
-					// . open appropriate extent
-					intent = new Intent();
-					intent.setDataAndType(Uri.fromFile(GetFile()), "audio/*");
-				} catch (Exception E) {
-					Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
+				default:
+					Toast.makeText(context, R.string.SUnknownDataFileFormat,	Toast.LENGTH_LONG).show();
 					return; // . ->
 				}
-				break; // . >
-
-			case SpaceDefines.TYPEDDATAFILE_TYPE_Video:
-				try {
-					// . open appropriate extent
-					intent = new Intent();
-					intent.setDataAndType(Uri.fromFile(GetFile()),"video/*");
-				} catch (Exception E) {
-					Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
-					return; // . ->
+				if (intent != null) {
+					intent.setAction(android.content.Intent.ACTION_VIEW);
+					context.startActivity(intent);
 				}
-				break; // . >
-				
-			case SpaceDefines.TYPEDDATAFILE_TYPE_Measurement:
-				try {
-					String MeasurementID = Integer.toString(DataComponentType)+"_"+Long.toString(DataComponentID);
-					//. open appropriate extent
-		            Intent ProcessorPanel = new Intent(ParentActivity, TMeasurementProcessorPanel.class);
-		            ProcessorPanel.putExtra("MeasurementDatabaseFolder",TGeoLogApplication.GetTempFolder());
-		            ProcessorPanel.putExtra("MeasurementID",MeasurementID);
-		            ProcessorPanel.putExtra("MeasurementDataFile",GetFile().getAbsolutePath());
-		            ProcessorPanel.putExtra("MeasurementStartPosition",0);
-		            ParentActivity.startActivity(ProcessorPanel);	            	
-		  		    //.
-					return; // . ->
-				} catch (Exception E) {
-					Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SErrorOfPreparingDataFile)+FileName(), Toast.LENGTH_SHORT).show();
-					return; // . ->
-				}
-
-			default:
-				Toast.makeText(ParentActivity, R.string.SUnknownDataFileFormat,	Toast.LENGTH_LONG).show();
-				return; // . ->
 			}
-			if (intent != null) {
-				intent.setAction(android.content.Intent.ACTION_VIEW);
-				ParentActivity.startActivity(intent);
+			else {
+				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(DataComponentType,DataComponentID);
+				if (CF != null)
+					try {
+						CF.Open(context, null);
+					}
+					finally {
+						CF.Release();
+					}
 			}
+			//.
 		} catch (Exception E) {
-			Toast.makeText(ParentActivity, E.getMessage(),Toast.LENGTH_LONG).show();
+			Toast.makeText(context, E.getMessage(),Toast.LENGTH_LONG).show();
 		}
 	}
 }

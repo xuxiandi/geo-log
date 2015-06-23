@@ -382,7 +382,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						public boolean onLongClick(View v) {
 							if ((Item.Composition != null) && (Item.Composition.Map.ItemByPosition != null)) {
 								TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile)Item.Composition.Map.ItemByPosition.LinkedObject;
-								ComponentTypedDataFile.ClearData();
 								//.
 								Panel.ComponentTypedDataFile_Process(ComponentTypedDataFile);
 							}
@@ -1450,7 +1449,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	
 	public void ComponentTypedDataFile_DoProcess(TComponentTypedDataFile ComponentTypedDataFile) {
 		if (ComponentTypedDataFile.IsLoaded()) {
-			ComponentTypedDataFile.Open(UserAgent.User(), this, Component);
+			ComponentTypedDataFile.Open(UserAgent.User(), this);
 		} else {
 			if (ComponentTypedDataFileLoading != null)
 				ComponentTypedDataFileLoading.Cancel();
@@ -1470,7 +1469,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
     	            	break; //. >
     				TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile) msg.obj;
     				if (ComponentTypedDataFile != null)
-    					ComponentTypedDataFile.Open(UserAgent.User(), TComponentTypedDataFilesPanel.this, Component);
+    					ComponentTypedDataFile.Open(UserAgent.User(), TComponentTypedDataFilesPanel.this);
     				// .
     				break; // . >				
     			}

@@ -7477,7 +7477,7 @@ public class TReflectorComponent extends TUIComponent {
 					try {
 						TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile) msg.obj;
 						if (ComponentTypedDataFile != null)
-							ComponentTypedDataFile.Open(User, ParentActivity, TReflectorComponent.this);
+							ComponentTypedDataFile.Open(User, ParentActivity);
 					} catch (Exception E) {
 						Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
 						return; // . ->
@@ -8966,7 +8966,7 @@ public class TReflectorComponent extends TUIComponent {
 						try {
 							TComponentTypedDataFile ComponentTypedDataFile = _ComponentTypedDataFiles.Items[arg1];
 							if (ComponentTypedDataFile.IsLoaded()) {
-								ComponentTypedDataFile.Open(User, TReflectorComponent.this.ParentActivity, TReflectorComponent.this);
+								ComponentTypedDataFile.Open(User, TReflectorComponent.this.ParentActivity);
 							} else {
 								if (SelectedComponentTypedDataFileLoading != null)
 									SelectedComponentTypedDataFileLoading.Cancel();

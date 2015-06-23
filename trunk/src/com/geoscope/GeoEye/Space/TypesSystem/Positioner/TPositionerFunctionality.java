@@ -11,7 +11,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.content.Context;
+import android.content.Intent;
+
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
+import com.geoscope.GeoEye.Space.Defines.TLocation;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.URL.TURL;
@@ -163,5 +169,25 @@ public class TPositionerFunctionality extends TComponentFunctionality {
         Serializer.endTag("", "Timestamp");
         //.
         Serializer.endTag("", "RW");
+	}
+	
+	@Override
+	public void Open(Context context, Object Params) throws Exception {
+		TReflectorComponent Component = TReflectorComponent.GetAComponent();
+		if (Component != null) {
+			TLocation P = new TLocation(_Name);
+			P.RW.Assign(Component.ReflectionWindow.GetWindow());
+			P.RW.X0 = _X0; P.RW.Y0 = _Y0;
+			P.RW.X1 = _X1; P.RW.Y1 = _Y1;
+			P.RW.X2 = _X2; P.RW.Y2 = _Y2;
+			P.RW.X3 = _X3; P.RW.Y3 = _Y3;
+			P.RW.BeginTimestamp = _Timestamp; P.RW.EndTimestamp = _Timestamp;
+			P.RW.Normalize();
+			//.
+			Intent intent = new Intent(context,TReflector.class);
+			intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATIONWINDOW);
+			intent.putExtra("LocationWindow", P.ToByteArray());
+			context.startActivity(intent);
+		}
 	}
 }

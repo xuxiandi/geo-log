@@ -405,7 +405,6 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 						public boolean onLongClick(View v) {
 							if ((Item.Composition != null) && (Item.Composition.Map.ItemByPosition != null)) {
 								TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile)Item.Composition.Map.ItemByPosition.LinkedObject;
-								ComponentTypedDataFile.ClearData();
 								//.
 								Panel.ComponentTypedDataFile_Process(ComponentTypedDataFile);
 							}
@@ -1720,7 +1719,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	
 	public void ComponentTypedDataFile_Process(TComponentTypedDataFile ComponentTypedDataFile) {
 		if (ComponentTypedDataFile.IsLoaded()) {
-			ComponentTypedDataFile.Open(UserAgent.User(), ParentActivity, Component);
+			ComponentTypedDataFile.Open(UserAgent.User(), ParentActivity);
 		} else {
 			if (ComponentTypedDataFileLoading != null)
 				ComponentTypedDataFileLoading.Cancel();
@@ -1823,7 +1822,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
     	            	break; //. >
     				TComponentTypedDataFile ComponentTypedDataFile = (TComponentTypedDataFile) msg.obj;
     				if (ComponentTypedDataFile != null)
-    					ComponentTypedDataFile.Open(UserAgent.User(), ParentActivity, Component);
+    					ComponentTypedDataFile.Open(UserAgent.User(), ParentActivity);
     				// .
     				break; // . >				
     			}

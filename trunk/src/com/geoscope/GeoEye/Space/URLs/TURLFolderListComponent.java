@@ -61,6 +61,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.Data.Types.Image.TDiskImageCache;
 import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
@@ -74,6 +75,8 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.TUserListComponent;
 import com.geoscope.GeoEye.TUserListPanel;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowStruc;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFile;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.URL.TURL;
@@ -602,8 +605,7 @@ public class TURLFolderListComponent extends TUIComponent {
 						@Override
 						public boolean onLongClick(View v) {
 							if ((Item.Item.Composition != null) && (Item.Item.Composition.Map.ItemByPosition != null) && (Item.Item.Composition.Map.ItemByPosition.LinkedObject instanceof TComponentTypedDataFile)) {
-								com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.TOpenComponentTypedDataFileParams Params = new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.TOpenComponentTypedDataFileParams((TComponentTypedDataFile)Item.Item.Composition.Map.ItemByPosition.LinkedObject, Panel.ParentActivity, Panel.Component);
-								Params.ComponentTypedDataFile.ClearData();
+								com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.TOpenComponentTypedDataFileParams Params = new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL.TOpenComponentTypedDataFileParams((TComponentTypedDataFile)Item.Item.Composition.Map.ItemByPosition.LinkedObject, Panel.ParentActivity);
 								//.
 								Panel.OpenURL(position, Params);
 							}
@@ -1004,9 +1006,10 @@ public class TURLFolderListComponent extends TUIComponent {
 			@Override
 			public boolean onLongClick(View v) {
 				final CharSequence[] _items;
-				_items = new CharSequence[2];
+				_items = new CharSequence[3];
 				_items[0] = ParentActivity.getString(R.string.SImportFromFile);
-				_items[1] = ParentActivity.getString(R.string.SCreateInternetAddressBookmark);
+				_items[1] = ParentActivity.getString(R.string.SCreatePlaceBookmarkFromCurrentMap);
+				_items[2] = ParentActivity.getString(R.string.SCreateInternetAddressBookmark);
 				AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 				builder.setTitle(R.string.SOperations);
 				builder.setNegativeButton(ParentActivity.getString(R.string.SCancel),null);
@@ -1039,7 +1042,24 @@ public class TURLFolderListComponent extends TUIComponent {
 						    	//.
 								break; //. >
 								
-							case 1: 
+							case 1:
+								if (Component != null) {
+									TReflectionWindowStruc RW = Component.ReflectionWindow.GetWindow(); 
+									//.
+									double Timestamp = RW.EndTimestamp;
+									if (Timestamp >= TReflectionWindowActualityInterval.MaxRealTimestamp)
+										Timestamp = OleDate.UTCCurrentTimestamp();
+				    				com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.TURL.TData Data = new com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.TURL.TData("RW", RW.X0,RW.Y0, RW.X1,RW.Y1, RW.X2,RW.Y2, RW.X3,RW.Y3, Timestamp);
+				    				String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+				    				com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.Panel.TURL URL = new com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.Panel.TURL(Data);
+				    				URL.Name = "";  
+				    				URL.ConstructURLFile(URLFN);
+				    				//.
+				    				ImportURLFromFile(URLFN);
+								}
+								break; //. >
+								
+							case 2: 
 				                final LinearLayout layout = new LinearLayout(ParentActivity);
 				                layout.setOrientation(LinearLayout.VERTICAL);
 				                TextView label = new TextView(ParentActivity);

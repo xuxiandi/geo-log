@@ -322,7 +322,7 @@
                 android:id="@+id/TextView1"
                 android:layout_width="234dp"
                 android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/cbDataName"
+                android:layout_alignBaseline="@+id/cbDataParameters"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
@@ -332,7 +332,7 @@
                 android:textSize="16sp" />
 
             <CheckBox
-                android:id="@+id/cbDataName"
+                android:id="@+id/cbDataParameters"
                 android:layout_width="wrap_content"
                 android:layout_height="28dp"
                 android:layout_alignParentRight="true"
@@ -341,7 +341,7 @@
                 android:checked="false"
                 android:scaleX="0.8"
                 android:scaleY="0.8"
-                android:text="@string/SAttachName"
+                android:text="@string/SWithParameters"
                 android:textColor="#ffffffff"
                 android:textSize="16sp" />
         </RelativeLayout>

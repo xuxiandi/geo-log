@@ -10,25 +10,13 @@
         android:orientation="vertical" >
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/SMapFor" >
-        </TextView>
-
-        <Spinner
-            android:id="@+id/spPOIMapIDGeoSpace"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/TextView02"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/SPOIName" >
+            android:text="@string/SName1" >
         </TextView>
 
         <EditText
-            android:id="@+id/edPOIName"
+            android:id="@+id/edName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -44,18 +32,12 @@
             android:id="@+id/spSecurity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-        <CheckBox
-            android:id="@+id/cbPOIModifyLast"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/SChangeLastPOI" >
-        </CheckBox>
 
         <Button
-            android:id="@+id/TrackerPOIPanel_btnOk"
+            android:id="@+id/btnCreate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/SCreateNewPOI"
+            android:text="@string/SCreate"
             android:textSize="16sp" >
         </Button>
     </LinearLayout>

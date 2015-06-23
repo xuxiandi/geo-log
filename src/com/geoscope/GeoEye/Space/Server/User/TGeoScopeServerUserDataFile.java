@@ -23,18 +23,28 @@ public class TGeoScopeServerUserDataFile {
 	
 	private TGeoScopeServerUser User = null;
 	//.
-	private double Timestamp;
-	private String DataFileName;
+	private double 	Timestamp;
+	private String 	DataFileName;
+	private long 	SecurityFileID;
 	
-	public TGeoScopeServerUserDataFile(TGeoScopeServerUser pUser, double pTimestamp, String pDataFileName) {
+	public TGeoScopeServerUserDataFile(TGeoScopeServerUser pUser, double pTimestamp, String pDataFileName, long pSecurityFileID) {
 		User = pUser;
 		//.
 		Timestamp = pTimestamp;
 		DataFileName = pDataFileName;
+		SecurityFileID = pSecurityFileID;
+	}
+	
+	public TGeoScopeServerUserDataFile(TGeoScopeServerUser pUser, double pTimestamp, String pDataFileName) {
+		this(pUser, pTimestamp, pDataFileName, 0);
+	}
+	
+	public TGeoScopeServerUserDataFile(double pTimestamp, String pDataFileName, long pSecurityFileID) {
+		this(null, pTimestamp, pDataFileName, pSecurityFileID);	
 	}
 	
 	public TGeoScopeServerUserDataFile(double pTimestamp, String pDataFileName) {
-		this(null, pTimestamp, pDataFileName);	
+		this(pTimestamp, pDataFileName, 0);
 	}
 	
 	public void Destroy() {
@@ -131,9 +141,14 @@ public class TGeoScopeServerUserDataFile {
         	UserLocation.AssignFromGPSFix(GPSFix);
         	//.
             Params = "3"/*Version*/+","+Integer.toString(PrototypeID)+","+UserLocation.ToFixString();
+            if (SecurityFileID != 0)
+            	Params += ","+Long.toString(SecurityFileID); 
         }
-        else
+        else {
             Params = "2"/*Version*/+","+Integer.toString(PrototypeID);
+            if (SecurityFileID != 0)
+            	Params += ","+Long.toString(SecurityFileID); 
+        }
         //.
         byte[] AddressData = Params.getBytes("windows-1251");
 		//.
@@ -161,9 +176,14 @@ public class TGeoScopeServerUserDataFile {
         	UserLocation.AssignFromGPSFix(GPSFix);
         	//.
             Params = "5"/*Version*/+","+Integer.toString(idTOwner)+","+Long.toString(idOwner)+","+Integer.toString(PrototypeForComponentID)+","+UserLocation.ToFixString();
+            if (SecurityFileID != 0)
+            	Params += ","+Long.toString(SecurityFileID); 
         }
-        else
+        else {
             Params = "4"/*Version*/+","+Integer.toString(idTOwner)+","+Long.toString(idOwner)+","+Integer.toString(PrototypeForComponentID);
+            if (SecurityFileID != 0)
+            	Params += ","+Long.toString(SecurityFileID); 
+        }
         //.
         byte[] AddressData = Params.getBytes("windows-1251");
 		//.

@@ -1074,5 +1074,7 @@
     <string name="SSecurity">Security</string>
     <string name="SDefault">Default</string>
     <string name="SWithParameters">with parameters</string>
+    <string name="SChangeSecurity">Change security &#8230;</string>
+    <string name="SSecurityHasBeenChanged">Security has been changed.</string>
     
 </resources>

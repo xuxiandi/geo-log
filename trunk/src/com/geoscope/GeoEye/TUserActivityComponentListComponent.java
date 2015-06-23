@@ -706,12 +706,13 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 					//.
 		    		final CharSequence[] _items;
 		    		int SelectedIdx = -1;
-		    		_items = new CharSequence[5];
+		    		_items = new CharSequence[6];
 		    		_items[0] = ParentActivity.getString(R.string.SOpen); 
 		    		_items[1] = ParentActivity.getString(R.string.SContent1); 
 		    		_items[2] = ParentActivity.getString(R.string.SShowGeoLocation); 
 		    		_items[3] = ParentActivity.getString(R.string.SGetURLFile); 
-		    		_items[4] = ParentActivity.getString(R.string.SRemove); 
+		    		_items[4] = ParentActivity.getString(R.string.SChangeSecurity); 
+		    		_items[5] = ParentActivity.getString(R.string.SRemove); 
 		    		//.
 		    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		    		builder.setTitle(R.string.SSelect);
@@ -830,7 +831,79 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 4: //. remove component
+		    		    		case 4: //. change component security
+		    						final CharSequence[] _items;
+		    						_items = new CharSequence[2];
+		    						_items[0] = ParentActivity.getString(R.string.SDefault);
+		    						_items[1] = ParentActivity.getString(R.string.SPrivate);
+		    						AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
+		    						builder.setTitle(R.string.SOperations);
+		    						builder.setNegativeButton(ParentActivity.getString(R.string.SCancel),null);
+		    						builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+		    							
+		    							@Override
+		    							public void onClick(DialogInterface arg0, int arg1) {
+		    								arg0.dismiss();
+		    								//.
+		    				            	try {
+		    				            		final long SecurityFileID;
+		    									switch (arg1) {
+		    									
+		    									case 0: //. default security 
+		    										SecurityFileID = TComponentFunctionality.USER_DEFAULT_SECURITY_FILE_ID;
+		    										break; //. >
+
+		    									case 1: //. private security
+		    										SecurityFileID = TComponentFunctionality.USER_PRIVATE_SECURITY_FILE_ID;
+		    										break; //. >
+		    									
+		    									default:
+		    										return; //. ->
+		    									}
+		    									//.
+			    		    					TAsyncProcessing SecurityChanging = new TAsyncProcessing(ParentActivity, ParentActivity.getString(R.string.SRemoving)) {
+
+			    		    						@Override
+			    		    						public void Process() throws Exception {
+			    		    							TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_Component.idTComponent,_Component.idComponent);
+			    		    							if (CF != null)
+			    		    								try {
+			    		    									CF.ChangeSecurity(SecurityFileID);
+			    		    								} finally {
+			    		    									CF.Release();
+			    		    								}
+			    		    								else
+			    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(_Component.idTComponent)); //. =>
+			    		    						}
+
+			    		    						@Override
+			    		    						public void DoOnCompleted() throws Exception {
+			    		    							Toast.makeText(ParentActivity, R.string.SSecurityHasBeenChanged, Toast.LENGTH_LONG).show();
+			    		    						}
+			    		    						
+			    		    						@Override
+			    		    						public void DoOnException(Exception E) {
+			    		    							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+			    		    						}
+			    		    					};
+			    		    					SecurityChanging.Start();
+		    								}
+		    								catch (Exception E) {
+		    									String S = E.getMessage();
+		    									if (S == null)
+		    										S = E.getClass().getName();
+		    				        			Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+		    								}
+		    							}
+		    						});
+		    						AlertDialog AD = builder.create();
+		    						AD.show();
+		    		    			//.
+		        		    		arg0.dismiss();
+		        		    		//.
+		    		    			break; //. >
+		    		    			
+		    		    		case 5: //. remove component
 		    		    			AlertDialog.Builder alert = new AlertDialog.Builder(ParentActivity);
 		    		    			//.
 		    		    			alert.setTitle(R.string.SRemoval);
@@ -1068,7 +1141,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 				    					
 			    					}
 			    					catch (Exception E) {
-			    		    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+			    		    			//. suppress exception MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
 			    					}
 			    				}
 			            	}

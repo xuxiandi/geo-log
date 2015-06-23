@@ -1074,5 +1074,7 @@
     <string name="SSecurity">Безопасность</string>
     <string name="SDefault">По-умолчанию</string>
     <string name="SWithParameters">с параметрами</string>
-
+    <string name="SChangeSecurity">Изменить безопасность &#8230;</string>
+    <string name="SSecurityHasBeenChanged">Безопасность изменена.</string>
+    
 </resources>

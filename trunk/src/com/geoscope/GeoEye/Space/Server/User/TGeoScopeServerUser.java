@@ -2987,13 +2987,7 @@ public class TGeoScopeServerUser {
 		String CommandURL = PrepareSetTaskEnabledURL(pUserID,Value);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
-		try {
-			InputStream in = Connection.getInputStream();
-			in.close();
-		}
-		finally {
-			Connection.disconnect();
-		}
+		Connection.disconnect();
 	}
 	
 	public void SetTaskEnabled(boolean Value) throws Exception {
@@ -3212,13 +3206,7 @@ public class TGeoScopeServerUser {
 		String CommandURL = PrepareFinishUserCurrentActivityURL(pUserID);
 		//.
 		HttpURLConnection Connection = Server.OpenConnection(CommandURL);
-		try {
-			InputStream in = Connection.getInputStream();
-			in.close();
-		}
-		finally {
-			Connection.disconnect();
-		}
+		Connection.disconnect();
 	}
 	
 	public void FinishUserCurrentActivity() throws Exception {

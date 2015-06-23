@@ -35,6 +35,9 @@ public class TComponentFunctionality extends TFunctionality {
 	public static final int COMPONENTDATA_SOURCE_CONTEXT 	= 2;
 	public static final int COMPONENTDATA_SOURCE_THIS 		= 4;
 	
+	public static final int USER_DEFAULT_SECURITY_FILE_ID = 0;
+	public static final int USER_PRIVATE_SECURITY_FILE_ID = -1;
+	
 	public static class TPropsPanel {
 		
 		public int	idTComponent;
@@ -397,6 +400,38 @@ public class TComponentFunctionality extends TFunctionality {
 		finally {
 			HttpConnection.disconnect();
 		}
+	}
+	
+	public void ChangeSecurity(long SecurityFileID) throws Exception {
+		String URL1 = Server.Address;
+		//. add command path
+		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
+		String URL2 = "Functionality"+"/"+"Component.dat";
+		//. add command parameters
+		URL2 = URL2+"?"+"2"/*command version*/+","+Integer.toString(TypeFunctionality.idType)+","+Long.toString(idComponent)+","+Long.toString(SecurityFileID);
+		//.
+		byte[] URL2_Buffer;
+		try {
+			URL2_Buffer = URL2.getBytes("windows-1251");
+		} 
+		catch (Exception E) {
+			URL2_Buffer = null;
+		}
+		byte[] URL2_EncryptedBuffer = Server.User.EncryptBufferV2(URL2_Buffer);
+		//. encode string
+        StringBuffer sb = new StringBuffer();
+        for (int I=0; I < URL2_EncryptedBuffer.length; I++) {
+            String h = Integer.toHexString(0xFF & URL2_EncryptedBuffer[I]);
+            while (h.length() < 2) 
+            	h = "0" + h;
+            sb.append(h);
+        }
+		URL2 = sb.toString();
+		//.
+		String URL = URL1+"/"+URL2+".dat";
+		//.
+		HttpURLConnection HttpConnection = Server.OpenConnection(URL);
+		HttpConnection.disconnect();
 	}
 	
 	public TURL GetDefaultURL() throws Exception {

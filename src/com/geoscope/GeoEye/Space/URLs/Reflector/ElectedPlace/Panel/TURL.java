@@ -11,6 +11,7 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.TLocation;
+import com.geoscope.GeoEye.Space.Defines.TReflectionWindowActualityInterval;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 
 public class TURL extends com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.TURL {
@@ -61,7 +62,12 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Reflector.ElectedPlace.
 		P.RW.X1 = Data.RW_X1; P.RW.Y1 = Data.RW_Y1;
 		P.RW.X2 = Data.RW_X2; P.RW.Y2 = Data.RW_Y2;
 		P.RW.X3 = Data.RW_X3; P.RW.Y3 = Data.RW_Y3;
-		P.RW.BeginTimestamp = Data.RW_Timestamp; P.RW.EndTimestamp = Data.RW_Timestamp;
+		if (Data.RW_Timestamp < TReflectionWindowActualityInterval.MaxRealTimestamp) {
+			P.RW.BeginTimestamp = Data.RW_Timestamp-1.0; P.RW.EndTimestamp = Data.RW_Timestamp;
+		}
+		else {
+			P.RW.BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp; P.RW.EndTimestamp = TReflectionWindowActualityInterval.MaxTimestamp;
+		}
 		P.RW.Normalize();
 		Intent intent = new Intent(context, TReflector.class);
 		intent.putExtra("Reason", TReflectorComponent.REASON_SHOWLOCATIONWINDOW);

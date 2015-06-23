@@ -366,11 +366,6 @@ public class TComponentTypedDataFiles {
 		return DataIsNull();
 	}
 	
-	public void ClearData() {
-		for (int I = 0; I < Items.length; I++)
-			Items[I].ClearData();
-	}
-	
 	public void FromByteArrayV0(byte[] BA, int Index) throws IOException {
 		int Idx = Index;
 		short ItemsCount = TDataConverter.ConvertLEByteArrayToInt16(BA,Idx); Idx += 2;

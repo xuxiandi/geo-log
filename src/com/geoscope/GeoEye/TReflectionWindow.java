@@ -1070,7 +1070,14 @@ public class TReflectionWindow {
 	}
 	
 	public synchronized void SetActualityTime(double Timestamp, boolean flUpdateImage) {
-		SetActualityInterval(Timestamp-1.0,Timestamp, flUpdateImage);
+		double BeginTimestamp,EndTimestamp;
+		if (Timestamp < TReflectionWindowActualityInterval.MaxRealTimestamp) {
+			BeginTimestamp = Timestamp-1.0; EndTimestamp = Timestamp;
+		}
+		else {
+			BeginTimestamp = TReflectionWindowActualityInterval.NullTimestamp; EndTimestamp = TReflectionWindowActualityInterval.MaxTimestamp;
+		}
+		SetActualityInterval(BeginTimestamp,EndTimestamp, flUpdateImage);
 	}
 	
 	public synchronized void SetActualityTime(double Timestamp) {

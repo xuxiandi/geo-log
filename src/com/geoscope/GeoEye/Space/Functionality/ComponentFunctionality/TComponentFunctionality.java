@@ -572,4 +572,10 @@ public class TComponentFunctionality extends TFunctionality {
 			HttpConnection.disconnect();
 		}
 	}
+	
+	public void Open(Context context, Object Params) throws Exception {
+		TComponentFunctionality.TPropsPanel PropsPanel = TPropsPanel_Create(context);
+		if (PropsPanel != null)
+			context.startActivity(PropsPanel.PanelActivity);
+	}	
 }

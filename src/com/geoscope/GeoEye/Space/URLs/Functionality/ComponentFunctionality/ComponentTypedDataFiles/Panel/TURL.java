@@ -17,7 +17,6 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
@@ -159,13 +158,10 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 		public TComponentTypedDataFile ComponentTypedDataFile;
 		//.
 		public Activity ParentActivity;
-		//.
-		public TReflectorComponent Component;
 		
-		public TOpenComponentTypedDataFileParams(TComponentTypedDataFile pComponentTypedDataFile, Activity pParentActivity, TReflectorComponent pComponent) {
+		public TOpenComponentTypedDataFileParams(TComponentTypedDataFile pComponentTypedDataFile, Activity pParentActivity) {
 			ComponentTypedDataFile = pComponentTypedDataFile;
 			ParentActivity = pParentActivity;
-			Component = pComponent;
 		}
 	}
 	
@@ -184,12 +180,40 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 				
 				@Override 
 				public void DoOnCompleted() throws Exception {
-					Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
-					intent.putExtra("ComponentID", 0);
-					intent.putExtra("DataFiles", TypedDataFiles.ToByteArrayV0());
-					intent.putExtra("AutoStart", true);
-					//.
-					context.startActivity(intent);
+					if (TypedDataFiles.Count() > 1) {
+						Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
+						intent.putExtra("ComponentID", 0);
+						intent.putExtra("DataFiles", TypedDataFiles.ToByteArrayV0());
+						intent.putExtra("AutoStart", true);
+						//.
+						context.startActivity(intent);
+					}
+					else
+						if (TypedDataFiles.Count() == 1) {
+							final TComponentTypedDataFile ComponentTypedDataFile = TypedDataFiles.GetRootItem();
+							if (ComponentTypedDataFile.IsLoaded())
+								ComponentTypedDataFile.Open(User, context);
+							else {
+								TAsyncProcessing Opening = new TAsyncProcessing(context) {
+									
+									@Override
+									public void Process() throws Exception {
+										ComponentTypedDataFile.PrepareAsFullFromServer(User, Canceller, null/*Progressor*/);
+									}
+									
+									@Override 
+									public void DoOnCompleted() throws Exception {
+										ComponentTypedDataFile.Open(User, context);
+									}
+									
+									@Override
+									public void DoOnException(Exception E) {
+						    			Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								};
+								Opening.Start();
+							}
+						}
 				}
 				
 				@Override
@@ -204,7 +228,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 				final TOpenComponentTypedDataFileParams OpenComponentTypedDataFileParams = (TOpenComponentTypedDataFileParams)Params;
 				//.
 				if (OpenComponentTypedDataFileParams.ComponentTypedDataFile.IsLoaded())
-					OpenComponentTypedDataFileParams.ComponentTypedDataFile.Open(User, OpenComponentTypedDataFileParams.ParentActivity, OpenComponentTypedDataFileParams.Component);
+					OpenComponentTypedDataFileParams.ComponentTypedDataFile.Open(User, OpenComponentTypedDataFileParams.ParentActivity);
 				else {
 					TAsyncProcessing Opening = new TAsyncProcessing(context) {
 						
@@ -215,7 +239,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 						
 						@Override 
 						public void DoOnCompleted() throws Exception {
-							OpenComponentTypedDataFileParams.ComponentTypedDataFile.Open(User, OpenComponentTypedDataFileParams.ParentActivity, OpenComponentTypedDataFileParams.Component);
+							OpenComponentTypedDataFileParams.ComponentTypedDataFile.Open(User, OpenComponentTypedDataFileParams.ParentActivity);
 						}
 						
 						@Override

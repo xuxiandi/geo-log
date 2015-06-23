@@ -122,4 +122,12 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 	public TDataStreamDescriptor GetStreamDescriptor() throws Exception {
 		return (new TDataStreamDescriptor(GetDescriptorData())); //. ->
 	}
+	
+	@Override
+	public void Open(Context context, Object Params) throws Exception {
+    	Intent intent = new Intent(context, TDataStreamPropsPanel.class);
+		intent.putExtra("idTComponent",idTComponent());
+		intent.putExtra("idComponent",idComponent);
+    	context.startActivity(intent);
+	}
 }

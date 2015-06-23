@@ -106,7 +106,7 @@ public class TComponentCreatingPanel extends Activity {
         //. 
         setContentView(R.layout.componentcreating_panel);
         //.
-        cbDataName = (CheckBox)findViewById(R.id.cbDataName);
+        cbDataName = (CheckBox)findViewById(R.id.cbDataParameters);
         cbDataName.setChecked(Configuration.ActivityConfiguration.flDataName);
         cbDataName.setOnClickListener(new OnClickListener() {
         	

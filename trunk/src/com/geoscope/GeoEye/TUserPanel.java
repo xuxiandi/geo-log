@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
@@ -263,6 +264,57 @@ public class TUserPanel extends Activity {
         		User_GetLocation(UserInfo);
             }
         });
+        btnUserLocation.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+        		if (UserInfo == null)
+        			return false; //. ->
+        		//.
+				final CharSequence[] _items;
+				_items = new CharSequence[1];
+				_items[0] = getString(R.string.SGetURLFile);
+				AlertDialog.Builder builder = new AlertDialog.Builder(TUserPanel.this);
+				builder.setTitle(R.string.SOperations);
+				builder.setNegativeButton(getString(R.string.SCancel),null);
+				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						arg0.dismiss();
+						//.
+		            	try {
+							switch (arg1) {
+							
+							case 0: 
+			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+			            		com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Location.TURL URL = new com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.Location.TURL(UserID);
+			            		URL.Name = getString(R.string.SLocation)+UserInfo.UserFullName;
+			            		URL.ConstructURLFile(URLFN);
+			            		//.
+				    		    new AlertDialog.Builder(TUserPanel.this)
+				    	        .setIcon(android.R.drawable.ic_dialog_alert)
+				    	        .setTitle(R.string.SInfo)
+				    	        .setMessage(TUserPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TUserPanel.this.getString(R.string.SUseItForImport))
+				    		    .setPositiveButton(R.string.SOk, null)
+				    		    .show();
+								break; //. >
+							}
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
+							if (S == null)
+								S = E.getClass().getName();
+		        			Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				//.
+				return true;
+			}
+		});
         btnUserMessaging = (Button)findViewById(R.id.btnUserMessaging);
         btnUserMessaging.setOnClickListener(new OnClickListener() {
         	
@@ -972,7 +1024,7 @@ public class TUserPanel extends Activity {
     	Updating = new TUpdating(true,true);
     }    
 
-    private class TUserLocationGetting extends TCancelableThread {
+    public static class TUserLocationGetting extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION 				= 0;
     	private static final int MESSAGE_DONE 					= 1;
@@ -981,15 +1033,16 @@ public class TUserPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
 
     	private TGeoScopeServerUser.TUserDescriptor User;
-    	private boolean flCloseAfterDone;
     	
+    	private Context context;
+    	//.
         private ProgressDialog progressDialog; 
     	
-    	public TUserLocationGetting(TGeoScopeServerUser.TUserDescriptor pUser, boolean pflCloseAfterDone) {
+    	public TUserLocationGetting(Context pcontext, TGeoScopeServerUser.TUserDescriptor pUser) {
     		super();
     		//.
+    		context = pcontext;
     		User = pUser;
-    		flCloseAfterDone = pflCloseAfterDone;
     		//.
     		_Thread = new Thread(this);
     		_Thread.start();
@@ -1003,7 +1056,7 @@ public class TUserPanel extends Activity {
     			try {
     				TUserAgent UserAgent = TUserAgent.GetUserAgent();
     				if (UserAgent == null)
-    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+    					throw new Exception(context.getString(R.string.SUserAgentIsNotInitialized)); //. =>
     				GeoLocation = _GetUserLocation(User, UserAgent.Server.User, Canceller);
 				}
 				finally {
@@ -1024,6 +1077,29 @@ public class TUserPanel extends Activity {
         	}
 		}
 
+	    private TGeoLocation _GetUserLocation(TGeoScopeServerUser.TUserDescriptor User, TGeoScopeServerUser MyUser, TCanceller Canceller) throws Exception {
+	    	TGeoScopeServerUser.TUserLocation UserLocation = MyUser.IncomingMessages_Command_GetUserLocation(User.UserID, TGeoScopeServerUser.TGetUserLocationCommandMessage.Version_ObtainFix, Integer.MAX_VALUE, Canceller);
+			switch (UserLocation.Status) {
+			
+			case TGPSModule.GPSMODULESTATUS_AVAILABLE:
+				break; //. >
+				
+			case TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE:
+				throw new Exception(context.getString(R.string.SLocationIsPermanentlyUnavailable)); //. =>
+				
+			case TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE:
+				throw new Exception(MyUser.Server.context.getString(R.string.SLocationIsTemporarilyUnavailable)); //. =>
+
+			case TGPSModule.GPSMODULESTATUS_UNKNOWN:
+				throw new Exception(context.getString(R.string.SLocationIsUnavailableForUnknownReason)); //. =>
+			}
+			if (!UserLocation.IsAvailable())
+				throw new Exception(context.getString(R.string.SLocationIsNotAvailable)); //. =>
+			if (UserLocation.IsNull())
+				throw new Exception(context.getString(R.string.SLocationIsUnknown)); //. =>
+			return (new TGeoLocation(UserLocation.Datum, UserLocation.Timestamp, UserLocation.Latitude,UserLocation.Longitude,UserLocation.Altitude)); 
+	    }
+	    
 	    private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
@@ -1035,10 +1111,10 @@ public class TUserPanel extends Activity {
 			            	break; //. >
 		            	Exception E = (Exception)msg.obj;
 		            	//.
-		    		    new AlertDialog.Builder(TUserPanel.this)
+		    		    new AlertDialog.Builder(context)
 		    	        .setIcon(android.R.drawable.ic_dialog_alert)
 		    	        .setTitle(R.string.SError)
-		    	        .setMessage(TUserPanel.this.getString(R.string.SErrorOfGettingCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")"+", "+E.getMessage())
+		    	        .setMessage(context.getString(R.string.SErrorOfGettingCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")"+", "+E.getMessage())
 		    		    .setPositiveButton(R.string.SOk, null)
 		    		    .show();
 		            	//.
@@ -1050,23 +1126,20 @@ public class TUserPanel extends Activity {
 		            	TGeoLocation GeoLocation = (TGeoLocation)msg.obj;
 		        		//.
 		        		try {
-		        			Intent intent = new Intent(TUserPanel.this, TReflector.class);
+		        			Intent intent = new Intent(context, TReflector.class);
 		        			intent.putExtra("Reason", TReflectorComponent.REASON_SHOWGEOLOCATION1);
 		        			intent.putExtra("GeoLocation", GeoLocation.ToByteArray());
-		        			TUserPanel.this.startActivity(intent);
+		        			context.startActivity(intent);
 		            		//.
-		                    Toast.makeText(TUserPanel.this, TUserPanel.this.getString(R.string.SCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")", Toast.LENGTH_SHORT).show();
-			            	//.
-			            	if (flCloseAfterDone)
-			            		finish();
+		                    Toast.makeText(context, context.getString(R.string.SCurrentLocationOfUser)+User.UserName+" ("+User.UserFullName+")", Toast.LENGTH_SHORT).show();
 		        		} catch (Exception E1) {
-		        			Toast.makeText(TUserPanel.this, E1.getMessage(),Toast.LENGTH_LONG).show();
+		        			Toast.makeText(context, E1.getMessage(),Toast.LENGTH_LONG).show();
 		        		}
 		            	break; //. >
 		            	
 		            case MESSAGE_PROGRESSBAR_SHOW:
-		            	progressDialog = new ProgressDialog(TUserPanel.this);    
-		            	progressDialog.setMessage(TUserPanel.this.getString(R.string.SGettingUserLocation));    
+		            	progressDialog = new ProgressDialog(context);    
+		            	progressDialog.setMessage(context.getString(R.string.SGettingUserLocation));    
 		            	progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);    
 		            	progressDialog.setIndeterminate(true); 
 		            	progressDialog.setCancelable(true);
@@ -1082,7 +1155,7 @@ public class TUserPanel extends Activity {
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		                if ((!isFinishing()) && progressDialog.isShowing()) 
+		                if (progressDialog.isShowing()) 
 		                	progressDialog.dismiss(); 
 		            	//.
 		            	break; //. >
@@ -1100,31 +1173,8 @@ public class TUserPanel extends Activity {
 	    };
     }
 	
-    private TGeoLocation _GetUserLocation(TGeoScopeServerUser.TUserDescriptor User, TGeoScopeServerUser MyUser, TCanceller Canceller) throws Exception {
-    	TGeoScopeServerUser.TUserLocation UserLocation = MyUser.IncomingMessages_Command_GetUserLocation(User.UserID, TGeoScopeServerUser.TGetUserLocationCommandMessage.Version_ObtainFix, Integer.MAX_VALUE, Canceller);
-		switch (UserLocation.Status) {
-		
-		case TGPSModule.GPSMODULESTATUS_AVAILABLE:
-			break; //. >
-			
-		case TGPSModule.GPSMODULESTATUS_PERMANENTLYUNAVAILABLE:
-			throw new Exception(getString(R.string.SLocationIsPermanentlyUnavailable)); //. =>
-			
-		case TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE:
-			throw new Exception(getString(R.string.SLocationIsTemporarilyUnavailable)); //. =>
-
-		case TGPSModule.GPSMODULESTATUS_UNKNOWN:
-			throw new Exception(getString(R.string.SLocationIsUnavailableForUnknownReason)); //. =>
-		}
-		if (!UserLocation.IsAvailable())
-			throw new Exception(getString(R.string.SLocationIsNotAvailable)); //. =>
-		if (UserLocation.IsNull())
-			throw new Exception(getString(R.string.SLocationIsUnknown)); //. =>
-		return (new TGeoLocation(UserLocation.Datum, UserLocation.Timestamp, UserLocation.Latitude,UserLocation.Longitude,UserLocation.Altitude)); 
-    }
-    
     private void User_GetLocation(TGeoScopeServerUser.TUserDescriptor User) {
-    	new TUserLocationGetting(User,false);
+    	new TUserLocationGetting(this, User);
     }    
     
     private void User_SetTaskEnabled(TGeoScopeServerUser.TUserDescriptor pUser, boolean _Value) {

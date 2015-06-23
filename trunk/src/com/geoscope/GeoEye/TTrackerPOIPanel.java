@@ -5,7 +5,6 @@ import java.util.Date;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,7 +15,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TableLayout;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
@@ -30,13 +28,19 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 public class TTrackerPOIPanel extends Activity {
 
 	
+	public static final long DEFAULT_SECURITY_FILE_ID = 0;
+	public static final long PRIVATE_SECURITY_FILE_ID = -1;
+	
+	public static final int DEFAULT_SECURITY_FILE_INDEX = 0;
+	public static final int PRIVATE_SECURITY_FILE_INDEX = 1;
+	public static final int OTHER_SECURITY_FILE_INDEX 	= 2;
+	
 	private final int MENU_CANCEL = 0;
 	private final int MENU_CREATE = 1;
-	//.
-	private TableLayout _TableLayout;
+	
 	private Spinner spPOIMapIDGeoSpace;
 	public EditText edPOIName;
-	public CheckBox cbPOIPrivateSecurity;
+	private Spinner spSecurity;
 	public CheckBox cbPOIModifyLast;
 	private Button 	btnOk;
 	//.
@@ -51,9 +55,6 @@ public class TTrackerPOIPanel extends Activity {
 		super.onCreate(savedInstanceState);
         //.
         setContentView(R.layout.tracker_poi_panel);
-        //.
-        _TableLayout = (TableLayout)findViewById(R.id.TrackerPOIPanelTableLayout);
-        _TableLayout.setBackgroundColor(Color.blue(100));
     	//.
         spPOIMapIDGeoSpace = (Spinner)findViewById(R.id.spPOIMapIDGeoSpace);
         String[] GeoSpaceNames = TSystemTGeoSpace.WellKnownGeoSpaces_GetNames();
@@ -62,10 +63,19 @@ public class TTrackerPOIPanel extends Activity {
         spPOIMapIDGeoSpace.setAdapter(saPOIMapIDGeoSpace);
         //.
         edPOIName = (EditText)findViewById(R.id.edPOIName);
-        cbPOIPrivateSecurity = (CheckBox)findViewById(R.id.cbPOIPrivateSecurity);
-        cbPOIPrivateSecurity.setChecked(false);
+        //.
+    	//.
+        String[] SecuritySA = new String[2];
+        SecuritySA[DEFAULT_SECURITY_FILE_INDEX] = getString(R.string.SDefault);
+        SecuritySA[PRIVATE_SECURITY_FILE_INDEX] = getString(R.string.SPrivate);
+        spSecurity = (Spinner)findViewById(R.id.spSecurity);
+        ArrayAdapter<String> saSecurity = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SecuritySA);
+        saSecurity.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spSecurity.setAdapter(saSecurity);
+        //.
         cbPOIModifyLast = (CheckBox)findViewById(R.id.cbPOIModifyLast);
         cbPOIModifyLast.setChecked(false);
+        //.
         btnOk = (Button)findViewById(R.id.TrackerPOIPanel_btnOk);
         btnOk.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -90,8 +100,7 @@ public class TTrackerPOIPanel extends Activity {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");      
 		POIName = "POI@"+sdf.format(new Date()); 
 		edPOIName.setText(POIName);
-		flPOIPrivateSecurity = false;
-		cbPOIPrivateSecurity.setChecked(flPOIPrivateSecurity);
+        spSecurity.setSelection(DEFAULT_SECURITY_FILE_INDEX);
 		flPOIModifyLast = false;
 		cbPOIModifyLast.setChecked(flPOIModifyLast);
 	}
@@ -128,7 +137,7 @@ public class TTrackerPOIPanel extends Activity {
     		Idx = 0;
     	MapID = TSystemTGeoSpace.WellKnownGeoSpaces[Idx].POIMapID;
 		POIName = edPOIName.getText().toString(); 
-		flPOIPrivateSecurity = cbPOIPrivateSecurity.isChecked();
+		flPOIPrivateSecurity = (spSecurity.getSelectedItemPosition() == PRIVATE_SECURITY_FILE_INDEX);
 		flPOIModifyLast = cbPOIModifyLast.isChecked();
 		//.
 		if (!TTracker.TrackerIsEnabled()) {

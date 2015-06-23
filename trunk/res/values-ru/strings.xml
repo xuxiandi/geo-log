@@ -1050,7 +1050,7 @@
     <string name="SMovingAndScaling">перемещение и масштабирование</string>
     <string name="STakePictureWithCameraAndEdit">Добавить отредактированное изображение</string>
     <string name="SMyUserPanelHint">Долгое нажатие на кнопку [+Изображение] открывает контекстное меню.\n(долгое нажатие на подсказке убирает её)</string>
-    <string name="SUserPanelHint">Долгое нажатие на изображении пользователя, на кнопках "Cообщения", "Чат", "Видео-телефон", "Содержимое", "Показать весь список" открывает контекстное меню.\n(долгое нажатие на подсказке убирает её)</string>
+    <string name="SUserPanelHint">Долгое нажатие на изображении пользователя, на кнопках "Cообщения", "Чат", "Видео-телефон", "Текущая позиция", "Содержимое", "Показать весь список" открывает контекстное меню.\n(долгое нажатие на подсказке убирает её)</string>
     <string name="SResourceIsNotAvailableAtTheMoment">ресурс недоступен в данный момент</string>
     <string name="SUserIsNotAvailableForMessaging">пользователь недоступен для чата</string>
     <string name="SLiveChatIsNotSupportedForUser">чат не поддерживается пользователем</string>
@@ -1071,5 +1071,8 @@
     <string name="SSummaryDrawingLength">"Суммарная длина линий: "</string>
     <string name="SSummarySquareUnderDrawing">"Суммарная площадь под линиями: "</string>
     <string name="SLocateDrawing">Найти рисунок</string>
-    
+    <string name="SSecurity">Безопасность</string>
+    <string name="SDefault">По-умолчанию</string>
+    <string name="SWithParameters">с параметрами</string>
+
 </resources>

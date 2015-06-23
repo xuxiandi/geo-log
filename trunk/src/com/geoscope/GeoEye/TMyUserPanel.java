@@ -96,6 +96,7 @@ public class TMyUserPanel extends Activity {
 	private static final int REQUEST_VIDEOCAMERA		= 6;
 	private static final int REQUEST_DRAWINGEDITOR		= 7;
 	private static final int REQUEST_IMAGEDRAWINGEDITOR	= 8;
+	private static final int REQUEST_DATAFILEPARAMETERS = 9;
 	
 	private static final int ACTIVITY_DATAFILE_TYPE_TEXT 		= 1;
 	private static final int ACTIVITY_DATAFILE_TYPE_IMAGE 		= 2;
@@ -113,7 +114,8 @@ public class TMyUserPanel extends Activity {
 			public static final int DataNameMaxSize = 100;
 			
 			
-			public boolean flDataName = false;
+			public boolean flDataName = false; //. obsolete
+			public boolean flDataParameters = false;
 		}
 		
 		
@@ -129,7 +131,7 @@ public class TMyUserPanel extends Activity {
 		
 		public void Load() throws Exception {
 			//. defaults
-			ActivityConfiguration.flDataName = false;
+			ActivityConfiguration.flDataParameters = false;
 			//.
 			File F = new File(ConfigurationFileName);
 			if (F.exists()) {
@@ -166,7 +168,9 @@ public class TMyUserPanel extends Activity {
 						//.
 						Node ModuleNode = TMyXML.SearchNode(UserAgentNode,"Activity");
 						if (ModuleNode != null) {
-							ActivityConfiguration.flDataName = (Integer.parseInt(TMyXML.SearchNode(ModuleNode,"DataName").getFirstChild().getNodeValue()) != 0);
+							Node PropertyNode = TMyXML.SearchNode(ModuleNode,"DataParameters");
+							if (PropertyNode != null)
+								ActivityConfiguration.flDataParameters = (Integer.parseInt(PropertyNode.getFirstChild().getNodeValue()) != 0);
 						}
 					}
 					catch (Exception E) {
@@ -200,12 +204,12 @@ public class TMyUserPanel extends Activity {
     	        //. ActivityModule
                 serializer.startTag("", "Activity");
     	        //.
-                serializer.startTag("", "DataName");
+                serializer.startTag("", "DataParameters");
                 int V = 0;
-                if (ActivityConfiguration.flDataName)
+                if (ActivityConfiguration.flDataParameters)
                 	V = 1;
                 serializer.text(Integer.toString(V));
-                serializer.endTag("", "DataName");
+                serializer.endTag("", "DataParameters");
                 //.
                 serializer.endTag("", "Activity");
                 //.
@@ -273,7 +277,7 @@ public class TMyUserPanel extends Activity {
 	private Button btnUserLocation;
 	//.
 	private Button btnUserCurrentActivity;
-	private CheckBox cbDataName;
+	private CheckBox cbDataParameters;
 	private Button btnUserCurrentActivityAddDataFile;
 	private Button btnUserCurrentActivityAddTextDataFile;
 	private Button btnUserCurrentActivityAddImageDataFile;
@@ -375,14 +379,14 @@ public class TMyUserPanel extends Activity {
             	startActivityForResult(intent,REQUEST_SETUSERACTIVITY);
             }
         });
-        cbDataName = (CheckBox)findViewById(R.id.cbDataName);
-        cbDataName.setChecked(Configuration.ActivityConfiguration.flDataName);
-        cbDataName.setOnClickListener(new OnClickListener(){
+        cbDataParameters = (CheckBox)findViewById(R.id.cbDataParameters);
+        cbDataParameters.setChecked(Configuration.ActivityConfiguration.flDataParameters);
+        cbDataParameters.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View v) {
                 boolean checked = ((CheckBox)v).isChecked();
                 //.
-                Configuration.ActivityConfiguration.flDataName = checked;
+                Configuration.ActivityConfiguration.flDataParameters = checked;
                 Configuration.flChanged = true;
             }
         });        
@@ -708,16 +712,26 @@ public class TMyUserPanel extends Activity {
                 if (extras != null) {
                 	final String POIText = extras.getString("Text");
                 	try {
-                    	if (Configuration.ActivityConfiguration.flDataName) 
-                    		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
-                    			
-                    			@Override
-                    			public void DoOnDataFileNameHandler(String Name)  throws Exception {
-                    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_TEXT, POIText,Name);
-                    			}
-                    		});
-                    	else 
-            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_TEXT, POIText,null);
+                    	if (Configuration.ActivityConfiguration.flDataParameters) {
+					    	//.
+					    	Intent intent = new Intent(TMyUserPanel.this, TMyUserNewDatafilePanel.class);
+					    	//.
+					    	intent.putExtra("DataFileType", ACTIVITY_DATAFILE_TYPE_TEXT);
+					    	intent.putExtra("DataFile", POIText);
+					    	//.
+					    	startActivityForResult(intent, REQUEST_DATAFILEPARAMETERS);    		
+                    	}
+                    	else
+                        	if (Configuration.ActivityConfiguration.flDataName) 
+                        		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
+                        			
+                        			@Override
+                        			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+                        	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_TEXT, POIText, Name, 0);
+                        			}
+                        		});
+                        	else 
+                	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_TEXT, POIText, null, 0);
 					}
 					catch (Exception E) {
 	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -731,16 +745,26 @@ public class TMyUserPanel extends Activity {
 				final File F = GetImageTempFile(this);
 				if (F.exists()) {
 					try {
-		            	if (Configuration.ActivityConfiguration.flDataName) 
-		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
-		            			
-		            			@Override
-		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
-		            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_IMAGE, F,Name);
-		            			}
-		            		});
-		            	else 
-		    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_IMAGE, F,null);
+                    	if (Configuration.ActivityConfiguration.flDataParameters) {
+					    	//.
+					    	Intent intent = new Intent(TMyUserPanel.this, TMyUserNewDatafilePanel.class);
+					    	//.
+					    	intent.putExtra("DataFileType", ACTIVITY_DATAFILE_TYPE_IMAGE);
+					    	intent.putExtra("DataFile", F.getAbsolutePath());
+					    	//.
+					    	startActivityForResult(intent, REQUEST_DATAFILEPARAMETERS);    		
+                    	}
+                    	else
+    		            	if (Configuration.ActivityConfiguration.flDataName) 
+    		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
+    		            			
+    		            			@Override
+    		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+    		            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_IMAGE, F.getAbsolutePath(), Name, 0);
+    		            			}
+    		            		});
+    		            	else 
+    		    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_IMAGE, F.getAbsolutePath(), null, 0);
 					}
 					catch (Throwable E) {
 						String S = E.getMessage();
@@ -870,16 +894,26 @@ public class TMyUserPanel extends Activity {
             	try {
     				final File F = GetVideoTempFile(this);
     				if (F.exists()) {
-		            	if (Configuration.ActivityConfiguration.flDataName) 
-		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
-		            			
-		            			@Override
-		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
-		            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_VIDEO, F,Name);
-		            			}
-		            		});
-		            	else 
-		    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_VIDEO, F,null);
+                    	if (Configuration.ActivityConfiguration.flDataParameters) {
+					    	//.
+					    	Intent intent = new Intent(TMyUserPanel.this, TMyUserNewDatafilePanel.class);
+					    	//.
+					    	intent.putExtra("DataFileType", ACTIVITY_DATAFILE_TYPE_VIDEO);
+					    	intent.putExtra("DataFile", F.getAbsolutePath());
+					    	//.
+					    	startActivityForResult(intent, REQUEST_DATAFILEPARAMETERS);    		
+                    	}
+                    	else
+    		            	if (Configuration.ActivityConfiguration.flDataName) 
+    		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
+    		            			
+    		            			@Override
+    		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+    		            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_VIDEO, F.getAbsolutePath(), Name, 0);
+    		            			}
+    		            		});
+    		            	else 
+    		    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_VIDEO, F.getAbsolutePath(), null, 0);
     				}
     				else
             			Toast.makeText(this, R.string.SVideoWasNotPrepared, Toast.LENGTH_SHORT).show();  
@@ -896,16 +930,26 @@ public class TMyUserPanel extends Activity {
                 if (extras != null) {
                 	final String DrawingFileName = extras.getString("FileName");
                 	try {
-		            	if (Configuration.ActivityConfiguration.flDataName) 
-		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
-		            			
-		            			@Override
-		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
-		            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_DRAWING, DrawingFileName,Name);
-		            			}
-		            		});
-		            	else 
-		    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_DRAWING, DrawingFileName,null);
+                    	if (Configuration.ActivityConfiguration.flDataParameters) {
+					    	//.
+					    	Intent intent = new Intent(TMyUserPanel.this, TMyUserNewDatafilePanel.class);
+					    	//.
+					    	intent.putExtra("DataFileType", ACTIVITY_DATAFILE_TYPE_DRAWING);
+					    	intent.putExtra("DataFile", DrawingFileName);
+					    	//.
+					    	startActivityForResult(intent, REQUEST_DATAFILEPARAMETERS);    		
+                    	}
+                    	else
+    		            	if (Configuration.ActivityConfiguration.flDataName) 
+    		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
+    		            			
+    		            			@Override
+    		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+    		            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_DRAWING, DrawingFileName, Name, 0);
+    		            			}
+    		            		});
+    		            	else 
+    		    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_DRAWING, DrawingFileName, null, 0);
 					}
 					catch (Exception E) {
 	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
@@ -971,16 +1015,26 @@ public class TMyUserPanel extends Activity {
                             	//.
         						if (ImageFile.exists()) {
         							try {
-        				            	if (Configuration.ActivityConfiguration.flDataName) 
-        				            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
-        				            			
-        				            			@Override
-        				            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
-        				            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_EDITEDIMAGE, ImageFile,Name);
-        				            			}
-        				            		});
-        				            	else 
-        				    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_EDITEDIMAGE, ImageFile,null);
+        		                    	if (Configuration.ActivityConfiguration.flDataParameters) {
+        							    	//.
+        							    	Intent intent = new Intent(TMyUserPanel.this, TMyUserNewDatafilePanel.class);
+        							    	//.
+        							    	intent.putExtra("DataFileType", ACTIVITY_DATAFILE_TYPE_EDITEDIMAGE);
+        							    	intent.putExtra("DataFile", ImageFile.getAbsolutePath());
+        							    	//.
+        							    	startActivityForResult(intent, REQUEST_DATAFILEPARAMETERS);    		
+        		                    	}
+        		                    	else
+            				            	if (Configuration.ActivityConfiguration.flDataName) 
+            				            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
+            				            			
+            				            			@Override
+            				            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+            				            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_EDITEDIMAGE, ImageFile.getAbsolutePath(), Name, 0);
+            				            			}
+            				            		});
+            				            	else 
+            				    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_EDITEDIMAGE, ImageFile.getAbsolutePath(), null, 0);
         							}
         							catch (Throwable E) {
         								String S = E.getMessage();
@@ -1007,6 +1061,28 @@ public class TMyUserPanel extends Activity {
                 	}
                 }
 			}
+            break; //. >
+
+        case REQUEST_DATAFILEPARAMETERS: 
+        	if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+                	int DataFileType = extras.getInt("DataFileType");
+                	String DataFile = extras.getString("DataFile");
+                	String Name = extras.getString("Name");
+                	long SecurityFileID = extras.getLong("SecurityFileID");
+                	//.
+                	if (Name.length() > TConfiguration.TActivityConfiguration.DataNameMaxSize)
+                		Name = Name.substring(0, TConfiguration.TActivityConfiguration.DataNameMaxSize);
+                	//.
+                	try {
+        	    		EnqueueDataFile(DataFileType, DataFile, Name, SecurityFileID);
+					}
+					catch (Exception E) {
+	        			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+					}
+                }
+        	}
             break; //. >
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -1146,16 +1222,26 @@ public class TMyUserPanel extends Activity {
 	        		final String SelectedFileName = fileName; 
                     //.
 					try {
-		            	if (Configuration.ActivityConfiguration.flDataName) 
-		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
-		            			
-		            			@Override
-		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
-		            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_FILE, SelectedFileName,Name);
-		            			}
-		            		});
-		            	else 
-		    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_FILE, SelectedFileName,null);
+                    	if (Configuration.ActivityConfiguration.flDataParameters) {
+					    	//.
+					    	Intent intent = new Intent(TMyUserPanel.this, TMyUserNewDatafilePanel.class);
+					    	//.
+					    	intent.putExtra("DataFileType", ACTIVITY_DATAFILE_TYPE_FILE);
+					    	intent.putExtra("DataFile", SelectedFileName);
+					    	//.
+					    	startActivityForResult(intent, REQUEST_DATAFILEPARAMETERS);    		
+                    	}
+                    	else
+    		            	if (Configuration.ActivityConfiguration.flDataName) 
+    		            		DataFileName_Dialog(TConfiguration.TActivityConfiguration.DataNameMaxSize, new TOnDataFileNameHandler() {
+    		            			
+    		            			@Override
+    		            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+    		            	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_FILE, SelectedFileName, Name, 0);
+    		            			}
+    		            		});
+    		            	else 
+    		    	    		EnqueueDataFile(ACTIVITY_DATAFILE_TYPE_FILE, SelectedFileName, null, 0);
 					}
 					catch (Throwable E) {
 						String S = E.getMessage();
@@ -1174,7 +1260,7 @@ public class TMyUserPanel extends Activity {
 		}
     }
     
-    private void EnqueueDataFile(int DataFileType, Object Data, String DataName) throws Exception {
+    private void EnqueueDataFile(int DataFileType, String Data, String DataName, long SecurityFileID) throws Exception {
     	if ((DataName != null) && (DataName.length() > 0))
     		DataName = "@"+TComponentFileStreaming.CheckAndEncodeFileNameString(DataName);
     	else
@@ -1183,7 +1269,7 @@ public class TMyUserPanel extends Activity {
 		switch (DataFileType) {
 		
 		case ACTIVITY_DATAFILE_TYPE_TEXT: {
-			String POIText = (String)Data;
+			String POIText = Data;
     		if (POIText.equals(""))
     			throw new Exception(getString(R.string.STextIsNull)); //. =>
     		//.
@@ -1211,7 +1297,7 @@ public class TMyUserPanel extends Activity {
 			    	TTracker Tracker = TTracker.GetTracker();
 			    	if (Tracker == null)
 			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-			    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp,DataFileName);
+			    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp, DataFileName, SecurityFileID);
 			    	DataFile.SendViaDevice(Tracker.GeoLog);
     			}
     			@Override 
@@ -1230,7 +1316,7 @@ public class TMyUserPanel extends Activity {
 	    	TTracker Tracker = TTracker.GetTracker();
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
+	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp, DataFileName, SecurityFileID);
 	    	DataFile.Create(Tracker.GeoLog);
 	    	//.
     		Toast.makeText(this, getString(R.string.STextIsAdded)+Integer.toString(DataFileSize), Toast.LENGTH_LONG).show();
@@ -1246,7 +1332,7 @@ public class TMyUserPanel extends Activity {
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	//.
-			File F = (File)Data;
+			File F = new File(Data);
 			FileInputStream fs = new FileInputStream(F);
 			try
 			{
@@ -1310,7 +1396,7 @@ public class TMyUserPanel extends Activity {
 				    	TTracker Tracker = TTracker.GetTracker();
 				    	if (Tracker == null)
 				    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-				    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp,DataFileName);
+				    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp, DataFileName, SecurityFileID);
 				    	DataFile.SendViaDevice(Tracker.GeoLog);
 	    			}
 	    			@Override 
@@ -1329,7 +1415,7 @@ public class TMyUserPanel extends Activity {
 		    	Tracker = TTracker.GetTracker();
 		    	if (Tracker == null)
 		    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-		    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
+		    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp, DataFileName, SecurityFileID);
 		    	DataFile.Create(Tracker.GeoLog);
 		    	//.
 	        	Toast.makeText(this, getString(R.string.SImageIsAdded)+Integer.toString(DataFileSize), Toast.LENGTH_LONG).show();
@@ -1345,7 +1431,7 @@ public class TMyUserPanel extends Activity {
 			//. try to gc
 			TGeoLogApplication.Instance().GarbageCollector.Collect();
 			//.
-			File F = (File)Data;
+			File F = new File(Data);
 			//.
         	double Timestamp = OleDate.UTCCurrentTimestamp();
     		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+DataName+"."+TFileSystem.FileName_GetExtension(F.getName());
@@ -1369,7 +1455,7 @@ public class TMyUserPanel extends Activity {
 			    	TTracker Tracker = TTracker.GetTracker();
 			    	if (Tracker == null)
 			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-			    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp,DataFileName);
+			    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp, DataFileName, SecurityFileID);
 			    	DataFile.SendViaDevice(Tracker.GeoLog);
     			}
     			@Override 
@@ -1388,7 +1474,7 @@ public class TMyUserPanel extends Activity {
 	    	TTracker Tracker = TTracker.GetTracker();
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
+	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp, DataFileName, SecurityFileID);
 	    	DataFile.Create(Tracker.GeoLog);
 	    	//.
     		Toast.makeText(this, getString(R.string.SDataIsAdded)+Integer.toString((int)(DataFileSize/1024))+getString(R.string.SKb), Toast.LENGTH_LONG).show();
@@ -1396,7 +1482,7 @@ public class TMyUserPanel extends Activity {
 		}
 
 		case ACTIVITY_DATAFILE_TYPE_DRAWING: {
-			String DrawingFileName = (String)Data;
+			String DrawingFileName = Data;
 			//.
         	double Timestamp = OleDate.UTCCurrentTimestamp();
     		String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+DataName+"."+TDrawingDefines.FileExtension;
@@ -1415,7 +1501,7 @@ public class TMyUserPanel extends Activity {
 			    	TTracker Tracker = TTracker.GetTracker();
 			    	if (Tracker == null)
 			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-			    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp,DataFileName);
+			    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp, DataFileName, SecurityFileID);
 			    	DataFile.SendViaDevice(Tracker.GeoLog);
     			}
     			@Override 
@@ -1434,7 +1520,7 @@ public class TMyUserPanel extends Activity {
 	    	TTracker Tracker = TTracker.GetTracker();
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
+	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp, DataFileName, SecurityFileID);
 	    	DataFile.Create(Tracker.GeoLog);
 	    	//.
     		Toast.makeText(this, getString(R.string.SDrawingIsAdded)+Long.toString(DataFileSize), Toast.LENGTH_LONG).show();
@@ -1442,7 +1528,7 @@ public class TMyUserPanel extends Activity {
 		}
 			
 		case ACTIVITY_DATAFILE_TYPE_FILE: {
-			String FileName = (String)Data;
+			String FileName = Data;
 			//.
 	    	double Timestamp = OleDate.UTCCurrentTimestamp();
 			String NFN = TGPSModule.MapPOIComponentFolder()+"/"+Double.toString(Timestamp)+"_"+TUIDGenerator.Generate()+DataName+"."+TFileSystem.FileName_GetExtension(FileName);
@@ -1460,7 +1546,7 @@ public class TMyUserPanel extends Activity {
 			    	TTracker Tracker = TTracker.GetTracker();
 			    	if (Tracker == null)
 			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-			    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp,DataFileName);
+			    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User, Timestamp, DataFileName);
 			    	DataFile.SendViaDevice(Tracker.GeoLog);
 				}
 				@Override 
@@ -1479,7 +1565,7 @@ public class TMyUserPanel extends Activity {
 	    	TTracker Tracker = TTracker.GetTracker();
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
+	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp, DataFileName, SecurityFileID);
 	    	DataFile.Create(Tracker.GeoLog);
 	    	//.
 			Toast.makeText(this, getString(R.string.SFileIsAdded)+Long.toString(DataFileSize), Toast.LENGTH_LONG).show();

@@ -407,8 +407,8 @@
     <string name="SContactInfoIsEmpty">contact info is empty</string>
     <string name="SRegistrationCodeIsEmpty">registration code is empty</string>
     <string name="SGettingUserLocation">getting user location&#8230;</string>
-    <string name="SCurrentLocationOfUser">"Current location of user: "</string>
-    <string name="SErrorOfGettingCurrentLocationOfUser">"Error of getting current location of user: "</string>
+    <string name="SCurrentLocationOfUser">"Current location of the user: "</string>
+    <string name="SErrorOfGettingCurrentLocationOfUser">"Error of getting current location of the user: "</string>
     <string name="SLocationIsPermanentlyUnavailable">Location is permanently unavailable</string>
     <string name="SLocationIsTemporarilyUnavailable">Location is temporarily unavailable</string>
     <string name="SLocationIsUnavailableForUnknownReason">Location is unavailable for unknown reason</string>
@@ -1050,7 +1050,7 @@
     <string name="SMovingAndScaling">moving and scaling</string>
     <string name="STakePictureWithCameraAndEdit">Take a picture with camera and edit</string>
     <string name="SMyUserPanelHint">Long click on the [+Image] button to view a context menu.\n(long click on the hint to remove it)</string>
-    <string name="SUserPanelHint">Long click on user image, "Messaging" button, "Live chat" button, "Video-phone" button, "Content" button, "Show all list" button to view a context menu.\n(long click on the hint to remove it)</string>
+    <string name="SUserPanelHint">Long click on user image, "Messaging" button, "Live chat" button, "Video-phone" button, "Current" location, "Content" button, "Show all list" button to view a context menu.\n(long click on the hint to remove it)</string>
     <string name="SResourceIsNotAvailableAtTheMoment">resource is not available at the moment</string>
     <string name="SUserIsNotAvailableForMessaging">user is not available for live messaging</string>
     <string name="SLiveChatIsNotSupportedForUser">live chat is not supported for the user</string>
@@ -1071,5 +1071,8 @@
     <string name="SSummaryDrawingLength">"Summary drawing length: "</string>
     <string name="SSummarySquareUnderDrawing">"Summary square under drawing: "</string>
     <string name="SLocateDrawing">Locate the drawing</string>
+    <string name="SSecurity">Security</string>
+    <string name="SDefault">Default</string>
+    <string name="SWithParameters">with parameters</string>
     
 </resources>

@@ -1078,5 +1078,14 @@
     <string name="SSecurityHasBeenChanged">Security has been changed.</string>
     <string name="SChangingSecurity">Changing the security &#8230;</string>
     <string name="SCreatePlaceBookmarkFromCurrentMap">Create a place bookmark from the current map view</string>
+    <string name="STransfer">Transfer</string>
+    <string name="SVideoRecorderDataTransfer">Video recorder data transfer</string>
+    <string name="SCurrentProgress">current progress: </string>
+    <string name="Scheduling">scheduling: </string>
+    <string name="SStartTransfer">Start transfer immediately</string>
+    <string name="SDataTransferHasBeenStarted">Data transfer has been started.</string>
+    <string name="SItemsToTransfer">"Items to transfer: "</string>
+    <string name="STime">"Time#"</string>
+    <string name="SEnterTime">Enter a time (HH:MM)</string>
     
 </resources>

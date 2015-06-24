@@ -1,14 +1,9 @@
 package com.geoscope.GeoEye.Space.TypesSystem.DataStream;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import android.content.Context;
@@ -29,21 +24,11 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 	}
 
 	@Override
-	public int ParseFromXMLDocument(byte[] XML) throws Exception {
+	public int ParseFromXMLDocument(Element XMLNode) throws Exception {
     	try {
-        	Document XmlDoc;
-    		ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
-    		try {
-    			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
-    			factory.setNamespaceAware(true);     
-    			DocumentBuilder builder = factory.newDocumentBuilder(); 			
-    			XmlDoc = builder.parse(BIS); 
-    		}
-    		finally {
-    			BIS.close();
-    		}
-    		Element RootNode = XmlDoc.getDocumentElement();
-			int Version = Integer.parseInt(RootNode.getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
+    		XMLDocumentRootNode = XMLNode;
+    		//.
+			int Version = Integer.parseInt(XMLDocumentRootNode.getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
 			return Version; //. ->
     	}
     	catch (Exception E) {

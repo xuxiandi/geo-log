@@ -592,6 +592,7 @@ public class TTrackerPanel extends Activity {
 	private ToggleButton tbAlarm;
     private CheckBox cbVideoRecorderModuleRecording;
     private Button btnVideoRecorderModulePanel;	
+    private Button btnVideoRecorderModuleServerSaverPanel;	
     private Button btnSensorsModuleMetersPanel;
     private CheckBox cbDataStreamerModuleActive;
     private Button btnDataStreamerModulePanel;	
@@ -996,6 +997,26 @@ public class TTrackerPanel extends Activity {
 			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 			    	//.
         			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TTrackerPanel.this);
+            	}
+            	catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+            	}
+            }
+        });
+        btnVideoRecorderModuleServerSaverPanel = (Button)findViewById(R.id.btnVideoRecorderModuleServerSaverPanel);
+        btnVideoRecorderModuleServerSaverPanel.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+            	try {
+            		TTracker Tracker = TTracker.GetTracker();
+			    	if (Tracker == null)
+			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+			    	//.
+        			Tracker.GeoLog.VideoRecorderModule.ShowServerSaverPanel(TTrackerPanel.this);
             	}
             	catch (Exception E) {
 					String S = E.getMessage();

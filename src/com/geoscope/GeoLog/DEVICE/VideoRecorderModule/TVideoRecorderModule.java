@@ -3,6 +3,7 @@ package com.geoscope.GeoLog.DEVICE.VideoRecorderModule;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,6 +13,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,9 +36,11 @@ import android.content.Intent;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Xml;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
@@ -143,12 +147,450 @@ public class TVideoRecorderModule extends TModule {
     	public int Camera_Video_BitRate = -1;
     }
     
-    public class TServerSaver implements Runnable {
+    public static class TServerSaver implements Runnable {
+    	
+    	public static final String FolderName = "ServerSaver"; 
+
+    	public static String Folder() {
+    		return TVideoRecorderModule.Folder()+"/"+FolderName;
+    	}
+    	
+    	public static class TMeasurements {
+    		
+    		public static final String FileName = "Measurements.xml";
+    		
+    		
+    		private String Folder;
+    		//.
+    		private ArrayList<String> 	Items = new ArrayList<String>();
+    		private int					Items_SummaryCount;
+    		private int					Items_RemovedCount;
+    		
+    		public TMeasurements(String pFolder) throws Exception {
+    			Folder = pFolder;
+    			//.
+    			Load();
+    		}
+    		
+    		private synchronized void Clear() {
+    			Items.clear();
+    			Items_SummaryCount = 0;
+    			Items_RemovedCount = 0;
+    		}
+    		
+    		private synchronized void Load() throws Exception {
+    			Clear();
+    			//.
+    			String FN = Folder+"/"+FileName;
+    			File F = new File(FN);
+    			if (!F.exists()) 
+    				return; //. ->
+    			//.
+    			byte[] XML;
+    	    	long FileSize = F.length();
+    	    	FileInputStream FIS = new FileInputStream(FN);
+    	    	try {
+    	    		XML = new byte[(int)FileSize];
+    	    		FIS.read(XML);
+    	    	}
+    	    	finally {
+    	    		FIS.close();
+    	    	}
+    	    	Document XmlDoc;
+    			ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
+    			try {
+    				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+    				factory.setNamespaceAware(true);     
+    				DocumentBuilder builder = factory.newDocumentBuilder(); 			
+    				XmlDoc = builder.parse(BIS); 
+    			}
+    			finally {
+    				BIS.close();
+    			}
+				Element RootNode = XmlDoc.getDocumentElement();
+				int Version = Integer.parseInt(TMyXML.SearchNode(RootNode,"Version").getFirstChild().getNodeValue());
+    			switch (Version) {
+    			
+    			case 1:
+					NodeList ItemsNode = TMyXML.SearchNode(RootNode,"Items").getChildNodes();
+					int Cnt = ItemsNode.getLength();
+					for (int I = 0; I < Cnt; I++) {
+						Node ItemNode = ItemsNode.item(I);
+						String MeasurementID = ItemNode.getFirstChild().getNodeValue();
+						//.
+						Items.add(MeasurementID);
+						Items_SummaryCount++;
+    				}
+    				break; //. >
+    				
+    			default:
+    				throw new Exception("unknown data version, version: "+Integer.toString(Version)); //. =>
+    			}
+    		}
+    		
+			public void Save() throws Exception {
+    			String FN = Folder+"/"+FileName;
+	            File F = new File(FN);
+	            if (Items.size() == 0) {
+	            	F.delete();
+	            	return; //. ->
+	            }
+	    	    String TFN = FN+".tmp";
+	        	int Version = 1;
+	    	    XmlSerializer serializer = Xml.newSerializer();
+	    	    FileWriter writer = new FileWriter(TFN);
+	    	    try {
+	    	        serializer.setOutput(writer);
+	    	        serializer.startDocument("UTF-8",true);
+	    	        serializer.startTag("", "ROOT");
+	    	        //.
+	                serializer.startTag("", "Version");
+	                serializer.text(Integer.toString(Version));
+	                serializer.endTag("", "Version");
+	    	        //. Items
+	                serializer.startTag("", "Items");
+	                	int Cnt = Items.size();
+	                	for (int I = 0; I < Cnt; I++) {
+	    	            	serializer.startTag("", "Item"+Integer.toString(I));
+    	            		serializer.text(Items.get(I));
+	    	            	serializer.endTag("", "Item"+Integer.toString(I));
+	                	}
+	                serializer.endTag("", "Items");
+	                //.
+	    	        serializer.endTag("", "ROOT");
+	    	        serializer.endDocument();
+	    	    }
+	    	    finally {
+	    	    	writer.close();
+	    	    }
+	    		File TF = new File(TFN);
+	    		TF.renameTo(F);
+			}
+			
+			public synchronized void AddItem(String MeasurementID, boolean flSave) throws Exception {
+				if (!ItemExists(MeasurementID)) {
+					Items.add(MeasurementID);
+					Items_SummaryCount++;
+					//.
+					if (flSave)
+						Save();
+				}
+			}
+
+			public synchronized void RemoveItem(String MeasurementID) throws Exception {
+				int Cnt = Items.size();
+				for (int I = 0; I < Cnt; I++) 
+					if (Items.get(I).equals(MeasurementID)) {
+						Items.remove(I);
+						Items_RemovedCount++;
+						//.
+						Save();
+						//.
+						return; //. ->
+					}
+			}
+			
+			public synchronized boolean ItemExists(String MeasurementID) {
+				int Cnt = Items.size();
+				for (int I = 0; I < Cnt; I++)
+					if (Items.get(I).equals(MeasurementID))
+						return true; //. ->
+				return false;
+			}
+			
+			public synchronized int Count() {
+				return Items.size();
+			}
+			
+			public synchronized ArrayList<String> GetItems() {
+				return (new ArrayList<String>(Items));
+			}
+			
+			public synchronized double ProgressPercentage() {
+				if (Items_SummaryCount == 0)
+					return 100.0; //. ->
+				return (100.0*Items_RemovedCount/Items_SummaryCount);
+			}
+    	}
+    	
+    	public static class TScheduler {
+    		
+    		public static final String FileName = "Scheduler.xml";
+    		
+    		public static class TDailyPlan {
+    			
+				public static final long DayInMs = 24*3600*1000;
+				
+    			public static class TItem {
+    				
+    				private TDailyPlan Plan;
+    				//.
+    				public boolean flEnabled = true;
+    				//.
+    				public double 	DayTime = 0.0;
+    				private long 	DayTimeInMs = 0;
+    				//.
+    				private Runnable Process;
+    				
+    				public TItem(TDailyPlan pPlan) {
+    					Plan = pPlan;
+    					//.
+    					Process = new Runnable() {
+							
+    						private TItem Item = TItem.this;
+    						
+							@Override
+							public void run() {
+								Plan.Scheduler.ServerSaver.StartProcess();
+								//.
+	    						DayTimeInMs += DayInMs;
+	        					Plan.ProcessHandler.postDelayed(Item.Process, DayTimeInMs-System.currentTimeMillis());
+							}
+						};
+    				}
+    				
+    				public void FromXMLNode(Node node) {
+    					flEnabled = (Integer.parseInt(TMyXML.SearchNode(node,"Enabled").getFirstChild().getNodeValue()) != 0);
+    					DayTime = Double.parseDouble(TMyXML.SearchNode(node,"DayTime").getFirstChild().getNodeValue());
+    				}
+    				
+    				public void ToXMLSerializer(XmlSerializer serializer) throws Exception {
+    	                serializer.startTag("", "Enabled");
+    	                int V = 0;
+    	                if (flEnabled)
+    	                	V = 1;
+    	                serializer.text(Integer.toString(V));
+    	                serializer.endTag("", "Enabled");
+    	                //.
+    	                serializer.startTag("", "DayTime");
+    	                serializer.text(Double.toString(DayTime));
+    	                serializer.endTag("", "DayTime");
+    				}
+    				
+    				public void Attach() {
+    					Calendar c = Calendar.getInstance();
+    					int Hours = (int)(DayTime*24.0);
+    					c.set(Calendar.HOUR_OF_DAY, Hours);
+    					int Mins = (int)((DayTime*24.0-Hours)*60.0);
+    					c.set(Calendar.MINUTE, Mins);
+    					long ProcessTimeInMs = c.getTimeInMillis();
+    					long Delay = ProcessTimeInMs-System.currentTimeMillis();
+    					if (Delay < 0) {
+    						Delay += DayInMs;
+    						ProcessTimeInMs += DayInMs;
+    					}
+    					//.
+    					DayTimeInMs = ProcessTimeInMs;
+    					Plan.ProcessHandler.postDelayed(Process, Delay);
+    				}
+    				
+    				public void Detach() {
+    					Plan.ProcessHandler.removeCallbacks(Process);
+    				}
+    				
+    				public void SetEnabled(boolean pflEnabled) throws Exception {
+    					if (pflEnabled != flEnabled) {
+        					if (flEnabled)
+        						Detach();
+        					flEnabled = pflEnabled;
+        					if (flEnabled)
+        						Attach();
+        					//.
+        					Plan.Scheduler.Save();
+    					}
+    				}
+    				
+    				public void SetDayTime(double pDayTime) throws Exception {
+    					if (pDayTime != DayTime) { 
+        					if (flEnabled)
+        						Detach();
+        					DayTime = pDayTime;
+        					if (flEnabled)
+        						Attach();
+        					//.
+        					Plan.Scheduler.Save();
+    					}
+    				}
+    			}
+    			
+    			private TScheduler Scheduler;
+    			//.
+    			public ArrayList<TItem> Items = new ArrayList<TItem>();
+    			//.
+        	    private Handler ProcessHandler = new Handler();
+    			
+    			public TDailyPlan(TScheduler pScheduler) {
+    				Scheduler = pScheduler;
+    			}
+    			
+    			public void Destroy() {
+    				Stop();
+    			}
+    			
+    			private void Clear() {
+    				Stop();
+    				Items.clear();
+    			}
+    			
+        		private void FromXMLNode(Node node) throws Exception {
+        			Clear();
+        			//.
+					NodeList ItemsNode = TMyXML.SearchNode(node,"Items").getChildNodes();
+					int Cnt = ItemsNode.getLength();
+					for (int I = 0; I < Cnt; I++) {
+						Node ItemNode = ItemsNode.item(I);
+						//.
+						TItem Item = new TItem(this);
+						Item.FromXMLNode(ItemNode);
+						//.
+						Items.add(Item);
+    				}
+        		}
+        		
+    			private void ToXMLSerializer(XmlSerializer serializer) throws Exception {
+	                serializer.startTag("", "Items");
+	                	int Cnt = Items.size();
+	                	for (int I = 0; I < Cnt; I++) {
+	    	            	serializer.startTag("", "Item"+Integer.toString(I));
+	    	            	Items.get(I).ToXMLSerializer(serializer);
+	    	            	serializer.endTag("", "Item"+Integer.toString(I));
+	                	}
+	                serializer.endTag("", "Items");
+    			}
+    			
+    			public void Start() {
+    				int Cnt = Items.size();
+    				for (int I =0; I < Cnt; I++) {
+    					TItem Item = Items.get(I);
+    					if (Item.flEnabled)
+    						Item.Attach();
+    				}
+    			}
+    			
+    			public void Stop() {
+    				int Cnt = Items.size();
+    				for (int I =0; I < Cnt; I++) { 
+    					TItem Item = Items.get(I);
+    					if (Item.flEnabled)
+    						Item.Detach();
+    				}
+    			}
+    		}
+    		
+    		private TServerSaver ServerSaver;
+    		//.
+    		private String Folder;
+    		//.
+    		public TDailyPlan Plan;
+    		
+    		public TScheduler(TServerSaver pServerSaver) throws Exception {
+    			ServerSaver = pServerSaver;
+    			Folder = TServerSaver.Folder();
+    			//.
+    			Plan = new TDailyPlan(this);
+    			//.
+    			Load();
+    			//.
+    			Plan.Start();
+    		}
+    		
+    		public void Destroy() {
+    			if (Plan != null) {
+    				Plan.Destroy();
+    				Plan = null;
+    			}
+    		}
+
+    		private void Load() throws Exception {
+    			String FN = Folder+"/"+FileName;
+    			File F = new File(FN);
+    			if (!F.exists()) {
+    				//. default items
+    				TDailyPlan.TItem Item = new TDailyPlan.TItem(Plan);
+    				Item.DayTime = 10/24.0;
+    				Plan.Items.add(Item);
+    				Item = new TDailyPlan.TItem(Plan);
+    				Item.DayTime = 14/24.0;
+    				Plan.Items.add(Item);
+    				Item = new TDailyPlan.TItem(Plan);
+    				Item.DayTime = 18/24.0;
+    				Plan.Items.add(Item);
+    				Item = new TDailyPlan.TItem(Plan);
+    				Item.DayTime = 20/24.0;
+    				Plan.Items.add(Item);
+    				return; //. ->
+    			}
+    			//.
+    			byte[] XML;
+    	    	long FileSize = F.length();
+    	    	FileInputStream FIS = new FileInputStream(FN);
+    	    	try {
+    	    		XML = new byte[(int)FileSize];
+    	    		FIS.read(XML);
+    	    	}
+    	    	finally {
+    	    		FIS.close();
+    	    	}
+    	    	Document XmlDoc;
+    			ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
+    			try {
+    				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+    				factory.setNamespaceAware(true);     
+    				DocumentBuilder builder = factory.newDocumentBuilder(); 			
+    				XmlDoc = builder.parse(BIS); 
+    			}
+    			finally {
+    				BIS.close();
+    			}
+				Element RootNode = XmlDoc.getDocumentElement();
+				int Version = Integer.parseInt(TMyXML.SearchNode(RootNode,"Version").getFirstChild().getNodeValue());
+    			switch (Version) {
+    			
+    			case 1:
+    				Node DailyPlanNode = TMyXML.SearchNode(RootNode,"DailyPlan");
+    				if (DailyPlanNode != null) 
+    					Plan.FromXMLNode(DailyPlanNode);
+    				break; //. >
+    				
+    			default:
+    				throw new Exception("unknown data version, version: "+Integer.toString(Version)); //. =>
+    			}
+    		}
+    		
+			protected void Save() throws Exception {
+    			String FN = Folder+"/"+FileName;
+	            File F = new File(FN);
+	    	    String TFN = FN+".tmp";
+	        	int Version = 1;
+	    	    XmlSerializer serializer = Xml.newSerializer();
+	    	    FileWriter writer = new FileWriter(TFN);
+	    	    try {
+	    	        serializer.setOutput(writer);
+	    	        serializer.startDocument("UTF-8",true);
+	    	        serializer.startTag("", "ROOT");
+	    	        //.
+	                serializer.startTag("", "Version");
+	                serializer.text(Integer.toString(Version));
+	                serializer.endTag("", "Version");
+	    	        //. DailyPlan
+	                serializer.startTag("", "DailyPlan");
+	                Plan.ToXMLSerializer(serializer);
+	                serializer.endTag("", "DailyPlan");
+	                //.
+	    	        serializer.endTag("", "ROOT");
+	    	        serializer.endDocument();
+	    	    }
+	    	    finally {
+	    	    	writer.close();
+	    	    }
+	    		File TF = new File(TFN);
+	    		TF.renameTo(F);
+			}
+    	}
     	
     	public static final int CONNECTION_TYPE_PLAIN 		= 0;
     	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
     	
-    	///? public static final int AutoSavingDefaultInterval = 1000*3600*24*1000/*days*/;
     	public static final int ConnectTimeout = 1000*10; //. seconds
     	
     	private class SavingDataErrorException extends Exception {
@@ -160,12 +602,16 @@ public class TVideoRecorderModule extends TModule {
     		}
     	}
     	
+    	private TVideoRecorderModule VideoRecorderModule;
+    	//.
         public String 	ServerAddress = "127.0.0.1";
         public int		ServerPort = 5000;
     	protected int 	SecureServerPortShift = 2;
         protected int	SecureServerPort() {
         	return (ServerPort+SecureServerPortShift);
         }
+    	//.
+    	private TMeasurements Measurements;
         //.
         public int			ConnectionType = (TServerConnection.flSecureConnection ? CONNECTION_TYPE_SECURE_SSL : CONNECTION_TYPE_PLAIN);
         private Socket 		Connection;
@@ -174,20 +620,38 @@ public class TVideoRecorderModule extends TModule {
         //.
     	protected Thread _Thread;
     	private boolean flCancel = false;
-    	public boolean flProcessing = false;
+    	//.
+    	public boolean 			flProcessing = false;
     	private TAutoResetEvent ProcessSignal = new TAutoResetEvent();
+    	//.
     	private String MeasurementsIDsToProcess = "";
-    	private boolean flProcessingMeasurement = false;
+    	//.
+    	public TScheduler Scheduler;
     	
-    	public TServerSaver(TSavingServerDescriptor ServerDescriptor) {
+    	public TServerSaver(TVideoRecorderModule pVideoRecorderModule, TSavingServerDescriptor ServerDescriptor) throws Exception {
+    		VideoRecorderModule = pVideoRecorderModule;
+    		//.
     		ServerAddress = ServerDescriptor.Address;
     		ServerPort = ServerDescriptor.Port;
+        	//. 
+    		File F = new File(Folder());
+    		if (!F.exists()) 
+    			F.mkdirs();
+    		//.
+    		Measurements = new TMeasurements(Folder());
     		//.
     		_Thread = new Thread(this);
     		_Thread.start();
+    		//.
+    		Scheduler = new TScheduler(this);
     	}
     	
     	public void Destroy() throws IOException {
+    		if (Scheduler != null) {
+    			Scheduler.Destroy();
+    			Scheduler = null;
+    		}
+    		//.
     		CancelAndWait();
     	}
     	
@@ -196,62 +660,85 @@ public class TVideoRecorderModule extends TModule {
 			flProcessing = true;
 			try {
 				try {
+					byte[] TransferBuffer = new byte[1024*64];
 					while (!flCancel) {
-						ProcessSignal.WaitOne((int)(TVideoRecorderModule.this.MeasurementConfiguration.AutosaveInterval*1000*3600*24));
+						//. transferring the measurements ...
+						try {
+							while (true) {
+								ArrayList<String> ItemsToSave = Measurements.GetItems();
+								int Cnt = ItemsToSave.size();
+								if (Cnt == 0)
+									break; //. ->
+								for (int I = 0; I < Cnt; I++) {
+									String MeasurementID = ItemsToSave.get(I);
+									try {
+										ProcessMeasurement(MeasurementID,TransferBuffer);
+										//.
+										Measurements.RemoveItem(MeasurementID);
+									}
+									catch (SavingDataErrorException E) {
+										String S = E.getMessage();
+										if (S == null)
+											S = E.getClass().getName();
+										VideoRecorderModule.Device.Log.WriteError("VideoRecorderModule.ServerSaver, error of saving measurement: "+MeasurementID,S);
+									}
+									//.
+									if (flCancel)
+										return; //. ->
+								}
+							}
+						}
+						catch (Throwable TE) {
+			            	//. log errors
+							String S = TE.getMessage();
+							if (S == null)
+								S = TE.getClass().getName();
+							VideoRecorderModule.Device.Log.WriteError("VideoRecorderModule.ServerSaver",S);
+			            	if (!(TE instanceof Exception))
+			            		TGeoLogApplication.Log_WriteCriticalError(TE);
+						}
+						//. waiting for the signal
+						ProcessSignal.WaitOne((int)(VideoRecorderModule.MeasurementConfiguration.AutosaveInterval*1000*3600*24));
 						if (flCancel)
 							return; //. ->
-						//.
+						//. collect measurements for transfer
 						String _MeasurementsIDsToProcess;
 						synchronized (this) {
 							_MeasurementsIDsToProcess = MeasurementsIDsToProcess;
 							MeasurementsIDsToProcess = "";
 						}
-						//. processing measurement(s)
-						flProcessingMeasurement = true;
 						try {
-							try {
-								byte[] TransferBuffer = new byte[1024*64];
-								if (_MeasurementsIDsToProcess.equals("")) {
-									File[] Measurements = TVideoRecorderMeasurements.GetMeasurementsFolderList();
-									for (int I = 0; I < Measurements.length; I++) 
-										if (Measurements[I] != null) {
-											String MeasurementID = Measurements[I].getName();
-											TMeasurementDescriptor CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
-											if (!((CurrentMeasurement != null) && CurrentMeasurement.ID.equals(MeasurementID))) {
-												try {
-													ProcessMeasurement(MeasurementID,TransferBuffer);
-												}
-												catch (SavingDataErrorException E) {}
-											}
-										}
-								}
-								else {
-									String[] Measurements = _MeasurementsIDsToProcess.split(",");
-									for (int I = 0; I < Measurements.length; I++) 
-										if (Measurements[I] != null) {
-											String MeasurementID = Measurements[I];
-											TMeasurementDescriptor CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
-											if (!((CurrentMeasurement != null) && CurrentMeasurement.ID.equals(MeasurementID))) {
-												try {
-													ProcessMeasurement(MeasurementID,TransferBuffer);
-												}
-												catch (SavingDataErrorException E) {}
-											}
-										}
-								}
+							if (_MeasurementsIDsToProcess.equals("")) {
+								File[] _Measurements = TVideoRecorderMeasurements.GetMeasurementsFolderList();
+								for (int I = 0; I < _Measurements.length; I++) 
+									if (_Measurements[I] != null) {
+										String MeasurementID = _Measurements[I].getName();
+										TMeasurementDescriptor CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
+										if (!((CurrentMeasurement != null) && CurrentMeasurement.ID.equals(MeasurementID)))
+											Measurements.AddItem(MeasurementID, false);
+									}
+								Measurements.Save();
 							}
-							catch (Throwable TE) {
-				            	//. log errors
-								String S = TE.getMessage();
-								if (S == null)
-									S = TE.getClass().getName();
-			            		Device.Log.WriteError("VideoRecorderModule.ServerSaver",S);
-				            	if (!(TE instanceof Exception))
-				            		TGeoLogApplication.Log_WriteCriticalError(TE);
+							else {
+								String[] _Measurements = _MeasurementsIDsToProcess.split(",");
+								for (int I = 0; I < _Measurements.length; I++) 
+									if (_Measurements[I] != null) {
+										String MeasurementID = _Measurements[I];
+										TMeasurementDescriptor CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
+										if (!((CurrentMeasurement != null) && CurrentMeasurement.ID.equals(MeasurementID))) 
+											Measurements.AddItem(MeasurementID, false);
+									}
+								Measurements.Save();
 							}
 						}
-						finally {
-							flProcessingMeasurement = false;
+						catch (Throwable TE) {
+			            	//. log errors
+							String S = TE.getMessage();
+							if (S == null)
+								S = TE.getClass().getName();
+							VideoRecorderModule.Device.Log.WriteError("VideoRecorderModule.ServerSaver",S);
+			            	if (!(TE instanceof Exception))
+			            		TGeoLogApplication.Log_WriteCriticalError(TE);
 						}
 					}
 
@@ -275,8 +762,12 @@ public class TVideoRecorderModule extends TModule {
 			StartProcess("");		
 		}
 		
-		public boolean IsProcessingMeasurement() {
-			return flProcessingMeasurement;
+		public double ProcessProgressPercentage() {
+			return Measurements.ProgressPercentage();
+		}
+		
+		public int MeasurementsCount() {
+			return Measurements.Count();
 		}
 		
     	public void Join() {
@@ -350,14 +841,14 @@ public class TVideoRecorderModule extends TModule {
 				        ConnectionOutputStream = Connection.getOutputStream();
 						break; //. >
 					} catch (SocketTimeoutException STE) {
-						throw new IOException(Device.context.getString(R.string.SConnectionTimeoutError)); //. =>
+						throw new IOException(VideoRecorderModule.Device.context.getString(R.string.SConnectionTimeoutError)); //. =>
 					} catch (ConnectException CE) {
-						throw new ConnectException(Device.context.getString(R.string.SNoServerConnection)); //. =>
+						throw new ConnectException(VideoRecorderModule.Device.context.getString(R.string.SNoServerConnection)); //. =>
 					} catch (Exception E) {
 						String S = E.getMessage();
 						if (S == null)
 							S = E.toString();
-						throw new Exception(Device.context.getString(R.string.SHTTPConnectionError)+S); //. =>
+						throw new Exception(VideoRecorderModule.Device.context.getString(R.string.SHTTPConnectionError)+S); //. =>
 					}
 				}
 				catch (Exception E) {
@@ -422,24 +913,32 @@ public class TVideoRecorderModule extends TModule {
 	    	byte[] LoginBuffer = new byte[20];
 			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(TGeographDataServerClient.SERVICE_SETSENSORDATA_V1);
 			System.arraycopy(BA,0, LoginBuffer,0, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray(Device.UserID);
+			BA = TDataConverter.ConvertInt32ToLEByteArray(VideoRecorderModule.Device.UserID);
 			System.arraycopy(BA,0, LoginBuffer,2, BA.length);
-			BA = TDataConverter.ConvertInt32ToLEByteArray((int)Device.idGeographServerObject);
+			BA = TDataConverter.ConvertInt32ToLEByteArray((int)VideoRecorderModule.Device.idGeographServerObject);
 			System.arraycopy(BA,0, LoginBuffer,10, BA.length);
 			short CRC = Buffer_GetCRC(LoginBuffer, 10,8);
 			BA = TDataConverter.ConvertInt16ToLEByteArray(CRC);
 			System.arraycopy(BA,0, LoginBuffer,18, BA.length);
-			Buffer_Encrypt(LoginBuffer,10,10,Device.UserPassword);
+			Buffer_Encrypt(LoginBuffer,10,10,VideoRecorderModule.Device.UserPassword);
 			//.
 			ConnectionOutputStream.write(LoginBuffer);
 			byte[] DecriptorBA = new byte[4];
 			ConnectionInputStream.read(DecriptorBA);
 			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor != TGeographDataServerClient.MESSAGE_OK)
-				throw new Exception(Device.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
+				throw new Exception(VideoRecorderModule.Device.context.getString(R.string.SDataServerConnectionError)+Integer.toString(Descriptor)); //. =>
 	    }
 	    
 		private void ProcessMeasurement(String MeasurementID, byte[] TransferBuffer) throws Exception {
+			File[] MeasurementContent = TVideoRecorderMeasurements.GetMeasurementFolderContent(MeasurementID);
+			if (MeasurementContent == null)
+				return; //. ->
+			ArrayList<File> ContentFiles = new ArrayList<File>(MeasurementContent.length);
+			for (int I = 0; I < MeasurementContent.length; I++)
+				if (!MeasurementContent[I].isDirectory() && (MeasurementContent[I].length() > 0)) 
+					ContentFiles.add(MeasurementContent[I]);
+			//.
 			boolean flDisconnect = true;
 			Connect();
 			try {
@@ -451,12 +950,6 @@ public class TVideoRecorderModule extends TModule {
 				ConnectionOutputStream.write(DecriptorBA);
 				if (Descriptor > 0)  
 					ConnectionOutputStream.write(DataIDBA);
-				//.
-				File[] MeasurementContent = TVideoRecorderMeasurements.GetMeasurementFolderContent(MeasurementID);
-				ArrayList<File> ContentFiles = new ArrayList<File>(MeasurementContent.length);
-				for (int I = 0; I < MeasurementContent.length; I++)
-					if (!MeasurementContent[I].isDirectory()) 
-						ContentFiles.add(MeasurementContent[I]);
 				//.
 				int ContentFilesCount = ContentFiles.size(); 
 				DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(ContentFilesCount);
@@ -1006,7 +1499,7 @@ public class TVideoRecorderModule extends TModule {
     		        	TSavingServerDescriptor SD = GetSavingServerDescriptor();
     		        	if (SD != null) 
     		        		synchronized (this) {
-    			        		ServerSaver = new TServerSaver(SD);
+    			        		ServerSaver = new TServerSaver(TVideoRecorderModule.this, SD);
     						}
     		        }
                 	break; //. >
@@ -1025,7 +1518,7 @@ public class TVideoRecorderModule extends TModule {
                         			ServerSaver.Destroy();
             		        	TSavingServerDescriptor SD = GetSavingServerDescriptor();
             		        	if (SD != null)
-            		        		ServerSaver = new TServerSaver(SD);
+            		        		ServerSaver = new TServerSaver(TVideoRecorderModule.this,SD);
     						}
         				}
         				catch (Exception E1) {
@@ -1531,6 +2024,11 @@ public class TVideoRecorderModule extends TModule {
     
     public void ShowPropsPanel(Context context) {
     	Intent intent = new Intent(Device.context,TVideoRecorderPropsPanel.class);
+    	context.startActivity(intent);
+    }
+    
+    public void ShowServerSaverPanel(Context context) {
+    	Intent intent = new Intent(Device.context,TVideoRecorderServerSaverPanel.class);
     	context.startActivity(intent);
     }
     

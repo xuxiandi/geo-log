@@ -1078,5 +1078,14 @@
     <string name="SSecurityHasBeenChanged">Безопасность изменена.</string>
     <string name="SChangingSecurity">Изменение безопасности &#8230;</string>
     <string name="SCreatePlaceBookmarkFromCurrentMap">Создать ссылку на место по текущей карте</string>
+    <string name="STransfer">Трансфер</string>
+    <string name="SVideoRecorderDataTransfer">Трансфер данных видео-рекордера</string>
+    <string name="SCurrentProgress">текущий прогресс: </string>
+    <string name="Scheduling">расписание: </string>
+    <string name="SStartTransfer">Начать передачу сейчас</string>
+    <string name="SDataTransferHasBeenStarted">Передача данных запущена.</string>
+    <string name="SItemsToTransfer">"Элементов к передаче: "</string>
+    <string name="STime">"Время#"</string>
+    <string name="SEnterTime">Введите время (ЧЧ:ММ)</string>
     
 </resources>

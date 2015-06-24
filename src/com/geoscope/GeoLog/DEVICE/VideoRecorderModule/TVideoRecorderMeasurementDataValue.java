@@ -93,8 +93,6 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
     		TVideoRecorderModule.TServerSaver Saver = VideoRecorderModule.GetServerSaver(); 
     		if (Saver == null)
     			throw new OperationException(TSetVideoRecorderMeasurementDataValueSO.OperationErrorCode_ServerSaverIsDisabled); //. =>
-    		if (Saver.IsProcessingMeasurement())
-    			throw new OperationException(TSetVideoRecorderMeasurementDataValueSO.OperationErrorCode_ServerSaverIsBusy); //. =>
     		Saver.StartProcess(MIDs);
     		//.
             break; //. >

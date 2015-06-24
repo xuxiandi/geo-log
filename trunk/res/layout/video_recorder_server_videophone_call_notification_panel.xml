@@ -35,13 +35,15 @@
 
         <Button
             android:id="@+id/btnRejectCallingUser"
+            style="android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:text="@string/SReject" />
+            android:text="@string/SReject" /> 
 
         <Button
             android:id="@+id/btnAcceptCallingUser"
+            style="android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"

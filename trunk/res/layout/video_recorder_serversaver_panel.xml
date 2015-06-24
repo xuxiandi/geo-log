@@ -1,0 +1,55 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="center"
+        android:text="@string/SVideoRecorderDataTransfer"
+        android:textColor="#ff000000"
+        android:textSize="18sp" />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SCurrentProgress"
+        android:textSize="8pt" />
+
+    <ProgressBar
+        android:id="@+id/pbProcessProgress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/tvProcessProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="8pt" />
+
+    <Button
+        android:id="@+id/btnStartTransfer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SStartTransfer"
+        android:textSize="8pt" />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/Scheduling"
+        android:textSize="8pt" />
+
+    <ListView
+        android:id="@+id/lvSchedulerPlan"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:cacheColorHint="#00000000"
+        android:choiceMode="multipleChoice"
+        android:scrollbars="vertical" />
+
+</LinearLayout>

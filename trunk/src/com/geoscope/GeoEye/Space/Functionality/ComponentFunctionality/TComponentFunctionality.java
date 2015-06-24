@@ -1,5 +1,6 @@
 package com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -7,6 +8,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import android.content.Context;
@@ -269,7 +274,23 @@ public class TComponentFunctionality extends TFunctionality {
 	}
 	
 	public int ParseFromXMLDocument(byte[] XML) throws Exception {
-		return 0;
+    	Document XmlDoc;
+		ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+			factory.setNamespaceAware(true);     
+			DocumentBuilder builder = factory.newDocumentBuilder(); 			
+			XmlDoc = builder.parse(BIS); 
+		}
+		finally {
+			BIS.close();
+		}
+		Element RootNode = XmlDoc.getDocumentElement();
+		return ParseFromXMLDocument(RootNode);
+	}
+	
+	public int ParseFromXMLDocument(Element XMLNode) throws Exception {
+		return 0; 
 	}
 	
 	public TPropsPanel TPropsPanel_Create(Context context) throws Exception {

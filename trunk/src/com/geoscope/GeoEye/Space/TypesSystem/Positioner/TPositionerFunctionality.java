@@ -1,12 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.Positioner;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
@@ -38,22 +33,11 @@ public class TPositionerFunctionality extends TComponentFunctionality {
 	}
 	
 	@Override
-	public int ParseFromXMLDocument(byte[] XML) throws Exception {
+	public int ParseFromXMLDocument(Element XMLNode) throws Exception {
     	try {
-        	Document XmlDoc;
-    		ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
-    		try {
-    			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
-    			factory.setNamespaceAware(true);     
-    			DocumentBuilder builder = factory.newDocumentBuilder(); 			
-    			XmlDoc = builder.parse(BIS); 
-    		}
-    		finally {
-    			BIS.close();
-    		}
-    		Element RootNode = XmlDoc.getDocumentElement();
+    		XMLDocumentRootNode = XMLNode;
     		//.
-    		return FromXMLNode(RootNode); //. ->
+    		return FromXMLNode(XMLDocumentRootNode); //. ->
     	}
     	catch (Exception E) {
 			throw new Exception("error of loading xml document: "+E.getMessage()); //. =>

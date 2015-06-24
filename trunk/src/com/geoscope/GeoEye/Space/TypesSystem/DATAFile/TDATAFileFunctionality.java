@@ -1,11 +1,6 @@
 package com.geoscope.GeoEye.Space.TypesSystem.DATAFile;
 
-import java.io.ByteArrayInputStream;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import android.content.Context;
@@ -25,20 +20,10 @@ public class TDATAFileFunctionality extends TComponentFunctionality {
 	}
 
 	@Override
-	public int ParseFromXMLDocument(byte[] XML) throws Exception {
+	public int ParseFromXMLDocument(Element XMLNode) throws Exception {
     	try {
-        	Document XmlDoc;
-    		ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
-    		try {
-    			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
-    			factory.setNamespaceAware(true);     
-    			DocumentBuilder builder = factory.newDocumentBuilder(); 			
-    			XmlDoc = builder.parse(BIS); 
-    		}
-    		finally {
-    			BIS.close();
-    		}
-    		XMLDocumentRootNode = XmlDoc.getDocumentElement();
+    		XMLDocumentRootNode = XMLNode;
+    		//.
 			int Version = Integer.parseInt(XMLDocumentRootNode.getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
 			switch (Version) {
 			case 1:

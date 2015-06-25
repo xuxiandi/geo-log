@@ -1139,7 +1139,11 @@ public class TDEVICEModule extends TModule
 			//.
     		F.delete();
     		//.
-    		Items.remove(Item);
+    		if (Items.remove(Item)) 
+    			if (Items.size() == 0) {
+    				Items_FileSize = 0;
+    				Items_RemovedFileSize = 0;
+    			}
     		//.
     		Save();
     	}
@@ -1183,10 +1187,13 @@ public class TDEVICEModule extends TModule
     		//.
     		public long FileSize = 0;
     		public long RemovedFileSize = 0;
+    		//.
     		public long Size = 0;
     		public long TransmittedSize = 0;
     		
     		public double TransmissionPercentage() {
+    			if (FileSize == 0)
+    				return 100.0; //. ->
     			return (100.0*(TransmittedSize+RemovedFileSize)/FileSize);
     		}
     	}

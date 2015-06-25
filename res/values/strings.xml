@@ -991,7 +991,8 @@
     <string name="SEnterName">Enter a name</string>
     <string name="SAttachName">with name </string>
     <string name="SAttachData">Attach a data to the POI</string>
-    <string name="SExportToFile">Export to file (MP4)</string>
+    <string name="SExportToFile">Export to a file (MP4)</string>
+    <string name="SExportToFileAndAttachToMyActivityAsDataFile">Export to a file (MP4) and attach to my user activity</string>
     <string name="SOperationIsDone">Operation is done.</string>
     <string name="SAVDataHasBeenExportedToFile">"Audio/Video data has been exported to the file: "</string>
     <string name="SLiveChat">Live chat</string>
@@ -1080,12 +1081,22 @@
     <string name="SCreatePlaceBookmarkFromCurrentMap">Create a place bookmark from the current map view</string>
     <string name="STransfer">Transfer</string>
     <string name="SVideoRecorderDataTransfer">Video recorder data transfer</string>
-    <string name="SCurrentProgress">current progress: </string>
-    <string name="Scheduling">scheduling: </string>
+    <string name="SCurrentProgress">Current progress: </string>
+    <string name="Scheduling">Scheduling: </string>
     <string name="SStartTransfer">Start transfer immediately</string>
     <string name="SDataTransferHasBeenStarted">Data transfer has been started.</string>
     <string name="SItemsToTransfer">"Items to transfer: "</string>
     <string name="STime">"Time#"</string>
     <string name="SEnterTime">Enter a time (HH:MM)</string>
+    <string name="SVideoRecorderServerSaverPanelHint">Long click on a scheduling table item to setup a time.\n(long click on the hint to remove it)</string>
+    <string name="STransferring">[transferring &#8230;]</string>
+    <string name="SSecurityFilesForContext">"Security files"</string>
+    <string name="SOther">Other &#8230;</string>
+    <string name="SSecurity1">Security &#8230;</string>
+    <string name="SShowSecurity">Show security</string>
+    <string name="SSelectSecurity">Select a security</string>
+    <string name="SConfirmOperation">Confirm the operation</string>
+    <string name="SGettingSecurityInfo">Getting security info &#8230;</string>
+    <string name="SAttachToMyUserActivityAsDatafile">Attach to my user activity as a data-file</string>
     
 </resources>

@@ -6,7 +6,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -47,19 +46,18 @@ public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
         setContentView(R.layout.reflector_gmos_search_panel);
         //.
         edContext = (EditText)findViewById(R.id.edContext);
-        edContext.setOnEditorActionListener(new OnEditorActionListener() {        
+        edContext.setOnEditorActionListener(new OnEditorActionListener() {
+        	
 			@Override
 			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
 				btnSearch.callOnClick();
-                if(arg1 == EditorInfo.IME_ACTION_DONE){
-    				btnSearch.callOnClick();
-                }
 				return false;
 			}
         });        
         //.
         btnSearch = (Button)findViewById(R.id.btnSearch);
         btnSearch.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
             	try {

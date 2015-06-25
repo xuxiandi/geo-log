@@ -68,6 +68,8 @@ import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TUserDescriptor.TActivity.TComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.TComponentStreamServer;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
+import com.geoscope.GeoEye.Space.TypesSystem.SecurityFile.TSecurityFileFunctionality;
+import com.geoscope.GeoEye.Space.TypesSystem.SecurityFile.TSecurityFileInstanceListPanel;
 import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -85,7 +87,8 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	
 	private static final int MESSAGE_TYPEDDATAFILE_LOADED = 1;
 	
-	public static final int REQUEST_COMPONENT_CONTENT = 1;
+	public static final int REQUEST_COMPONENT_CONTENT 			= 1;
+	public static final int REQUEST_COMPONENT_CHANGESECURITY 	= 2;
 	
 	public static class TOnListItemClickHandler {
 		
@@ -469,6 +472,10 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 				notifyDataSetChanged();
 		}
 		
+		public int Items_GetSelectedIndex() {
+			return Items_SelectedIndex;
+		}
+		
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			TViewHolder holder;
@@ -710,13 +717,14 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		    		_items[1] = ParentActivity.getString(R.string.SContent1); 
 		    		_items[2] = ParentActivity.getString(R.string.SShowGeoLocation); 
 		    		_items[3] = ParentActivity.getString(R.string.SGetURLFile); 
-		    		_items[4] = ParentActivity.getString(R.string.SChangeSecurity); 
+		    		_items[4] = ParentActivity.getString(R.string.SSecurity1); 
 		    		_items[5] = ParentActivity.getString(R.string.SRemove); 
 		    		//.
 		    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		    		builder.setTitle(R.string.SSelect);
 		    		builder.setNegativeButton(R.string.SClose,null);
 		    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+		    			
 		    			@Override
 		    			public void onClick(DialogInterface arg0, int arg1) {
 		    		    	try {
@@ -830,11 +838,11 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 4: //. change component security
+		    		    		case 4: //. component security
 		    						final CharSequence[] _items;
 		    						_items = new CharSequence[2];
-		    						_items[0] = ParentActivity.getString(R.string.SDefault);
-		    						_items[1] = ParentActivity.getString(R.string.SPrivate);
+		    						_items[0] = ParentActivity.getString(R.string.SShowSecurity);
+		    						_items[1] = ParentActivity.getString(R.string.SChangeSecurity);
 		    						AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		    						builder.setTitle(R.string.SOperations);
 		    						builder.setNegativeButton(ParentActivity.getString(R.string.SCancel),null);
@@ -844,55 +852,167 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		    							public void onClick(DialogInterface arg0, int arg1) {
 		    								arg0.dismiss();
 		    								//.
-		    				            	try {
-		    				            		final long SecurityFileID;
-		    									switch (arg1) {
-		    									
-		    									case 0: //. default security 
-		    										SecurityFileID = TComponentFunctionality.USER_DEFAULT_SECURITY_FILE_ID;
-		    										break; //. >
+	    									switch (arg1) {
+	    									
+	    									case 0: //. show security 
+	    				            			TAsyncProcessing Processing = new TAsyncProcessing(ParentActivity,R.string.SGettingSecurityInfo) {
+	    				            				
+	    				            				private String SecurityFileInfo = null;
+	    				            				
+	    				            				@Override
+	    				            				public void Process() throws Exception {
+	    				            					long SecurityFileID;
+	    				        						TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_Component.idTComponent,_Component.idComponent);
+	    				        						if (CF != null)
+	    				        							try {
+	    				        								SecurityFileID = CF.GetSecurity();
+	    				        							} finally {
+	    				        								CF.Release();
+	    				        							}
+	    				        							else
+	    				        								throw new Exception("there is no functionality for type, idType = "+Integer.toString(_Component.idTComponent)); //. =>
+	    				        						//.
+	    				        						TComponentTypedDataFiles ComponentTypedDataFiles = new TComponentTypedDataFiles(context, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_Document);
+	    				        						ComponentTypedDataFiles.PrepareForComponent(SpaceDefines.idTSecurityFile,SecurityFileID, false, UserAgent.User().Server);
+	    				        						//.
+	    				        						TComponentTypedDataFile ComponentTypedDataFile = ComponentTypedDataFiles.GetRootItem(); 
+	    				        						if ((ComponentTypedDataFile != null) && ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
+		    				        						TSecurityFileFunctionality SFF = (TSecurityFileFunctionality)UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+		    				        						if (SFF != null)
+		    				        							try {
+		    				        								SFF.ParseFromXMLDocument(ComponentTypedDataFile.GetFileData());
+		    				        								//.
+		    				        								SecurityFileInfo = SFF._Name+"\n"+"("+SFF._Info+")";
+		    				        							} finally {
+		    				        								SFF.Release();
+		    				        							}
+	    				        						}
+	    				        						else
+    				        								throw new Exception("there is no data for security file, SID: "+Long.toString(SecurityFileID)); //. =>
+	    				            					//.
+	    				            					Thread.sleep(100);
+	    				            				}
+	    				            				
+	    				            				@Override 
+	    				            				public void DoOnCompleted() throws Exception {
+	    				            					if (SecurityFileInfo != null) {
+	    				    				    		    new AlertDialog.Builder(ParentActivity)
+	    				    				    	        .setIcon(android.R.drawable.ic_dialog_alert)
+	    				    				    	        .setTitle(R.string.SSecurity)
+	    				    				    	        .setMessage(SecurityFileInfo)
+	    				    				    		    .setPositiveButton(R.string.SOk, null)
+	    				    				    		    .show();
+	    				            					}
+	    				            					else
+	    				            						throw new Exception("there is no security file info"); //. =>
+	    				            				}
+	    				            				
+	    				            				@Override
+	    				            				public void DoOnException(Exception E) {
+	    				            					Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+	    				            				}
+	    				            			};
+	    				            			Processing.Start();
+	    										break; //. >
 
-		    									case 1: //. private security
-		    										SecurityFileID = TComponentFunctionality.USER_PRIVATE_SECURITY_FILE_ID;
-		    										break; //. >
-		    									
-		    									default:
-		    										return; //. ->
-		    									}
-		    									//.
-			    		    					TAsyncProcessing SecurityChanging = new TAsyncProcessing(ParentActivity, ParentActivity.getString(R.string.SChangingSecurity)) {
+	    									case 1: //. change security
+	    			    						final CharSequence[] _items;
+	    			    						_items = new CharSequence[3];
+	    			    						_items[0] = ParentActivity.getString(R.string.SDefault);
+	    			    						_items[1] = ParentActivity.getString(R.string.SPrivate);
+	    			    						_items[2] = ParentActivity.getString(R.string.SOther);
+	    			    						AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
+	    			    						builder.setTitle(R.string.SSelectSecurity);
+	    			    						builder.setNegativeButton(ParentActivity.getString(R.string.SCancel),null);
+	    			    						builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+	    			    							
+	    			    							@Override
+	    			    							public void onClick(DialogInterface arg0, int arg1) {
+	    			    								arg0.dismiss();
+	    			    								//.
+	    			    				            	try {
+	    			    				            		final long SecurityFileID;
+	    			    									switch (arg1) {
+	    			    									
+	    			    									case 0: //. default security 
+	    			    										SecurityFileID = TComponentFunctionality.USER_DEFAULT_SECURITY_FILE_ID;
+	    			    										break; //. >
 
-			    		    						@Override
-			    		    						public void Process() throws Exception {
-			    		    							TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_Component.idTComponent,_Component.idComponent);
-			    		    							if (CF != null)
-			    		    								try {
-			    		    									CF.ChangeSecurity(SecurityFileID);
-			    		    								} finally {
-			    		    									CF.Release();
-			    		    								}
-			    		    								else
-			    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(_Component.idTComponent)); //. =>
-			    		    						}
+	    			    									case 1: //. private security
+	    			    										SecurityFileID = TComponentFunctionality.USER_PRIVATE_SECURITY_FILE_ID;
+	    			    										break; //. >
+	    			    									
+	    			    									case 2: //. other security
+	    			    				            			TAsyncProcessing Processing = new TAsyncProcessing(ParentActivity,ParentActivity.getString(R.string.SWaitAMoment)) {
+	    			    				            				
+	    			    				            				private TGeoScopeServerUser.TUserDescriptor UserDescriptor;
+	    			    				            				
+	    			    				            				@Override
+	    			    				            				public void Process() throws Exception {
+	    			    				            					UserDescriptor = UserAgent.User().GetUserInfo();
+	    			    				            					//.
+	    			    				            					Thread.sleep(100);
+	    			    				            				}
+	    			    				            				
+	    			    				            				@Override 
+	    			    				            				public void DoOnCompleted() throws Exception {
+	    					    										Intent intent = new Intent(ParentActivity,TSecurityFileInstanceListPanel.class);
+	    					    										intent.putExtra("Context", UserDescriptor.UserName);
+	    					    										ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CHANGESECURITY);
+	    			    				            				}
+	    			    				            				
+	    			    				            				@Override
+	    			    				            				public void DoOnException(Exception E) {
+	    			    				            					Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+	    			    				            				}
+	    			    				            			};
+	    			    				            			Processing.Start();
+	    			    										return; //. ->
+	    			    									
+	    			    									default:
+	    			    										return; //. ->
+	    			    									}
+	    			    									//.
+	    				    		    					TAsyncProcessing SecurityChanging = new TAsyncProcessing(ParentActivity, ParentActivity.getString(R.string.SChangingSecurity)) {
 
-			    		    						@Override
-			    		    						public void DoOnCompleted() throws Exception {
-			    		    							Toast.makeText(ParentActivity, R.string.SSecurityHasBeenChanged, Toast.LENGTH_LONG).show();
-			    		    						}
-			    		    						
-			    		    						@Override
-			    		    						public void DoOnException(Exception E) {
-			    		    							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
-			    		    						}
-			    		    					};
-			    		    					SecurityChanging.Start();
-		    								}
-		    								catch (Exception E) {
-		    									String S = E.getMessage();
-		    									if (S == null)
-		    										S = E.getClass().getName();
-		    				        			Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
-		    								}
+	    				    		    						@Override
+	    				    		    						public void Process() throws Exception {
+	    				    		    							TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_Component.idTComponent,_Component.idComponent);
+	    				    		    							if (CF != null)
+	    				    		    								try {
+	    				    		    									CF.ChangeSecurity(SecurityFileID);
+	    				    		    								} finally {
+	    				    		    									CF.Release();
+	    				    		    								}
+	    				    		    								else
+	    				    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(_Component.idTComponent)); //. =>
+	    				    		    						}
+
+	    				    		    						@Override
+	    				    		    						public void DoOnCompleted() throws Exception {
+	    				    		    							Toast.makeText(ParentActivity, R.string.SSecurityHasBeenChanged, Toast.LENGTH_LONG).show();
+	    				    		    						}
+	    				    		    						
+	    				    		    						@Override
+	    				    		    						public void DoOnException(Exception E) {
+	    				    		    							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+	    				    		    						}
+	    				    		    					};
+	    				    		    					SecurityChanging.Start();
+	    			    								}
+	    			    								catch (Exception E) {
+	    			    									String S = E.getMessage();
+	    			    									if (S == null)
+	    			    										S = E.getClass().getName();
+	    			    				        			Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+	    			    								}
+	    			    							}
+	    			    						});
+	    			    						AlertDialog AD = builder.create();
+	    			    						AD.show();
+	    			    						//.
+	    										break; //. >
+	    									}
 		    							}
 		    						});
 		    						AlertDialog AD = builder.create();
@@ -1051,6 +1171,60 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	        StopUpdating();
 	}
 	
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {        
+
+        case REQUEST_COMPONENT_CONTENT: 
+        	if (resultCode == Activity.RESULT_OK)
+				try {
+					Restart();
+				} catch (Exception E) {
+				}
+        	break; //. >
+
+        case REQUEST_COMPONENT_CHANGESECURITY: 
+        	if (resultCode == Activity.RESULT_OK) {
+        		int SI = lvActivityComponentListAdapter.Items_GetSelectedIndex();
+        		if (SI >= 0) {
+            		final long SecurityFileID = data.getExtras().getLong("SecurityFileID");
+            		final TActivity.TComponent _Component = ActivityComponents.Items[SI];
+    				TAsyncProcessing SecurityChanging = new TAsyncProcessing(ParentActivity, ParentActivity.getString(R.string.SChangingSecurity)) {
+
+    					@Override
+    					public void Process() throws Exception {
+    						TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_Component.idTComponent,_Component.idComponent);
+    						if (CF != null)
+    							try {
+    								CF.ChangeSecurity(SecurityFileID);
+    							} finally {
+    								CF.Release();
+    							}
+    							else
+    								throw new Exception("there is no functionality for type, idType = "+Integer.toString(_Component.idTComponent)); //. =>
+    					}
+
+    					@Override
+    					public void DoOnCompleted() throws Exception {
+    						Toast.makeText(ParentActivity, R.string.SSecurityHasBeenChanged, Toast.LENGTH_LONG).show();
+    					}
+    					
+    					@Override
+    					public void DoOnException(Exception E) {
+    						Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+    					}
+    				};
+    				SecurityChanging.Start();
+        		}
+        		else
+					Toast.makeText(ParentActivity, "component is not selected",	Toast.LENGTH_LONG).show();
+        	}
+        	break; //. >
+        }
+        //.
+    	super.onActivityResult(requestCode, resultCode, data);
+    }
+    
 	protected void FilterActivityComponents(TActivity.TComponents ActivityComponents) {
 		if (ActivityComponents == null)
 			return; //. ->

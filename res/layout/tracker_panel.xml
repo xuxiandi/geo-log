@@ -55,7 +55,6 @@
                     android:layout_centerVertical="true"
                     android:text="@string/SLockScreen"
                     android:textSize="16sp" />
-
             </RelativeLayout>
 
             <TextView
@@ -340,18 +339,18 @@
                         android:textSize="18sp" />
 
                     <Button
-                        android:id="@+id/btnVideoRecorderModuleServerSaverPanel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="@string/STransfer"
-                        android:textSize="18sp" />
-
-                    <Button
                         android:id="@+id/btnSensorsModuleMetersPanel"
                         android:layout_width="0dip"
                         android:layout_height="match_parent"
                         android:layout_weight="1.0"
                         android:text="@string/SRecorders"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnVideoRecorderModuleServerSaverPanel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="@string/STransfer"
                         android:textSize="18sp" />
 
                     <CheckBox
@@ -431,7 +430,6 @@
                         android:text="@string/SQueueMenu"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
-
                 </RelativeLayout>
 
                 <LinearLayout
@@ -582,7 +580,6 @@
                         android:inputType="none"
                         android:textColor="#ffffffff"
                         android:textSize="18sp" />
-
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -636,7 +633,6 @@
                         android:layout_toLeftOf="@+id/edComponentFileStreaming"
                         android:layout_toRightOf="@+id/TextView08"
                         android:visibility="gone" />
-
                 </RelativeLayout>
             </LinearLayout>
         </LinearLayout>

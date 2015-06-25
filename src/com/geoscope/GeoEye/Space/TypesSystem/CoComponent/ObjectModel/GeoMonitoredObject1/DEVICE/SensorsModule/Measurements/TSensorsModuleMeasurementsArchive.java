@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -26,6 +27,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Data.Types.String.TEnterStringDialog;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
@@ -33,12 +35,17 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TTrackerPanel.TConfiguration;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUserDataFile;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographDataServerClient;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurement;
+import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentFileStreaming;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 @SuppressLint("HandlerLeak")
@@ -168,20 +175,34 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 				//.
 				final TArchiveItem Item = Items[arg2];
 				//.
-				TSensorMeasurementDescriptor MeasurementDescriptor = null;
+				TSensorMeasurementDescriptor _MeasurementDescriptor;
 				if (Item.Location == TSensorMeasurementDescriptor.LOCATION_CLIENT)
 					try {
-						MeasurementDescriptor = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.GetMeasurementDescriptor(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()),Item.ID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+						_MeasurementDescriptor = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.GetMeasurementDescriptor(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()),Item.ID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 					} catch (Exception E) {
+						_MeasurementDescriptor = null;
 					}
+					else
+						_MeasurementDescriptor = null;
+				final TSensorMeasurementDescriptor MeasurementDescriptor = _MeasurementDescriptor;
 				//.
 	    		final CharSequence[] _items;
 	    		int SelectedIdx = -1;
-	    		if ((MeasurementDescriptor != null) && MeasurementDescriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID)) {
-		    		_items = new CharSequence[3];	    		
-		    		_items[0] = getString(R.string.SOpen); 
-		    		_items[1] = getString(R.string.SRemove); 
-		    		_items[2] = getString(R.string.SExportToFile); 
+	    		if (MeasurementDescriptor != null) {
+	    			if (MeasurementDescriptor.IsTypeOf(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.TModel.ModelTypeID)) {
+			    		_items = new CharSequence[5];	    		
+			    		_items[0] = getString(R.string.SOpen); 
+			    		_items[1] = getString(R.string.SRemove); 
+			    		_items[2] = getString(R.string.SAttachToMyUserActivityAsDatafile); 
+			    		_items[3] = getString(R.string.SExportToFile); 
+			    		_items[4] = getString(R.string.SExportToFileAndAttachToMyActivityAsDataFile); 
+	    			}
+	    			else {
+			    		_items = new CharSequence[3];	    		
+			    		_items[0] = getString(R.string.SOpen); 
+			    		_items[1] = getString(R.string.SRemove); 
+			    		_items[2] = getString(R.string.SAttachToMyUserActivityAsDatafile); 
+	    			}
 	    		}
 	    		else {
 		    		_items = new CharSequence[2];	    		
@@ -247,7 +268,60 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 	        		    		//.
 	    		    			break; //. >
 	    		    			
-	    		    		case 2: //. export to a file
+	    		    		case 2: //. attach the measurement to my user activity as a data-file
+    		    				String _DataName = MeasurementDescriptor.TypeID()+"("+OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(MeasurementDescriptor.StartTimestamp))+")"; 
+    		    		    	//.
+    		    		    	TEnterStringDialog.Dialog(TSensorsModuleMeasurementsArchive.this, getString(R.string.SDataName), getString(R.string.SEnterName), _DataName, TConfiguration.TGPSModuleConfiguration.MapPOI_DataNameMaxSize, new TEnterStringDialog.TOnStringEnteredHandler() {
+                        			
+                        			@Override
+                        			public void DoOnStringEntered(String Str)  throws Exception {
+            		    		    	if ((Str != null) && (Str.length() > 0))
+            		    		    		Str = "@"+TComponentFileStreaming.CheckAndEncodeFileNameString(Str);
+            		    		    	else
+            		    		    		Str = "";
+            		    				//.
+                        				final String DataName = Str;
+                        				//.
+        	    		    			TAsyncProcessing Processing = new TAsyncProcessing(TSensorsModuleMeasurementsArchive.this) {
+
+        	    		    				@Override
+        	    		    				public void Process() throws Exception {
+        	    	    				    	TTracker Tracker = TTracker.GetTracker();
+        	    	    				    	if (Tracker == null)
+        	    	    				    		throw new Exception(TSensorsModuleMeasurementsArchive.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+        	    	    				    	//.
+        	    								TMeasurement Measurement = new TMeasurement(Tracker.GeoLog.idGeographServerObject, TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+        	        		    		    	byte[] Data = Measurement.ToByteArray();
+        	        		    		    	double Timestamp = OleDate.UTCCurrentTimestamp();
+        	        		    				String NFN = TGPSModule.MapPOIComponentFolder()+"/"+MeasurementDescriptor.GUID+DataName+TSensorMeasurement.DataFileFormat;
+        	        		    				File NF = new File(NFN);
+        	        		    				FileOutputStream FOS = new FileOutputStream(NF);
+        	        		    				try {
+        	        		    					FOS.write(Data);
+        	        		    				}
+        	        		    				finally {
+        	        		    					FOS.close();
+        	        		    				}
+        	        		    				//. prepare and send data-file
+        	        		    		    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(Timestamp,NFN);
+        	        		    		    	DataFile.Create(Tracker.GeoLog);
+        	    		    				}
+
+        	    		    				@Override
+        	    		    				public void DoOnCompleted() throws Exception {
+        	    		    					if (!Canceller.flCancel && flRunning) 
+        	    			    		    		Toast.makeText(TSensorsModuleMeasurementsArchive.this, "Datafile of the measurement has been added.", Toast.LENGTH_LONG).show();
+        	    		    				}
+        	    		    			};
+        	    		    			Processing.Start();
+                        			}
+                        		});
+	    						//.
+	        		    		arg0.dismiss();
+    		    		    	//.
+	    		    			break; 
+	    		    			
+	    		    		case 3: //. export to a file
 	    		    			TAsyncProcessing Exporting = new TAsyncProcessing(TSensorsModuleMeasurementsArchive.this) {
 
 	    		    				private static final String ExpertFileName = "Clip.mp4";
@@ -289,6 +363,51 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 	    		    				}
 	    		    			};
 	    		    			Exporting.Start();
+	    						//.
+	        		    		arg0.dismiss();
+	        		    		//.
+	    		    			break; //. >
+
+	    		    		case 4: //. export to a file and attach to my activity as data-file
+	    		    			_DataName = MeasurementDescriptor.TypeID()+"("+OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(MeasurementDescriptor.StartTimestamp))+")"; 
+    		    		    	//.
+    		    		    	TEnterStringDialog.Dialog(TSensorsModuleMeasurementsArchive.this, getString(R.string.SDataName), getString(R.string.SEnterName), _DataName, TConfiguration.TGPSModuleConfiguration.MapPOI_DataNameMaxSize, new TEnterStringDialog.TOnStringEnteredHandler() {
+                        			
+                        			@Override
+                        			public void DoOnStringEntered(String Str)  throws Exception {
+            		    		    	if ((Str != null) && (Str.length() > 0))
+            		    		    		Str = "@"+TComponentFileStreaming.CheckAndEncodeFileNameString(Str);
+            		    		    	else
+            		    		    		Str = "";
+            		    				//.
+                        				final String DataName = Str;
+                        				//.
+        	    		    			TAsyncProcessing Processing = new TAsyncProcessing(TSensorsModuleMeasurementsArchive.this) {
+
+        	    		    				@Override
+        	    		    				public void Process() throws Exception {
+        	    	    				    	TTracker Tracker = TTracker.GetTracker();
+        	    	    				    	if (Tracker == null)
+        	    	    				    		throw new Exception(TSensorsModuleMeasurementsArchive.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+        	    								//.
+        	        		    				String NFN = TGPSModule.MapPOIComponentFolder()+"/"+MeasurementDescriptor.GUID+DataName+".MP4";
+        	    		    					com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, NFN);
+        	    		    					//.
+        	        		    		    	double Timestamp = OleDate.UTCCurrentTimestamp();
+        	        		    				//. prepare and send data-file
+        	        		    		    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(Timestamp,NFN);
+        	        		    		    	DataFile.Create(Tracker.GeoLog);
+        	    		    				}
+
+        	    		    				@Override
+        	    		    				public void DoOnCompleted() throws Exception {
+        	    		    					if (!Canceller.flCancel && flRunning) 
+        	    			    		    		Toast.makeText(TSensorsModuleMeasurementsArchive.this, "Datafile of the measurement has been added.", Toast.LENGTH_LONG).show();
+        	    		    				}
+        	    		    			};
+        	    		    			Processing.Start();
+                        			}
+                        		});
 	    						//.
 	        		    		arg0.dismiss();
 	        		    		//.
@@ -546,6 +665,8 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 			switch (Items[I].Location) {
 			case TSensorMeasurementDescriptor.LOCATION_SERVER:
 				SideS = getString(R.string.SAtServer);
+				if (Items[I].CPC < 1.0)
+					SideS += " "+getString(R.string.STransferring);
 				break; //. >
 
 			case TSensorMeasurementDescriptor.LOCATION_CLIENT:

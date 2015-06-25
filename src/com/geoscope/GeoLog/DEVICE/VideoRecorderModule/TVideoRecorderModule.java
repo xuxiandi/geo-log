@@ -62,6 +62,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoReco
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderTransmittingFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderVideoFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.TMediaFrameServer;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -722,7 +723,7 @@ public class TVideoRecorderModule extends TModule {
 						}
 						try {
 							if (_MeasurementsIDsToProcess.equals("")) {
-								File[] _Measurements = TVideoRecorderMeasurements.GetMeasurementsFolderList();
+								File[] _Measurements = TSensorsModuleMeasurements.GetMeasurementsFolderList();
 								for (int I = 0; I < _Measurements.length; I++) 
 									if (_Measurements[I] != null) {
 										String MeasurementID = _Measurements[I].getName();

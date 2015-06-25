@@ -1088,7 +1088,7 @@
     <string name="SItemsToTransfer">"Items to transfer: "</string>
     <string name="STime">"Time#"</string>
     <string name="SEnterTime">Enter a time (HH:MM)</string>
-    <string name="SVideoRecorderServerSaverPanelHint">Long click on a scheduling table item to setup a time.\n(long click on the hint to remove it)</string>
+    <string name="SVideoRecorderServerSaverPanelHint">Long click on a scheduling table item to setup a time.</string>
     <string name="STransferring">[transferring &#8230;]</string>
     <string name="SSecurityFilesForContext">"Security files"</string>
     <string name="SOther">Other &#8230;</string>

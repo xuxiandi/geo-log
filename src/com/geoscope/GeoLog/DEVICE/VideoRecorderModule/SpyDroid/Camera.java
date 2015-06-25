@@ -105,8 +105,9 @@ public class Camera {
 	}
 	
 	public void UpdateMeasurementCurrentDescriptor() throws Exception {
-		TMeasurementDescriptor Descriptor = GetMeasurementCurrentDescriptor();
+		//. Do not update measurement while recording it. It makes the measurement invisible for clients
+		/* TMeasurementDescriptor Descriptor = GetMeasurementCurrentDescriptor();
 		if (Descriptor != null) 
-			TSensorsModuleMeasurements.SetMeasurementDescriptor(Descriptor.ID, Descriptor);
+			TSensorsModuleMeasurements.SetMeasurementDescriptor(Descriptor.ID, Descriptor); */
 	}
 }

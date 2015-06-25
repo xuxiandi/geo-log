@@ -992,6 +992,7 @@
     <string name="SAttachName">c именем </string>
     <string name="SAttachData">Добавить данные</string>
     <string name="SExportToFile">Экспортировать в файл (MP4)</string>
+    <string name="SExportToFileAndAttachToMyActivityAsDataFile">Экспортировать в файл (MP4) и прикрепить к текущей активности</string>
     <string name="SOperationIsDone">Операция выполнена.</string>
     <string name="SAVDataHasBeenExportedToFile">"Аудио/Видео данные экспортированы в файл: "</string>
     <string name="SLiveChat">Чат</string>
@@ -1080,12 +1081,22 @@
     <string name="SCreatePlaceBookmarkFromCurrentMap">Создать ссылку на место по текущей карте</string>
     <string name="STransfer">Трансфер</string>
     <string name="SVideoRecorderDataTransfer">Трансфер данных видео-рекордера</string>
-    <string name="SCurrentProgress">текущий прогресс: </string>
-    <string name="Scheduling">расписание: </string>
+    <string name="SCurrentProgress">Текущий прогресс: </string>
+    <string name="Scheduling">Расписание: </string>
     <string name="SStartTransfer">Начать передачу сейчас</string>
     <string name="SDataTransferHasBeenStarted">Передача данных запущена.</string>
     <string name="SItemsToTransfer">"Элементов к передаче: "</string>
     <string name="STime">"Время#"</string>
     <string name="SEnterTime">Введите время (ЧЧ:ММ)</string>
+    <string name="SVideoRecorderServerSaverPanelHint">Долгое нажатие на строке таблицы расписания - редактировать время.\n(долгое нажатие на подсказке убирает её)</string>
+    <string name="STransferring">[передача &#8230;]</string>
+    <string name="SSecurityFilesForContext">"Файлы безопасности"</string>
+    <string name="SOther">Другая &#8230;</string>
+    <string name="SSecurity1">Безопасность &#8230;</string>
+    <string name="SShowSecurity">Показать безопасность</string>
+    <string name="SSelectSecurity">Выберите безопасность</string>
+    <string name="SConfirmOperation">Подтвердите операцию</string>
+    <string name="SGettingSecurityInfo">Получение файла безопасности &#8230;</string>
+    <string name="SAttachToMyUserActivityAsDatafile">Прикрепить к моей активности как файл данных</string>
     
 </resources>

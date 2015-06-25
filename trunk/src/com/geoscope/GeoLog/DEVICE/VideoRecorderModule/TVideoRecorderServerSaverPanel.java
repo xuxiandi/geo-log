@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -28,6 +29,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.Application.THintManager;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 @SuppressLint("HandlerLeak")
@@ -123,7 +125,11 @@ public class TVideoRecorderServerSaverPanel extends Activity {
 			        		if (SA.length != 2)
 			        			throw new Exception("incorrect time format"); //. ->
 			        		int Hours = Integer.parseInt(SA[0]);
+			        		if ((Hours < 0) || (Hours > 23))
+			        			throw new Exception("wrong hour value"); //. ->
 			        		int Mins = Integer.parseInt(SA[1]);
+			        		if ((Mins < 0) || (Mins > 59))
+			        			throw new Exception("wrong minute value"); //. ->
 			        		double DayTime = Hours/24.0+Mins/(24.0*60.0);
 		            		ServerSaver.Scheduler.Plan.Items.get(arg2).SetDayTime(DayTime);
 		            		//.
@@ -151,6 +157,27 @@ public class TVideoRecorderServerSaverPanel extends Activity {
             	return true; 
 			}
 		}); 
+        //.
+        final int HintID = THintManager.HINT__VideoRecorderServerSaverPanel;
+        final TextView lbHint = (TextView)findViewById(R.id.lbHint);
+        String Hint = THintManager.GetHint(HintID, this);
+        if (Hint != null) {
+        	lbHint.setText(Hint);
+            lbHint.setOnLongClickListener(new OnLongClickListener() {
+            	
+    			@Override
+    			public boolean onLongClick(View v) {
+    				THintManager.SetHintAsDisabled(HintID);
+    	        	lbHint.setVisibility(View.GONE);
+    	        	//.
+    				return true;
+    			}
+    		});
+            //.
+        	lbHint.setVisibility(View.VISIBLE);
+        }
+        else
+        	lbHint.setVisibility(View.GONE);
         //.
         Updater = new Timer();
         Updater.schedule(new TUpdaterTask(),0,UpdateInterval);

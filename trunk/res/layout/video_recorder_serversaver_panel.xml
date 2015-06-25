@@ -15,6 +15,7 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:paddingLeft="8dp"
         android:text="@string/SCurrentProgress"
         android:textSize="8pt" />
 
@@ -28,6 +29,7 @@
         android:id="@+id/tvProcessProgress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingLeft="8dp"
         android:textSize="8pt" />
 
     <Button
@@ -40,6 +42,7 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:paddingLeft="8dp"
         android:text="@string/Scheduling"
         android:textSize="8pt" />
 
@@ -50,6 +53,17 @@
         android:layout_weight="1"
         android:cacheColorHint="#00000000"
         android:choiceMode="multipleChoice"
-        android:scrollbars="vertical" />
+        android:scrollbars="vertical" >
+    </ListView>
+
+    <TextView
+        android:id="@+id/lbHint"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#E7C04A"
+        android:gravity="left"
+        android:textColor="#ff000000"
+        android:textSize="12sp"
+        android:visibility="gone" />
 
 </LinearLayout>

@@ -87,15 +87,6 @@ public class TUserActivityComponentListPanel extends Activity {
 	
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {        
-
-        case TUserActivityComponentListComponent.REQUEST_COMPONENT_CONTENT: 
-        	if (resultCode == RESULT_OK)
-				try {
-					ListComponent.Restart();
-				} catch (Exception E) {
-				}
-        	break; //. >
-        }
+    	ListComponent.onActivityResult(requestCode, resultCode, data);
     }
 }

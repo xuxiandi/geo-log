@@ -282,7 +282,12 @@ public class TVideoRecorderModule extends TModule {
 				for (int I = 0; I < Cnt; I++) 
 					if (Items.get(I).equals(MeasurementID)) {
 						Items.remove(I);
-						Items_RemovedCount++;
+						if (Items.size() > 0)
+							Items_RemovedCount++;
+						else {
+			    			Items_SummaryCount = 0;
+			    			Items_RemovedCount = 0;
+						}
 						//.
 						Save();
 						//.
@@ -501,23 +506,31 @@ public class TVideoRecorderModule extends TModule {
     			}
     		}
 
+    		private void CreateDefaultItems() {
+    			double Time0 = 10; //. hours
+    			double Time1 = 14;
+    			double Time2 = 18;
+    			double Time3 = 20;
+    			//.
+				TDailyPlan.TItem Item = new TDailyPlan.TItem(Plan);
+				Item.DayTime = Time0/24.0;
+				Plan.Items.add(Item);
+				Item = new TDailyPlan.TItem(Plan);
+				Item.DayTime = Time1/24.0;
+				Plan.Items.add(Item);
+				Item = new TDailyPlan.TItem(Plan);
+				Item.DayTime = Time2/24.0;
+				Plan.Items.add(Item);
+				Item = new TDailyPlan.TItem(Plan);
+				Item.DayTime = Time3/24.0;
+				Plan.Items.add(Item);
+    		}
+    		
     		private void Load() throws Exception {
     			String FN = Folder+"/"+FileName;
     			File F = new File(FN);
     			if (!F.exists()) {
-    				//. default items
-    				TDailyPlan.TItem Item = new TDailyPlan.TItem(Plan);
-    				Item.DayTime = 10/24.0;
-    				Plan.Items.add(Item);
-    				Item = new TDailyPlan.TItem(Plan);
-    				Item.DayTime = 14/24.0;
-    				Plan.Items.add(Item);
-    				Item = new TDailyPlan.TItem(Plan);
-    				Item.DayTime = 18/24.0;
-    				Plan.Items.add(Item);
-    				Item = new TDailyPlan.TItem(Plan);
-    				Item.DayTime = 20/24.0;
-    				Plan.Items.add(Item);
+    				CreateDefaultItems();
     				return; //. ->
     			}
     			//.

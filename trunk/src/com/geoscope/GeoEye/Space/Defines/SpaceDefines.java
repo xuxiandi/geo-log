@@ -436,6 +436,18 @@ public class SpaceDefines {
 	public static final int 	idTGeodesyPoint = 2043;
 	public static final String 	nmTGeodesyPoint = "Geodesy Point";
 
+	public static final int 	idTSecurityComponentOperation = 2025;
+	public static final String 	nmTSecurityComponentOperation = "Security Component Operation";
+
+	public static final int 	idTSecurityKey = 2024;
+	public static final String 	nmTSecurityKey = "Security Key";
+
+	public static final int 	idTSecurityFile = 2023;
+	public static final String 	nmTSecurityFile = "Security File";
+
+	public static final int 	idTSecurityComponent = 2022;
+	public static final String 	nmTSecurityComponent = "Security Component";
+
 	public static final int 	idTModelUser = 2019;
 	public static final String 	nmTModelUser = "User";
 	

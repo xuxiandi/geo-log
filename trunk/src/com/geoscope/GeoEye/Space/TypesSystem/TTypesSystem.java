@@ -23,6 +23,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.MapFormatMap.TSystemTMapFormatMap;
 import com.geoscope.GeoEye.Space.TypesSystem.MapFormatObject.TSystemTMapFormatObject;
 import com.geoscope.GeoEye.Space.TypesSystem.PictureVisualization.TSystemTPictureVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.Positioner.TSystemTPositioner;
+import com.geoscope.GeoEye.Space.TypesSystem.SecurityFile.TSystemTSecurityFile;
 import com.geoscope.GeoEye.Space.TypesSystem.TTFVisualization.TSystemTTTFVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.TileServerVisualization.TSystemTTileServerVisualization;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualization.TSystemTVisualization;
@@ -68,6 +69,7 @@ public class TTypesSystem {
 	public TSystemTDetailedPictureVisualization	SystemTDetailedPictureVisualization;
 	public TSystemTTileServerVisualization		SystemTTileServerVisualization;
 	public TSystemTHintVisualization			SystemTHintVisualization;
+	public TSystemTSecurityFile					SystemTSecurityFile;
 	public TSystemTCoComponent					SystemTCoComponent;
 	public TSystemTDATAFile 					SystemTDATAFile;
 	public TSystemTPositioner					SystemTPositioner;
@@ -92,6 +94,7 @@ public class TTypesSystem {
 		SystemTDetailedPictureVisualization = new TSystemTDetailedPictureVisualization(this); 
 		SystemTTileServerVisualization		= new TSystemTTileServerVisualization(this);
 		SystemTHintVisualization			= new TSystemTHintVisualization(this);
+		SystemTSecurityFile					= new TSystemTSecurityFile(this);
 		SystemTCoComponent					= new TSystemTCoComponent(this);
 		SystemTDATAFile 					= new TSystemTDATAFile(this);
 		SystemTPositioner 					= new TSystemTPositioner(this);

@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServer;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypeSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
@@ -24,6 +25,10 @@ public class TTypeFunctionality extends TFunctionality {
 		idType = TypeSystem.idType;
 		//.
 		Server = pTypeSystem.TypesSystem.Space.User.Server;
+	}
+	
+	public TGeoScopeServerUser User() {
+		return Server.User;
 	}
 	
 	public TTypesSystem TypesSystem() {

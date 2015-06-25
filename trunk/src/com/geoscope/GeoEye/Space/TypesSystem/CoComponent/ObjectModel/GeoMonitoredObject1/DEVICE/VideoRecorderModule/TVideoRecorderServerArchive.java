@@ -511,6 +511,8 @@ public class TVideoRecorderServerArchive extends Activity {
 			switch (Items[I].Location) {
 			case TSensorMeasurementDescriptor.LOCATION_SERVER:
 				SideS = getString(R.string.SAtServer);
+				if (Items[I].CPC < 1.0)
+					SideS += " "+getString(R.string.STransferring);
 				break; //. >
 
 			case TSensorMeasurementDescriptor.LOCATION_CLIENT:

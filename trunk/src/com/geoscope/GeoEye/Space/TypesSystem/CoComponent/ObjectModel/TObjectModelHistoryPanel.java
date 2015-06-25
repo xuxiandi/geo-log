@@ -1783,6 +1783,9 @@ public class TObjectModelHistoryPanel extends Activity {
 	}
 	
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (UserActivitiesComponentList != null)
+			UserActivitiesComponentList.onActivityResult(requestCode, resultCode, data);
+		//.
 		switch (requestCode) {
 
 		case REQUEST_SHOWVIDEOMEASUREMENT:

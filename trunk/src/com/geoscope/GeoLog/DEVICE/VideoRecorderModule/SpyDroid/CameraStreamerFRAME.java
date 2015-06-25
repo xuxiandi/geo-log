@@ -269,9 +269,6 @@ public class CameraStreamerFRAME extends Camera {
 		public TVideoFrameCaptureCallback() {
 		}
 		
-		public void Release() throws IOException {
-		}
-		
 		@Override        
 		public void onPreviewFrame(byte[] data, android.hardware.Camera camera) {
 			try {
@@ -522,147 +519,235 @@ public class CameraStreamerFRAME extends Camera {
 				MeasurementFolder = "";
 			}
 		}
-		//. AUDIO
-		if (flAudio) {
-			AudioSampleSource = new TAudioSampleSource();
-			if (asrc > 0)
-				AudioSampleSource.SetSource(asrc);
-			if (sps > 0)
-				AudioSampleSource.SetSampleRate(sps);
-	        camera_parameters_Audio_SampleRate = AudioSampleSource.Microphone_SamplePerSec;
-			//.
-	        synchronized (VideoRecorderModule.MediaFrameServer.CurrentSamplePacket) {
-	        	VideoRecorderModule.MediaFrameServer.SampleRate = AudioSampleSource.Microphone_SamplePerSec;
-	        	VideoRecorderModule.MediaFrameServer.SamplePacketInterval = 10;
-	        	VideoRecorderModule.MediaFrameServer.SampleBitRate = abr;
-			}
-			camera_parameters_Audio_SampleCount = 0;
-	        //.
-	        if (MeasurementID != null) {
-				AudioSampleFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName);
-				AudioSampleBufferedStream = new BufferedOutputStream(AudioSampleFileStream, 65535);
-				AudioSampleEncoder = new TAudioSampleEncoder(this, abr, AudioSampleSource.Microphone_SamplePerSec, AudioSampleBufferedStream);
-	        }
-		}
-		else {
-			camera_parameters_Audio_SampleCount = -1;
-			AudioSampleFileStream = null;
-		}
-		//. VIDEO
-		if (flVideo) {
-			if ((vsrc > 0) && (android.hardware.Camera.getNumberOfCameras() > vsrc)) 
-				camera = android.hardware.Camera.open(vsrc);
-			else
-				camera = android.hardware.Camera.open();
-	        camera_parameters = camera.getParameters();
-	        camera_parameters.setPreviewSize(resX,resY);
-	        if (fps > 0)
-	        	camera_parameters.setPreviewFrameRate(fps);
-	        //.
-	        camera_parameters.setPreviewFormat(ImageFormat.NV21);
-			//.
-	        camera_parameters.set("orientation", "landscape");
-	        camera.setParameters(camera_parameters);
-	        camera_parameters = camera.getParameters();
-	        camera_parameters_Video_FrameSize = camera_parameters.getPreviewSize();
-	        camera_parameters_Video_FrameRate = camera_parameters.getPreviewFrameRate();
-	        camera_parameters_Video_FramePixelFormat = camera_parameters.getPreviewFormat();
-	        //.
-	        if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-	        	Surface 	Preview = null;
-	        	Rect 		PreviewFrame = null;
-	        	if (pflPreview && (holder != null)) {
-	        		Preview = holder.getSurface();
-	        		PreviewFrame = holder.getSurfaceFrame();
-	        	}
-	        	VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, camera_parameters_Video_FrameSize.width, camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, Preview,PreviewFrame);
-	        }
-	        else {
-				if (holder == null)
-					throw new Exception("surface isn't set"); //. ->
+		try {
+			//. AUDIO
+			if (flAudio) {
+				AudioSampleSource = new TAudioSampleSource();
+				if (asrc > 0)
+					AudioSampleSource.SetSource(asrc);
+				if (sps > 0)
+					AudioSampleSource.SetSampleRate(sps);
+		        camera_parameters_Audio_SampleRate = AudioSampleSource.Microphone_SamplePerSec;
 				//.
-		        for (int I = 0; I < 4; I++) 
-		        	camera.addCallbackBuffer(CreateCallbackBuffer());
-		        //.
-		        camera.setPreviewCallbackWithBuffer(VideoFrameCaptureCallback);
-		        //.
-	        	camera.setPreviewDisplay(holder);
-	        }
-	        //. 
-	        camera_parameters_Video_FrameCount = 0;
-	        //. setting FrameServer
-	        synchronized (VideoRecorderModule.MediaFrameServer.CurrentFrame) {
-	        	VideoRecorderModule.MediaFrameServer.FrameSize = camera_parameters_Video_FrameSize;
-	        	VideoRecorderModule.MediaFrameServer.FrameRate = camera_parameters_Video_FrameRate;
-	        	VideoRecorderModule.MediaFrameServer.FrameInterval = (int)(1000/camera_parameters_Video_FrameRate);
-	        	VideoRecorderModule.MediaFrameServer.FrameBitRate = br;
-	        	VideoRecorderModule.MediaFrameServer.FramePixelFormat = camera_parameters_Video_FramePixelFormat; 
-			}
-	        //.
-	        if (MeasurementID != null) { 
-				VideoFrameFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName);
-				VideoFrameBufferedStream = new BufferedOutputStream(VideoFrameFileStream, 256*1024);
-				VideoFrameIndexFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.VideoIndex32FileName);
-				VideoFrameIndexBufferedStream = new BufferedOutputStream(VideoFrameIndexFileStream, 65535);
-				VideoFrameTimestampFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.VideoTS32FileName);
-				VideoFrameTimestampBufferedStream = new BufferedOutputStream(VideoFrameTimestampFileStream, 65535);
-				if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists()) {
-					VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient(this, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
-					//.
-					VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(VideoFrameEncoderServerClient);
+		        synchronized (VideoRecorderModule.MediaFrameServer.CurrentSamplePacket) {
+		        	VideoRecorderModule.MediaFrameServer.SampleRate = AudioSampleSource.Microphone_SamplePerSec;
+		        	VideoRecorderModule.MediaFrameServer.SamplePacketInterval = 10;
+		        	VideoRecorderModule.MediaFrameServer.SampleBitRate = abr;
 				}
+				camera_parameters_Audio_SampleCount = 0;
+		        //.
+		        if (MeasurementID != null) {
+					AudioSampleFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName);
+					AudioSampleBufferedStream = new BufferedOutputStream(AudioSampleFileStream, 65535);
+					AudioSampleEncoder = new TAudioSampleEncoder(this, abr, AudioSampleSource.Microphone_SamplePerSec, AudioSampleBufferedStream);
+		        }
+			}
+			else {
+				camera_parameters_Audio_SampleCount = -1;
+				AudioSampleFileStream = null;
+			}
+			//. VIDEO
+			if (flVideo) {
+				if ((vsrc > 0) && (android.hardware.Camera.getNumberOfCameras() > vsrc)) 
+					camera = android.hardware.Camera.open(vsrc);
 				else
-					VideoFrameEncoder = new TVideoFrameEncoder(this, camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, camera_parameters_Video_FramePixelFormat, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
-	        }
+					camera = android.hardware.Camera.open();
+		        camera_parameters = camera.getParameters();
+		        camera_parameters.setPreviewSize(resX,resY);
+		        if (fps > 0)
+		        	camera_parameters.setPreviewFrameRate(fps);
+		        //.
+		        camera_parameters.setPreviewFormat(ImageFormat.NV21);
+				//.
+		        camera_parameters.set("orientation", "landscape");
+		        camera.setParameters(camera_parameters);
+		        camera_parameters = camera.getParameters();
+		        camera_parameters_Video_FrameSize = camera_parameters.getPreviewSize();
+		        camera_parameters_Video_FrameRate = camera_parameters.getPreviewFrameRate();
+		        camera_parameters_Video_FramePixelFormat = camera_parameters.getPreviewFormat();
+		        //.
+		        if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
+		        	Surface 	Preview = null;
+		        	Rect 		PreviewFrame = null;
+		        	if (pflPreview && (holder != null)) {
+		        		Preview = holder.getSurface();
+		        		PreviewFrame = holder.getSurfaceFrame();
+		        	}
+		        	VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, camera_parameters_Video_FrameSize.width, camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, Preview,PreviewFrame);
+		        }
+		        else {
+					if (holder == null)
+						throw new Exception("surface isn't set"); //. ->
+					//.
+			        for (int I = 0; I < 4; I++) 
+			        	camera.addCallbackBuffer(CreateCallbackBuffer());
+			        //.
+			        camera.setPreviewCallbackWithBuffer(VideoFrameCaptureCallback);
+			        //.
+		        	camera.setPreviewDisplay(holder);
+		        }
+		        //. 
+		        camera_parameters_Video_FrameCount = 0;
+		        //. setting FrameServer
+		        synchronized (VideoRecorderModule.MediaFrameServer.CurrentFrame) {
+		        	VideoRecorderModule.MediaFrameServer.FrameSize = camera_parameters_Video_FrameSize;
+		        	VideoRecorderModule.MediaFrameServer.FrameRate = camera_parameters_Video_FrameRate;
+		        	VideoRecorderModule.MediaFrameServer.FrameInterval = (int)(1000/camera_parameters_Video_FrameRate);
+		        	VideoRecorderModule.MediaFrameServer.FrameBitRate = br;
+		        	VideoRecorderModule.MediaFrameServer.FramePixelFormat = camera_parameters_Video_FramePixelFormat; 
+				}
+		        //.
+		        if (MeasurementID != null) { 
+					VideoFrameFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName);
+					VideoFrameBufferedStream = new BufferedOutputStream(VideoFrameFileStream, 256*1024);
+					VideoFrameIndexFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.VideoIndex32FileName);
+					VideoFrameIndexBufferedStream = new BufferedOutputStream(VideoFrameIndexFileStream, 65535);
+					VideoFrameTimestampFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.VideoTS32FileName);
+					VideoFrameTimestampBufferedStream = new BufferedOutputStream(VideoFrameTimestampFileStream, 65535);
+					if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists()) {
+						VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient(this, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
+						//.
+						VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(VideoFrameEncoderServerClient);
+					}
+					else
+						VideoFrameEncoder = new TVideoFrameEncoder(this, camera_parameters_Video_FrameSize.width,camera_parameters_Video_FrameSize.height, br, camera_parameters_Video_FrameRate, camera_parameters_Video_FramePixelFormat, VideoFrameBufferedStream,VideoFrameIndexBufferedStream,VideoFrameTimestampBufferedStream);
+		        }
+			}
+			else {
+		        camera_parameters_Video_FrameCount = -1;
+				VideoFrameFileStream = null;
+				VideoFrameBufferedStream = null;
+				VideoFrameIndexFileStream = null;
+				VideoFrameIndexBufferedStream = null;
+				VideoFrameTimestampFileStream = null;
+				VideoFrameTimestampBufferedStream = null;
+			}
+			//.
+			synchronized (this) {
+		        if (MeasurementDescriptor != null) {
+		        	if (flAudio) {
+		        		AACChannel = new TAACChannel();
+		        		AACChannel.ID = TChannel.GetNextID();
+		        		AACChannel.Enabled = true;
+		        		AACChannel.DataFormat = 0;
+		        		AACChannel.Name = "Audio channel";
+		        		AACChannel.Info = "AAC channel";
+		        		AACChannel.Size = 0;
+		        		AACChannel.Configuration = "";
+		        		AACChannel.Parameters = "";
+		        		AACChannel.SampleRate = camera_parameters_Audio_SampleRate;
+		        		//.
+		        		MeasurementDescriptor.Model.Stream.Channels.add(AACChannel);
+		        		//. 
+		            	MeasurementDescriptor.AudioFormat = AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS;
+		            	MeasurementDescriptor.AudioSPS = camera_parameters_Audio_SampleRate;
+		        	}
+		        	if (flVideo) {
+		        		H264IChannel = new TH264IChannel();
+		        		H264IChannel.ID = TChannel.GetNextID();
+		        		H264IChannel.Enabled = true;
+		        		H264IChannel.DataFormat = 0;
+		        		H264IChannel.Name = "Video channel";
+		        		H264IChannel.Info = "H264(Indexed) channel";
+		        		H264IChannel.Size = 0;
+		        		H264IChannel.Configuration = "";
+		        		H264IChannel.Parameters = "";
+		        		H264IChannel.FrameRate = camera_parameters_Video_FrameRate;
+		        		//.
+		        		MeasurementDescriptor.Model.Stream.Channels.add(H264IChannel);
+		        		//. 
+		            	MeasurementDescriptor.VideoFormat = VIDEO_FRAME_FILE_FORMAT_H264PACKETS;
+		            	MeasurementDescriptor.VideoFPS = camera_parameters_Video_FrameRate;
+		        	}
+		        	TSensorsModuleMeasurements.SetMeasurementDescriptor(MeasurementID, MeasurementDescriptor);
+		        }
+			}
 		}
-		else {
-	        camera_parameters_Video_FrameCount = -1;
-			VideoFrameFileStream = null;
-			VideoFrameBufferedStream = null;
-			VideoFrameIndexFileStream = null;
-			VideoFrameIndexBufferedStream = null;
-			VideoFrameTimestampFileStream = null;
-			VideoFrameTimestampBufferedStream = null;
-		}
-		//.
-		synchronized (this) {
-	        if (MeasurementDescriptor != null) {
-	        	if (flAudio) {
-	        		AACChannel = new TAACChannel();
-	        		AACChannel.ID = TChannel.GetNextID();
-	        		AACChannel.Enabled = true;
-	        		AACChannel.DataFormat = 0;
-	        		AACChannel.Name = "Audio channel";
-	        		AACChannel.Info = "AAC channel";
-	        		AACChannel.Size = 0;
-	        		AACChannel.Configuration = "";
-	        		AACChannel.Parameters = "";
-	        		AACChannel.SampleRate = camera_parameters_Audio_SampleRate;
-	        		//.
-	        		MeasurementDescriptor.Model.Stream.Channels.add(AACChannel);
-	        		//. 
-	            	MeasurementDescriptor.AudioFormat = AUDIO_SAMPLE_FILE_FORMAT_ADTSAACPACKETS;
-	            	MeasurementDescriptor.AudioSPS = camera_parameters_Audio_SampleRate;
-	        	}
-	        	if (flVideo) {
-	        		H264IChannel = new TH264IChannel();
-	        		H264IChannel.ID = TChannel.GetNextID();
-	        		H264IChannel.Enabled = true;
-	        		H264IChannel.DataFormat = 0;
-	        		H264IChannel.Name = "Video channel";
-	        		H264IChannel.Info = "H264(Indexed) channel";
-	        		H264IChannel.Size = 0;
-	        		H264IChannel.Configuration = "";
-	        		H264IChannel.Parameters = "";
-	        		H264IChannel.FrameRate = camera_parameters_Video_FrameRate;
-	        		//.
-	        		MeasurementDescriptor.Model.Stream.Channels.add(H264IChannel);
-	        		//. 
-	            	MeasurementDescriptor.VideoFormat = VIDEO_FRAME_FILE_FORMAT_H264PACKETS;
-	            	MeasurementDescriptor.VideoFPS = camera_parameters_Video_FrameRate;
-	        	}
-	        	TSensorsModuleMeasurements.SetMeasurementDescriptor(MeasurementID, MeasurementDescriptor);
-	        }
+		catch (Exception E) {
+			if (MeasurementID != null) {
+				try {
+					if (VideoFrameTimestampBufferedStream != null) {
+						VideoFrameTimestampBufferedStream.close();
+						VideoFrameTimestampBufferedStream = null;
+					}
+					if (VideoFrameTimestampFileStream != null) {
+						VideoFrameTimestampFileStream.close();
+						VideoFrameTimestampFileStream = null;
+					}
+					if (VideoFrameIndexBufferedStream != null) {
+						VideoFrameIndexBufferedStream.close();
+						VideoFrameIndexBufferedStream = null;
+					}
+					if (VideoFrameIndexFileStream != null) {
+						VideoFrameIndexFileStream.close();
+						VideoFrameIndexFileStream = null;
+					}
+					if (VideoFrameBufferedStream != null) {
+						VideoFrameBufferedStream.close();
+						VideoFrameBufferedStream = null;
+					}
+					if (VideoFrameFileStream != null) {
+						VideoFrameFileStream.close();
+						VideoFrameFileStream = null;
+					}
+					//.
+					if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists()) {
+						if (VideoFrameEncoderServerClient != null) {
+							VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(VideoFrameEncoderServerClient);
+							//.
+							VideoFrameEncoderServerClient.Destroy();
+							VideoFrameEncoderServerClient = null;
+						}
+						//.
+						VideoRecorderModule.MediaFrameServer.H264EncoderServer_Stop();
+					}
+					else
+						if (VideoFrameEncoder != null) {
+							VideoFrameEncoder.Destroy();
+							VideoFrameEncoder = null;
+						}
+					//.
+					if (camera != null) {
+						 camera.stopPreview();
+				         camera.setPreviewDisplay(null);
+				         camera.setPreviewCallback(null);
+				         camera.release();
+				         camera = null;
+				    }
+					//.
+					if (AudioSampleEncoder != null) {
+						AudioSampleEncoder.Destroy();
+						AudioSampleEncoder = null;
+					}
+					if (AudioSampleBufferedStream != null) {
+						AudioSampleBufferedStream.close();
+						AudioSampleBufferedStream = null;
+					}
+					//.
+					if (AudioSampleFileStream != null) {
+						AudioSampleFileStream.close();
+						AudioSampleFileStream = null;
+					}
+					//.
+					if (AudioSampleSource != null) {
+						AudioSampleSource.Release();
+						AudioSampleSource = null;
+					}
+				}
+				finally {
+					String _MeasurementID = MeasurementID;
+					//.
+					synchronized (this) {
+						MeasurementID = null;
+						MeasurementDescriptor = null;
+						MeasurementFolder = "";
+					}
+					//.
+					TSensorsModuleMeasurements.DeleteMeasurement(_MeasurementID);
+				}
+				//.
+				throw E; //. =>
+			}
 		}
 	}
 	
@@ -670,22 +755,16 @@ public class CameraStreamerFRAME extends Camera {
 	public void Finalize() throws Exception {
 		super.Finalize();
 		//.
-		synchronized (this) {
-			if (camera != null) {
-				 camera.stopPreview();
-		         camera.setPreviewDisplay(null);
-		         camera.setPreviewCallback(null);
-		         camera.release();
-		         camera = null;
-		    }
-			if (VideoFrameCaptureCallback != null) {
-				VideoFrameCaptureCallback.Release();
-				VideoFrameCaptureCallback = null;
-			}
-			//.
-			if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists()) 
-				VideoRecorderModule.MediaFrameServer.H264EncoderServer_Stop();
-		}
+		if (camera != null) {
+			 camera.stopPreview();
+	         camera.setPreviewDisplay(null);
+	         camera.setPreviewCallback(null);
+	         camera.release();
+	         camera = null;
+	    }
+		//.
+		if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists()) 
+			VideoRecorderModule.MediaFrameServer.H264EncoderServer_Stop();
 		//.
 		if (AudioSampleSource != null) {
 			AudioSampleSource.Release();
@@ -727,22 +806,6 @@ public class CameraStreamerFRAME extends Camera {
 		}
 		//.
 		if (MeasurementID != null) {
-			int AudioSampleEncoderPackets = 0;
-			if (AudioSampleEncoder != null) {
-				AudioSampleEncoderPackets = AudioSampleEncoder.Packets;
-				AudioSampleEncoder.Destroy();
-				AudioSampleEncoder = null;
-			}
-			if (AudioSampleBufferedStream != null) {
-				AudioSampleBufferedStream.close();
-				AudioSampleBufferedStream = null;
-			}
-			//.
-			if (AudioSampleFileStream != null) {
-				AudioSampleFileStream.close();
-				AudioSampleFileStream = null;
-			}
-			//.
 			int VideoFrameEncoderPackets = 0;
 			if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_Exists()) {
 				if (VideoFrameEncoderServerClient != null) {
@@ -753,7 +816,6 @@ public class CameraStreamerFRAME extends Camera {
 					VideoFrameEncoderServerClient.Destroy();
 					VideoFrameEncoderServerClient = null;
 				}
-				
 			}
 			else
 				if (VideoFrameEncoder != null) {
@@ -786,6 +848,22 @@ public class CameraStreamerFRAME extends Camera {
 			if (VideoFrameFileStream != null) {
 				VideoFrameFileStream.close();
 				VideoFrameFileStream = null;
+			}
+			//.
+			int AudioSampleEncoderPackets = 0;
+			if (AudioSampleEncoder != null) {
+				AudioSampleEncoderPackets = AudioSampleEncoder.Packets;
+				AudioSampleEncoder.Destroy();
+				AudioSampleEncoder = null;
+			}
+			if (AudioSampleBufferedStream != null) {
+				AudioSampleBufferedStream.close();
+				AudioSampleBufferedStream = null;
+			}
+			//.
+			if (AudioSampleFileStream != null) {
+				AudioSampleFileStream.close();
+				AudioSampleFileStream = null;
 			}
 			//.
 			synchronized (this) {

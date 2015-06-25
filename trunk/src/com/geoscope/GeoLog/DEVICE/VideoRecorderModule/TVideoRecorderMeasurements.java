@@ -279,6 +279,7 @@ public class TVideoRecorderMeasurements {
 			return null; //. ->
 		File[] MeasurementFolders = DF.listFiles();
 		Arrays.sort(MeasurementFolders, new Comparator<File>(){
+			
 		    public int compare(File f1, File f2) {
 		        return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
 		    }}
@@ -288,10 +289,12 @@ public class TVideoRecorderMeasurements {
 			if (MeasurementFolders[I].isDirectory()) 
 				Count++;
 		File[] Result = new File[Count];
+		Count = 0;
 		for (int I = 0; I < MeasurementFolders.length; I++)
-			if (MeasurementFolders[I].isDirectory())
-				if (I < Count)
-					Result[I] = MeasurementFolders[I];
+			if (MeasurementFolders[I].isDirectory()) {
+				Result[Count] = MeasurementFolders[I];
+				Count++;
+			}
 		return Result;
 	}
 	
@@ -358,11 +361,9 @@ public class TVideoRecorderMeasurements {
             serializer.text(Integer.toString(Version));
             serializer.endTag("", "Version");
 	        //. ID
-            String SID = MeasurementID;
-            //. if (Descriptor.ID != null)
-            //. 	SID = Descriptor.ID; 
+            Descriptor.ID = MeasurementID; //. set ID
             serializer.startTag("", "ID");
-            serializer.text(SID);
+            serializer.text(Descriptor.ID);
             serializer.endTag("", "ID");
 	        //. StartTimestamp
             serializer.startTag("", "StartTimestamp");

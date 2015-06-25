@@ -176,15 +176,16 @@ public class TVideoRecorder {
 				}
 				//.
 				camera.Start();
-			} 
-			catch (Throwable T) {
-				VideoRecorderModule.Device.Log.WriteError("VideoRecorder",T.getMessage());
 				//.
-	        	Toast.makeText(context, context.getString(R.string.SVideoRecorderInitializationError)+T.getMessage(), Toast.LENGTH_LONG).show();
+				camera_flStarted = true;
+				//.
+				Status_Update();
+			} 
+			catch (Exception E) {
+				VideoRecorderModule.Device.Log.WriteError("VideoRecorder",E.getMessage());
+				//.
+	        	Toast.makeText(context, context.getString(R.string.SVideoRecorderInitializationError)+E.getMessage(), Toast.LENGTH_LONG).show();
 			}
-			//.
-			camera_flStarted = true;
-			Status_Update();
 		}
 	}
 	
@@ -239,6 +240,7 @@ public class TVideoRecorder {
 			if (camera != null) 
 				try {
 					camera.Stop();
+					//.
 					camera.Finalize();
 					//.
 		    		camera.Destroy();

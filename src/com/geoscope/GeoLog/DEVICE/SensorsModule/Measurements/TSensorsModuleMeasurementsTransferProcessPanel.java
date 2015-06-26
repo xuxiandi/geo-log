@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.SensorsModule.MeasurementsTransferProcess;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -247,14 +247,7 @@ public class TSensorsModuleMeasurementsTransferProcessPanel extends Activity {
 	}
 	
 	private void StartTransfer() throws Exception {
-		TTracker Tracker = TTracker.GetTracker();
-		if (Tracker == null)
-			return; //. ->
-		TSensorsModuleMeasurementsTransferProcess ServerSaver = Tracker.GeoLog.SensorsModule.Measurements_GetTransferProcess();
-		if (ServerSaver == null)
-			return; //. ->
-		//.
-		ServerSaver.StartProcess();
+		TransferProcess.StartProcess();
 	}
 	
 	private static final int MESSAGE_UPDATE = 1; 

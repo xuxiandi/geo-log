@@ -18,7 +18,7 @@
             android:layout_toLeftOf="@+id/pbProgress"
             android:background="#ff999999"
             android:gravity="center"
-            android:text=""
+            android:text="@string/SSecurityFilesForContext"
             android:textColor="#ff000000"
             android:textSize="16sp" />
 

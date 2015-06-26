@@ -466,7 +466,8 @@ public class TSecurityFileInstanceListComponent extends TUIComponent {
 	//.
 	private TOnListItemClickHandler OnListItemClickHandler;
 	//.
-    private TextView lbName;
+    @SuppressWarnings("unused")
+	private TextView lbName;
     //.
 	private EditText	edContext;
 	private Button 		btnSearch;
@@ -496,8 +497,6 @@ public class TSecurityFileInstanceListComponent extends TUIComponent {
 		OnListItemClickHandler = pOnListItemClickHandler;
 		//.
 		lbName = (TextView)ParentLayout.findViewById(R.id.lbName);
-		if (pContext != null)
-			lbName.setText(ParentActivity.getString(R.string.SSecurityFilesForContext)+Context);
         //.
         edContext = (EditText)ParentActivity.findViewById(R.id.edContext);
         edContext.setOnEditorActionListener(new OnEditorActionListener() {
@@ -563,11 +562,10 @@ public class TSecurityFileInstanceListComponent extends TUIComponent {
 					//.
 		    		final CharSequence[] _items;
 		    		int SelectedIdx = -1;
-		    		_items = new CharSequence[4];
+		    		_items = new CharSequence[3];
 		    		_items[0] = ParentActivity.getString(R.string.SOpen); 
 		    		_items[1] = ParentActivity.getString(R.string.SContent1); 
-		    		_items[2] = ParentActivity.getString(R.string.SShowGeoLocation); 
-		    		_items[3] = ParentActivity.getString(R.string.SGetURLFile); 
+		    		_items[2] = ParentActivity.getString(R.string.SGetURLFile); 
 		    		//.
 		    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		    		builder.setTitle(R.string.SSelect);
@@ -611,7 +609,7 @@ public class TSecurityFileInstanceListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 3: //. get URL-file
+		    		    		case 2: //. get URL-file
     								if (_Item.TypedDataFiles.Count() > 0) {
 	    								final TComponentTypedDataFile ComponentTypedDataFile = _Item.TypedDataFiles.Items[0].Clone();
 	    								//.

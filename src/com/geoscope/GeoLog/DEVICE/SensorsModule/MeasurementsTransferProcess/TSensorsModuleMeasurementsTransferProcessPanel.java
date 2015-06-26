@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.VideoRecorderModule;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.MeasurementsTransferProcess;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,14 +33,14 @@ import com.geoscope.GeoLog.Application.THintManager;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 @SuppressLint("HandlerLeak")
-public class TVideoRecorderServerSaverPanel extends Activity {
+public class TSensorsModuleMeasurementsTransferProcessPanel extends Activity {
 
 	public static final int UpdateInterval = 1000*2; //. seconds
 	
 	
 	private boolean flVisible = false;
 	//.
-	private TVideoRecorderModule.TServerSaver ServerSaver;
+	private TSensorsModuleMeasurementsTransferProcess TransferProcess;
 	//.
 	private ProgressBar pbProcessProgress;
 	//.
@@ -55,20 +55,21 @@ public class TVideoRecorderServerSaverPanel extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //.
-		TTracker Tracker = TTracker.GetTracker();
-		if (Tracker == null) {
-			finish();
-			return; //. ->
-		}
-		ServerSaver = Tracker.GeoLog.VideoRecorderModule.GetServerSaver();
-		if (ServerSaver == null) {
+		try {
+			TTracker Tracker = TTracker.GetTracker();
+			if (Tracker == null) 
+				throw new Exception("Tracker is null"); //. =>
+			TransferProcess = Tracker.GeoLog.SensorsModule.Measurements_GetTransferProcess();
+			if (TransferProcess == null) 
+				throw new Exception("TransferProcess is null"); //. =>
+		} catch (Exception E) {
 			finish();
 			return; //. ->
 		}
         //.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
-        setContentView(R.layout.video_recorder_serversaver_panel);
+        setContentView(R.layout.sensorsmodule_measurements_transferprocess_panel);
         //.
         pbProcessProgress = (ProgressBar)findViewById(R.id.pbProcessProgress);
         //.
@@ -79,9 +80,14 @@ public class TVideoRecorderServerSaverPanel extends Activity {
         	
         	@Override
             public void onClick(View v) {
-        		StartTransfer();
-        		//.
-	            Toast.makeText(TVideoRecorderServerSaverPanel.this, R.string.SDataTransferHasBeenStarted, Toast.LENGTH_LONG).show();
+        		try {
+            		StartTransfer();
+            		//.
+    	            Toast.makeText(TSensorsModuleMeasurementsTransferProcessPanel.this, R.string.SDataTransferHasBeenStarted, Toast.LENGTH_LONG).show();
+            	}
+            	catch (Exception E) {
+            		Toast.makeText(TSensorsModuleMeasurementsTransferProcessPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            	}
             }
         });
         //.
@@ -92,10 +98,10 @@ public class TVideoRecorderServerSaverPanel extends Activity {
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
         		try {
             		ListView lv = (ListView)arg0;
-            		ServerSaver.Scheduler.Plan.Items.get(arg2).SetEnabled(lv.isItemChecked(arg2));
+            		TransferProcess.Scheduler.Plan.Items.get(arg2).SetEnabled(lv.isItemChecked(arg2));
             	}
             	catch (Exception E) {
-            		Toast.makeText(TVideoRecorderServerSaverPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            		Toast.makeText(TSensorsModuleMeasurementsTransferProcessPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
             	}
         	}
 		});
@@ -103,12 +109,12 @@ public class TVideoRecorderServerSaverPanel extends Activity {
         	
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, final int arg2, long arg3) {
-		    	AlertDialog.Builder alert = new AlertDialog.Builder(TVideoRecorderServerSaverPanel.this);
+		    	AlertDialog.Builder alert = new AlertDialog.Builder(TSensorsModuleMeasurementsTransferProcessPanel.this);
 		    	//.
 		    	alert.setTitle("");
 		    	alert.setMessage(R.string.SEnterTime);
 		    	//.
-		    	final EditText input = new EditText(TVideoRecorderServerSaverPanel.this);
+		    	final EditText input = new EditText(TSensorsModuleMeasurementsTransferProcessPanel.this);
 		    	alert.setView(input);
 		    	//.
 		    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
@@ -131,12 +137,12 @@ public class TVideoRecorderServerSaverPanel extends Activity {
 			        		if ((Mins < 0) || (Mins > 59))
 			        			throw new Exception("wrong minute value"); //. ->
 			        		double DayTime = Hours/24.0+Mins/(24.0*60.0);
-		            		ServerSaver.Scheduler.Plan.Items.get(arg2).SetDayTime(DayTime);
+		            		TransferProcess.Scheduler.Plan.Items.get(arg2).SetDayTime(DayTime);
 		            		//.
 		            		UpdateScheduler();
 		        		}
 		            	catch (Exception E) {
-		            		Toast.makeText(TVideoRecorderServerSaverPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		            		Toast.makeText(TSensorsModuleMeasurementsTransferProcessPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 		            	}
 		        			
 		          	}
@@ -210,19 +216,19 @@ public class TVideoRecorderServerSaverPanel extends Activity {
     }
     
 	private void Update() {
-		int ProcessCounter = ServerSaver.MeasurementsCount();
+		int ProcessCounter = TransferProcess.MeasurementsCount();
 		if (ProcessCounter > 0)
-			pbProcessProgress.setProgress((int)ServerSaver.ProcessProgressPercentage());
+			pbProcessProgress.setProgress((int)TransferProcess.ProcessProgressPercentage());
 		else
 			pbProcessProgress.setProgress(0);
 		tvProcessProgress.setText(getString(R.string.SItemsToTransfer)+Integer.toString(ProcessCounter));
 	}
 	
 	private void UpdateScheduler() {
-		int Cnt = ServerSaver.Scheduler.Plan.Items.size();
+		int Cnt = TransferProcess.Scheduler.Plan.Items.size();
 		String[] lvItems = new String[Cnt];
 		for (int I = 0; I < Cnt; I++) {
-			TVideoRecorderModule.TServerSaver.TScheduler.TDailyPlan.TItem Item = ServerSaver.Scheduler.Plan.Items.get(I); 
+			TSensorsModuleMeasurementsTransferProcess.TScheduler.TDailyPlan.TItem Item = TransferProcess.Scheduler.Plan.Items.get(I); 
 			int Hours = (int)(Item.DayTime*24.0);
 			int Mins = (int)((Item.DayTime*24.0-Hours)*60.0);
 			String HoursStr = Integer.toString(Hours);
@@ -235,16 +241,16 @@ public class TVideoRecorderServerSaverPanel extends Activity {
 		ArrayAdapter<String> lvAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvItems);             
 		lvSchedulerPlan.setAdapter(lvAdapter);
 		for (int I = 0; I < Cnt; I++) {
-			TVideoRecorderModule.TServerSaver.TScheduler.TDailyPlan.TItem Item = ServerSaver.Scheduler.Plan.Items.get(I); 
+			TSensorsModuleMeasurementsTransferProcess.TScheduler.TDailyPlan.TItem Item = TransferProcess.Scheduler.Plan.Items.get(I); 
 			lvSchedulerPlan.setItemChecked(I, Item.flEnabled);
 		}
 	}
 	
-	private void StartTransfer() {
+	private void StartTransfer() throws Exception {
 		TTracker Tracker = TTracker.GetTracker();
 		if (Tracker == null)
 			return; //. ->
-		TVideoRecorderModule.TServerSaver ServerSaver = Tracker.GeoLog.VideoRecorderModule.GetServerSaver();
+		TSensorsModuleMeasurementsTransferProcess ServerSaver = Tracker.GeoLog.SensorsModule.Measurements_GetTransferProcess();
 		if (ServerSaver == null)
 			return; //. ->
 		//.

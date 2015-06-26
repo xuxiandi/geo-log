@@ -8,6 +8,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Operatio
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.MeasurementsTransferProcess.TSensorsModuleMeasurementsTransferProcess;
 
 public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDataValue {
 
@@ -90,10 +91,10 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
     		if (MIDs.equals(""))
     			break; //. >
     		//.
-    		TVideoRecorderModule.TServerSaver Saver = VideoRecorderModule.GetServerSaver(); 
-    		if (Saver == null)
+    		TSensorsModuleMeasurementsTransferProcess TransferProcess = VideoRecorderModule.Device.SensorsModule.Measurements_GetTransferProcess(); 
+    		if (TransferProcess == null)
     			throw new OperationException(TSetVideoRecorderMeasurementDataValueSO.OperationErrorCode_ServerSaverIsDisabled); //. =>
-    		Saver.StartProcess(MIDs);
+    		TransferProcess.StartProcess(MIDs);
     		//.
             break; //. >
             

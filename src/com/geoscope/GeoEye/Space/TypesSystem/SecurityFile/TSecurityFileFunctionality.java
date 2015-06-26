@@ -6,7 +6,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.app.AlertDialog;
+import android.content.Context;
+
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 
@@ -71,5 +75,17 @@ public class TSecurityFileFunctionality extends TComponentFunctionality {
         Serializer.endTag("", "Info");
         //.
         Serializer.endTag("", "RW");
+	}
+	
+	@Override
+	public void Open(Context context, Object Params) throws Exception {
+		String SecurityFileInfo = _Name+"\n"+"("+_Info+")";
+		//.
+	    new AlertDialog.Builder(context)
+        .setIcon(android.R.drawable.ic_dialog_alert)
+        .setTitle(R.string.SSecurity)
+        .setMessage(SecurityFileInfo)
+	    .setPositiveButton(R.string.SOk, null)
+	    .show();
 	}
 }

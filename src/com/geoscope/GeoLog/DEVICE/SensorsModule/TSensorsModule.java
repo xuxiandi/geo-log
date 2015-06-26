@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import android.content.Context;
+import android.content.Intent;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
@@ -15,13 +20,15 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectS
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessagingModule.TUserMessagingModule.TUserMessaging;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.MeasurementsTransferProcess.TSensorsModuleMeasurementsTransferProcess;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.MeasurementsTransferProcess.TSensorsModuleMeasurementsTransferProcessPanel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMeters;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TChannelsProvider;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
-import com.geoscope.GeoLog.DEVICEModule.TModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
+import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 public class TSensorsModule extends TModule {
 
@@ -37,6 +44,27 @@ public class TSensorsModule extends TModule {
 		return Folder()+"/"+"Measurements";
 	}
 	
+	private static final int OldMeasurementRemovingInterval = 1000*3600*1; //. hours
+	
+    private static class TOldMeasurementRemovingTask extends TimerTask {
+    	
+    	private TSensorsModule SensorsModule;
+    	
+    	public TOldMeasurementRemovingTask(TSensorsModule pSensorsModule) {
+    		SensorsModule = pSensorsModule;
+    	}
+    	
+        public void run() {
+        	try {
+        		SensorsModule.Meters.Measurements_RemoveOld();
+        	}
+        	catch (Throwable E) {
+        		Throwable EE = new Error("error while removing old measurements, "+E.getMessage());
+        		SensorsModule.Device.Log.WriteError("SensorsMeters",EE.getMessage());
+        	}
+        }
+    }
+
 	
 	public TInternalSensorsModule InternalSensorsModule;
 	//.
@@ -45,6 +73,10 @@ public class TSensorsModule extends TModule {
 	private TModel Model;
 	//.
 	public TSensorsMeters Meters;
+	//.
+	private TSensorsModuleMeasurementsTransferProcess MeasurementsTransferProcess;
+	//.
+	private Timer MeasurementsRemoveProcess;
 	
     public TSensorsModule(TDEVICEModule pDevice) throws Exception {
     	super(pDevice);
@@ -68,9 +100,24 @@ public class TSensorsModule extends TModule {
         Model = null;
         //.
         Meters = new TSensorsMeters(this, Meters_Folder());
+        //.
+        MeasurementsTransferProcess = null;
+    	//.
+		MeasurementsRemoveProcess = new Timer();
+		MeasurementsRemoveProcess.schedule(new TOldMeasurementRemovingTask(this),OldMeasurementRemovingInterval,OldMeasurementRemovingInterval);
     }
     
     public void Destroy() throws Exception {
+		if (MeasurementsRemoveProcess != null) {
+			MeasurementsRemoveProcess.cancel();
+			MeasurementsRemoveProcess = null;
+		}
+		//.
+    	if (MeasurementsTransferProcess != null) {
+    		MeasurementsTransferProcess.Destroy();
+    		MeasurementsTransferProcess = null;
+    	}
+    	//.
     	if (Meters != null) {
     		Meters.Destroy();
     		Meters = null;
@@ -324,6 +371,22 @@ public class TSensorsModule extends TModule {
 		TSensorsModuleMeasurements.DeleteMeasurement(MeasurementID);
 	}
 	
+	public synchronized TSensorsModuleMeasurementsTransferProcess Measurements_GetTransferProcess() throws Exception {
+		if (MeasurementsTransferProcess != null)
+			return MeasurementsTransferProcess; //. ->
+		//.
+		if ((Device.ConnectorModule != null) && Device.ConnectorModule.flProcessing) {
+			String 	ServerAddress = Device.ConnectorModule.GetGeographDataServerAddress();
+			int 	ServerPort = Device.ConnectorModule.GetGeographDataServerPort();
+			//.
+			MeasurementsTransferProcess = new TSensorsModuleMeasurementsTransferProcess(this, ServerAddress,ServerPort);
+			//.
+			return MeasurementsTransferProcess; //. ->
+		}
+		else
+			return null; //. ->
+	}
+	
 	public long Measurement_GetSize(String MeasurementID) throws IOException {
 		return TSensorsModuleMeasurements.GetMeasurementSize(MeasurementID);
 	}
@@ -331,4 +394,9 @@ public class TSensorsModule extends TModule {
 	public byte[] Measurement_GetData(String MeasurementID) throws IOException {
 		return TSensorsModuleMeasurements.GetMeasurementData(MeasurementID);
 	}
+
+    public void ShowMeasurementsTransferProcessPanel(Context context) {
+    	Intent intent = new Intent(Device.context,TSensorsModuleMeasurementsTransferProcessPanel.class);
+    	context.startActivity(intent);
+    }
 }

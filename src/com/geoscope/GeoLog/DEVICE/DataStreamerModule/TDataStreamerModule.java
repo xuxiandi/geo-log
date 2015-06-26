@@ -413,8 +413,6 @@ public class TDataStreamerModule extends TModule {
     
     @Override
     public void Start() throws Exception {
-		if (ActiveValue.BooleanValue())
-			ReStartStreaming();
     }
     
     @Override
@@ -535,16 +533,24 @@ public class TDataStreamerModule extends TModule {
     	return StreamingComponents.Components.size();
     }
     
-    private synchronized void ReStartStreaming() throws InterruptedException {
-    	StopStreaming();
+    public synchronized void StartStreaming() throws InterruptedException {
     	Streaming = new TStreaming(this, StreamingComponents);
     }
 
-    private synchronized void StopStreaming() throws InterruptedException {
+    public synchronized void StopStreaming() throws InterruptedException {
     	if (Streaming != null) {
     		Streaming.Destroy();
     		Streaming = null;
     	}
+    }
+    
+    public synchronized void ReStartStreaming() throws InterruptedException {
+    	StopStreaming();
+    	Streaming = new TStreaming(this, StreamingComponents);
+    }
+
+    public synchronized boolean StreamingIsActive() throws InterruptedException {
+    	return (ActiveValue.BooleanValue());
     }
     
     public synchronized void SetActive(boolean Value) throws Exception {

@@ -39,9 +39,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Environment;
 import android.os.StatFs;
 import android.os.StrictMode;
@@ -162,6 +160,8 @@ public class TDEVICEModule extends TModule
     //.
     public boolean 					flComponentFileStreaming = true;
     public TComponentFileStreaming 	ComponentFileStreaming;
+    //.
+    private TConnectorModule.TConfigurationSubscribers.TConfigurationSubscriber ConnectorConfigurationSubscriber;
     
     @SuppressLint("NewApi")
 	public TDEVICEModule(Context pcontext) throws Exception
@@ -220,6 +220,20 @@ public class TDEVICEModule extends TModule
         //.
         ComponentFileStreaming = new TComponentFileStreaming(this,flComponentFileStreaming);
         //.
+		ConnectorConfigurationSubscriber = new TConnectorModule.TConfigurationSubscribers.TConfigurationSubscriber() {
+			
+			@Override
+			protected void DoOnConfigurationReceived() {
+				try {
+					if (ComponentFileStreaming.flEnabledStreaming && !ComponentFileStreaming.IsStarted())
+						ComponentFileStreaming.Start();
+				} catch (Exception E) {
+					Device.Log.WriteError("DEVICEModule.ComponentFileStreaming",E.getMessage());
+				}
+			};
+		};
+		ConnectorModule.ConfigurationSubscribers.Subscribe(ConnectorConfigurationSubscriber);
+        //.
         ModuleState = MODULE_STATE_INITIALIZED;
 		Log.WriteInfo("Device", "initialized.");
 		//. starting
@@ -232,11 +246,6 @@ public class TDEVICEModule extends TModule
         Stop();
         //.
         ModuleState = MODULE_STATE_FINALIZING;
-    	//.
-    	/*///? if (EventReceiver != null) {
-    		context.getApplicationContext().unregisterReceiver(EventReceiver);
-    		EventReceiver = null;
-    	}*/
         //. save profile
         if (IsEnabled())
         	SaveProfile();
@@ -368,13 +377,6 @@ public class TDEVICEModule extends TModule
 			//. build and send controls/sensors schemas
 			ControlsModule.Model_BuildAndPublish();
 			SensorsModule.Model_BuildAndPublish();
-			//.
-	    	/*///? IntentFilter Filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-	    	Filter.addAction(Intent.ACTION_SCREEN_OFF);
-	    	context.getApplicationContext().registerReceiver(EventReceiver,Filter);*/
-			//.
-			if (ComponentFileStreaming.flEnabledStreaming)
-				ComponentFileStreaming.Start();
 	        //.
 	        BackupMonitor = new TBackupMonitor(this);
 	        //.
@@ -618,22 +620,6 @@ public class TDEVICEModule extends TModule
         //.
         return memoryInfo.toString();
     }
-    
-    protected BroadcastReceiver EventReceiver = new BroadcastReceiver() {
-    	@Override
-    	public void onReceive(Context context, Intent intent) {
-    		if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-    			flUserInteractive = true;
-    			//.
-    	    	return; //. ->
-    		}
-    		if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-    			flUserInteractive = false;
-    			//.
-    	    	return; //. ->
-    		}
-    	}
-    };
     
     public static class TBackupMonitor {
     	
@@ -1307,98 +1293,90 @@ public class TDEVICEModule extends TModule
 			flStreaming = true;
 			try {
 				try {
+					GetServerInfo();
+					//.
 					while (!Canceller.flCancel) {
-						if (ServerAddress != null) {
-							//. streaming ...
-							TItem StreamItem = GetLastItem();
-							while (StreamItem != null) {
+						//. streaming ...
+						TItem StreamItem = GetLastItem();
+						while (StreamItem != null) {
+							try {
+								SupplyItemsWithFileInfo();
+								//.
+								flStreamingComponent = true;
 								try {
-									SupplyItemsWithFileInfo();
-									//.
-									flStreamingComponent = true;
-									try {
-										while (!Canceller.flCancel) {
-											try {
-												StreamItem(StreamItem,TransferBuffer);
-											}
-											catch (InterruptedException E) {
-												return; //. ->
-											}
-											catch (CancelException CE) {
-												return; //. ->
-											}
-											catch (SocketTimeoutException STE) {
-												break; //. >
-											}
-											catch (IOException IOE) {
-												break; //. >
-											}
-											catch (Exception E) {
-												String S = E.getMessage();
-												if (S == null)
-													S = E.getClass().getName();
-												DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentFileStreaming","Failed attempt to stream file: "+StreamItem.FileName+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Long.toString(StreamItem.idComponent)+")"+", "+S);
-												//.
-												boolean flRetry = true;
-												if (E instanceof StreamingErrorException) {
-													StreamingErrorException SEE = (StreamingErrorException)E;
-													switch (SEE.GetCode()) {
-													
-													case MESSAGE_UNKNOWNSERVICE:
-													case MESSAGE_UNKNOWNCOMMAND:
-													case MESSAGE_WRONGPARAMETERS:
-													case MESSAGE_SAVINGDATAERROR:
-														flRetry = false;
-														break; //. >
-													}
-												}
-												//.
-												if (flRetry) {
-													StreamItem.ErrorCount++;
-													Save();
-													//.
-													Thread.sleep(StreamingAttemptSleepTime);
-													//.
-													continue; //. ^
-												}
-											}
-											//.
-											RemoveItem(StreamItem);
-											//. next one
-											StreamItem = GetLastItem();
-											//.
+									while (!Canceller.flCancel) {
+										try {
+											StreamItem(StreamItem,TransferBuffer);
+										}
+										catch (InterruptedException E) {
+											return; //. ->
+										}
+										catch (CancelException CE) {
+											return; //. ->
+										}
+										catch (SocketTimeoutException STE) {
 											break; //. >
 										}
-										if (Canceller.flCancel)
-											return; //. ->
+										catch (IOException IOE) {
+											break; //. >
+										}
+										catch (Exception E) {
+											String S = E.getMessage();
+											if (S == null)
+												S = E.getClass().getName();
+											DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentFileStreaming","Failed attempt to stream file: "+StreamItem.FileName+", Component("+Integer.toString(StreamItem.idTComponent)+";"+Long.toString(StreamItem.idComponent)+")"+", "+S);
+											//.
+											boolean flRetry = true;
+											if (E instanceof StreamingErrorException) {
+												StreamingErrorException SEE = (StreamingErrorException)E;
+												switch (SEE.GetCode()) {
+												
+												case MESSAGE_UNKNOWNSERVICE:
+												case MESSAGE_UNKNOWNCOMMAND:
+												case MESSAGE_WRONGPARAMETERS:
+												case MESSAGE_SAVINGDATAERROR:
+													flRetry = false;
+													break; //. >
+												}
+											}
+											//.
+											if (flRetry) {
+												StreamItem.ErrorCount++;
+												Save();
+												//.
+												Thread.sleep(StreamingAttemptSleepTime);
+												//.
+												continue; //. ^
+											}
+										}
+										//.
+										RemoveItem(StreamItem);
+										//. next one
+										StreamItem = GetLastItem();
+										//.
+										break; //. >
 									}
-									finally {
-										flStreamingComponent = false;
-									}
+									if (Canceller.flCancel)
+										return; //. ->
 								}
-								catch (InterruptedException E) {
-									return; //. ->
-								}
-								catch (CancelException CE) {
-									return; //. ->
-								}
-								catch (Throwable TE) {
-					            	//. log errors
-									String S = TE.getMessage();
-									if (S == null)
-										S = TE.getClass().getName();
-									DEVICEModule.Log.WriteError("DEVICEModule.ComponentFileStreaming",S);
-					            	if (!(TE instanceof Exception))
-					            		TGeoLogApplication.Log_WriteCriticalError(TE);
+								finally {
+									flStreamingComponent = false;
 								}
 							}
-						}
-						else {
-							if ((DEVICEModule.ConnectorModule != null) && (DEVICEModule.ConnectorModule.flProcessing)) {
-								ServerAddress = DEVICEModule.ConnectorModule.GetGeographDataServerAddress();
-								ServerPort = DEVICEModule.ConnectorModule.GetGeographDataServerPort();
-								//.
-								continue; //. ^
+							catch (InterruptedException E) {
+								return; //. ->
+							}
+							catch (CancelException CE) {
+								return; //. ->
+							}
+							catch (Throwable TE) {
+				            	//. log errors
+								String S = TE.getMessage();
+								if (S == null)
+									S = TE.getClass().getName();
+								DEVICEModule.Log.WriteError("DEVICEModule.ComponentFileStreaming",S);
+				            	if (!(TE instanceof Exception))
+				            		TGeoLogApplication.Log_WriteCriticalError(TE);
 							}
 						}
 						//.
@@ -1424,6 +1402,11 @@ public class TDEVICEModule extends TModule
 			return flStreamingComponent;
 		}
 		
+    	private void GetServerInfo() {
+			ServerAddress = DEVICEModule.ConnectorModule.GetGeographDataServerAddress();
+			ServerPort = DEVICEModule.ConnectorModule.GetGeographDataServerPort();
+    	}
+    	
 		private final int Connect_TryCount = 3;
 		
 	    private void Connect() throws Exception {

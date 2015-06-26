@@ -932,6 +932,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	    			    				            				public void DoOnCompleted() throws Exception {
 	    					    										Intent intent = new Intent(ParentActivity,TSecurityFileInstanceListPanel.class);
 	    					    										intent.putExtra("Context", UserDescriptor.UserName);
+	    					    										intent.putExtra("ConfirmChoice", true);
 	    					    										ParentActivity.startActivityForResult(intent, REQUEST_COMPONENT_CHANGESECURITY);
 	    			    				            				}
 	    			    				            				

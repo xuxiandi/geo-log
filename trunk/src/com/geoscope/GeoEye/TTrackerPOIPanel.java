@@ -10,6 +10,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -68,16 +70,34 @@ public class TTrackerPOIPanel extends Activity {
         String[] SecuritySA = new String[2];
         SecuritySA[DEFAULT_SECURITY_FILE_INDEX] = getString(R.string.SDefault);
         SecuritySA[PRIVATE_SECURITY_FILE_INDEX] = getString(R.string.SPrivate);
+        //. SecuritySA[OTHER_SECURITY_FILE_INDEX] = getString(R.string.SOther);
         spSecurity = (Spinner)findViewById(R.id.spSecurity);
         ArrayAdapter<String> saSecurity = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SecuritySA);
         saSecurity.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spSecurity.setAdapter(saSecurity);
+        spSecurity.setOnItemSelectedListener(new OnItemSelectedListener() {
+        	
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+            	switch (position) {
+            	
+            	case OTHER_SECURITY_FILE_INDEX:
+            		break; //. >
+            	}
+            }
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+			}
+        });        
         //.
         cbPOIModifyLast = (CheckBox)findViewById(R.id.cbPOIModifyLast);
         cbPOIModifyLast.setChecked(false);
         //.
         btnOk = (Button)findViewById(R.id.TrackerPOIPanel_btnOk);
         btnOk.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
             public void onClick(View v) {
         		if (CreateNewPOI())
         			setResult(Activity.RESULT_OK);

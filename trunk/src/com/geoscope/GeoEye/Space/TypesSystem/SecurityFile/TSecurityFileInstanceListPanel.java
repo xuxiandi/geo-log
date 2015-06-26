@@ -29,10 +29,15 @@ public class TSecurityFileInstanceListPanel extends Activity {
     			throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
     		//.
     		String Context = "";
+    		final boolean flConfirmChoice;
             Bundle extras = getIntent().getExtras(); 
             if (extras != null) {
             	Context = extras.getString("Context");
+            	flConfirmChoice = extras.getBoolean("ConfirmChoice");
             }
+            else
+            	flConfirmChoice = false;
+            //.
     		requestWindowFeature(Window.FEATURE_NO_TITLE);
             //. 
             setContentView(R.layout.securityfile_instancelist_panel);
@@ -43,27 +48,39 @@ public class TSecurityFileInstanceListPanel extends Activity {
 
     			@Override
     			public void DoOnListItemClick(final TInstanceListItem Item) {
-	    			AlertDialog.Builder alert = new AlertDialog.Builder(TSecurityFileInstanceListPanel.this);
-	    			//.
-	    			alert.setTitle(R.string.SConfirmation);
-	    			alert.setMessage(R.string.SConfirmOperation);
-	    			//.
-	    			alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
-	    				
-	    				@Override
-	    				public void onClick(DialogInterface dialog, int whichButton) {
-	                    	Intent intent = TSecurityFileInstanceListPanel.this.getIntent();
-	                    	intent.putExtra("SecurityFileID", Item.ID);
-	                        //.
-	                    	setResult(Activity.RESULT_OK,intent);
-	                		//.
-	                    	finish();
-	    				}
-	    			});
-	    			//.
-	    			alert.setNegativeButton(R.string.SCancel, null);
-	    			//.
-	    			alert.show();
+    				if (flConfirmChoice) {
+    	    			AlertDialog.Builder alert = new AlertDialog.Builder(TSecurityFileInstanceListPanel.this);
+    	    			//.
+    	    			alert.setTitle(R.string.SConfirmation);
+    	    			alert.setMessage(R.string.SConfirmOperation);
+    	    			//.
+    	    			alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+    	    				
+    	    				@Override
+    	    				public void onClick(DialogInterface dialog, int whichButton) {
+    	                    	Intent intent = TSecurityFileInstanceListPanel.this.getIntent();
+    	                    	intent.putExtra("SecurityFileID", Item.ID);
+    	                    	intent.putExtra("SecurityFileName", Item.GetName());
+    	                        //.
+    	                    	setResult(Activity.RESULT_OK,intent);
+    	                		//.
+    	                    	finish();
+    	    				}
+    	    			});
+    	    			//.
+    	    			alert.setNegativeButton(R.string.SCancel, null);
+    	    			//.
+    	    			alert.show();
+    				}
+    				else {
+                    	Intent intent = TSecurityFileInstanceListPanel.this.getIntent();
+                    	intent.putExtra("SecurityFileID", Item.ID);
+                    	intent.putExtra("SecurityFileName", Item.GetName());
+                        //.
+                    	setResult(Activity.RESULT_OK,intent);
+                		//.
+                    	finish();
+    				}
     			}
     		});
             //.

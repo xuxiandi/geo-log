@@ -36,7 +36,8 @@ public class TMicrophoneCapturingServer extends TCancelableThread {
 		}
 		
 		public boolean Equals(TConfiguration AConfiguration) {
-			return (((AConfiguration.Source == SOURCE_ANY) || (Source == AConfiguration.Source)) && (SamplePerSec == AConfiguration.SamplePerSec) && ((AConfiguration.BufferSize == BUFFERSIZE_ANY) || (BufferSize == AConfiguration.BufferSize))); 
+			//. return (((AConfiguration.Source == SOURCE_ANY) || (Source == AConfiguration.Source)) && (SamplePerSec == AConfiguration.SamplePerSec) && ((AConfiguration.BufferSize == BUFFERSIZE_ANY) || (BufferSize == AConfiguration.BufferSize))); 
+			return ((SamplePerSec == AConfiguration.SamplePerSec) && ((AConfiguration.BufferSize == BUFFERSIZE_ANY) || (BufferSize == AConfiguration.BufferSize))); 
 		}
 	}
 	

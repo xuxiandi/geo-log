@@ -225,6 +225,9 @@ public class TDEVICEModule extends TModule
 			@Override
 			protected void DoOnConfigurationReceived() {
 				try {
+					if (DataStreamerModule.StreamingIsActive())
+						DataStreamerModule.StartStreaming();
+					//.
 					if (ComponentFileStreaming.flEnabledStreaming && !ComponentFileStreaming.IsStarted())
 						ComponentFileStreaming.Start();
 				} catch (Exception E) {
@@ -1912,7 +1915,9 @@ public class TDEVICEModule extends TModule
     		return flStreaming;
     	}
     	
-    	protected void GetServerInfo() {
+    	private void GetServerInfo() {
+			ServerAddress = DEVICEModule.ConnectorModule.GetGeographDataServerAddress();
+			ServerPort = DEVICEModule.ConnectorModule.GetGeographDataServerPort();
     	}
     	
 		@Override
@@ -1920,40 +1925,36 @@ public class TDEVICEModule extends TModule
 			try {
 		        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 		        //.
+				GetServerInfo();
+				//.
 				while (!Canceller.flCancel) {
-					if (ServerAddress != null) {
-						//. streaming ...
+					//. streaming ...
+					try {
 						try {
-							try {
-								if (Streamer.Streaming_SourceIsActive())
-									Streaming();
-							}
-							catch (InterruptedException IE) {
-								return; //. ->
-							}
-							catch (CancelException CE) {
-								return; //. ->
-							}
-							catch (Exception E) {
-								String S = E.getMessage();
-								if (S == null)
-									S = E.getClass().getName();
-								DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentDataStreaming","Failed attempt to stream, Component("+Integer.toString(Streamer.idTComponent)+";"+Long.toString(Streamer.idComponent)+")"+", "+S);
-							}
+							if (Streamer.Streaming_SourceIsActive())
+								Streaming();
 						}
-						catch (Throwable TE) {
-			            	//. log errors
-							String S = TE.getMessage();
+						catch (InterruptedException IE) {
+							return; //. ->
+						}
+						catch (CancelException CE) {
+							return; //. ->
+						}
+						catch (Exception E) {
+							String S = E.getMessage();
 							if (S == null)
-								S = TE.getClass().getName();
-							DEVICEModule.Log.WriteError("DEVICEModule.ComponentDataStreaming",S);
-			            	if (!(TE instanceof Exception))
-			            		TGeoLogApplication.Log_WriteCriticalError(TE);
+								S = E.getClass().getName();
+							DEVICEModule.Log.WriteWarning("DEVICEModule.ComponentDataStreaming","Failed attempt to stream, Component("+Integer.toString(Streamer.idTComponent)+";"+Long.toString(Streamer.idComponent)+")"+", "+S);
 						}
 					}
-					else {
-						if ((DEVICEModule.ConnectorModule != null) && (DEVICEModule.ConnectorModule.flProcessing)) 
-							GetServerInfo();
+					catch (Throwable TE) {
+		            	//. log errors
+						String S = TE.getMessage();
+						if (S == null)
+							S = TE.getClass().getName();
+						DEVICEModule.Log.WriteError("DEVICEModule.ComponentDataStreaming",S);
+		            	if (!(TE instanceof Exception))
+		            		TGeoLogApplication.Log_WriteCriticalError(TE);
 					}
 					//.
 					Thread.sleep(StreamingConnectionTimeout);
@@ -2177,12 +2178,6 @@ public class TDEVICEModule extends TModule
     		ServerPort = 5000;
     	}
     	
-	    @Override
-    	protected void GetServerInfo() {
-			ServerAddress = DEVICEModule.ConnectorModule.GetGeographDataServerAddress();
-			ServerPort = DEVICEModule.ConnectorModule.GetGeographDataServerPort();
-    	}
-    	
 	    private void Login(int idTComponent, long idComponent) throws Exception {
 	    	byte[] LoginBuffer = new byte[24];
 			byte[] BA = TDataConverter.ConvertInt16ToLEByteArray(SERVICE_SETDATASTREAM_V2);
@@ -2380,12 +2375,6 @@ public class TDEVICEModule extends TModule
     		super(pDEVICEModule,pStreamer);
     		//.
     		ServerPort = 2010;
-    	}
-    	
-	    @Override
-    	protected void GetServerInfo() {
-			ServerAddress = DEVICEModule.ConnectorModule.GetGeographProxyServerAddress();
-			ServerPort = DEVICEModule.ConnectorModule.GetGeographProxyServerPort();
     	}
     	
 	    private void Login(int idTComponent, long idComponent) throws Exception {

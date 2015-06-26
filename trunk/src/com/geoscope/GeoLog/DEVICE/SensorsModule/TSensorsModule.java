@@ -15,13 +15,14 @@ import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetSensorsDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessagingModule.TUserMessagingModule.TUserMessaging;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.MeasurementsTransferProcess.TSensorsModuleMeasurementsTransferProcess;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.MeasurementsTransferProcess.TSensorsModuleMeasurementsTransferProcessPanel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsTransferProcess;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsTransferProcessPanel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMeters;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
@@ -77,6 +78,8 @@ public class TSensorsModule extends TModule {
 	private TSensorsModuleMeasurementsTransferProcess MeasurementsTransferProcess;
 	//.
 	private Timer MeasurementsRemoveProcess;
+	//.
+	private TConnectorModule.TConfigurationSubscribers.TConfigurationSubscriber ConnectorConfigurationSubscriber;
 	
     public TSensorsModule(TDEVICEModule pDevice) throws Exception {
     	super(pDevice);
@@ -104,7 +107,19 @@ public class TSensorsModule extends TModule {
         MeasurementsTransferProcess = null;
     	//.
 		MeasurementsRemoveProcess = new Timer();
-		MeasurementsRemoveProcess.schedule(new TOldMeasurementRemovingTask(this),OldMeasurementRemovingInterval,OldMeasurementRemovingInterval);
+		MeasurementsRemoveProcess.schedule(new TOldMeasurementRemovingTask(this), OldMeasurementRemovingInterval,OldMeasurementRemovingInterval);
+		//.
+		ConnectorConfigurationSubscriber = new TConnectorModule.TConfigurationSubscribers.TConfigurationSubscriber() {
+			
+			@Override
+			protected void DoOnConfigurationReceived() {
+				try {
+					Measurements_CreateTransferProcess();
+				} catch (Exception E) {
+					Device.Log.WriteError("SensorsModule.MeasurementsTransferProcess: "+"could not create process",E.getMessage());
+				}
+			};
+		};
     }
     
     public void Destroy() throws Exception {
@@ -127,10 +142,14 @@ public class TSensorsModule extends TModule {
     @Override
     public void Start() throws Exception {
     	super.Start();
+    	//.
+    	Device.ConnectorModule.ConfigurationSubscribers.Subscribe(ConnectorConfigurationSubscriber);
     }
     
     @Override
     public void Stop() throws Exception {
+    	Device.ConnectorModule.ConfigurationSubscribers.Unsubscribe(ConnectorConfigurationSubscriber);
+    	//.
     	Meters.Finalize();
     	//.
     	super.Stop();
@@ -371,11 +390,11 @@ public class TSensorsModule extends TModule {
 		TSensorsModuleMeasurements.DeleteMeasurement(MeasurementID);
 	}
 	
-	public synchronized TSensorsModuleMeasurementsTransferProcess Measurements_GetTransferProcess() throws Exception {
+	private synchronized TSensorsModuleMeasurementsTransferProcess Measurements_CreateTransferProcess() throws Exception {
 		if (MeasurementsTransferProcess != null)
 			return MeasurementsTransferProcess; //. ->
 		//.
-		if ((Device.ConnectorModule != null) && Device.ConnectorModule.flProcessing) {
+		if (Device.ConnectorModule != null) {
 			String 	ServerAddress = Device.ConnectorModule.GetGeographDataServerAddress();
 			int 	ServerPort = Device.ConnectorModule.GetGeographDataServerPort();
 			//.
@@ -385,6 +404,10 @@ public class TSensorsModule extends TModule {
 		}
 		else
 			return null; //. ->
+	}
+	
+	public synchronized TSensorsModuleMeasurementsTransferProcess Measurements_GetTransferProcess() throws Exception {
+		return MeasurementsTransferProcess; //. ->
 	}
 	
 	public long Measurement_GetSize(String MeasurementID) throws IOException {

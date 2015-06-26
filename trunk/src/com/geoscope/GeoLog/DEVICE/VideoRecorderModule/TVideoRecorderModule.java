@@ -43,7 +43,6 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoReco
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderVideoFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.MeasurementsTransferProcess.TSensorsModuleMeasurementsTransferProcess;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.TMediaFrameServer;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -150,8 +149,6 @@ public class TVideoRecorderModule extends TModule {
 	public TMediaFrameServer MediaFrameServer = null;
 	//.
     private Timer RecorderWatcher = null;
-    //.
-    private TSensorsModuleMeasurementsTransferProcess MeasurementsTransferProcess = null;
 
     public TVideoRecorderModule(TDEVICEModule pDevice) throws Exception
     {
@@ -222,11 +219,6 @@ public class TVideoRecorderModule extends TModule {
     
     @Override
     public void Stop() throws Exception {
-    	if (MeasurementsTransferProcess != null) {
-    		MeasurementsTransferProcess.Destroy();
-    		MeasurementsTransferProcess = null;
-    	}
-    	//.
     	if (RecorderWatcher != null) {
     		RecorderWatcher.cancel();
     		RecorderWatcher = null;
@@ -605,14 +597,6 @@ public class TVideoRecorderModule extends TModule {
     				}
     				//.
                 	UpdateRecorderState();
-    				//.
-    		        if ((msg.what == MESSAGE_CONFIGURATION_RECEIVED) && (flEnabled) && (MeasurementsTransferProcess == null)) {
-    		        	TSavingServerDescriptor SD = GetSavingServerDescriptor();
-    		        	if (SD != null) 
-    		        		synchronized (this) {
-    			        		MeasurementsTransferProcess = Device.SensorsModule.Measurements_GetTransferProcess();
-    						}
-    		        }
                 	break; //. >
 
                 case MESSAGE_OPERATION_ERROR: 
@@ -622,18 +606,6 @@ public class TVideoRecorderModule extends TModule {
                 	break; //. >
                 	
                 case MESSAGE_SETSAVINGSERVER_OPERATION_COMPLETED:
-                	if (flEnabled) {
-                		try {
-                			synchronized (this) {
-                        		if (MeasurementsTransferProcess != null)
-                        			MeasurementsTransferProcess.Destroy();
-    			        		MeasurementsTransferProcess = Device.SensorsModule.Measurements_GetTransferProcess();
-    						}
-        				}
-        				catch (Exception E1) {
-        					Toast.makeText(Device.context, Device.context.getString(R.string.SErrorOfCreatingTransmissionService)+E1.getMessage(), Toast.LENGTH_LONG).show();
-        				}
-                	}
                 	break; //. >
                 	
                 case MESSAGE_UPDATERECORDERSTATE:

@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.SensorsModule.MeasurementsTransferProcess;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -39,7 +39,6 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographDataServer.TGeographDataServerClient;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorder;
 

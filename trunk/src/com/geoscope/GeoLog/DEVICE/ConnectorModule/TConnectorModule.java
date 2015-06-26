@@ -19,6 +19,7 @@ import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.net.ssl.SSLContext;
@@ -33,7 +34,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -147,12 +151,50 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
  *
  * @author ALXPONOM
  */
+@SuppressLint("HandlerLeak")
 public class TConnectorModule extends TModule implements Runnable{
 	
 	public static String Folder() {
 		return TDEVICEModule.DeviceFolder()+"/"+"ConnectorModule";
 	}
 
+	public static class TConfigurationSubscribers {
+	
+		public static class TConfigurationSubscriber {
+			
+			protected void DoOnConfigurationReceived() {			
+			}
+		}
+
+		
+		private ArrayList<TConfigurationSubscriber> Items = new ArrayList<TConfigurationSubscriber>();
+		
+		public TConfigurationSubscribers() {
+		}
+		
+		public void Destroy() {
+			ClearSubscribers();
+		}
+		
+		private synchronized void ClearSubscribers() {
+			Items = new ArrayList<TConfigurationSubscriber>();
+		}
+		
+		public synchronized void Subscribe(TConfigurationSubscriber Subscriber) {
+			Items.add(Subscriber);
+		}
+
+		public synchronized void Unsubscribe(TConfigurationSubscriber Subscriber) {
+			Items.remove(Subscriber);
+		}
+
+		public synchronized void DoOnConfigurationReceived() {
+			int Cnt = Items.size();
+			for (int I = 0; I < Cnt; I++)
+				Items.get(I).DoOnConfigurationReceived();
+		}
+	}
+	
 	public static final int CONNECTION_TYPE_PLAIN 		= 0;
 	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
 	
@@ -843,6 +885,8 @@ public class TConnectorModule extends TModule implements Runnable{
     //. connector signal condition listener
     public TConnectorStateListener ConnectorStateListener = new TConnectorStateListener();
     private TelephonyManager _TelephonyManager;
+    //.
+    public TConfigurationSubscribers ConfigurationSubscribers;
     
     public TConnectorModule(TDEVICEModule pDevice) throws Exception
     {
@@ -869,6 +913,8 @@ public class TConnectorModule extends TModule implements Runnable{
         //.
         OutgoingSetComponentDataOperationsQueue = new TOutgoingSetComponentDataOperationsQueue(this);
         OutgoingGetComponentDataOperationsQueue = new TOutgoingGetComponentDataOperationsQueue(this);
+        //.
+        ConfigurationSubscribers = new TConfigurationSubscribers();
         //.
         ModuleState = MODULE_STATE_INITIALIZED;
     }
@@ -1745,6 +1791,8 @@ public class TConnectorModule extends TModule implements Runnable{
         int RC = SO.ProcessOutgoingOperation(Connection,ConnectionInputStream,ConnectionOutputStream);
         if (RC < 0)
             throw new OperationException(RC,"load configuration error"); //. =>
+        //. send a notification message 
+		MessageHandler.obtainMessage(MESSAGE_CONFIGURATION_RECEIVED).sendToTarget();
     }
     
     private void TransmitConfiguration() throws Exception 
@@ -2113,4 +2161,23 @@ public class TConnectorModule extends TModule implements Runnable{
         	return (GetSignalLevel() >= WeakSignalThreshold);
         }
     }
+
+    private static final int MESSAGE_CONFIGURATION_RECEIVED = 1;
+    
+	public Handler MessageHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+        	try {
+                switch (msg.what) {
+
+                case MESSAGE_CONFIGURATION_RECEIVED: 
+                	ConfigurationSubscribers.DoOnConfigurationReceived();
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
+        }
+    };
 }

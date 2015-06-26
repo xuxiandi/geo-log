@@ -26,10 +26,10 @@ import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
-import android.view.View.OnClickListener;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -139,6 +139,10 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	public static class TAudioAACChannelProcessor extends TChannelProcessor {
 		
 		public static final String TypeID = TAACChannel.TypeID;
+		
+		public static boolean ChannelIsMine(TChannel Channel) {
+			return ((Channel instanceof TAACChannel) && (((TAACChannel)Channel).Packets > 0));
+		}
 		
 		private static final String CodecTypeName = "audio/mp4a-latm";
 		private static final int 	CodecLatency = 10000; //. microseconds
@@ -406,6 +410,10 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	public static class TVideoH264IChannelProcessor extends TChannelProcessor {
 		
 		public static final String TypeID = TH264IChannel.TypeID;
+		
+		public static boolean ChannelIsMine(TChannel Channel) {
+			return ((Channel instanceof TH264IChannel) && (((TH264IChannel)Channel).Packets > 0));
+		}
 		
 		private static final String CodecTypeName = "video/avc";
 		private static final int 	CodecLatency = 1000; //. microseconds
@@ -979,7 +987,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 			for (int C = 0; C < Cnt; C++) {
 				TChannel Channel = Measurement.Descriptor.Model.Stream.Channels.get(C);
 				//.
-				if (Channel.IsTypeOf(TVideoH264IChannelProcessor.TypeID)) {
+				if (TVideoH264IChannelProcessor.ChannelIsMine(Channel)) {
 					flVideo = true;
 					//.
 					synchronized (this) {
@@ -1004,7 +1012,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 			for (int C = 0; C < Cnt; C++) {
 				TChannel Channel = Measurement.Descriptor.Model.Stream.Channels.get(C);
 				//.
-				if (Channel.IsTypeOf(TAudioAACChannelProcessor.TypeID)) {
+				if (TAudioAACChannelProcessor.ChannelIsMine(Channel)) {
 					flAudio = true;
 					//.
 					synchronized (this) {
@@ -1016,7 +1024,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 					}
 				}
 				//.
-				if ((surface != null) && Channel.IsTypeOf(TVideoH264IChannelProcessor.TypeID)) {
+				if ((surface != null) && TVideoH264IChannelProcessor.ChannelIsMine(Channel)) {
 					flVideo = true;
 					//.
 					synchronized (this) {

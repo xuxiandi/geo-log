@@ -57,7 +57,7 @@ public class TSensorsModule extends TModule {
     	
         public void run() {
         	try {
-        		SensorsModule.Meters.Measurements_RemoveOld();
+        		SensorsModule.Measurements_RemoveOld();
         	}
         	catch (Throwable E) {
         		Throwable EE = new Error("error while removing old measurements, "+E.getMessage());
@@ -75,9 +75,8 @@ public class TSensorsModule extends TModule {
 	//.
 	public TSensorsMeters Meters;
 	//.
-	private TSensorsModuleMeasurementsTransferProcess MeasurementsTransferProcess;
-	//.
-	private Timer MeasurementsRemoveProcess;
+	private TSensorsModuleMeasurementsTransferProcess 	Measurements_TransferProcess;
+	private Timer 										Measurements_RemoveProcess;
 	//.
 	private TConnectorModule.TConfigurationSubscribers.TConfigurationSubscriber ConnectorConfigurationSubscriber;
 	
@@ -104,10 +103,10 @@ public class TSensorsModule extends TModule {
         //.
         Meters = new TSensorsMeters(this, Meters_Folder());
         //.
-        MeasurementsTransferProcess = null;
+        Measurements_TransferProcess = null;
     	//.
-		MeasurementsRemoveProcess = new Timer();
-		MeasurementsRemoveProcess.schedule(new TOldMeasurementRemovingTask(this), OldMeasurementRemovingInterval,OldMeasurementRemovingInterval);
+		Measurements_RemoveProcess = new Timer();
+		Measurements_RemoveProcess.schedule(new TOldMeasurementRemovingTask(this), OldMeasurementRemovingInterval,OldMeasurementRemovingInterval);
 		//.
 		ConnectorConfigurationSubscriber = new TConnectorModule.TConfigurationSubscribers.TConfigurationSubscriber() {
 			
@@ -123,14 +122,14 @@ public class TSensorsModule extends TModule {
     }
     
     public void Destroy() throws Exception {
-		if (MeasurementsRemoveProcess != null) {
-			MeasurementsRemoveProcess.cancel();
-			MeasurementsRemoveProcess = null;
+		if (Measurements_RemoveProcess != null) {
+			Measurements_RemoveProcess.cancel();
+			Measurements_RemoveProcess = null;
 		}
 		//.
-    	if (MeasurementsTransferProcess != null) {
-    		MeasurementsTransferProcess.Destroy();
-    		MeasurementsTransferProcess = null;
+    	if (Measurements_TransferProcess != null) {
+    		Measurements_TransferProcess.Destroy();
+    		Measurements_TransferProcess = null;
     	}
     	//.
     	if (Meters != null) {
@@ -390,24 +389,28 @@ public class TSensorsModule extends TModule {
 		TSensorsModuleMeasurements.DeleteMeasurement(MeasurementID);
 	}
 	
+	public void Measurements_RemoveOld() throws Exception {
+		Meters.Measurements_RemoveOld();
+	}
+	
 	private synchronized TSensorsModuleMeasurementsTransferProcess Measurements_CreateTransferProcess() throws Exception {
-		if (MeasurementsTransferProcess != null)
-			return MeasurementsTransferProcess; //. ->
+		if (Measurements_TransferProcess != null)
+			return Measurements_TransferProcess; //. ->
 		//.
 		if (Device.ConnectorModule != null) {
 			String 	ServerAddress = Device.ConnectorModule.GetGeographDataServerAddress();
 			int 	ServerPort = Device.ConnectorModule.GetGeographDataServerPort();
 			//.
-			MeasurementsTransferProcess = new TSensorsModuleMeasurementsTransferProcess(this, ServerAddress,ServerPort);
+			Measurements_TransferProcess = new TSensorsModuleMeasurementsTransferProcess(this, ServerAddress,ServerPort);
 			//.
-			return MeasurementsTransferProcess; //. ->
+			return Measurements_TransferProcess; //. ->
 		}
 		else
 			return null; //. ->
 	}
 	
 	public synchronized TSensorsModuleMeasurementsTransferProcess Measurements_GetTransferProcess() throws Exception {
-		return MeasurementsTransferProcess; //. ->
+		return Measurements_TransferProcess; //. ->
 	}
 	
 	public long Measurement_GetSize(String MeasurementID) throws IOException {

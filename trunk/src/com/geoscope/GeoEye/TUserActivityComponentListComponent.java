@@ -850,14 +850,12 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		    							
 		    							@Override
 		    							public void onClick(DialogInterface arg0, int arg1) {
-		    								arg0.dismiss();
-		    								//.
 	    									switch (arg1) {
 	    									
 	    									case 0: //. show security 
 	    				            			TAsyncProcessing Processing = new TAsyncProcessing(ParentActivity,R.string.SGettingSecurityInfo) {
 	    				            				
-	    				            				private String SecurityFileInfo = null;
+	    				            				private TSecurityFileFunctionality SecurityFileFunctionality = null;
 	    				            				
 	    				            				@Override
 	    				            				public void Process() throws Exception {
@@ -877,15 +875,9 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	    				        						//.
 	    				        						TComponentTypedDataFile ComponentTypedDataFile = ComponentTypedDataFiles.GetRootItem(); 
 	    				        						if ((ComponentTypedDataFile != null) && ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) {
-		    				        						TSecurityFileFunctionality SFF = (TSecurityFileFunctionality)UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
-		    				        						if (SFF != null)
-		    				        							try {
-		    				        								SFF.ParseFromXMLDocument(ComponentTypedDataFile.GetFileData());
-		    				        								//.
-		    				        								SecurityFileInfo = SFF._Name+"\n"+"("+SFF._Info+")";
-		    				        							} finally {
-		    				        								SFF.Release();
-		    				        							}
+		    				        						SecurityFileFunctionality = (TSecurityFileFunctionality)UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+		    				        						if (SecurityFileFunctionality != null)
+	    				        								SecurityFileFunctionality.ParseFromXMLDocument(ComponentTypedDataFile.GetFileData());
 	    				        						}
 	    				        						else
     				        								throw new Exception("there is no data for security file, SID: "+Long.toString(SecurityFileID)); //. =>
@@ -895,16 +887,16 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 	    				            				
 	    				            				@Override 
 	    				            				public void DoOnCompleted() throws Exception {
-	    				            					if (SecurityFileInfo != null) {
-	    				    				    		    new AlertDialog.Builder(ParentActivity)
-	    				    				    	        .setIcon(android.R.drawable.ic_dialog_alert)
-	    				    				    	        .setTitle(R.string.SSecurity)
-	    				    				    	        .setMessage(SecurityFileInfo)
-	    				    				    		    .setPositiveButton(R.string.SOk, null)
-	    				    				    		    .show();
-	    				            					}
+	    				            					if (SecurityFileFunctionality != null) 
+	    				            						SecurityFileFunctionality.Open(context, null);
 	    				            					else
 	    				            						throw new Exception("there is no security file info"); //. =>
+	    				            				}
+	    				            				
+	    				            				@Override 
+	    				            				public void DoOnFinished() throws Exception {
+	    				            					if (SecurityFileFunctionality != null)
+	    				            						SecurityFileFunctionality.Release();
 	    				            				}
 	    				            				
 	    				            				@Override

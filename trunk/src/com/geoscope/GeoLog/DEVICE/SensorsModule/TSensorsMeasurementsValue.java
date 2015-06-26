@@ -6,7 +6,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleMe
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMeters;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.MeasurementsTransferProcess.TSensorsModuleMeasurementsTransferProcess;
 
 public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
 
@@ -61,11 +61,11 @@ public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
     		if (MIDs.equals(""))
     			break; //. >
     		//.
-    		TSensorsMeters.TMeasurementSaver Saver = SensorsModule.Meters.Measurements_GetSaver(); 
-    		if (Saver == null)
+    		TSensorsModuleMeasurementsTransferProcess MeasurementsTransferProcess = SensorsModule.Measurements_GetTransferProcess(); 
+    		if (MeasurementsTransferProcess == null)
     			throw new OperationException(TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_ServerSaverIsNotReady); //. =>
     		//.
-    		Saver.StartProcess(MIDs);
+    		MeasurementsTransferProcess.StartProcess(MIDs);
     		//.
             break; //. >
             

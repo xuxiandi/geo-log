@@ -11,8 +11,6 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telem
 
 public class TGPSTLRMeter extends TSensorMeter {
 
-	public static final String ID = "Telemetry.GPSTLR";
-	//.
 	public static final String TypeID = "Telemetry.GPSTLR";
 	public static final String ContainerTypeID = "";
 	//.
@@ -22,8 +20,8 @@ public class TGPSTLRMeter extends TSensorMeter {
 	public static class TMyProfile extends TProfile {
 	}
 	
-	public TGPSTLRMeter(TSensorsModule pSensorsModule, String pProfileFolder) throws Exception {
-		super(pSensorsModule, new TSensorMeterDescriptor(ID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
+	public TGPSTLRMeter(TSensorsModule pSensorsModule, String pID, String pProfileFolder) throws Exception {
+		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
 	}
 	
 	@Override

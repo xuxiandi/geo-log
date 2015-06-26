@@ -187,13 +187,14 @@ public class TSensorsModuleMeasurements {
 		        return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
 		    }}
 		);		
+		int Cnt = MeasurementFolders.length;
 		int Count = 0;
-		for (int I = 0; I < MeasurementFolders.length; I++)
+		for (int I = 0; I < Cnt; I++)
 			if (MeasurementFolders[I].isDirectory()) 
 				Count++;
 		File[] Result = new File[Count];
 		Count = 0;
-		for (int I = 0; I < MeasurementFolders.length; I++)
+		for (int I = 0; I < Cnt; I++)
 			if (MeasurementFolders[I].isDirectory()) {
 				Result[Count] = MeasurementFolders[I];
 				Count++;

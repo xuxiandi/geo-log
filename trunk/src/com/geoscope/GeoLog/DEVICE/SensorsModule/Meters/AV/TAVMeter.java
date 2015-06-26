@@ -9,8 +9,6 @@ import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 
 public class TAVMeter extends TSensorMeter {
 
-	public static final String ID = "AV";
-	//.
 	public static final String TypeID = "AV.FRAME";
 	public static final String ContainerTypeID = "";
 	//.
@@ -22,8 +20,8 @@ public class TAVMeter extends TSensorMeter {
 	public static class TMyProfile extends TProfile {
 	}
 	
-	public TAVMeter(TSensorsModule pSensorsModule, String pProfileFolder) throws Exception {
-		super(pSensorsModule, new TSensorMeterDescriptor(ID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
+	public TAVMeter(TSensorsModule pSensorsModule, String pID, String pProfileFolder) throws Exception {
+		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
 	}
 	
 	@Override

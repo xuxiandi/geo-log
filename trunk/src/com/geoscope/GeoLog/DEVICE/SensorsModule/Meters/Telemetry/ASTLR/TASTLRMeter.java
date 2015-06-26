@@ -11,8 +11,6 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telem
 
 public class TASTLRMeter extends TSensorMeter {
 
-	public static final String ID = "Telemetry.ASTLR.0";
-	//.
 	public static final String TypeID = "Telemetry.ASTLR";
 	public static final String ContainerTypeID = "";
 	//.
@@ -22,8 +20,8 @@ public class TASTLRMeter extends TSensorMeter {
 	public static class TMyProfile extends TProfile {
 	}
 	
-	public TASTLRMeter(TSensorsModule pSensorsModule, String pProfileFolder) throws Exception {
-		super(pSensorsModule, new TSensorMeterDescriptor(ID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
+	public TASTLRMeter(TSensorsModule pSensorsModule, String pID, String pProfileFolder) throws Exception {
+		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
 	}
 	
 	@Override

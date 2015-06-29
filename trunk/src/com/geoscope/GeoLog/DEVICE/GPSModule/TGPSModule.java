@@ -190,7 +190,7 @@ public class TGPSModule extends TModule implements Runnable
 						break; //. >
 						
 					case LocationProvider.TEMPORARILY_UNAVAILABLE:
-						if (!(TGPSModule.this.flImpulseMode && TGPSModule.this.LocationMonitor.flNeedToSleep))
+						if (!(GPSModule.flImpulseMode && ((GPSModule.LocationMonitor != null) && GPSModule.LocationMonitor.flNeedToSleep)))
 							TGPSModule.this.SetStatus(TGPSModule.GPSMODULESTATUS_TEMPORARILYUNAVAILABLE);
 						break; //. >
 						
@@ -435,14 +435,14 @@ public class TGPSModule extends TModule implements Runnable
 		    			if (Canceller.flCancel)
 		    				return; //. ->
 		    			//.
-						LocationMonitor.GPSModule.Connect();
+						TLocationMonitor.this.GPSModule.Connect();
 		            	break; //. >
 
 		            case MESSAGE_DISCONNECT:
 		    			if (Canceller.flCancel)
 		    				return; //. ->
 		    			//.
-						LocationMonitor.GPSModule.Disconnect();
+		    			TLocationMonitor.this.GPSModule.Disconnect();
 		            	break; //. >
 		            }
 	        	}

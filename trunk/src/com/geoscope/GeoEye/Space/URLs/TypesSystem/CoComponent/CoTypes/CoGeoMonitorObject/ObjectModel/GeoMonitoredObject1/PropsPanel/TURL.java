@@ -10,11 +10,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectPanel;
+import com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.Location.TURL.TObjectParams;
 
 public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.ObjectModel.GeoMonitoredObject1.TURL {
 
@@ -88,12 +91,19 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent
 
 	@Override
 	public int GetThumbnailImageResID(int ImageMaxSize) {
-		return R.drawable.user_activity_component_list_placeholder_cocomponent_geomonitorobject1;
+		return R.drawable.user_activity_component_list_placeholder_cocomponent_geomonitorobject1_panel_offline;
 	}
 	
 	@Override
 	public TThumbnailImageComposition GetThumbnailImageComposition() {
-		return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_cocomponent_geomonitorobject1))); 
+		TObjectParams ObjectParams = GetObjectParams();
+		if (ObjectParams.IsOnline)
+			if (ObjectParams.FixIsAvailable)
+				return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_cocomponent_geomonitorobject1_panel_online_location))); //. ->
+			else
+				return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_cocomponent_geomonitorobject1_panel_online_nolocation))); //. ->
+		else
+			return (new TThumbnailImageComposition(BitmapFactory.decodeResource(User.Server.context.getResources(), R.drawable.user_activity_component_list_placeholder_cocomponent_geomonitorobject1_panel_offline))); //. ->
 	}
 	
 	@Override
@@ -104,5 +114,20 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent
     	intent.putExtra("ObjectID", idComponent);
     	intent.putExtra("ObjectName", ObjectName);
     	context.startActivity(intent);
+	}
+	
+	public TObjectParams GetObjectParams() {
+		TObjectParams Result = new TObjectParams();
+		try {
+			TCoGeoMonitorObject Object = new TCoGeoMonitorObject(User.Server, idComponent);
+			byte[] ObjectData = Object.GetData(0);
+			//.
+			Result.IsOnline = (ObjectData[0] > 0);
+			Result.FixIsAvailable = (ObjectData[1] > 0);
+			Result.UserAlert = TDataConverter.ConvertLEByteArrayToInt32(ObjectData,2);
+		}
+		catch (Exception E) {
+		}
+		return Result;
 	}
 }

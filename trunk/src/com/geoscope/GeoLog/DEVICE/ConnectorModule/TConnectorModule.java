@@ -160,10 +160,9 @@ public class TConnectorModule extends TModule implements Runnable{
 
 	public static class TConfigurationSubscribers {
 	
-		public static class TConfigurationSubscriber {
+		public static abstract class TConfigurationSubscriber {
 			
-			protected void DoOnConfigurationReceived() {			
-			}
+			protected abstract void DoOnConfigurationReceived();			
 		}
 
 		
@@ -177,7 +176,7 @@ public class TConnectorModule extends TModule implements Runnable{
 		}
 		
 		private synchronized void ClearSubscribers() {
-			Items = new ArrayList<TConfigurationSubscriber>();
+			Items.clear();
 		}
 		
 		public synchronized void Subscribe(TConfigurationSubscriber Subscriber) {

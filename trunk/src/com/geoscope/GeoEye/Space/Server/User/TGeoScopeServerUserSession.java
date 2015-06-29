@@ -9,6 +9,7 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.net.ssl.SSLContext;
@@ -34,6 +35,97 @@ import com.geoscope.GeoLog.Application.Network.TServerConnection;
 @SuppressLint("HandlerLeak")
 public class TGeoScopeServerUserSession extends TCancelableThread {
 
+	public static class TUserMessage {
+		
+		public long SenderID;
+		//.
+		public long 	MessageID;
+		public byte[] 	Message;
+		
+		public void FromConnection(Socket Connection, InputStream ConnectionInputStream) throws Exception {
+    		byte[] BA = new byte[8];
+        	Connection_ReadData(Connection, ConnectionInputStream, BA);
+        	SenderID = TDataConverter.ConvertLEByteArrayToInt64(BA,0);
+        	Connection_ReadData(Connection, ConnectionInputStream, BA);
+        	MessageID = TDataConverter.ConvertLEByteArrayToInt64(BA,0);
+    		BA = new byte[4];
+        	Connection_ReadData(Connection, ConnectionInputStream, BA);
+			int MessageSize = TDataConverter.ConvertLEByteArrayToInt32(BA,0);
+        	if (MessageSize > 0) {
+        		Message = new byte[MessageSize];
+	        	Connection_ReadData(Connection, ConnectionInputStream, Message);
+        	}
+        	else
+        		Message = null;        		
+		}
+	}
+	
+	public static class TUserMessageSubscribers {
+		
+		public static abstract class TUserMessageSubscriber {
+			
+			protected abstract boolean 	DoOnMessageReceived(TUserMessage UserMessage);
+			protected abstract void 	DoOnMessageSentToUser(long MessageID);			
+			protected abstract void 	DoOnMessageDelivered(TUserMessage UserMessage);			
+			protected abstract void 	DoOnMessageUserNotConnected(long MessageID);			
+			protected abstract void 	DoOnMessageUserNotAvailable(TUserMessage UserMessage);			
+		}
+
+		
+		private ArrayList<TUserMessageSubscriber> Items = new ArrayList<TUserMessageSubscriber>();
+		
+		public TUserMessageSubscribers() {
+		}
+		
+		public void Destroy() {
+			ClearSubscribers();
+		}
+		
+		private synchronized void ClearSubscribers() {
+			Items.clear();
+		}
+		
+		public synchronized void Subscribe(TUserMessageSubscriber Subscriber) {
+			Items.add(Subscriber);
+		}
+
+		public synchronized void Unsubscribe(TUserMessageSubscriber Subscriber) {
+			Items.remove(Subscriber);
+		}
+		
+		public synchronized boolean DoOnMessageReceived(TUserMessage UserMessage) {
+			boolean Result = false;
+			int Cnt = Items.size();
+			for (int I = 0; I < Cnt; I++)
+				Result |= Items.get(I).DoOnMessageReceived(UserMessage);
+			return Result;
+		}
+
+		public synchronized void DoOnMessageSentToUser(long MessageID) {
+			int Cnt = Items.size();
+			for (int I = 0; I < Cnt; I++)
+				Items.get(I).DoOnMessageSentToUser(MessageID);
+		}
+
+		public synchronized void DoOnMessageDelivered(TUserMessage UserMessage) {
+			int Cnt = Items.size();
+			for (int I = 0; I < Cnt; I++)
+				Items.get(I).DoOnMessageDelivered(UserMessage);
+		}
+
+		public synchronized void DoOnMessageUserNotConnected(long MessageID) {
+			int Cnt = Items.size();
+			for (int I = 0; I < Cnt; I++)
+				Items.get(I).DoOnMessageUserNotConnected(MessageID);
+		}
+
+		public synchronized void DoOnMessageUserNotAvailable(TUserMessage UserMessage) {
+			int Cnt = Items.size();
+			for (int I = 0; I < Cnt; I++)
+				Items.get(I).DoOnMessageUserNotAvailable(UserMessage);
+		}
+	}
+	
 	public static final int CONNECTION_TYPE_PLAIN 		= 0;
 	public static final int CONNECTION_TYPE_SECURE_SSL 	= 1;
 	
@@ -68,14 +160,23 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	public static final int MESSAGE_UNKNOWNCOMMAND        = -14;
 	public static final int MESSAGE_WRONGPARAMETERS       = -15;
 	//.
+	//.
 	public static final int SERVICE_MESSAGING_CLIENTMESSAGE_SPACEWINDOWUPDATING_SUBSCRIBE         		= 1001;
 	public static final int SERVICE_MESSAGING_CLIENTMESSAGE_SPACEWINDOWUPDATING_UNSUBSCRIBE       		= 1002;
 	public static final int SERVICE_MESSAGING_CLIENTMESSAGE_TILESERVERSPACEWINDOWUPDATING_SUBSCRIBE   	= 1003;
 	public static final int SERVICE_MESSAGING_CLIENTMESSAGE_TILESERVERSPACEWINDOWUPDATING_UNSUBSCRIBE 	= 1004;
+	public static final int SERVICE_MESSAGING_CLIENTMESSAGE_USERMESSAGE                                 = 1005;
+	//.
 	//.
 	public static final int SERVICE_MESSAGING_SERVERMESSAGE_NEWUSERMESSAGE        		= 1;
 	public static final int SERVICE_MESSAGING_SERVERMESSAGE_SPACEWINDOWUPDATE     		= 2;
 	public static final int SERVICE_MESSAGING_SERVERMESSAGE_TILESERVERSPACEWINDOWUPDATE = 3;
+	//.
+	public static final int SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE                           = 101;
+	public static final int SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_SENTTOUSER         = -101;
+	public static final int SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_DELIVERIED         = -102;
+	public static final int SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTCONNECTED   = -103;
+	public static final int SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTAVAILABLE   = -104;
 	
 	public static void CheckMessage(int Message) throws Exception {
 		if (Message >= 0)
@@ -111,6 +212,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		}
 	}
 
+	
 	private TGeoScopeServerUser User;
 	//.
 	private String 	ServerAddress;
@@ -134,6 +236,8 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
     public boolean flSessioning = false;
     //.
     private boolean flReconnect = false;
+    //.
+    public TUserMessageSubscribers UserMessageSubscribers = new TUserMessageSubscribers();
 	
 	public TGeoScopeServerUserSession(TGeoScopeServerUser pUser) {
 		super();
@@ -363,7 +467,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 			while (!Canceller.flCancel) {
 				try {
     				//. waiting for Internet connection
-    				/*///? while (!User.Server.IsNetworkAvailable()) 
+    				/* while (!User.Server.IsNetworkAvailable()) 
     					Thread.sleep(WaitForInternetConnectionInterval);*/
 					//. establishing user session 
 					TGeoScopeServerInfo.TInfo SI = User.Server.Info.GetInfo();
@@ -430,6 +534,43 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 						        	}
 						        	//.
 					    			MessageHandler.obtainMessage(HANDLER_MESSAGE_TILESERVERSPACEWINDOWUPDATE,WindowID).sendToTarget();
+					        		break; //. >
+					        		
+					        	case SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE:
+					        		TUserMessage UserMessage = new TUserMessage();
+					        		UserMessage.FromConnection(Connection, ConnectionInputStream);
+					        		//.
+					    			MessageHandler.obtainMessage(HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE, UserMessage).sendToTarget();
+					        		break; //. >
+					        		
+					        	case SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_SENTTOUSER:
+					        		BA = new byte[8];
+						        	Connection_ReadData(Connection, ConnectionInputStream, BA);
+						        	Long MessageID = TDataConverter.ConvertLEByteArrayToInt64(BA,0);
+					        		//.
+					    			MessageHandler.obtainMessage(HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_SENTTOUSER, MessageID).sendToTarget();
+					        		break; //. >
+					        		
+					        	case SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_DELIVERIED:
+					        		UserMessage = new TUserMessage();
+					        		UserMessage.FromConnection(Connection, ConnectionInputStream);
+					        		//.
+					    			MessageHandler.obtainMessage(HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_DELIVERIED, UserMessage).sendToTarget();
+					        		break; //. >
+					        		
+					        	case SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTCONNECTED:
+					        		BA = new byte[8];
+						        	Connection_ReadData(Connection, ConnectionInputStream, BA);
+						        	MessageID = TDataConverter.ConvertLEByteArrayToInt64(BA,0);
+					        		//.
+					    			MessageHandler.obtainMessage(HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTCONNECTED, MessageID).sendToTarget();
+					        		break; //. >
+					        		
+					        	case SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTAVAILABLE:
+					        		UserMessage = new TUserMessage();
+					        		UserMessage.FromConnection(Connection, ConnectionInputStream);
+					        		//.
+					    			MessageHandler.obtainMessage(HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTAVAILABLE, UserMessage).sendToTarget();
 					        		break; //. >
 					        	}
 							}
@@ -503,11 +644,65 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		}
 	}
 	
+	private static Random	SendUserMessage_IDGenerator = new Random();
+	//.
+	private static long		SendUserMessage_IDGenerator_GetNextID() {
+		synchronized (SendUserMessage_IDGenerator) {
+			while (true) {
+				long Result = SendUserMessage_IDGenerator.nextLong();
+				if (Result != 0)
+					return Result; //. ->
+			}
+		}
+	}
+	
+	public long SendUserMessage(long UserID, int UserMessageCode, byte[] UserMessage) throws IOException {
+		long UserMessageID = SendUserMessage_IDGenerator_GetNextID();
+		int UserMessageSize;
+		if (UserMessage != null)
+			UserMessageSize = UserMessage.length;
+		else
+			UserMessageSize = 0;
+		byte[] Message = new byte[4/*SizeOf(MessageID)*/+8/*SizeOf(UserID)*/+8/*SizeOf(UserMessageID)*/+4/*SizeOf(UserMessageCode)*/+4/*SizeOf(UserMessageSize)*/+UserMessageSize];
+		int Idx = 0;
+		byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(SERVICE_MESSAGING_CLIENTMESSAGE_USERMESSAGE);
+		System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt64ToLEByteArray(UserID);
+		System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt64ToLEByteArray(UserMessageID);
+		System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt32ToLEByteArray(UserMessageCode);
+		System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
+		BA = TDataConverter.ConvertInt32ToLEByteArray(UserMessageSize);
+		System.arraycopy(BA,0, Message,Idx, BA.length); Idx += BA.length;
+		if (UserMessageSize > 0) {
+			System.arraycopy(UserMessage,0, Message,Idx, UserMessage.length); Idx += UserMessageSize;
+		}
+		//.
+		SendMessage(Message);
+		//.
+		return UserMessageID;
+	}
+
+	public long SendUserMessage(long UserID, byte[] UserMessage) throws IOException {
+		return SendUserMessage(UserID, SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE, UserMessage);
+	}
+
+	public long SendUserPingMessage(long UserID) throws IOException {
+		return SendUserMessage(UserID, null);
+	}
+	
 	private static final int HANDLER_MESSAGE_SHOWEXCEPTION 					= -1;
 	private static final int HANDLER_MESSAGE_SHOWMESSAGE 					= 0;
 	private static final int HANDLER_MESSAGE_NEWUSERMESSAGE 				= 1;
 	private static final int HANDLER_MESSAGE_SPACEWINDOWUPDATE 				= 2;
 	private static final int HANDLER_MESSAGE_TILESERVERSPACEWINDOWUPDATE	= 3;
+	//.
+	public static final int HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE                           = 101;
+	public static final int HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_SENTTOUSER         = -101;
+	public static final int HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_DELIVERIED         = -102;
+	public static final int HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTCONNECTED   = -103;
+	public static final int HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTAVAILABLE   = -104;
 	
 	private final Handler MessageHandler = new Handler() {
 		@Override
@@ -552,6 +747,54 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
         				if ((Reflector != null) && (Reflector.ReflectionWindow.ID == WindowID))
         					Reflector.PostStartUpdatingSpaceImage();
     				}
+    				//.
+    				break; //. >
+    				
+    			case HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE:
+    				if (Canceller.flCancel)
+    					break; //. >
+    				//.
+    				TUserMessage UserMessage = (TUserMessage)msg.obj;
+    				if (UserMessageSubscribers.DoOnMessageReceived(UserMessage))
+            			SendUserMessage(UserMessage.SenderID, SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_DELIVERIED, null);
+    				else
+    					SendUserMessage(UserMessage.SenderID, SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTAVAILABLE, null);
+    				//.
+    				break; //. >
+    				
+    			case HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_SENTTOUSER:
+    				if (Canceller.flCancel)
+    					break; //. >
+    				//.
+    				long MessageID = (Long)msg.obj;
+    				UserMessageSubscribers.DoOnMessageSentToUser(MessageID);
+    				//.
+    				break; //. >
+    				
+    			case HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_DELIVERIED:
+    				if (Canceller.flCancel)
+    					break; //. >
+    				//.
+    				UserMessage = (TUserMessage)msg.obj;
+    				UserMessageSubscribers.DoOnMessageDelivered(UserMessage);
+    				//.
+    				break; //. >
+    				
+    			case HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTCONNECTED:
+    				if (Canceller.flCancel)
+    					break; //. >
+    				//.
+    				MessageID = (Long)msg.obj;
+    				UserMessageSubscribers.DoOnMessageUserNotConnected(MessageID);
+    				//.
+    				break; //. >
+    				
+    			case HANDLER_SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTAVAILABLE:
+    				if (Canceller.flCancel)
+    					break; //. >
+    				//.
+    				UserMessage = (TUserMessage)msg.obj;
+    				UserMessageSubscribers.DoOnMessageUserNotAvailable(UserMessage);
     				//.
     				break; //. >
     			}

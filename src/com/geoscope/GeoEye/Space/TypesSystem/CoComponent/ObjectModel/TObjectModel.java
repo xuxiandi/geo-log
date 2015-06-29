@@ -207,7 +207,7 @@ public class TObjectModel {
 	    	    for (int i = 0; i < 3; i++) 
 	    	    	hsvb[i] = (hsva[i]+((hsvb[i]-hsva[i])*proportion));
 	    	    return Color.HSVToColor(hsvb);
-	    	  }
+	    	}
 
 	    	public int GetColor(double Speed) {
 		    	if (Speed < Interval0_SpeedLimit) 

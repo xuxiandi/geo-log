@@ -17,9 +17,9 @@ import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.IntentFilter;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -58,6 +58,8 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingMessage;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser.TIncomingXMLDataMessage;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUserSession;
+import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUserSession.TUserMessage;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
@@ -68,7 +70,8 @@ public class TUserChatPanel extends Activity {
 
 	public static Hashtable<Long, TUserChatPanel> Panels = new Hashtable<Long, TUserChatPanel>();
 
-	public static final int ContactUserInfoUpdateInterval = 1000*30; //. seconds
+	public static final int ContactUserInfoUpdateInterval = 1000*60; //. seconds
+	public static final int ContactUserStateUpdateCounter = 10; 
 	public static final int MessageIsProcessedDelay = 1000*1; //. seconds
 	//.
 	public static final int CameraImageMaxSize = 1024;
@@ -76,9 +79,8 @@ public class TUserChatPanel extends Activity {
 	public static final String MessageTextFileName 		= "MessageText.txt";
 	public static final String MessagePictureFileName 	= "MessagePicture.png";
 	
-	private static final int MESSAGE_SENT 				= 1;
-	private static final int MESSAGE_RECEIVED 			= 2;
-	private static final int MESSAGE_UPDATECONTACTUSER 	= 3;
+	private static final int MESSAGE_SENT 					= 1;
+	private static final int MESSAGE_RECEIVED 				= 2;
 	
 	private static final int REQUEST_DRAWINGEDITOR				= 1;
 	private static final int REQUEST_ADDPICTUREFROMCAMERA		= 2;
@@ -120,12 +122,15 @@ public class TUserChatPanel extends Activity {
 	private TUserAgent UserAgent;
 	//.
 	private TGeoScopeServerUser.TUserDescriptor 	ContactUser = new TGeoScopeServerUser.TUserDescriptor();
-	private TContactUserUpdating    				ContactUserUpdating;
+	private TContactUserUpdating    				ContactUserUpdating = null;
+	private TContactUserStateUpdating    			ContactUserStateUpdating = null;
 	//.
 	private int UserIncomingMessages_LastCheckInterval = -1;
 	private ArrayList<TMessageAsProcessedMarking> MessageAsProcessedMarkingList = new ArrayList<TUserChatPanel.TMessageAsProcessedMarking>();
 	//.
-	private TextView lbUserChatContactUser;
+	private TextView 		lbUserChatContactUser;
+	private LinearLayout 	llUserChatContactUserState;
+	private TextView 		lbUserChatContactUserState;
 	private ScrollView svUserChatArea;
 	private LinearLayout llUserChatArea;
 	private EditText edUserChatComposeMessage;
@@ -185,12 +190,15 @@ public class TUserChatPanel extends Activity {
         setContentView(R.layout.userchat_panel);
         //.
         lbUserChatContactUser = (TextView)findViewById(R.id.lbUserChatContactUser);
+        llUserChatContactUserState = (LinearLayout)findViewById(R.id.llUserChatContactUserState);
+        lbUserChatContactUserState = (TextView)findViewById(R.id.lbUserChatContactUserState);
         //.
         svUserChatArea = (ScrollView)findViewById(R.id.svUserChatArea);
         llUserChatArea = (LinearLayout)findViewById(R.id.llUserChatArea);
         //.
         edUserChatComposeMessage = (EditText)findViewById(R.id.edUserChatComposeMessage);
-        edUserChatComposeMessage.setOnEditorActionListener(new OnEditorActionListener() {        
+        edUserChatComposeMessage.setOnEditorActionListener(new OnEditorActionListener() { 
+        	
 			@Override
 			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
                 if(arg1 == EditorInfo.IME_ACTION_DONE){
@@ -200,13 +208,13 @@ public class TUserChatPanel extends Activity {
                 }
 				return false;
 			}
-        });        
-        //.
+        });  
         btnUserChatComposeMessageSend = (Button)findViewById(R.id.btnUserChatComposeMessageSend);
         btnUserChatComposeMessageSend.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
-            	String Message = edUserChatComposeMessage.getText().toString();
+				String Message = edUserChatComposeMessage.getText().toString();
             	if (!Message.equals(""))
             		SendMessage(Message);
             }
@@ -214,6 +222,7 @@ public class TUserChatPanel extends Activity {
         //.
         btnUserChatTextEntry = (Button)findViewById(R.id.btnUserChatTextEntry);
         btnUserChatTextEntry.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -223,6 +232,7 @@ public class TUserChatPanel extends Activity {
         //.
         btnUserChatDrawingSend = (Button)findViewById(R.id.btnUserChatDrawingSend);
         btnUserChatDrawingSend.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
 				SendDrawing();
@@ -231,14 +241,26 @@ public class TUserChatPanel extends Activity {
         //.
         btnUserChatPictureSend = (Button)findViewById(R.id.btnUserChatPictureSend);
         btnUserChatPictureSend.setOnClickListener(new OnClickListener() {
+        	
 			@Override
             public void onClick(View v) {
 				SendPicture();
 			}
         });
         //.
-        UpdateContactUserInfo();
-        ContactUserUpdating = new TContactUserUpdating(MESSAGE_UPDATECONTACTUSER);
+        ContactUserUpdating = new TContactUserUpdating();
+        //.
+        TGeoScopeServerUserSession UserSession = UserAgent.User().GetSession(); 
+        if (UserSession != null) {
+            ContactUserStateUpdating = new TContactUserStateUpdating(UserSession);
+			//.
+            llUserChatContactUserState.setVisibility(View.VISIBLE);
+        }
+        else {
+        	ContactUserStateUpdating = null;
+            //.
+            llUserChatContactUserState.setVisibility(View.GONE);
+        }
         //.
         if (Message != null) 
 			try {
@@ -265,6 +287,8 @@ public class TUserChatPanel extends Activity {
 		};
 		IntentFilter ScreenOffFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 		getApplicationContext().registerReceiver(EventReceiver, ScreenOffFilter);
+		//.
+        UpdateContactUserInfo();
         //.
         Panels.put(ContactUser.UserID, this);
         //.
@@ -297,6 +321,11 @@ public class TUserChatPanel extends Activity {
     		}
     		//.
     		UserIncomingMessages_LastCheckInterval = -1;
+    	}
+        //.
+    	if (ContactUserStateUpdating != null) {
+    		ContactUserStateUpdating.Cancel();
+    		ContactUserStateUpdating = null;
     	}
         //.
     	if (ContactUserUpdating != null) {
@@ -999,17 +1028,11 @@ public class TUserChatPanel extends Activity {
 		
     private class TContactUserUpdating extends TCancelableThread {
 
-    	private static final int MESSAGE_SHOWEXCEPTION 			= 0;
-    	private static final int MESSAGE_PROGRESSBAR_SHOW 		= 1;
-    	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 2;
-    	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 3;
+    	private static final int MESSAGE_SHOWEXCEPTION 		= 0;
+    	private static final int MESSAGE_UPDATECONTACTUSER 	= 1;
     	
-    	private int OnCompletionMessage;
-    	
-    	public TContactUserUpdating(int pOnCompletionMessage) {
+    	public TContactUserUpdating() {
     		super();
-    		//.
-    		OnCompletionMessage = pOnCompletionMessage;
     		//.
     		_Thread = new Thread(this);
     		_Thread.start();
@@ -1030,7 +1053,7 @@ public class TUserChatPanel extends Activity {
 							return; //. ->
 			    		//.
 						if (User != null)
-							PanelHandler.obtainMessage(OnCompletionMessage,User).sendToTarget();
+							MessageHandler.obtainMessage(MESSAGE_UPDATECONTACTUSER, User).sendToTarget();
 		        	}
 		        	catch (InterruptedException E) {
 		        	}
@@ -1050,6 +1073,7 @@ public class TUserChatPanel extends Activity {
 		}
 
 	    private final Handler MessageHandler = new Handler() {
+	    	
 	        @Override
 	        public void handleMessage(Message msg) {
 	        	try {
@@ -1063,17 +1087,174 @@ public class TUserChatPanel extends Activity {
 		            	//.
 		            	break; //. >
 		            	
-		            case MESSAGE_PROGRESSBAR_SHOW:
-		            	//.
-		            	break; //. >
+	                case MESSAGE_UPDATECONTACTUSER:
+						if (Canceller.flCancel)
+			            	break; //. >
+	            		TGeoScopeServerUser.TUserDescriptor User = (TGeoScopeServerUser.TUserDescriptor)msg.obj;
+	            		ContactUser.Assign(User);
+	            		UpdateContactUserInfo();
+	                	break; //. >
+		            }
+	        	}
+	        	catch (Throwable E) {
+	        		TGeoLogApplication.Log_WriteError(E);
+	        	}
+	        }
+	    };
+    }
+		
+    private class TContactUserStateUpdating extends TCancelableThread {
 
-		            case MESSAGE_PROGRESSBAR_HIDE:
-		            	//.
-		            	break; //. >
+    	public static final int OnlineColor = Color.GREEN; 
+    	public static final int OfflineColor = Color.LTGRAY; 
+    	
+    	private static final int MESSAGE_SHOWEXCEPTION 			= 0;
+    	private static final int MESSAGE_UPDATECONTACTUSERSTATE	= 1;
+    	
+    	private TGeoScopeServerUserSession UserSession;
+    	//.
+    	private TGeoScopeServerUserSession.TUserMessageSubscribers.TUserMessageSubscriber UserMessageSubscriber = new TGeoScopeServerUserSession.TUserMessageSubscribers.TUserMessageSubscriber() {
+			
+			@Override
+			protected void DoOnMessageUserNotConnected(long MessageID) {
+				if (LastPingMessageID == MessageID)
+					if (ContactUser.UserIsOnline)
+						SetOnlinePerventage(20);
+					else
+						SetOnlinePerventage(0);
+			}
+			
+			@Override
+			protected void DoOnMessageUserNotAvailable(TUserMessage UserMessage) {
+				if (UserMessage.SenderID == ContactUser.UserID)
+					SetOnlinePerventage(0);
+			}
+			
+			@Override
+			protected void DoOnMessageSentToUser(long MessageID) {
+				if (LastPingMessageID == MessageID) {
+					int V = 50;
+					if (GetOnlinePerventage() < V) 
+						SetOnlinePerventage(V);
+				}
+			}
+			
+			@Override
+			protected boolean DoOnMessageReceived(TUserMessage UserMessage) {
+				return true;
+			}
+			
+			@Override
+			protected void DoOnMessageDelivered(TUserMessage UserMessage) {
+				if (UserMessage.SenderID == ContactUser.UserID) 
+					if (UserMessage.MessageID == LastPingMessageID)
+						SetOnlinePerventage(100);
+					else
+						SetOnlinePerventage(90);
+			}
+		};
+		//.
+		private volatile long LastPingMessageID = 0;
+		//.
+		private volatile int OnlinePercentage = 0;
+    	
+    	public TContactUserStateUpdating(TGeoScopeServerUserSession pUserSession) {
+    		super();
+    		//.
+    		UserSession = pUserSession;
+    		//.
+            UserSession.UserMessageSubscribers.Subscribe(UserMessageSubscriber);
+    		//.
+    		_Thread = new Thread(this);
+    		_Thread.start();
+    	}
+    	
+    	@Override
+    	public void Destroy() throws Exception {
+    		super.Destroy();
+    		//.
+            UserSession.UserMessageSubscribers.Unsubscribe(UserMessageSubscriber);
+    	}
+
+		@Override
+		public void run() {
+			try {
+		    	int Count = 0;
+				while (!Canceller.flCancel) {
+					if ((Count % ContactUserStateUpdateCounter) == 0) {
+						Count = 0;
+						//.
+						try {
+							LastPingMessageID = UserSession.SendUserPingMessage(ContactUser.UserID);
+			        	}
+			        	catch (NullPointerException NPE) { 
+				    		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,NPE).sendToTarget();
+			        	}
+			        	catch (IOException E) {
+			    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
+			        	}
+			        	catch (Throwable E) {
+			    			MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,new Exception(E.getMessage())).sendToTarget();
+			        	}
+					}
+					else {
+						int OP = GetOnlinePerventage();
+						OP -= 2;
+						if (OP >= 0)
+							SetOnlinePerventage(OP);
+					}
+					Count++;
+					//.
+		        	Thread.sleep(1000);
+				}
+			}
+        	catch (InterruptedException E) {
+        	}
+		}
+
+		private void SetOnlinePerventage(int pValue) {
+			OnlinePercentage = pValue;
+			//.
+			MessageHandler.obtainMessage(MESSAGE_UPDATECONTACTUSERSTATE).sendToTarget();
+		}
+		
+		private int GetOnlinePerventage() {
+			return OnlinePercentage;
+		}
+		
+    	private int InterpolateColor(int C1, int C2, float proportion) {
+    	    float[] hsva = new float[3];
+    	    float[] hsvb = new float[3];
+    	    Color.colorToHSV(C1, hsva);
+    	    Color.colorToHSV(C2, hsvb);
+    	    for (int i = 0; i < 3; i++) 
+    	    	hsvb[i] = (hsva[i]+((hsvb[i]-hsva[i])*proportion));
+    	    return Color.HSVToColor(hsvb);
+    	}
+
+	    private final Handler MessageHandler = new Handler() {
+	    	
+	        @Override
+	        public void handleMessage(Message msg) {
+	        	try {
+		            switch (msg.what) {
 		            
-		            case MESSAGE_PROGRESSBAR_PROGRESS:
+		            case MESSAGE_SHOWEXCEPTION:
+						if (Canceller.flCancel)
+			            	break; //. >
+		            	Exception E = (Exception)msg.obj;
+		                Toast.makeText(TUserChatPanel.this, TUserChatPanel.this.getString(R.string.SUpdatingContactUser)+E.getMessage(), Toast.LENGTH_LONG).show();
 		            	//.
 		            	break; //. >
+	                	
+	                case MESSAGE_UPDATECONTACTUSERSTATE:
+						if (Canceller.flCancel)
+			            	break; //. >
+						int OP = GetOnlinePerventage();
+		            	//.
+		            	int C = InterpolateColor(OfflineColor,OnlineColor, OP/100.0F);
+		            	lbUserChatContactUserState.setBackgroundColor(C);
+	                	break; //. >
 		            }
 	        	}
 	        	catch (Throwable E) {
@@ -1084,6 +1265,7 @@ public class TUserChatPanel extends Activity {
     }
 		
 	public final Handler PanelHandler = new Handler() {
+		
         @Override
         public void handleMessage(Message msg) {
         	try {
@@ -1113,14 +1295,6 @@ public class TUserChatPanel extends Activity {
                 	catch (Exception E) {
                 		Toast.makeText(TUserChatPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
                 	}
-                	break; //. >
-                	
-                case MESSAGE_UPDATECONTACTUSER:
-    				if (!flExists)
-    	            	break; //. >
-            		TGeoScopeServerUser.TUserDescriptor User = (TGeoScopeServerUser.TUserDescriptor)msg.obj;
-            		ContactUser.Assign(User);
-            		UpdateContactUserInfo();
                 	break; //. >
                 }
         	}

@@ -1098,5 +1098,6 @@
     <string name="SConfirmOperation">Подтвердите операцию</string>
     <string name="SGettingSecurityInfo">Получение файла безопасности &#8230;</string>
     <string name="SAttachToMyUserActivityAsDatafile">Прикрепить к моей активности как файл данных</string>
+    <string name="SLink">Связь</string>
     
 </resources>

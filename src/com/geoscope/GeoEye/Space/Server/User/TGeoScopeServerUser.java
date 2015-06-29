@@ -2640,12 +2640,16 @@ public class TGeoScopeServerUser {
 		}
 	}
 	
-	public synchronized boolean InSession() {
-		return ((Session != null) && Session.flSessioning);
-	}
-	
 	public synchronized TGeoScopeServerUserSession GetSession() {
 		return Session;
+	}
+	
+	public synchronized boolean SessionAvailable() {
+		return (Session != null);
+	}
+	
+	public synchronized boolean InSession() {
+		return ((Session != null) && Session.flSessioning);
 	}
 	
 	private String IncomingMessages_PrepareSendNewURL(long RecepientID) {
@@ -2678,9 +2682,9 @@ public class TGeoScopeServerUser {
 		return URL;		
 	}
 	
-	public static int 		IncomingMessages_NewCommandSessionRange = Integer.MAX_VALUE-1;
+	private static int 		IncomingMessages_NewCommandSessionRange = Integer.MAX_VALUE-1;
 	private static Random	IncomingMessages_NewCommandSessionRandom = new Random();
-	
+	//.
 	private static int		IncomingMessages_GetNewCommandSession() {
 		synchronized (IncomingMessages_NewCommandSessionRandom) {
 			return (1+IncomingMessages_NewCommandSessionRandom.nextInt(IncomingMessages_NewCommandSessionRange));

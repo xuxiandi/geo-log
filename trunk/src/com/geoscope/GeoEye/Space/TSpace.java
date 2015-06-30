@@ -5,7 +5,6 @@ import android.content.Context;
 import com.geoscope.GeoEye.Space.Defines.TSpaceObj;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
-import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 public class TSpace {
 
@@ -31,7 +30,15 @@ public class TSpace {
 		return Space;
 	}
 	
-	public static final String ContextFolder = TGeoLogApplication.ProfileFolder()+"/"+"CONTEXT"+"/"+"Space";
+	public static final String 	FolderName = "Space";
+	
+	public static String 		Folder() {
+		return TGeoScopeServerUser.Folder()+"/"+FolderName;
+	}
+		
+	public static String 		ContextFolder() {
+		return TGeoScopeServerUser.ContextFolder+"/"+FolderName;
+	}
 
 	public TSpaceContext Context;
 	//.

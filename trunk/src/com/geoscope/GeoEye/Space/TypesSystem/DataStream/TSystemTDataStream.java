@@ -9,7 +9,13 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
 public class TSystemTDataStream extends TTypeSystem {
 	
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"DataStream";
+	public static final String 	FolderName = "DataStream";
+	
+	public static String 		Folder() {
+		return TTypesSystem.Folder()+"/"+FolderName;
+	}
+		
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+FolderName;
 	
 	public TSystemTDataStream(TTypesSystem pTypesSystem) throws Exception {
 		super(pTypesSystem,SpaceDefines.idTDataStream,SpaceDefines.nmTDataStream);

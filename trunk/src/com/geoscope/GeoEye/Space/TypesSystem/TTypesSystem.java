@@ -31,7 +31,13 @@ import com.geoscope.GeoEye.Space.TypesSystem.WMFVisualization.TSystemTWMFVisuali
 
 public class TTypesSystem {
 
-	public static final String ContextFolder = TSpace.ContextFolder+"/"+"TypesSystem";
+	public static final String 	FolderName = "TypesSystem";
+	
+	public static String 		Folder() {
+		return TSpace.Folder()+"/"+FolderName;
+	}
+		
+	public static final String ContextFolder = TSpace.ContextFolder()+"/"+FolderName;
 	
 	public static TTypesSystem TypesSystem = null;
 	

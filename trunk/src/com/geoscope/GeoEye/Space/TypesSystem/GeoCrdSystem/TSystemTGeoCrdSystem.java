@@ -14,7 +14,13 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
 public class TSystemTGeoCrdSystem extends TTypeSystem {
 
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"GeoCrdSystem";
+	public static final String 	FolderName = "GeoCrdSystem";
+	
+	public static String 		Folder() {
+		return TTypesSystem.Folder()+"/"+FolderName;
+	}
+		
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+FolderName;
 	
 	public static class TThisContextCache extends TTypeSystem.TContextCache {
 		

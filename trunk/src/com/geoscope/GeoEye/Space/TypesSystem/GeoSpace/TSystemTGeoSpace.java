@@ -11,6 +11,14 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
 public class TSystemTGeoSpace extends TTypeSystem {
 	
+	public static final String 	FolderName = "GeoSpace";
+	
+	public static String 		Folder() {
+		return TTypesSystem.Folder()+"/"+FolderName;
+	}
+		
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+FolderName;
+	
 	public static class TGeoSpaceDescriptor {
 
 		public int 		ID;
@@ -59,8 +67,6 @@ public class TSystemTGeoSpace extends TTypeSystem {
 		return -1;
 	}
 
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"GeoSpace";
-	
 	public static class TThisContextCache extends TTypeSystem.TContextCache {
 		
 		public TThisContextCache(TTypeSystem pTypeSystem) throws IOException {

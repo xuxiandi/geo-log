@@ -60,6 +60,23 @@ import com.jcraft.jzlib.ZInputStream;
 
 public class TGeoScopeServerUser {
 
+	public static final String 	FolderName = "User";
+	//.
+	public static String 		Folder() {
+		return TGeoLogApplication.ProfileFolder()+"/"+FolderName;
+	}
+	
+	public static final String 	ContextFolderName = "CONTEXT";
+	//.
+	public static String 		ContextFolder = ContextFolder_Get();
+	//.
+	private static String 		ContextFolder_Get() {
+ 		String FN = TGeoLogApplication.ProfileFolder()+"/"+ContextFolderName;
+		if (!(new File(FN)).exists())
+			FN = Folder()+"/"+ContextFolderName; 
+		return FN; //. ->
+	}
+
 	public static final long RootUserID 		= 1;
 	public static final long AnonymousUserID 	= 2;
 	

@@ -64,7 +64,7 @@ public class TSpeechRecognizer {
 
     public static final String TAG = TSpeechRecognizer.class.getSimpleName();
     
-    public static final int SilenceRestartInterval = 1000*10; //. seconds
+    public static final int SilenceRestartInterval = 1000*900; //. seconds
 
     private TAudioModule AudioModule;
     //.
@@ -293,7 +293,7 @@ public class TSpeechRecognizer {
         public void run() {
         	try {
         		if (MicrophoneCapturingServer_flAvailable) {
-    	            decoder.startUtt(null);            
+    	            decoder.startUtt();            
     				try {
             			//. try to connect to an AudioModule.MicrophoneCapturingServer
             			TMicrophoneCapturingServer.TPacketSubscriber PacketSubscriber = new TMicrophoneCapturingServer.TPacketSubscriber() {
@@ -308,7 +308,7 @@ public class TSpeechRecognizer {
                 				//.
             		            Log.d(TAG, "Start voice recognition...");
             		            //.
-                	            VADState = decoder.getVadState();
+                	            VADState = decoder.getInSpeech();
                 	            VADState_Timestamp = System.currentTimeMillis();
             		            while (!interrupted()) 
             						Thread.sleep(1000*60);
@@ -360,7 +360,7 @@ public class TSpeechRecognizer {
                 Log.d(TSpeechRecognizer.TAG, "Phrase received: "+Command);
             }
             //.
-            boolean _VadState = decoder.getVadState();
+            boolean _VadState = decoder.getInSpeech();
             if (_VadState != VADState) {
                 VADState = _VadState;
 	            VADState_Timestamp = System.currentTimeMillis();
@@ -379,7 +379,7 @@ public class TSpeechRecognizer {
             		if ((NowMillis-VADState_Timestamp) > SilenceRestartInterval) {
             			//. restart Utt
     		            decoder.endUtt();
-        	            decoder.startUtt(null);            
+        	            decoder.startUtt();            
             			//.
         	            VADState_Timestamp = System.currentTimeMillis();
         	            //.
@@ -411,9 +411,9 @@ public class TSpeechRecognizer {
             
             Log.d(TAG, "Starting decoding");
 
-            decoder.startUtt(null);            
+            decoder.startUtt();            
             short[] buffer = new short[bufferSize];
-            boolean _vadState = decoder.getVadState();
+            boolean _vadState = decoder.getInSpeech();
 
             while (!interrupted() && ((timeoutSamples == NO_TIMEOUT) || (remainingSamples > 0))) {
                 int nread = recorder.read(buffer, 0, buffer.length);
@@ -426,8 +426,8 @@ public class TSpeechRecognizer {
                     //.  
                     Hypothesis hypothesis = decoder.hyp();
                     
-                    if (decoder.getVadState() != _vadState) {
-                        _vadState = decoder.getVadState();
+                    if (decoder.getInSpeech() != _vadState) {
+                        _vadState = decoder.getInSpeech();
                         //.
                         if (_vadState || (hypothesis != null))
                         	mainHandler.post(new InSpeechChangeEvent(_vadState));

@@ -9,7 +9,13 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
 public class TSystemTHintVisualization extends TTypeSystem {
 
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"Hints";
+	public static final String 	FolderName = "HintVisualization";
+	
+	public static String 		Folder() {
+		return TTypesSystem.Folder()+"/"+FolderName;
+	}
+		
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+FolderName;
 	
 	public TSystemTHintVisualization(TTypesSystem pTypesSystem) throws Exception {
 		super(pTypesSystem,SpaceDefines.idTHINTVisualization,SpaceDefines.nmTHINTVisualization);

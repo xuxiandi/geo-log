@@ -9,7 +9,13 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
 public class TSystemTGeographServer extends TTypeSystem {
 
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"GeographServer";
+	public static final String 	FolderName = "GeographServer";
+	
+	public static String 		Folder() {
+		return TTypesSystem.Folder()+"/"+FolderName;
+	}
+		
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+FolderName;
 	
 	public TSystemTGeographServer(TTypesSystem pTypesSystem) throws Exception {
 		super(pTypesSystem,SpaceDefines.idTGeoGraphServer,SpaceDefines.nmTGeoGraphServer);

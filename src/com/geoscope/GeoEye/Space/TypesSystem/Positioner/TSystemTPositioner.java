@@ -9,7 +9,13 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
 public class TSystemTPositioner extends TTypeSystem {
 
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"Positioner";
+	public static final String 	FolderName = "Positioner";
+	
+	public static String 		Folder() {
+		return TTypesSystem.Folder()+"/"+FolderName;
+	}
+		
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+FolderName;
 	
 	public TSystemTPositioner(TTypesSystem pTypesSystem) throws Exception {
 		super(pTypesSystem,SpaceDefines.idTPositioner,SpaceDefines.nmTPositioner);

@@ -11,7 +11,13 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
 public class TSystemTDetailedPictureVisualization extends TTypeSystem {
 
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"DetailedPictureVisualization";
+	public static final String 	FolderName = "DetailedPictureVisualization";
+	
+	public static String 		Folder() {
+		return TTypesSystem.Folder()+"/"+FolderName;
+	}
+		
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+FolderName;
 	
 	public static class TThisContextCache extends TTypeSystem.TContextCache {
 		

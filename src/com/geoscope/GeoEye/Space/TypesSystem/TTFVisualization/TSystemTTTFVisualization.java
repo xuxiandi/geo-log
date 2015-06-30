@@ -9,7 +9,13 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
 public class TSystemTTTFVisualization extends TTypeSystem {
 
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"TTFVisualizations";
+	public static final String 	FolderName = "TTFVisualization";
+	
+	public static String 		Folder() {
+		return TTypesSystem.Folder()+"/"+FolderName;
+	}
+		
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+FolderName;
 	
 	public TSystemTTTFVisualization(TTypesSystem pTypesSystem) throws Exception {
 		super(pTypesSystem,SpaceDefines.idTTTFVisualization,SpaceDefines.nmTTTFVisualization);

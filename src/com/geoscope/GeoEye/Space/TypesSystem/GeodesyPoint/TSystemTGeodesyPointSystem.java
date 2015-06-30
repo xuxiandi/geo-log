@@ -11,7 +11,13 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 
 public class TSystemTGeodesyPointSystem extends TTypeSystem {
 
-	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+"GeodesyPoint";
+	public static final String 	FolderName = "GeodesyPoint";
+	
+	public static String 		Folder() {
+		return TTypesSystem.Folder()+"/"+FolderName;
+	}
+		
+	public static String ContextFolder = TTypesSystem.ContextFolder+"/"+FolderName;
 	
 	public static class TThisContextCache extends TTypeSystem.TContextCache {
 		

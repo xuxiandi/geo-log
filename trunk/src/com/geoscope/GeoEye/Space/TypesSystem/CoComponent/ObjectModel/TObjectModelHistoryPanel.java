@@ -1261,6 +1261,8 @@ public class TObjectModelHistoryPanel extends Activity {
 	//.
 	private boolean flBigScreen = false;
 	//.
+	private TUserAgent UserAgent = null;
+	//.
 	private long				ObjectID = -1;
 	private TCoGeoMonitorObject Object = null;
 	private TObjectModel		ObjectModel = null;
@@ -1317,7 +1319,7 @@ public class TObjectModelHistoryPanel extends Activity {
         //.
     	flBigScreen = true; //. (getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
         //.
-		TUserAgent UserAgent = TUserAgent.GetUserAgent();
+		UserAgent = TUserAgent.GetUserAgent();
 		if (UserAgent == null) {
 			Toast.makeText(this, R.string.SUserAgentIsNotInitialized, Toast.LENGTH_LONG).show();
 			finish();
@@ -1508,7 +1510,9 @@ public class TObjectModelHistoryPanel extends Activity {
 			@Override
 			public void Process() throws Exception {
 				try {
-					byte[] ObjectModelData = TObjectModelHistoryPanel.this.Object.GetData(1000001);
+					TCoGeoMonitorObject Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
+					//.
+					byte[] ObjectModelData = Object.GetData(1000001);
 					if (ObjectModelData != null) {
 	    				Canceller.Check();
 	    				//.
@@ -1521,7 +1525,7 @@ public class TObjectModelHistoryPanel extends Activity {
 							if (_ObjectModel != null) {
 								_ObjectModel.SetBusinessModel(BusinessModelID);
 								//.
-								TGeographServerObjectController GSOC = TObjectModelHistoryPanel.this.Object.GeographServerObjectController();
+								TGeographServerObjectController GSOC = Object.GeographServerObjectController();
 								synchronized (GSOC) {
 									boolean flKeepConnectionLast = GSOC.KeepConnection();
 									try {

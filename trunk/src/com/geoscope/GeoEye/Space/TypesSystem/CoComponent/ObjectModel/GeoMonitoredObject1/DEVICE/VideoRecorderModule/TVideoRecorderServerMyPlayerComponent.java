@@ -12,7 +12,10 @@ import java.nio.channels.FileChannel;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.media.AudioFormat;
@@ -20,6 +23,7 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -30,6 +34,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -910,6 +915,88 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
         //.
         svVideoRecorderServerMyPlayer = (SurfaceView)ParentLayout.findViewById(R.id.svVideoRecorderServerMyPlayer);
         svVideoRecorderServerMyPlayer.getHolder().addCallback(this);
+        svVideoRecorderServerMyPlayer.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+				if (!IsSetup())
+					return false; //. ->
+				//.
+	    		final CharSequence[] _items;
+	    		int SelectedIdx = -1;
+	    		_items = new CharSequence[1];	    		
+	    		_items[0] = ParentActivity.getString(R.string.SExportToFile); 
+	    		//.
+	    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
+	    		builder.setTitle(R.string.SSelect);
+	    		builder.setNegativeButton(R.string.SClose,null);
+	    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+	    			
+	    			@Override
+	    			public void onClick(DialogInterface arg0, int arg1) {
+	    		    	try {
+	    		    		switch (arg1) {
+	    		    		
+	    		    		case 0: //. export to a file
+	    		    			TAsyncProcessing Exporting = new TAsyncProcessing(ParentActivity) {
+
+	    		    				private static final String ExpertFileName = "Clip.mp4";
+	    		    				
+	    		    				private String ExportFile;
+	    		    				
+	    		    				@Override
+	    		    				public void Process() throws Exception {
+	    		    					ExportFile = TGeoLogApplication.TempFolder+"/"+ExpertFileName;
+	    		    					//.
+	    		    					com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements.ExportMeasurementToMP4File(Measurement.DatabaseFolder, Measurement.Descriptor.ID, ExportFile);
+	    		    				}
+
+	    		    				@Override
+	    		    				public void DoOnCompleted() throws Exception {
+	    		    					if (!Canceller.flCancel) {
+	    		    					    new AlertDialog.Builder(ParentActivity)
+	    		    				        .setIcon(android.R.drawable.ic_dialog_info)
+	    		    				        .setTitle(R.string.SOperationIsDone)
+	    		    				        .setMessage(ParentActivity.getString(R.string.SAVDataHasBeenExportedToFile)+ExportFile)
+	    		    					    .setPositiveButton(R.string.SOpen, new DialogInterface.OnClickListener() {
+
+	    		    					    	@Override
+	    		    					    	public void onClick(DialogInterface dialog, int id) {
+	    		    								try {
+	    		    									Intent intent = new Intent();
+	    		    									intent.setDataAndType(Uri.fromFile(new File(ExportFile)), "video/*");
+	    		    									intent.setAction(android.content.Intent.ACTION_VIEW);
+	    		    									ParentActivity.startActivity(intent);
+	    		    								} catch (Exception E) {
+	    		    									Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+	    		    									return; // . ->
+	    		    								}
+	    		    					    	}
+	    		    					    })
+	    		    					    .setNegativeButton(R.string.SClose, null)
+	    		    					    .show();
+	    		    					}
+	    		    				}
+	    		    			};
+	    		    			Exporting.Start();
+	    						//.
+	        		    		arg0.dismiss();
+	        		    		//.
+	    		    			break; //. >
+	    		    		}
+	    		    	}
+	    		    	catch (Exception E) {
+	    		    		Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+	    		    		//.
+	    		    		arg0.dismiss();
+	    		    	}
+	    			}
+	    		});
+	    		AlertDialog alert = builder.create();
+	    		alert.show();
+				return true;
+			}
+		});
         //.
         lbVideoRecorderServerMyPlayer = (TextView)ParentLayout.findViewById(R.id.lbVideoRecorderServerMyPlayer);
         //.

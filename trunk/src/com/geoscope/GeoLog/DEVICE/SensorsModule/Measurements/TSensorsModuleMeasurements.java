@@ -31,7 +31,7 @@ import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedLock;
+import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedReadWriteLock;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
@@ -70,7 +70,7 @@ public class TSensorsModuleMeasurements {
 		}
 	}
 	
-	public static synchronized String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
+	public static String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
 		String MeasurementFolder = DataBaseFolder+"/"+NewMeasurementID;
 		File Folder = new File(MeasurementFolder);
 		if (!Folder.exists())
@@ -82,20 +82,20 @@ public class TSensorsModuleMeasurements {
 		return NewMeasurementID;
 	}
 	
-	public static synchronized String CreateNewMeasurement(String NewMeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
+	public static String CreateNewMeasurement(String NewMeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
 		return CreateNewMeasurement(DataBaseFolder, NewMeasurementID, Descriptor);
 	}
 	
-	public static synchronized String CreateNewMeasurement(TSensorMeasurementDescriptor Descriptor) throws Exception {
+	public static String CreateNewMeasurement(TSensorMeasurementDescriptor Descriptor) throws Exception {
 		return CreateNewMeasurement(DataBaseFolder, TSensorMeasurement.GetNewID(), Descriptor);
 	}
 	
-	public static synchronized String CreateNewMeasurement() throws Exception {
+	public static String CreateNewMeasurement() throws Exception {
 		return CreateNewMeasurement(null);
 	}
 	
-	public static synchronized void DeleteMeasurement(String DataBaseFolder, String MeasurementID) throws IOException {
-		TNamedLock MeasurementLock = TNamedLock.Lock(Domain, MeasurementID);
+	public static void DeleteMeasurement(String DataBaseFolder, String MeasurementID) throws IOException {
+		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.WriteLock(Domain, MeasurementID);
 		try {
 			String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
 			File Folder = new File(MeasurementFolder);
@@ -104,25 +104,25 @@ public class TSensorsModuleMeasurements {
 			TFileSystem.RemoveFolder(Folder);
 		}
 		finally {
-			MeasurementLock.UnLock();
+			MeasurementLock.WriteUnLock();
 		}
 	}
 	
-	public static synchronized void DeleteMeasurement(String MeasurementID) throws IOException {
+	public static void DeleteMeasurement(String MeasurementID) throws IOException {
 		DeleteMeasurement(DataBaseFolder, MeasurementID);
 	}
 	
-	public static synchronized boolean MeasurementExists(String MeasurementFolder) throws IOException {
+	public static boolean MeasurementExists(String MeasurementFolder) throws IOException {
 		File Folder = new File(MeasurementFolder);
 		return Folder.exists();
 	}
 	
-	public static synchronized boolean MeasurementExists(String DataBaseFolder, String MeasurementID) throws IOException {
+	public static boolean MeasurementExists(String DataBaseFolder, String MeasurementID) throws IOException {
 		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
 		return MeasurementExists(MeasurementFolder);
 	}
 	
-	public static synchronized String GetMeasurementsList(String pDataBaseFolder, double BeginTimestamp, double EndTimestamp, short Version) {
+	public static String GetMeasurementsList(String pDataBaseFolder, double BeginTimestamp, double EndTimestamp, short Version) {
 		String Result = "";
 		File DF = new File(pDataBaseFolder);
 		if (!DF.exists())
@@ -138,21 +138,27 @@ public class TSensorsModuleMeasurements {
 				String MeasurementID = MeasurementFolders[I].getName();
 				//.
 				String ItemStr = null;
-				TSensorMeasurementDescriptor MeasurementDescriptor = null;
 				try {
-					MeasurementDescriptor = GetMeasurementDescriptor(pDataBaseFolder,MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
-					if (MeasurementDescriptor != null) {
-						if (MeasurementDescriptor.IsValid() && !((MeasurementDescriptor.StartTimestamp > EndTimestamp) || (MeasurementDescriptor.FinishTimestamp < BeginTimestamp))) {
-							String TypeID = "?";
-							String ContainerTypeID = "?";
-							if (MeasurementDescriptor.Model != null) {
-								TypeID = MeasurementDescriptor.Model.TypeID;
-								ContainerTypeID = MeasurementDescriptor.Model.ContainerTypeID;
+					TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.TryReadLock(Domain, MeasurementID);
+					if (MeasurementLock != null)
+						try {
+							TSensorMeasurementDescriptor MeasurementDescriptor = GetMeasurementDescriptor(pDataBaseFolder,MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+							if (MeasurementDescriptor != null) {
+								if (MeasurementDescriptor.IsValid() && !((MeasurementDescriptor.StartTimestamp > EndTimestamp) || (MeasurementDescriptor.FinishTimestamp < BeginTimestamp))) {
+									String TypeID = "?";
+									String ContainerTypeID = "?";
+									if (MeasurementDescriptor.Model != null) {
+										TypeID = MeasurementDescriptor.Model.TypeID;
+										ContainerTypeID = MeasurementDescriptor.Model.ContainerTypeID;
+									}
+									//.
+									ItemStr = MeasurementDescriptor.ID+","+Double.toString(MeasurementDescriptor.StartTimestamp)+","+Double.toString(MeasurementDescriptor.FinishTimestamp)+','+TypeID+','+ContainerTypeID;
+								}
 							}
-							//.
-							ItemStr = MeasurementDescriptor.ID+","+Double.toString(MeasurementDescriptor.StartTimestamp)+","+Double.toString(MeasurementDescriptor.FinishTimestamp)+','+TypeID+','+ContainerTypeID;
 						}
-					}
+						finally {
+							MeasurementLock.ReadUnLock();
+						}
 				}
 				catch (Exception E) {
 					ItemStr = null;
@@ -167,19 +173,19 @@ public class TSensorsModuleMeasurements {
 		return Result;
 	}
 	
-	public static synchronized String GetMeasurementsList(String DataBaseFolder, short Version) {
+	public static String GetMeasurementsList(String DataBaseFolder, short Version) {
 		return GetMeasurementsList(DataBaseFolder, -Double.MAX_VALUE,Double.MAX_VALUE, Version);
 	}
 	
-	public static synchronized String GetMeasurementsList(double BeginTimestamp, double EndTimestamp, short Version) {
+	public static String GetMeasurementsList(double BeginTimestamp, double EndTimestamp, short Version) {
 		return GetMeasurementsList(DataBaseFolder, BeginTimestamp, EndTimestamp, Version);
 	}
 	
-	public static synchronized String GetMeasurementsList(short Version) {
+	public static String GetMeasurementsList(short Version) {
 		return GetMeasurementsList(DataBaseFolder, Version);
 	}
 	
-	public static synchronized ArrayList<String> GetMeasurementsIDs(String DataBaseFolder) {
+	public static ArrayList<String> GetMeasurementsIDs(String DataBaseFolder) {
 		File DF = new File(DataBaseFolder);
 		if (!DF.exists())
 			return null; //. ->
@@ -198,11 +204,11 @@ public class TSensorsModuleMeasurements {
 		return Result;
 	}
 	
-	public static synchronized ArrayList<String> GetMeasurementsIDs() {
+	public static ArrayList<String> GetMeasurementsIDs() {
 		return GetMeasurementsIDs(DataBaseFolder);
 	}
 	
-	public static synchronized File[] GetMeasurementsFolderList() {
+	public static File[] GetMeasurementsFolderList() {
 		File DF = new File(DataBaseFolder);
 		if (!DF.exists())
 			return null; //. ->
@@ -228,34 +234,45 @@ public class TSensorsModuleMeasurements {
 		return Result;
 	}
 	
-	public static synchronized File[] GetMeasurementFolderContent(String MeasurementID) {
-		File MF = new File(DataBaseFolder+"/"+MeasurementID);
-		if (!MF.exists())
-			return null; //. ->
-		File[] Result = MF.listFiles();
-		Arrays.sort(Result, new Comparator<File>(){
-		    public int compare(File f1, File f2) {
-		        return Long.valueOf(f1.length()).compareTo(f2.length());
-		    }}
-		);		
-		return Result;
+	public static File[] GetMeasurementFolderContent(String MeasurementID) {
+		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.ReadLock(Domain, MeasurementID);
+		try {
+			File MF = new File(DataBaseFolder+"/"+MeasurementID);
+			if (!MF.exists())
+				return null; //. ->
+			File[] Result = MF.listFiles();
+			Arrays.sort(Result, new Comparator<File>(){
+			    public int compare(File f1, File f2) {
+			        return Long.valueOf(f1.length()).compareTo(f2.length());
+			    }}
+			);		
+			return Result;
+		}
+		finally {
+			MeasurementLock.ReadUnLock();
+		}
 	}
 	
-	public static synchronized long GetMeasurementSize(String DataBaseFolder, String MeasurementID) throws IOException {
-		int Result = 0;
-		File DF = new File(DataBaseFolder);
-		if (!DF.exists())
-			return Result; //. ->
-		String MID = DataBaseFolder+"/"+MeasurementID;
-		return TFileSystem.GetSize(MID);
+	public static long GetMeasurementSize(String DataBaseFolder, String MeasurementID) throws IOException {
+		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.ReadLock(Domain, MeasurementID);
+		try {
+			File DF = new File(DataBaseFolder);
+			if (!DF.exists())
+				return 0; //. ->
+			String MID = DataBaseFolder+"/"+MeasurementID;
+			return TFileSystem.GetSize(MID);
+		}
+		finally {
+			MeasurementLock.ReadUnLock();
+		}
 	}
 	
-	public static synchronized long GetMeasurementSize(String MeasurementID) throws IOException {
+	public static long GetMeasurementSize(String MeasurementID) throws IOException {
 		return GetMeasurementSize(DataBaseFolder, MeasurementID);
 	}
 	
-	public static synchronized void SetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
-		TNamedLock MeasurementLock = TNamedLock.Lock(Domain, MeasurementID);
+	public static void SetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
+		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.WriteLock(Domain, MeasurementID);
 		try {
 			int Version = 1;
 			String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
@@ -317,16 +334,16 @@ public class TSensorsModuleMeasurements {
 			TF.renameTo(F);
 		}
 		finally {
-			MeasurementLock.UnLock();
+			MeasurementLock.WriteUnLock();
 		}
 	}
 
-	public static synchronized void SetMeasurementDescriptor(String MeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
+	public static void SetMeasurementDescriptor(String MeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
 		SetMeasurementDescriptor(DataBaseFolder, MeasurementID, Descriptor);
 	}
 	
-	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
-		TNamedLock MeasurementLock = TNamedLock.Lock(Domain, MeasurementID);
+	public static TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.ReadLock(Domain, MeasurementID);
 		try {
 			String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
 			String _DFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
@@ -401,19 +418,19 @@ public class TSensorsModuleMeasurements {
 			return Descriptor;
 		}
 		finally {
-			MeasurementLock.UnLock();
+			MeasurementLock.ReadUnLock();
 		}
 	}
 
-	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, TChannelProvider ChannelProvider) throws Exception {
+	public static TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, TChannelProvider ChannelProvider) throws Exception {
 		return GetMeasurementDescriptor(DataBaseFolder, MeasurementID, TSensorMeasurementDescriptor.class, ChannelProvider);
 	}
 	
-	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String MeasurementID, TChannelProvider ChannelProvider) throws Exception {
+	public static TSensorMeasurementDescriptor GetMeasurementDescriptor(String MeasurementID, TChannelProvider ChannelProvider) throws Exception {
 		return GetMeasurementDescriptor(DataBaseFolder, MeasurementID, ChannelProvider);
 	}
 	
-	public static synchronized void SetMeasurementStartTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
+	public static void SetMeasurementStartTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
 		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 		if (Descriptor == null)
 			throw new Exception("measurement descriptor is not found, ID:"+MeasurementID); //. =>
@@ -422,22 +439,22 @@ public class TSensorsModuleMeasurements {
 		SetMeasurementDescriptor(DataBaseFolder, MeasurementID, Descriptor);
 	}
 
-	public static synchronized void SetMeasurementStartTimestamp(String MeasurementID) throws Exception {
+	public static void SetMeasurementStartTimestamp(String MeasurementID) throws Exception {
 		SetMeasurementStartTimestamp(DataBaseFolder, MeasurementID);
 	}
 	
-	public static synchronized double GetMeasurementStartTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
+	public static double GetMeasurementStartTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
 		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 		if (Descriptor == null)
 			return 0.0; //. ->
 		return Descriptor.StartTimestamp;
 	}
 	
-	public static synchronized double GetMeasurementStartTimestamp(String MeasurementID) throws Exception {
+	public static double GetMeasurementStartTimestamp(String MeasurementID) throws Exception {
 		return GetMeasurementStartTimestamp(DataBaseFolder, MeasurementID);
 	}
 	
-	public static synchronized void SetMeasurementFinishTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
+	public static void SetMeasurementFinishTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
 		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 		if (Descriptor == null)
 			throw new Exception("measurement descriptor is not found, ID:"+MeasurementID); //. =>
@@ -446,22 +463,22 @@ public class TSensorsModuleMeasurements {
 		SetMeasurementDescriptor(DataBaseFolder, MeasurementID, Descriptor);
 	}
 
-	public static synchronized void SetMeasurementFinishTimestamp(String MeasurementID) throws Exception {
+	public static void SetMeasurementFinishTimestamp(String MeasurementID) throws Exception {
 		SetMeasurementFinishTimestamp(DataBaseFolder, MeasurementID);
 	}
 	
-	public static synchronized double GetMeasurementFinishTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
+	public static double GetMeasurementFinishTimestamp(String DataBaseFolder, String MeasurementID) throws Exception {
 		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 		if (Descriptor == null)
 			return 0.0; //. ->
 		return Descriptor.FinishTimestamp;
 	}
 	
-	public static synchronized double GetMeasurementFinishTimestamp(String MeasurementID) throws Exception {
+	public static double GetMeasurementFinishTimestamp(String MeasurementID) throws Exception {
 		return GetMeasurementFinishTimestamp(DataBaseFolder, MeasurementID);
 	}
 	
-	public static synchronized void SetMeasurementFinish(String DataBaseFolder, String MeasurementID, double FinishTimestamp) throws Exception {
+	public static void SetMeasurementFinish(String DataBaseFolder, String MeasurementID, double FinishTimestamp) throws Exception {
 		TSensorMeasurementDescriptor Descriptor = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 		if (Descriptor == null)
 			throw new Exception("measurement descriptor is not found, ID:"+MeasurementID); //. =>
@@ -470,16 +487,16 @@ public class TSensorsModuleMeasurements {
 		SetMeasurementDescriptor(DataBaseFolder, MeasurementID, Descriptor);
 	}
 
-	public static synchronized void SetMeasurementFinish(String MeasurementID, double FinishTimestamp) throws Exception {
+	public static void SetMeasurementFinish(String MeasurementID, double FinishTimestamp) throws Exception {
 		SetMeasurementFinish(DataBaseFolder, MeasurementID, FinishTimestamp);
 	}
 
-	public static synchronized void SetMeasurementFinish(String MeasurementID) throws Exception {
+	public static void SetMeasurementFinish(String MeasurementID) throws Exception {
 		SetMeasurementFinish(DataBaseFolder, MeasurementID, OleDate.UTCCurrentTimestamp());
 	}
 	
-	public static synchronized byte[] GetMeasurementData(String DataBaseFolder, String MeasurementID) throws IOException {
-		TNamedLock MeasurementLock = TNamedLock.Lock(Domain, MeasurementID);
+	public static byte[] GetMeasurementData(String DataBaseFolder, String MeasurementID) throws IOException {
+		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.ReadLock(Domain, MeasurementID);
 		try {
 			final int BUFFER = 2048;
 			String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
@@ -524,15 +541,15 @@ public class TSensorsModuleMeasurements {
 		    }
 		}
 		finally {
-			MeasurementLock.UnLock();
+			MeasurementLock.ReadUnLock();
 		}
 	}	
 	
-	public static synchronized byte[] GetMeasurementData(String MeasurementID) throws IOException {
+	public static byte[] GetMeasurementData(String MeasurementID) throws IOException {
 		return GetMeasurementData(DataBaseFolder, MeasurementID);
 	}
 	
-	public static synchronized void ValidateMeasurements(String DataBaseFolder) throws Exception {
+	public static void ValidateMeasurements(String DataBaseFolder) throws Exception {
 		File DF = new File(DataBaseFolder);
 		if (!DF.exists())
 			return; //. ->
@@ -546,72 +563,74 @@ public class TSensorsModuleMeasurements {
 			}
 	}
 	
-	public static synchronized void ValidateMeasurements() throws Exception {
+	public static void ValidateMeasurements() throws Exception {
 		ValidateMeasurements(DataBaseFolder);
 	}
 	
-	public static synchronized void ValidateMeasurement(String DataBaseFolder, String MeasurementID) throws Exception {
+	public static void ValidateMeasurement(String DataBaseFolder, String MeasurementID) throws Exception {
 	}
 	
-	public static synchronized boolean ExportMeasurementToMP4File(String DataBaseFolder, String MeasurementID, String ExportFile) throws Exception {
-		TSensorMeasurementDescriptor SensorMeasurement = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
-		if (SensorMeasurement == null)
-			throw new MeasurementDataIsNotFoundException(); //. =>
-		if (!SensorMeasurement.IsValid())
-			throw new MeasurementDataIsNotFoundException(); //. =>
-		//.
-		if (!(SensorMeasurement instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor))
-			return false; //. ->
-		com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor Measurement = (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor)SensorMeasurement;
-		//.
-		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
-		Movie movie = new Movie();
-		if (Measurement.Model != null) {
-			int Cnt = Measurement.Model.Stream.Channels.size();
-			for (int C = 0; C < Cnt; C++) {
-				TChannel Channel = Measurement.Model.Stream.Channels.get(C);
-				//.
-				if (Channel instanceof TAACChannel) {
-					AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName));
-					movie.addTrack(aacTrack);
-				}
-				//.
-				if (Channel instanceof TH264IChannel) {
-					TH264IChannel H264IChannel = (TH264IChannel)Channel;
-					//.
-					H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName), "eng", H264IChannel.FrameRate, 1);
-					movie.addTrack(h264Track);
-				}
-			}
-		}
-		else {
-			switch (Measurement.Mode) {
-			
-			case TVideoRecorderModule.MODE_FRAMESTREAM:
-				if (Measurement.AudioPackets > 0) {
-					AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName));
-					movie.addTrack(aacTrack);
-				}
-				if (Measurement.VideoPackets > 0) {
-					H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName), "eng", Measurement.VideoFPS, 1);
-					movie.addTrack(h264Track);
-				}
-				break; //. >
-			
-			default:
-				return false; //. ->
-			}
-		}
-		//.
-		Container mp4file = new DefaultMp4Builder().build(movie);
-		//.
-		FileChannel fc = new FileOutputStream(new File(ExportFile)).getChannel();
+	public static boolean ExportMeasurementToMP4File(String DataBaseFolder, String MeasurementID, String ExportFile) throws Exception {
+		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.ReadLock(Domain, MeasurementID);
 		try {
-			mp4file.writeContainer(fc);
+			com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor Measurement = (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor)GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.class, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+			if (Measurement == null)
+				throw new MeasurementDataIsNotFoundException(); //. =>
+			if (!Measurement.IsValid())
+				throw new MeasurementDataIsNotFoundException(); //. =>
+			//.
+			String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
+			Movie movie = new Movie();
+			if (Measurement.Model != null) {
+				int Cnt = Measurement.Model.Stream.Channels.size();
+				for (int C = 0; C < Cnt; C++) {
+					TChannel Channel = Measurement.Model.Stream.Channels.get(C);
+					//.
+					if (Channel instanceof TAACChannel) {
+						AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName));
+						movie.addTrack(aacTrack);
+					}
+					//.
+					if (Channel instanceof TH264IChannel) {
+						TH264IChannel H264IChannel = (TH264IChannel)Channel;
+						//.
+						H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName), "eng", H264IChannel.FrameRate, 1);
+						movie.addTrack(h264Track);
+					}
+				}
+			}
+			else {
+				switch (Measurement.Mode) {
+				
+				case TVideoRecorderModule.MODE_FRAMESTREAM:
+					if (Measurement.AudioPackets > 0) {
+						AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName));
+						movie.addTrack(aacTrack);
+					}
+					if (Measurement.VideoPackets > 0) {
+						H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName), "eng", Measurement.VideoFPS, 1);
+						movie.addTrack(h264Track);
+					}
+					break; //. >
+				
+				default:
+					return false; //. ->
+				}
+			}
+			//.
+			Container mp4file = new DefaultMp4Builder().build(movie);
+			//.
+			FileChannel fc = new FileOutputStream(new File(ExportFile)).getChannel();
+			try {
+				mp4file.writeContainer(fc);
+			}
+			finally {
+				fc.close();
+			}
+			return true; //. ->
 		}
 		finally {
-			fc.close();
+			MeasurementLock.ReadUnLock();
 		}
-		return true; //. ->
 	}
 }

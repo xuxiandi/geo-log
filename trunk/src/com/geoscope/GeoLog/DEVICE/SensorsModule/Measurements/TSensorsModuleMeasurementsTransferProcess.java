@@ -34,7 +34,7 @@ import android.util.Xml;
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
-import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedLock;
+import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedReadWriteLock;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
@@ -584,7 +584,7 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
 							for (int I = 0; I < Cnt; I++) {
 								String MeasurementID = ItemsToSave.get(I);
 								try {
-									TNamedLock MeasurementLock = TNamedLock.TryLock(TSensorsModuleMeasurements.Domain, MeasurementID, 1000);
+									TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.TryWriteLock(TSensorsModuleMeasurements.Domain, MeasurementID, 1000);
 									if (MeasurementLock != null)
 										try {
 											ProcessMeasurement(MeasurementID,TransferBuffer);
@@ -592,7 +592,7 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
 											Measurements.RemoveItem(MeasurementID);
 										}
 										finally {
-											MeasurementLock.UnLock();
+											MeasurementLock.WriteUnLock();
 										}
 								}
 								catch (SavingDataErrorException E) {
@@ -605,6 +605,9 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
 								if (flCancel)
 									return; //. ->
 							}
+							//.
+							if (ProcessSignal.IsSignalled())
+								break; //. >
 						}
 					}
 					catch (Throwable TE) {
@@ -643,13 +646,13 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
 									if (CntI > 0) {
 										for (int I = 0; I < CntI; I++) {
 											String MeasurementID = _Measurements[I].getName();
-											TNamedLock MeasurementLock = TNamedLock.TryLock(TSensorsModuleMeasurements.Domain, MeasurementID);
+											TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.TryWriteLock(TSensorsModuleMeasurements.Domain, MeasurementID);
 											if (MeasurementLock != null)
 												try {
 													Measurements.AddItem(MeasurementID, false);
 												}
 												finally {
-													MeasurementLock.UnLock();
+													MeasurementLock.WriteUnLock();
 												}
 										}
 										Measurements.Save();
@@ -662,13 +665,13 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
 										for (int I = 0; I < CntI; I++) 
 											if (_Measurements[I] != null) {
 												String MeasurementID = _Measurements[I];
-												TNamedLock MeasurementLock = TNamedLock.TryLock(TSensorsModuleMeasurements.Domain, MeasurementID);
+												TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.TryWriteLock(TSensorsModuleMeasurements.Domain, MeasurementID);
 												if (MeasurementLock != null)
 													try {
 														Measurements.AddItem(MeasurementID, false);
 													}
 													finally {
-														MeasurementLock.UnLock();
+														MeasurementLock.WriteUnLock();
 													}
 											}
 										Measurements.Save();
@@ -876,7 +879,7 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
     }
     
 	private void ProcessMeasurement(String MeasurementID, byte[] TransferBuffer) throws Exception {
-		TNamedLock MeasurementLock = TNamedLock.Lock(TSensorsModuleMeasurements.Domain, MeasurementID);
+		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.WriteLock(TSensorsModuleMeasurements.Domain, MeasurementID);
 		try {
 			File[] MeasurementContent = TSensorsModuleMeasurements.GetMeasurementFolderContent(MeasurementID);
 			if (MeasurementContent == null)
@@ -964,7 +967,7 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
 			}
 		}
 		finally {
-			MeasurementLock.UnLock();
+			MeasurementLock.WriteUnLock();
 		}
 	}
 }

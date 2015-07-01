@@ -1,7 +1,7 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
-import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedLock;
+import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedReadWriteLock;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleMeasurementsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -49,14 +49,14 @@ public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
     		for (int I = 1; I < SA.length; I++) {
     			String MeasurementID = SA[I];
     			//.
-				TNamedLock MeasurementLock = TNamedLock.TryLock(TSensorsModuleMeasurements.Domain, MeasurementID);
+				TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.TryWriteLock(TSensorsModuleMeasurements.Domain, MeasurementID);
 				if (MeasurementLock == null)
 					throw new OperationException(TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked, "MeasurementID: "+MeasurementID); //. =>
 				try {
 	        		SensorsModule.Measurements_Delete(MeasurementID);
 				}
 				finally {
-					MeasurementLock.UnLock();
+					MeasurementLock.WriteUnLock();
 				}
     		}
             break; //. >
@@ -66,7 +66,7 @@ public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
     		for (int I = 1; I < SA.length; I++) {
     			String MeasurementID = SA[I];
     			//.
-				TNamedLock MeasurementLock = TNamedLock.TryLock(TSensorsModuleMeasurements.Domain, MeasurementID);
+				TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.TryWriteLock(TSensorsModuleMeasurements.Domain, MeasurementID);
 				if (MeasurementLock == null)
 					throw new OperationException(TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked, "MeasurementID: "+MeasurementID); //. =>
 				try {
@@ -76,7 +76,7 @@ public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
 	    				MIDs = MeasurementID;
 				}
 				finally {
-					MeasurementLock.UnLock();
+					MeasurementLock.WriteUnLock();
 				}
     		}
     		if (MIDs.equals(""))

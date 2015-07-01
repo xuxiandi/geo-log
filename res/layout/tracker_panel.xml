@@ -632,7 +632,10 @@
                         android:layout_centerVertical="true"
                         android:layout_toLeftOf="@+id/edComponentFileStreaming"
                         android:layout_toRightOf="@+id/TextView08"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
                         android:visibility="gone" />
+
                 </RelativeLayout>
             </LinearLayout>
         </LinearLayout>

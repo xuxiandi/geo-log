@@ -180,6 +180,7 @@ public class TVoiceCommandModule extends TModule {
             Setup.setKeywordThreshold(Parameters.KeywordThreshold);
             //. Setup.setFloat("-wip", 1e-4);
             Setup.setFloat("-silprob", 0.5);
+            Setup.setBoolean("-allphone_ci", true);
         	//. Setup.setRawLogDir(VoiceRecognizerFolder)
         	SphinxRecognizer = Setup.getRecognizer(VoiceCommandModule.AudioModule);
             //.

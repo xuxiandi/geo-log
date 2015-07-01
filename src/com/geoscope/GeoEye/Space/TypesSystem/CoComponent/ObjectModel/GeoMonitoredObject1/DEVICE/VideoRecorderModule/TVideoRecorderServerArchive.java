@@ -247,7 +247,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	    		    				public void Process() throws Exception {
 	    		    					ExportFile = TGeoLogApplication.TempFolder+"/"+ExpertFileName;
 	    		    					//.
-	    		    					com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, ExportFile);
+	    		    					com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, ExportFile);
 	    		    				}
 
 	    		    				@Override

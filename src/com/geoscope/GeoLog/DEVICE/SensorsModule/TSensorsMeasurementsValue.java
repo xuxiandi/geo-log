@@ -1,11 +1,13 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedLock;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleMeasurementsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsTransferProcess;
 
 public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
@@ -44,8 +46,19 @@ public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
     	switch (Operation) {
     	
     	case 1: //. delete measurement(s)
-    		for (int I = 1; I < SA.length; I++)
-        		SensorsModule.Measurements_Delete(SA[I]);
+    		for (int I = 1; I < SA.length; I++) {
+    			String MeasurementID = SA[I];
+    			//.
+				TNamedLock MeasurementLock = TNamedLock.TryLock(TSensorsModuleMeasurements.Domain, MeasurementID);
+				if (MeasurementLock == null)
+					throw new OperationException(TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked, "MeasurementID: "+MeasurementID); //. =>
+				try {
+	        		SensorsModule.Measurements_Delete(MeasurementID);
+				}
+				finally {
+					MeasurementLock.UnLock();
+				}
+    		}
             break; //. >
             
     	case 2: //. move measurement(s) to data server
@@ -53,10 +66,18 @@ public class TSensorsMeasurementsValue extends TComponentTimestampedDataValue {
     		for (int I = 1; I < SA.length; I++) {
     			String MeasurementID = SA[I];
     			//.
-    			if (!MIDs.equals("")) 
-    				MIDs = MIDs+","+MeasurementID;
-    			else
-    				MIDs = MeasurementID;
+				TNamedLock MeasurementLock = TNamedLock.TryLock(TSensorsModuleMeasurements.Domain, MeasurementID);
+				if (MeasurementLock == null)
+					throw new OperationException(TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked, "MeasurementID: "+MeasurementID); //. =>
+				try {
+	    			if (!MIDs.equals("")) 
+	    				MIDs = MIDs+","+MeasurementID;
+	    			else
+	    				MIDs = MeasurementID;
+				}
+				finally {
+					MeasurementLock.UnLock();
+				}
     		}
     		if (MIDs.equals(""))
     			break; //. >

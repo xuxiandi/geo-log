@@ -31,6 +31,7 @@ import com.geoscope.Classes.IO.File.TFileSystem;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedReadWriteLock;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
@@ -801,8 +802,6 @@ public class TVideoRecorderServerArchive extends Activity {
     		_Thread.start();
     	}
 
-    	private static Object MeasurementCopyingLock = new Object(); 
-    	
 		@Override
 		public void run() {
 			try {
@@ -856,7 +855,8 @@ public class TVideoRecorderServerArchive extends Activity {
         				}
     				}
     				else {
-    					synchronized (MeasurementCopyingLock) {
+    					TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.ReadLock(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.Domain, MeasurementID);
+    					try {
         					String SrcMeasurementFolder = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.DataBaseFolder+"/"+MeasurementID;
         					String MeasurementTempFolder = TSensorsModuleMeasurements.Context_GetMeasurementTempFolder(Object.GeographServerObjectID(), MeasurementID);
         					try {
@@ -873,7 +873,10 @@ public class TVideoRecorderServerArchive extends Activity {
         						TFileSystem.RemoveFolder(new File(MeasurementTempFolder));
         						throw E; //. =>
         					}
-						}
+    					}
+    					finally {
+    						MeasurementLock.ReadUnLock();
+    					}
 	    				//.
 	        			MessageHandler.obtainMessage(MESSAGE_SUCCESSLOCALLY,MeasurementFolder).sendToTarget();
 	    				//.

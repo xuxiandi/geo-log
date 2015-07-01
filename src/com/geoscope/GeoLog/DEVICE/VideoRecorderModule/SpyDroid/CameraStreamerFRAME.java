@@ -24,7 +24,7 @@ import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
-import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedLock;
+import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedReadWriteLock;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneCapturingServer;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACEncoder;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
@@ -512,7 +512,7 @@ public class CameraStreamerFRAME extends Camera {
 		synchronized (this) {
 			if (flSaving) {
 				MeasurementID = TSensorMeasurement.GetNewID();
-				MeasurementLock = TNamedLock.Lock(TSensorsModuleMeasurements.Domain, MeasurementID); //. lock new measurement
+				MeasurementLock = TNamedReadWriteLock.WriteLock(TSensorsModuleMeasurements.Domain, MeasurementID); //. lock new measurement
 				MeasurementDescriptor = new TMeasurementDescriptor();
 				TSensorsModuleMeasurements.CreateNewMeasurement(MeasurementID, MeasurementDescriptor); 
 				MeasurementFolder = TSensorsModuleMeasurements.DataBaseFolder+"/"+MeasurementID;
@@ -889,7 +889,7 @@ public class CameraStreamerFRAME extends Camera {
 			}
 			//.
 			if (MeasurementLock != null) {
-				MeasurementLock.UnLock();
+				MeasurementLock.WriteUnLock();
 				MeasurementLock = null;
 			}
 			//.

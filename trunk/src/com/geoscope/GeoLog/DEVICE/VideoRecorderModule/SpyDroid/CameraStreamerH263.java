@@ -26,8 +26,10 @@ import android.media.MediaRecorder;
 import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.AMRNBPacketizerGSPS;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.librtp.H263PacketizerGSPS;
@@ -79,10 +81,12 @@ public class CameraStreamerH263 extends Camera {
 		//.
 		synchronized (this) {
 			if (flSaving) {
-				MeasurementID = TVideoRecorderMeasurements.CreateNewMeasurementID();
+				MeasurementID = TSensorMeasurement.GetNewID();
 				//.
-				TVideoRecorderMeasurements.CreateNewMeasurement(MeasurementID,TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1); 
-				MeasurementFolder = TVideoRecorderMeasurements.DataBaseFolder+"/"+MeasurementID;
+				MeasurementDescriptor = new TMeasurementDescriptor();
+				MeasurementDescriptor.Mode = TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1;
+				TSensorsModuleMeasurements.CreateNewMeasurement(MeasurementID, MeasurementDescriptor); 
+				MeasurementFolder = TSensorsModuleMeasurements.DataBaseFolder+"/"+MeasurementID;
 			}
 			else { 
 				MeasurementID = null;
@@ -205,7 +209,14 @@ public class CameraStreamerH263 extends Camera {
 			if (vstream != null)
 				VideoPackets = vstream.Output.GetOutputFilePackets();
 			//.
-			TVideoRecorderMeasurements.SetMeasurementFinish(MeasurementID,AudioPackets,VideoPackets);
+			MeasurementDescriptor.FinishTimestamp = OleDate.UTCCurrentTimestamp();
+			MeasurementDescriptor.GeographServerObjectID = VideoRecorderModule.Device.idGeographServerObject;
+			MeasurementDescriptor.GUID = TUIDGenerator.GenerateWithTimestamp();
+			//. 
+			MeasurementDescriptor.AudioPackets = AudioPackets;
+			MeasurementDescriptor.VideoPackets = VideoPackets;
+			//.
+        	TSensorsModuleMeasurements.SetMeasurementDescriptor(MeasurementID, MeasurementDescriptor);
 			//.
 			MeasurementID = null;
 		}
@@ -235,20 +246,21 @@ public class CameraStreamerH263 extends Camera {
 	
 	@Override
 	public synchronized TMeasurementDescriptor GetMeasurementCurrentDescriptor() throws Exception {
-		if (MeasurementID == null)
-			return null; //. ->
-		TMeasurementDescriptor Result = TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementID);
-		if (Result == null)
+		if (MeasurementDescriptor == null)
 			return null; //. ->
 		//.
-		Result.AudioPackets = 0;
+		int AudioPackets = 0;
 		if (sstream != null)
-			Result.AudioPackets = sstream.Output.GetOutputFilePackets();
-		Result.VideoPackets = 0;
+			AudioPackets = sstream.Output.GetOutputFilePackets();
+		int VideoPackets = 0;
 		if (vstream != null)
-			Result.VideoPackets = vstream.Output.GetOutputFilePackets();
-		Result.FinishTimestamp = OleDate.UTCCurrentTimestamp();
+			VideoPackets = vstream.Output.GetOutputFilePackets();
 		//.
-		return Result;
+		MeasurementDescriptor.FinishTimestamp = OleDate.UTCCurrentTimestamp();
+		//. 
+		MeasurementDescriptor.AudioPackets = AudioPackets;
+		MeasurementDescriptor.VideoPackets = VideoPackets;
+		//.
+		return MeasurementDescriptor;
 	}
 }

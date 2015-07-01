@@ -64,7 +64,7 @@ public class TSpeechRecognizer {
 
     public static final String TAG = TSpeechRecognizer.class.getSimpleName();
     
-    public static final int SilenceRestartInterval = 1000*900; //. seconds
+    public static final int SilenceRestartInterval = 1000*10; //. seconds
 
     private TAudioModule AudioModule;
     //.
@@ -268,6 +268,10 @@ public class TSpeechRecognizer {
      */
     public void addKeywordSearch(String name, File file) {
         decoder.setKws(name, file.getPath());
+    }
+
+    public void addAllphoneSearch(String name, File file) {
+        decoder.setAllphoneFile(name, file.getPath());
     }
 
     private final class RecognizerThread extends Thread {

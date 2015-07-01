@@ -6,8 +6,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -23,18 +25,32 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.util.Xml;
 
+import com.coremedia.iso.boxes.Container;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedLock;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementModel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
+import com.googlecode.mp4parser.FileDataSourceImpl;
+import com.googlecode.mp4parser.authoring.Movie;
+import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
+import com.googlecode.mp4parser.authoring.tracks.AACTrackImpl;
+import com.googlecode.mp4parser.authoring.tracks.H264TrackImpl;
 
 public class TSensorsModuleMeasurements {
 
 	public static final String DataBaseFolder = TSensorsModule.Measurements_Folder();
+	
+	public static final String Domain = "Sensors.Measurements"; 
 	
 	public static class MeasurementDataIsNotFoundException extends Exception {
 
@@ -66,6 +82,10 @@ public class TSensorsModuleMeasurements {
 		return NewMeasurementID;
 	}
 	
+	public static synchronized String CreateNewMeasurement(String NewMeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
+		return CreateNewMeasurement(DataBaseFolder, NewMeasurementID, Descriptor);
+	}
+	
 	public static synchronized String CreateNewMeasurement(TSensorMeasurementDescriptor Descriptor) throws Exception {
 		return CreateNewMeasurement(DataBaseFolder, TSensorMeasurement.GetNewID(), Descriptor);
 	}
@@ -75,11 +95,17 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static synchronized void DeleteMeasurement(String DataBaseFolder, String MeasurementID) throws IOException {
-		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
-		File Folder = new File(MeasurementFolder);
-		if (!Folder.exists())
-			return; //. ->
-		TFileSystem.RemoveFolder(Folder);
+		TNamedLock MeasurementLock = TNamedLock.Lock(Domain, MeasurementID);
+		try {
+			String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
+			File Folder = new File(MeasurementFolder);
+			if (!Folder.exists())
+				return; //. ->
+			TFileSystem.RemoveFolder(Folder);
+		}
+		finally {
+			MeasurementLock.UnLock();
+		}
 	}
 	
 	public static synchronized void DeleteMeasurement(String MeasurementID) throws IOException {
@@ -229,64 +255,70 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static synchronized void SetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
-		int Version = 1;
-		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
-		File Folder = new File(MeasurementFolder);
-		if (!Folder.exists())
-			return; //. ->
-		String TDFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName+".tmp";
-	    XmlSerializer serializer = Xml.newSerializer();
-	    FileWriter writer = new FileWriter(TDFN);
-	    try {
-	        serializer.setOutput(writer);
-	        serializer.startDocument("UTF-8",true);
-	        serializer.startTag("", "ROOT");
-	        //. Version
-            serializer.startTag("", "Version");
-            serializer.text(Integer.toString(Version));
-            serializer.endTag("", "Version");
-	        //. ServerID
-            serializer.startTag("", "ServerID");
-            serializer.text(Integer.toString(Descriptor.ServerID));
-            serializer.endTag("", "ServerID");
-	        //. GeographServerObjectID
-            serializer.startTag("", "GeographServerObjectID");
-            serializer.text(Long.toString(Descriptor.GeographServerObjectID));
-            serializer.endTag("", "GeographServerObjectID");
-	        //. ID
-            Descriptor.ID = MeasurementID; //. set ID
-            serializer.startTag("", "ID");
-            serializer.text(Descriptor.ID);
-            serializer.endTag("", "ID");
-	        //. GUID
-            serializer.startTag("", "GUID");
-            serializer.text(Descriptor.GUID);
-            serializer.endTag("", "GUID");
-	        //. StartTimestamp
-            serializer.startTag("", "StartTimestamp");
-            serializer.text(Double.toString(Descriptor.StartTimestamp));
-            serializer.endTag("", "StartTimestamp");
-	        //. FinishTimestamp
-            serializer.startTag("", "FinishTimestamp");
-            serializer.text(Double.toString(Descriptor.FinishTimestamp));
-            serializer.endTag("", "FinishTimestamp");
-            //. Model
-            if (Descriptor.Model != null) {
-                serializer.startTag("", "Model");
-            	Descriptor.Model.ToXMLNode(serializer);
-                serializer.endTag("", "Model");
-            }
-            //.
-	        serializer.endTag("", "ROOT");
-	        serializer.endDocument();
-	    }
-	    finally {
-	    	writer.close();
-	    }
-		String DFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
-		File TF = new File(TDFN);
-		File F = new File(DFN);
-		TF.renameTo(F);
+		TNamedLock MeasurementLock = TNamedLock.Lock(Domain, MeasurementID);
+		try {
+			int Version = 1;
+			String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
+			File Folder = new File(MeasurementFolder);
+			if (!Folder.exists())
+				return; //. ->
+			String TDFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName+".tmp";
+		    XmlSerializer serializer = Xml.newSerializer();
+		    FileWriter writer = new FileWriter(TDFN);
+		    try {
+		        serializer.setOutput(writer);
+		        serializer.startDocument("UTF-8",true);
+		        serializer.startTag("", "ROOT");
+		        //. Version
+	            serializer.startTag("", "Version");
+	            serializer.text(Integer.toString(Version));
+	            serializer.endTag("", "Version");
+		        //. ServerID
+	            serializer.startTag("", "ServerID");
+	            serializer.text(Integer.toString(Descriptor.ServerID));
+	            serializer.endTag("", "ServerID");
+		        //. GeographServerObjectID
+	            serializer.startTag("", "GeographServerObjectID");
+	            serializer.text(Long.toString(Descriptor.GeographServerObjectID));
+	            serializer.endTag("", "GeographServerObjectID");
+		        //. ID
+	            Descriptor.ID = MeasurementID; //. set ID
+	            serializer.startTag("", "ID");
+	            serializer.text(Descriptor.ID);
+	            serializer.endTag("", "ID");
+		        //. GUID
+	            serializer.startTag("", "GUID");
+	            serializer.text(Descriptor.GUID);
+	            serializer.endTag("", "GUID");
+		        //. StartTimestamp
+	            serializer.startTag("", "StartTimestamp");
+	            serializer.text(Double.toString(Descriptor.StartTimestamp));
+	            serializer.endTag("", "StartTimestamp");
+		        //. FinishTimestamp
+	            serializer.startTag("", "FinishTimestamp");
+	            serializer.text(Double.toString(Descriptor.FinishTimestamp));
+	            serializer.endTag("", "FinishTimestamp");
+	            //. Model
+	            if (Descriptor.Model != null) {
+	                serializer.startTag("", "Model");
+	            	Descriptor.Model.ToXMLNode(serializer);
+	                serializer.endTag("", "Model");
+	            }
+	            //.
+		        serializer.endTag("", "ROOT");
+		        serializer.endDocument();
+		    }
+		    finally {
+		    	writer.close();
+		    }
+			String DFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
+			File TF = new File(TDFN);
+			File F = new File(DFN);
+			TF.renameTo(F);
+		}
+		finally {
+			MeasurementLock.UnLock();
+		}
 	}
 
 	public static synchronized void SetMeasurementDescriptor(String MeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
@@ -294,77 +326,83 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
-		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
-		String _DFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
-		File F = new File(_DFN);
-		if (!F.exists())  
-			return null; //. ->
-		//.
-		TSensorMeasurementDescriptor Descriptor = (TSensorMeasurementDescriptor)DescriptorClass.newInstance();
-		Descriptor.ID = MeasurementID; 
-		//.
-		byte[] XML;
-    	long FileSize = F.length();
-    	FileInputStream FIS = new FileInputStream(_DFN);
-    	try {
-    		XML = new byte[(int)FileSize];
-    		FIS.read(XML);
-    	}
-    	finally {
-    		FIS.close();
-    	}
-    	Document XmlDoc;
-		ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
+		TNamedLock MeasurementLock = TNamedLock.Lock(Domain, MeasurementID);
 		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
-			factory.setNamespaceAware(true);     
-			DocumentBuilder builder = factory.newDocumentBuilder(); 			
-			XmlDoc = builder.parse(BIS); 
-		}
-		finally {
-			BIS.close();
-		}
-		int Version = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
-		switch (Version) {
-		case 1:
-			Node node = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"ServerID");
-			if (node != null) 
-				Descriptor.ServerID = Integer.parseInt(node.getFirstChild().getNodeValue());
-			else
-				Descriptor.ServerID = 0;
+			String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
+			String _DFN = MeasurementFolder+"/"+TSensorMeasurementDescriptor.DescriptorFileName;
+			File F = new File(_DFN);
+			if (!F.exists())  
+				return null; //. ->
 			//.
-			node = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"GeographServerObjectID");
-			if (node != null) 
-				Descriptor.GeographServerObjectID = Long.parseLong(node.getFirstChild().getNodeValue());
-			else
-				Descriptor.GeographServerObjectID = 0;
+			TSensorMeasurementDescriptor Descriptor = (TSensorMeasurementDescriptor)DescriptorClass.newInstance();
+			Descriptor.ID = MeasurementID; 
 			//.
-			node = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"GUID");
-			if (node != null) {
-				node = node.getFirstChild();
+			byte[] XML;
+	    	long FileSize = F.length();
+	    	FileInputStream FIS = new FileInputStream(_DFN);
+	    	try {
+	    		XML = new byte[(int)FileSize];
+	    		FIS.read(XML);
+	    	}
+	    	finally {
+	    		FIS.close();
+	    	}
+	    	Document XmlDoc;
+			ByteArrayInputStream BIS = new ByteArrayInputStream(XML);
+			try {
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+				factory.setNamespaceAware(true);     
+				DocumentBuilder builder = factory.newDocumentBuilder(); 			
+				XmlDoc = builder.parse(BIS); 
+			}
+			finally {
+				BIS.close();
+			}
+			int Version = Integer.parseInt(XmlDoc.getDocumentElement().getElementsByTagName("Version").item(0).getFirstChild().getNodeValue());
+			switch (Version) {
+			case 1:
+				Node node = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"ServerID");
 				if (node != null) 
-					Descriptor.GUID = node.getNodeValue();
+					Descriptor.ServerID = Integer.parseInt(node.getFirstChild().getNodeValue());
+				else
+					Descriptor.ServerID = 0;
+				//.
+				node = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"GeographServerObjectID");
+				if (node != null) 
+					Descriptor.GeographServerObjectID = Long.parseLong(node.getFirstChild().getNodeValue());
+				else
+					Descriptor.GeographServerObjectID = 0;
+				//.
+				node = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"GUID");
+				if (node != null) {
+					node = node.getFirstChild();
+					if (node != null) 
+						Descriptor.GUID = node.getNodeValue();
+					else
+						Descriptor.GUID = "";
+				}
 				else
 					Descriptor.GUID = "";
+				//.
+				Descriptor.StartTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("StartTimestamp").item(0).getFirstChild().getNodeValue());
+				Descriptor.FinishTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("FinishTimestamp").item(0).getFirstChild().getNodeValue());
+				//.
+				Node ModelNode = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"Model");
+				if (ModelNode != null) {
+					Descriptor.Model = new TSensorMeasurementModel(ModelNode, ChannelProvider);
+					Descriptor.Model.Initialize(MeasurementFolder);
+				}
+				else
+					Descriptor.Model = null;
+				break; //. >
+			default:
+				throw new Exception("unknown descriptor data version, version: "+Integer.toString(Version)); //. =>
 			}
-			else
-				Descriptor.GUID = "";
-			//.
-			Descriptor.StartTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("StartTimestamp").item(0).getFirstChild().getNodeValue());
-			Descriptor.FinishTimestamp = Double.parseDouble(XmlDoc.getDocumentElement().getElementsByTagName("FinishTimestamp").item(0).getFirstChild().getNodeValue());
-			//.
-			Node ModelNode = TMyXML.SearchNode(XmlDoc.getDocumentElement(),"Model");
-			if (ModelNode != null) {
-				Descriptor.Model = new TSensorMeasurementModel(ModelNode, ChannelProvider);
-				Descriptor.Model.Initialize(MeasurementFolder);
-			}
-			else
-				Descriptor.Model = null;
-			break; //. >
-		default:
-			throw new Exception("unknown descriptor data version, version: "+Integer.toString(Version)); //. =>
+			return Descriptor;
 		}
-		return Descriptor;
+		finally {
+			MeasurementLock.UnLock();
+		}
 	}
 
 	public static synchronized TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, TChannelProvider ChannelProvider) throws Exception {
@@ -441,47 +479,53 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static synchronized byte[] GetMeasurementData(String DataBaseFolder, String MeasurementID) throws IOException {
-		final int BUFFER = 2048;
-		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
-		File Folder = new File(MeasurementFolder);
-		if (!Folder.exists())
-			return null; //. ->
-		File[] Files = Folder.listFiles();
-		BufferedInputStream origin = null;       
-		ByteArrayOutputStream dest = new ByteArrayOutputStream();
-	    try {
-	    	ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
-	    	try {
-		    	byte data[] = new byte[BUFFER];        
-		    	for(int i=0; i < Files.length; i++) { 
-		    		String FileName = Files[i].getName();
-		    		FileInputStream fi = new FileInputStream(Files[i]);
-		    		try {
-			    		origin = new BufferedInputStream(fi, BUFFER);
+		TNamedLock MeasurementLock = TNamedLock.Lock(Domain, MeasurementID);
+		try {
+			final int BUFFER = 2048;
+			String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
+			File Folder = new File(MeasurementFolder);
+			if (!Folder.exists())
+				return null; //. ->
+			File[] Files = Folder.listFiles();
+			BufferedInputStream origin = null;       
+			ByteArrayOutputStream dest = new ByteArrayOutputStream();
+		    try {
+		    	ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
+		    	try {
+			    	byte data[] = new byte[BUFFER];        
+			    	for(int i=0; i < Files.length; i++) { 
+			    		String FileName = Files[i].getName();
+			    		FileInputStream fi = new FileInputStream(Files[i]);
 			    		try {
-			    			ZipEntry entry = new ZipEntry(MeasurementID+"/"+FileName);         
-			    			out.putNextEntry(entry);         
-			    			int count;         
-			    			while ((count = origin.read(data, 0, BUFFER)) != -1) 
-			    				out.write(data, 0, count);
+				    		origin = new BufferedInputStream(fi, BUFFER);
+				    		try {
+				    			ZipEntry entry = new ZipEntry(MeasurementID+"/"+FileName);         
+				    			out.putNextEntry(entry);         
+				    			int count;         
+				    			while ((count = origin.read(data, 0, BUFFER)) != -1) 
+				    				out.write(data, 0, count);
+				    		}
+				    		finally {
+				    			origin.close();       
+				    		}
 			    		}
 			    		finally {
-			    			origin.close();       
+			    			fi.close();
 			    		}
-		    		}
-		    		finally {
-		    			fi.close();
-		    		}
+			    	}
 		    	}
-	    	}
-	    	finally {
-	    		out.close(); 	
-	    	}
-	    	return dest.toByteArray(); //. =>
-	    }
-	    finally {
-	    	dest.close();	    	
-	    }
+		    	finally {
+		    		out.close(); 	
+		    	}
+		    	return dest.toByteArray(); //. =>
+		    }
+		    finally {
+		    	dest.close();	    	
+		    }
+		}
+		finally {
+			MeasurementLock.UnLock();
+		}
 	}	
 	
 	public static synchronized byte[] GetMeasurementData(String MeasurementID) throws IOException {
@@ -507,5 +551,67 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static synchronized void ValidateMeasurement(String DataBaseFolder, String MeasurementID) throws Exception {
+	}
+	
+	public static synchronized boolean ExportMeasurementToMP4File(String DataBaseFolder, String MeasurementID, String ExportFile) throws Exception {
+		TSensorMeasurementDescriptor SensorMeasurement = GetMeasurementDescriptor(DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+		if (SensorMeasurement == null)
+			throw new MeasurementDataIsNotFoundException(); //. =>
+		if (!SensorMeasurement.IsValid())
+			throw new MeasurementDataIsNotFoundException(); //. =>
+		//.
+		if (!(SensorMeasurement instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor))
+			return false; //. ->
+		com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor Measurement = (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor)SensorMeasurement;
+		//.
+		String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
+		Movie movie = new Movie();
+		if (Measurement.Model != null) {
+			int Cnt = Measurement.Model.Stream.Channels.size();
+			for (int C = 0; C < Cnt; C++) {
+				TChannel Channel = Measurement.Model.Stream.Channels.get(C);
+				//.
+				if (Channel instanceof TAACChannel) {
+					AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName));
+					movie.addTrack(aacTrack);
+				}
+				//.
+				if (Channel instanceof TH264IChannel) {
+					TH264IChannel H264IChannel = (TH264IChannel)Channel;
+					//.
+					H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName), "eng", H264IChannel.FrameRate, 1);
+					movie.addTrack(h264Track);
+				}
+			}
+		}
+		else {
+			switch (Measurement.Mode) {
+			
+			case TVideoRecorderModule.MODE_FRAMESTREAM:
+				if (Measurement.AudioPackets > 0) {
+					AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.AudioAACADTSFileName));
+					movie.addTrack(aacTrack);
+				}
+				if (Measurement.VideoPackets > 0) {
+					H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl(MeasurementFolder+"/"+TMeasurementDescriptor.VideoH264FileName), "eng", Measurement.VideoFPS, 1);
+					movie.addTrack(h264Track);
+				}
+				break; //. >
+			
+			default:
+				return false; //. ->
+			}
+		}
+		//.
+		Container mp4file = new DefaultMp4Builder().build(movie);
+		//.
+		FileChannel fc = new FileOutputStream(new File(ExportFile)).getChannel();
+		try {
+			mp4file.writeContainer(fc);
+		}
+		finally {
+			fc.close();
+		}
+		return true; //. ->
 	}
 }

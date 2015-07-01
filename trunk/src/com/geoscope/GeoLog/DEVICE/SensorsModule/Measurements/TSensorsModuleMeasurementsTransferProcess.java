@@ -34,13 +34,12 @@ import android.util.Xml;
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
+import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedLock;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.Network.TServerConnection;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographDataServer.TGeographDataServerClient;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorder;
 
 public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
 
@@ -585,9 +584,16 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
 							for (int I = 0; I < Cnt; I++) {
 								String MeasurementID = ItemsToSave.get(I);
 								try {
-									ProcessMeasurement(MeasurementID,TransferBuffer);
-									//.
-									Measurements.RemoveItem(MeasurementID);
+									TNamedLock MeasurementLock = TNamedLock.TryLock(TSensorsModuleMeasurements.Domain, MeasurementID, 1000);
+									if (MeasurementLock != null)
+										try {
+											ProcessMeasurement(MeasurementID,TransferBuffer);
+											//.
+											Measurements.RemoveItem(MeasurementID);
+										}
+										finally {
+											MeasurementLock.UnLock();
+										}
 								}
 								catch (SavingDataErrorException E) {
 									String S = E.getMessage();
@@ -637,9 +643,14 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
 									if (CntI > 0) {
 										for (int I = 0; I < CntI; I++) {
 											String MeasurementID = _Measurements[I].getName();
-											TMeasurementDescriptor CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
-											if (!((CurrentMeasurement != null) && CurrentMeasurement.ID.equals(MeasurementID)))
-												Measurements.AddItem(MeasurementID, false);
+											TNamedLock MeasurementLock = TNamedLock.TryLock(TSensorsModuleMeasurements.Domain, MeasurementID);
+											if (MeasurementLock != null)
+												try {
+													Measurements.AddItem(MeasurementID, false);
+												}
+												finally {
+													MeasurementLock.UnLock();
+												}
 										}
 										Measurements.Save();
 									}
@@ -651,9 +662,14 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
 										for (int I = 0; I < CntI; I++) 
 											if (_Measurements[I] != null) {
 												String MeasurementID = _Measurements[I];
-												TMeasurementDescriptor CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
-												if (!((CurrentMeasurement != null) && CurrentMeasurement.ID.equals(MeasurementID))) 
-													Measurements.AddItem(MeasurementID, false);
+												TNamedLock MeasurementLock = TNamedLock.TryLock(TSensorsModuleMeasurements.Domain, MeasurementID);
+												if (MeasurementLock != null)
+													try {
+														Measurements.AddItem(MeasurementID, false);
+													}
+													finally {
+														MeasurementLock.UnLock();
+													}
 											}
 										Measurements.Save();
 									}
@@ -860,89 +876,95 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
     }
     
 	private void ProcessMeasurement(String MeasurementID, byte[] TransferBuffer) throws Exception {
-		File[] MeasurementContent = TSensorsModuleMeasurements.GetMeasurementFolderContent(MeasurementID);
-		if (MeasurementContent == null)
-			return; //. ->
-		ArrayList<File> ContentFiles = new ArrayList<File>(MeasurementContent.length);
-		for (int I = 0; I < MeasurementContent.length; I++)
-			if (!MeasurementContent[I].isDirectory() && (MeasurementContent[I].length() > 0)) 
-				ContentFiles.add(MeasurementContent[I]);
-		//.
-		boolean flDisconnect = true;
-		Connect();
+		TNamedLock MeasurementLock = TNamedLock.Lock(TSensorsModuleMeasurements.Domain, MeasurementID);
 		try {
-			Login();
+			File[] MeasurementContent = TSensorsModuleMeasurements.GetMeasurementFolderContent(MeasurementID);
+			if (MeasurementContent == null)
+				return; //. ->
+			ArrayList<File> ContentFiles = new ArrayList<File>(MeasurementContent.length);
+			for (int I = 0; I < MeasurementContent.length; I++)
+				if (!MeasurementContent[I].isDirectory() && (MeasurementContent[I].length() > 0)) 
+					ContentFiles.add(MeasurementContent[I]);
 			//.
-			byte[] DataIDBA = MeasurementID.getBytes("windows-1251");
-			int Descriptor = DataIDBA.length;
-			byte[] DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
-			ConnectionOutputStream.write(DecriptorBA);
-			if (Descriptor > 0)  
-				ConnectionOutputStream.write(DataIDBA);
-			//.
-			int ContentFilesCount = ContentFiles.size(); 
-			DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(ContentFilesCount);
-			ConnectionOutputStream.write(DecriptorBA);
-			//.
-			for (int I = 0; I < ContentFilesCount; I++) {
-				File ContentFile = ContentFiles.get(I);
+			boolean flDisconnect = true;
+			Connect();
+			try {
+				Login();
 				//.
-				byte[] FileNameBA = ContentFile.getName().getBytes("windows-1251");
-				Descriptor = FileNameBA.length;
-				DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+				byte[] DataIDBA = MeasurementID.getBytes("windows-1251");
+				int Descriptor = DataIDBA.length;
+				byte[] DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
 				ConnectionOutputStream.write(DecriptorBA);
 				if (Descriptor > 0)  
-					ConnectionOutputStream.write(FileNameBA);
+					ConnectionOutputStream.write(DataIDBA);
 				//.
-				long ContentFileSize = ContentFile.length(); 
-				byte[] ContentFileSizeBA = TDataConverter.ConvertInt64ToLEByteArray(ContentFileSize);
-				ConnectionOutputStream.write(ContentFileSizeBA);
+				int ContentFilesCount = ContentFiles.size(); 
+				DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(ContentFilesCount);
+				ConnectionOutputStream.write(DecriptorBA);
 				//.
-				if (ContentFileSize > 0) {
-					FileInputStream FIS = new FileInputStream(ContentFile);
-					try {
-						while (ContentFileSize > 0) {
-							int BytesRead = FIS.read(TransferBuffer);
-							ConnectionOutputStream.write(TransferBuffer,0,BytesRead);
-							//.
-							ContentFileSize -= BytesRead;
-							//.
-							if ((ContentFileSize > 0) && (ConnectionInputStream.available() >= 4)) {
-								ConnectionInputStream.read(DecriptorBA);
-								Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-								if (Descriptor == TGeographDataServerClient.MESSAGE_SAVINGDATAERROR) { 
+				for (int I = 0; I < ContentFilesCount; I++) {
+					File ContentFile = ContentFiles.get(I);
+					//.
+					byte[] FileNameBA = ContentFile.getName().getBytes("windows-1251");
+					Descriptor = FileNameBA.length;
+					DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(Descriptor);
+					ConnectionOutputStream.write(DecriptorBA);
+					if (Descriptor > 0)  
+						ConnectionOutputStream.write(FileNameBA);
+					//.
+					long ContentFileSize = ContentFile.length(); 
+					byte[] ContentFileSizeBA = TDataConverter.ConvertInt64ToLEByteArray(ContentFileSize);
+					ConnectionOutputStream.write(ContentFileSizeBA);
+					//.
+					if (ContentFileSize > 0) {
+						FileInputStream FIS = new FileInputStream(ContentFile);
+						try {
+							while (ContentFileSize > 0) {
+								int BytesRead = FIS.read(TransferBuffer);
+								ConnectionOutputStream.write(TransferBuffer,0,BytesRead);
+								//.
+								ContentFileSize -= BytesRead;
+								//.
+								if ((ContentFileSize > 0) && (ConnectionInputStream.available() >= 4)) {
+									ConnectionInputStream.read(DecriptorBA);
+									Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+									if (Descriptor == TGeographDataServerClient.MESSAGE_SAVINGDATAERROR) { 
+										flDisconnect = false;
+										throw new SavingDataErrorException(); //. =>
+									}
+								}
+								//.
+								if (flCancel) {
+									Disconnect(false);
 									flDisconnect = false;
-									throw new SavingDataErrorException(); //. =>
+									//.
+									throw new InterruptedException(); //. =>
 								}
 							}
-							//.
-							if (flCancel) {
-								Disconnect(false);
-								flDisconnect = false;
-								//.
-								throw new InterruptedException(); //. =>
-							}
+						}
+						finally {
+							FIS.close();
+						}
+						//. check ok
+						ConnectionInputStream.read(DecriptorBA);
+						Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
+						if (Descriptor != TGeographDataServerClient.MESSAGE_OK) {
+							flDisconnect = false;
+							throw new SavingDataErrorException(); //. =>
 						}
 					}
-					finally {
-						FIS.close();
-					}
-					//. check ok
-					ConnectionInputStream.read(DecriptorBA);
-					Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-					if (Descriptor != TGeographDataServerClient.MESSAGE_OK) {
-						flDisconnect = false;
-						throw new SavingDataErrorException(); //. =>
-					}
 				}
+				flDisconnect = false;
+				//. remove transferred measurement
+				TSensorsModuleMeasurements.DeleteMeasurement(MeasurementID);
 			}
-			flDisconnect = false;
-			//. remove transferred measurement
-			TSensorsModuleMeasurements.DeleteMeasurement(MeasurementID);
+			finally {
+				if (flDisconnect)
+					Disconnect();
+			}
 		}
 		finally {
-			if (flDisconnect)
-				Disconnect();
+			MeasurementLock.UnLock();
 		}
 	}
 }

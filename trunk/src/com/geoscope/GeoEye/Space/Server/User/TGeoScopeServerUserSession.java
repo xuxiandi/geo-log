@@ -656,8 +656,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		}
 	}
 	
-	public long SendUserMessage(long UserID, int UserMessageCode, byte[] UserMessage) throws IOException {
-		long UserMessageID = SendUserMessage_IDGenerator_GetNextID();
+	public long SendUserMessage(long UserID, long UserMessageID, int UserMessageCode, byte[] UserMessage) throws IOException {
 		int UserMessageSize;
 		if (UserMessage != null)
 			UserMessageSize = UserMessage.length;
@@ -684,12 +683,25 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		return UserMessageID;
 	}
 
+	public long SendUserMessage(long UserID, int UserMessageCode, byte[] UserMessage) throws IOException {
+		long UserMessageID = SendUserMessage_IDGenerator_GetNextID();
+		return SendUserMessage(UserID, UserMessageID, UserMessageCode, UserMessage);
+	}
+	
 	public long SendUserMessage(long UserID, byte[] UserMessage) throws IOException {
 		return SendUserMessage(UserID, SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE, UserMessage);
 	}
 
 	public long SendUserPingMessage(long UserID) throws IOException {
 		return SendUserMessage(UserID, null);
+	}
+	
+	public long SendUserDeliveredMessage(long UserID, long UserMessageID, byte[] UserMessage) throws IOException {
+		return SendUserMessage(UserID, UserMessageID, SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_DELIVERIED, UserMessage);
+	}
+	
+	public long SendUserNotAvailableMessage(long UserID, long UserMessageID, byte[] UserMessage) throws IOException {
+		return SendUserMessage(UserID, UserMessageID, SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTAVAILABLE, UserMessage);
 	}
 	
 	private static final int HANDLER_MESSAGE_SHOWEXCEPTION 					= -1;
@@ -755,10 +767,7 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
     					break; //. >
     				//.
     				TUserMessage UserMessage = (TUserMessage)msg.obj;
-    				if (UserMessageSubscribers.DoOnMessageReceived(UserMessage))
-            			SendUserMessage(UserMessage.SenderID, SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_DELIVERIED, null);
-    				else
-    					SendUserMessage(UserMessage.SenderID, SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTAVAILABLE, null);
+        			SendUserDeliveredMessage(UserMessage.SenderID, UserMessage.MessageID, null);
     				//.
     				break; //. >
     				

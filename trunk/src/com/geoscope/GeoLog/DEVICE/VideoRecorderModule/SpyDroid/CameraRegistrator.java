@@ -4,6 +4,7 @@ import android.media.MediaRecorder;
 import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
@@ -140,7 +141,14 @@ public class CameraRegistrator extends Camera {
 			if (flVideo)
 				VideoPackets = -1;
 			//.
-			com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements.SetMeasurementFinish(MeasurementID,AudioPackets,VideoPackets);
+			MeasurementDescriptor.FinishTimestamp = OleDate.UTCCurrentTimestamp();
+			MeasurementDescriptor.GeographServerObjectID = VideoRecorderModule.Device.idGeographServerObject;
+			MeasurementDescriptor.GUID = TUIDGenerator.GenerateWithTimestamp();
+			//. 
+			MeasurementDescriptor.AudioPackets = AudioPackets;
+			MeasurementDescriptor.VideoPackets = VideoPackets;
+			//.
+        	TSensorsModuleMeasurements.SetMeasurementDescriptor(MeasurementID, MeasurementDescriptor);
 			//.
 			MeasurementID = null;
 		}
@@ -158,20 +166,21 @@ public class CameraRegistrator extends Camera {
 	
 	@Override
 	public synchronized TMeasurementDescriptor GetMeasurementCurrentDescriptor() throws Exception {
-		if (MeasurementID == null)
-			return null; //. ->
-		TMeasurementDescriptor Result = com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements.GetMeasurementDescriptor(MeasurementID);
-		if (Result == null)
+		if (MeasurementDescriptor == null)
 			return null; //. ->
 		//.
-		Result.AudioPackets = 0;
+		int AudioPackets = 0;
 		if (flAudio)
-			Result.AudioPackets = -1;
-		Result.VideoPackets = 0;
+			AudioPackets = -1;
+		int VideoPackets = 0;
 		if (flVideo)
-			Result.VideoPackets = -1;
-		Result.FinishTimestamp = OleDate.UTCCurrentTimestamp();
+			VideoPackets = -1;
 		//.
-		return Result;
+		MeasurementDescriptor.FinishTimestamp = OleDate.UTCCurrentTimestamp();
+		//. 
+		MeasurementDescriptor.AudioPackets = AudioPackets;
+		MeasurementDescriptor.VideoPackets = VideoPackets;
+		//.
+		return MeasurementDescriptor;
 	}
 }

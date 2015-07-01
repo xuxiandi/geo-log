@@ -5,6 +5,7 @@ import java.io.File;
 import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedLock;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
@@ -52,6 +53,7 @@ public class Camera {
 	public boolean flSaving = true;
 	//.
 	public String 								MeasurementID = null;
+	public TNamedLock							MeasurementLock = null;
 	protected String 							MeasurementFolder = "";
 	protected 			TMeasurementDescriptor 	MeasurementDescriptor = null;
 	

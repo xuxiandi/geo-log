@@ -332,7 +332,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 	    		    				public void Process() throws Exception {
 	    		    					ExportFile = TGeoLogApplication.TempFolder+"/"+ExpertFileName;
 	    		    					//.
-	    		    					com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, ExportFile);
+	    		    					com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, ExportFile);
 	    		    				}
 
 	    		    				@Override
@@ -391,7 +391,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
         	    	    				    		throw new Exception(TSensorsModuleMeasurementsArchive.this.getString(R.string.STrackerIsNotInitialized)); //. =>
         	    								//.
         	        		    				String NFN = TGPSModule.MapPOIComponentFolder()+"/"+MeasurementDescriptor.GUID+DataName+".MP4";
-        	    		    					com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, NFN);
+        	        		    				com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, NFN);
         	    		    					//.
         	        		    		    	double Timestamp = OleDate.UTCCurrentTimestamp();
         	        		    				//. prepare and send data-file

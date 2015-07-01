@@ -42,6 +42,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoReco
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderTransmittingFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetVideoRecorderVideoFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.TMediaFrameServer;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -202,7 +203,7 @@ public class TVideoRecorderModule extends TModule {
     	//.
         if (IsEnabled()) {
             try {
-            	TVideoRecorderMeasurements.ValidateMeasurements();
+            	TSensorsModuleMeasurements.ValidateMeasurements();
             }
             catch (Exception E) {
                 Toast.makeText(Device.context, Device.context.getString(R.string.SVideoRecorderMeasurementsCheckingFailed)+E.getMessage(), Toast.LENGTH_LONG).show();
@@ -618,7 +619,7 @@ public class TVideoRecorderModule extends TModule {
         				try {
         					TMeasurementDescriptor CurrentMeasurement = VideoRecorder.Recording_GetMeasurementDescriptor();
         					if ((CurrentMeasurement != null) && CurrentMeasurement.IsStarted()) {
-        						double NowTime = TVideoRecorderMeasurements.GetCurrentTime();
+        						double NowTime = OleDate.UTCCurrentTimestamp();
         						if ((NowTime-CurrentMeasurement.StartTimestamp) > MeasurementConfiguration.MaxDuration)
         							ReinitializeRecorder();
         					}
@@ -1105,23 +1106,23 @@ public class TVideoRecorderModule extends TModule {
     }
     
 	public String Measurements_GetList() {
-		return TVideoRecorderMeasurements.GetMeasurementsList();
+		return TSensorsModuleMeasurements.GetMeasurementsList((short)1);
 	}
 	
 	public String Measurements_GetList(double BeginTimestamp, double EndTimestamp) {
-		return TVideoRecorderMeasurements.GetMeasurementsList(BeginTimestamp,EndTimestamp);
+		return TSensorsModuleMeasurements.GetMeasurementsList(BeginTimestamp,EndTimestamp, (short)1);
 	}
 	
 	public void Measurements_Delete(String MeasurementID) throws IOException {
-		TVideoRecorderMeasurements.DeleteMeasurement(MeasurementID);
+		TSensorsModuleMeasurements.DeleteMeasurement(MeasurementID);
 	}
 	
-	public int Measurement_GetSize(String MeasurementID, boolean flDescriptor, boolean flAudio, boolean flVideo) throws IOException {
-		return TVideoRecorderMeasurements.GetMeasurementSize(MeasurementID, flDescriptor,flAudio,flVideo);
+	public long Measurement_GetSize(String MeasurementID) throws IOException {
+		return TSensorsModuleMeasurements.GetMeasurementSize(MeasurementID);
 	}
 	
-	public byte[] Measurement_GetData(String MeasurementID, boolean flDescriptor, boolean flAudio, boolean flVideo) throws IOException {
-		return TVideoRecorderMeasurements.GetMeasurementData(MeasurementID, flDescriptor,flAudio,flVideo);
+	public byte[] Measurement_GetData(String MeasurementID) throws IOException {
+		return TSensorsModuleMeasurements.GetMeasurementData(MeasurementID);
 	}
 	
 	/* public byte[] Measurement_GetDataFragment(String MeasurementID, TMeasurementDescriptor CurrentMeasurement, double StartTimestamp, double FinishTimestamp, boolean flDescriptor, boolean flAudio, boolean flVideo) throws Exception {

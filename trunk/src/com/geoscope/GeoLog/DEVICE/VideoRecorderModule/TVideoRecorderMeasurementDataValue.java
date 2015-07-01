@@ -7,11 +7,15 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetVideoRecorderMe
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsTransferProcess;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
 
 public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDataValue {
 
+	public static final int MeasurementDataTransferableLimit = 5*1024*1024;
+	
+	
 	private TVideoRecorderModule VideoRecorderModule;
 	
 	public TVideoRecorderMeasurementDataValue(TVideoRecorderModule pVideoRecorderModule) {
@@ -124,9 +128,12 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
     	//.
     	switch (Operation) {
     	case 1: //. get measurement data
-    		boolean flDecriptor = true;
-    		boolean flAudio = true;
-    		boolean flVideo = true;
+    		@SuppressWarnings("unused")
+			boolean flDecriptor = true;
+    		@SuppressWarnings("unused")
+			boolean flAudio = true;
+    		@SuppressWarnings("unused")
+			boolean flVideo = true;
     		if (!SA[2].equals("")) {
         		int Flags = Integer.parseInt(SA[2]);
         		if (Flags != 0) {
@@ -139,12 +146,12 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
     		if (SA.length == 3) {
     			TVideoRecorder.VideoRecorder_FlashMeasurement();
             	//.
-            	int MS = VideoRecorderModule.Measurement_GetSize(MeasurementID, flDecriptor,flAudio,flVideo);
-            	if (MS > TVideoRecorderMeasurements.MeasurementDataTransferableLimit)
+            	long MS = VideoRecorderModule.Measurement_GetSize(MeasurementID);
+            	if (MS > MeasurementDataTransferableLimit)
             		throw new OperationException(TGetVideoRecorderMeasurementDataValueSO.OperationErrorCode_DataIsTooBig); //. =>
             	//.
 	    		Timestamp = OleDate.UTCCurrentTimestamp();
-            	Value = VideoRecorderModule.Measurement_GetData(MeasurementID, flDecriptor,flAudio,flVideo); 
+            	Value = VideoRecorderModule.Measurement_GetData(MeasurementID); 
     		}
     		else {
     			@SuppressWarnings("unused")
@@ -159,16 +166,16 @@ public class TVideoRecorderMeasurementDataValue extends TComponentTimestampedDat
     			try {
     	    		TMeasurementDescriptor CurrentMeasurement = TVideoRecorder.VideoRecorder_GetMeasurementDescriptor();
     	    		if (CurrentMeasurement != null)
-    	    			CurrentMeasurement.FinishTimestamp = TVideoRecorderMeasurements.GetCurrentTime();
+    	    			CurrentMeasurement.FinishTimestamp = OleDate.UTCCurrentTimestamp();
     	    		//.
     	    		Timestamp = OleDate.UTCCurrentTimestamp();
     				//. Value = VideoRecorderModule.Measurement_GetDataFragment(MeasurementID,CurrentMeasurement, StartTimestamp,FinishTimestamp, flDecriptor,flAudio,flVideo);
-                	Value = VideoRecorderModule.Measurement_GetData(MeasurementID, flDecriptor,flAudio,flVideo); 
+                	Value = VideoRecorderModule.Measurement_GetData(MeasurementID); 
     			}
-    			catch (TVideoRecorderMeasurements.MeasurementDataIsNotFoundException E) {
+    			catch (TSensorsModuleMeasurements.MeasurementDataIsNotFoundException E) {
             		throw new OperationException(TGetVideoRecorderMeasurementDataValueSO.OperationErrorCode_DataIsNotFound); //. =>
     			}
-    			catch (TVideoRecorderMeasurements.MeasurementDataIsTooBigException E) {
+    			catch (TSensorsModuleMeasurements.MeasurementDataIsTooBigException E) {
             		throw new OperationException(TGetVideoRecorderMeasurementDataValueSO.OperationErrorCode_DataIsTooBig); //. =>
     			}
     		}

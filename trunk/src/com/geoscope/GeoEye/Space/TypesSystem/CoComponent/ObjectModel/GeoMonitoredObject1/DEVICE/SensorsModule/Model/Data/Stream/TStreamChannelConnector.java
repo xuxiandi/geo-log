@@ -21,11 +21,11 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 
-public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
+public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
 
 	public static final int DeviceSensorsModuleStreamingServerPort = 10009;
 	
-    public static class TChannelProcessing extends TChannelProcessingAbstract {
+    public static class TChannelConnection extends TChannelConnectionAbstract {
 		
     	public static final int LocalPort = 10008;
     	
@@ -33,8 +33,8 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 		public static final int StreamingTimeout = 100; //. milliseconds
 		public static final int IdleTimeoutCounter = 10*30; //. counter of the ProcessingTimeout to fire the Idle event
 		
-	    public TChannelProcessing(TStreamChannelProcessorAbstract pProcessor) {
-	    	super(pProcessor);
+	    public TChannelConnection(TStreamChannelConnectorAbstract pConnector) {
+	    	super(pConnector);
 	    }
 	    
 	    @Override
@@ -47,13 +47,13 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 	    			public void DoOnException(Throwable E) {
 	    				Canceller.Cancel();
 	    				//.
-	    				TChannelProcessing.this.DoOnException(new Exception(E.getMessage()));	    			
+	    				TChannelConnection.this.DoOnException(new Exception(E.getMessage()));	    			
 	    			}
 	    		};		
-	    		TLANConnectionStartHandler StartHandler = ObjectModel.TLANConnectionStartHandler_Create(Processor.Object);
-	    		TLANConnectionStopHandler StopHandler = ObjectModel.TLANConnectionStopHandler_Create(Processor.Object);
+	    		TLANConnectionStartHandler StartHandler = ObjectModel.TLANConnectionStartHandler_Create(Connector.Object);
+	    		TLANConnectionStopHandler StopHandler = ObjectModel.TLANConnectionStopHandler_Create(Connector.Object);
 	    		//.
-	    		TLANConnectionRepeater LocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",DeviceSensorsModuleStreamingServerPort, LocalPort, Processor.ServerAddress,Processor.ServerPort, Processor.UserID,Processor.UserPassword, Processor.Object.GeographServerObjectID(), Processor.UserAccessKey, ExceptionHandler, StartHandler,StopHandler);
+	    		TLANConnectionRepeater LocalServer = new TLANConnectionRepeater(LANConnectionRepeaterDefines.CONNECTIONTYPE_NORMAL, "127.0.0.1",DeviceSensorsModuleStreamingServerPort, LocalPort, Connector.ServerAddress,Connector.ServerPort, Connector.UserID,Connector.UserPassword, Connector.Object.GeographServerObjectID(), Connector.UserAccessKey, ExceptionHandler, StartHandler,StopHandler);
 	    		try {
 	    			Socket Connection = new Socket();
 	    			Connection.connect(new InetSocketAddress("127.0.0.1", LocalServer.GetPort()), ConnectingTimeout);
@@ -64,13 +64,13 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 						try {
 							OutputStream OS = Connection.getOutputStream();
 							try {
-								if (Processor.UserAccessKey == null) {
+								if (Connector.UserAccessKey == null) {
 									//. send Version
 									int Version = 1;
 									byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
 									OS.write(Descriptor);
 									//. send ChannelID
-									Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Processor.Channel.ID);
+									Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Connector.Channel.ID);
 									OS.write(Descriptor);
 									//. get and check result
 									IS.read(Descriptor);
@@ -84,7 +84,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 									byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
 									OS.write(Descriptor);
 									//. send ChannelDescriptor
-									byte[] ChannelDescriptor = Processor.Channel.ToByteArray();
+									byte[] ChannelDescriptor = Connector.Channel.ToByteArray();
 									Descriptor = TDataConverter.ConvertInt32ToLEByteArray(ChannelDescriptor.length);
 									OS.write(Descriptor);
 									OS.write(ChannelDescriptor);
@@ -99,18 +99,18 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 									
 									@Override
 									public void DoOnProgress(int ReadSize, TCanceller Canceller) {
-										TChannelProcessing.this.DoOnProgress(ReadSize, Canceller);
+										TChannelConnection.this.DoOnProgress(ReadSize, Canceller);
 									}
 								};
 								TStreamChannel.TOnIdleHandler OnIdleHandler = new TStreamChannel.TOnIdleHandler() {
 									
 									@Override
 									public void DoOnIdle(TCanceller Canceller) throws Exception {
-										TChannelProcessing.this.DoOnIdle(Canceller);
+										TChannelConnection.this.DoOnIdle(Canceller);
 									}
 								};
 								//. processing ...
-								Processor.Channel.DoStreaming(Connection, IS,OS, OnProgressHandler, StreamingTimeout, IdleTimeoutCounter, OnIdleHandler, Canceller);
+								Connector.Channel.DoStreaming(Connection, IS,OS, OnProgressHandler, StreamingTimeout, IdleTimeoutCounter, OnIdleHandler, Canceller);
 							}
 							finally {
 								OS.close();
@@ -141,11 +141,11 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 	    }
 	}
 	
-    public TStreamChannelProcessor(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, String pUserAccessKey, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    public TStreamChannelConnector(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, String pUserAccessKey, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pObject, pChannel, pUserAccessKey, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
     }
 
-    public TStreamChannelProcessor(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    public TStreamChannelConnector(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	this(pcontext, pServerAddress,pServerPort, pUserID, pUserPassword, pObject, pChannel, null, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
     }
     
@@ -153,7 +153,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
     public void Start() throws Exception {
     	super.Start();
     	//.
-    	Processing = new TChannelProcessing(this);
+    	Processing = new TChannelConnection(this);
     }
     
     @Override

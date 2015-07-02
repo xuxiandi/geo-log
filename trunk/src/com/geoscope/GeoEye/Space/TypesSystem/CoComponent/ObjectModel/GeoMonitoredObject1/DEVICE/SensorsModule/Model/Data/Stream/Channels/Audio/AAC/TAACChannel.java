@@ -6,29 +6,74 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
-import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessor.TChannelProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessors.Audio.AAC.TAACChannelProcessor;
+import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACADTSDecoder;
 
 public class TAACChannel extends TStreamChannel {
 
 	public static final String TypeID = "Audio.AAC";
 
 	public static final int DescriptorSize = 2;
+	//.
+	private static final int DefaultSampleRate = 16000;
 	
-	public static class TDoOnAACPacketHandler {
+	public static class TDoOnSamplesHandler {
 		
-		public void DoOnAACPacket(byte[] Packet, int PacketOffset, int PacketSize) {
+		public void DoOnConfiguration(int SampleRate, int ChannelCount) throws IOException {
+		}	
+
+		public void DoOnSamplesPacket(byte[] Packet, int PacketSize) {
 		}
 	}	
 	
 	
-	public TDoOnAACPacketHandler OnAACPacketHandler = null;
+	private TAACADTSDecoder AACADTSDecoder;
+	//.
+	public volatile TDoOnSamplesHandler DoOnSamplesHandler = null;
+	
+	public TAACChannel() throws IOException {
+		super();
+	}
 	
 	@Override
 	public String GetTypeID() {
 		return TypeID;
+	}
+	
+	@Override
+	public void Start() throws Exception {
+		super.Start();
+		//.
+		AACADTSDecoder = new TAACADTSDecoder(DefaultSampleRate) {
+			
+			@Override
+			public void DoOnConfiguration(int SampleRate, int ChannelCount) throws IOException {
+				if (DoOnSamplesHandler != null)
+					DoOnSamplesHandler.DoOnConfiguration(SampleRate, ChannelCount);
+			}
+			
+			@Override
+			public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
+				if (DoOnSamplesHandler != null)
+					DoOnSamplesHandler.DoOnSamplesPacket(input, input_size);
+				
+			}
+		};
+	}
+	
+	
+	@Override
+	public void Stop() throws Exception {
+		if (AACADTSDecoder != null) {
+			AACADTSDecoder.Destroy();
+			AACADTSDecoder = null;
+		}
+		//.
+		super.Stop();
 	}
 	
 	@Override
@@ -70,7 +115,7 @@ public class TAACChannel extends TStreamChannel {
                 if (BytesRead1 <= 0) 
                 	break; //. >
 				//. parse and process
-            	ParseFromByteArrayAndProcess(TransferBuffer, 0);
+            	ParseFromByteArrayAndProcess(TransferBuffer, 0, Size);
             	//.
             	OnProgressHandler.DoOnProgress(BytesRead1, Canceller);
 			}
@@ -84,10 +129,18 @@ public class TAACChannel extends TStreamChannel {
 	}		
 	
 	@Override
-	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
-		short Descriptor = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += DescriptorSize;
-		if (OnAACPacketHandler != null) 
-			OnAACPacketHandler.DoOnAACPacket(BA, Idx, Descriptor);
+	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx, int Size) throws Exception {
+		AACADTSDecoder.DoOnAACADTSPAcket(BA, Idx, Size); Idx += Size; 
 		return Idx;
+	}
+
+	@Override
+	public TChannelProcessor GetProcessor() throws Exception {
+		if (Processor != null)
+			Processor.Destroy();
+		//.
+		Processor = new TAACChannelProcessor(this);
+		//.
+		return Processor;
 	}
 }

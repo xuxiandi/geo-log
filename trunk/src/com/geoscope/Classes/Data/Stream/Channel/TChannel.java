@@ -142,6 +142,7 @@ public class TChannel {
 	}
 
 	public void Close() throws Exception {
+		Stop();
 	}
 	
 	public String GetTypeID() {
@@ -177,6 +178,11 @@ public class TChannel {
 	public void Stop() throws Exception {
 	}
 	
+	public void ReStart() throws Exception {
+		Stop();
+		Start();
+	}
+
 	public void Process(TCanceller Canceller) throws Exception {
 	}
 	

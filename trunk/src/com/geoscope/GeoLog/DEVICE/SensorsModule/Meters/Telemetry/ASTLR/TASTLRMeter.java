@@ -48,7 +48,7 @@ public class TASTLRMeter extends TSensorMeter {
 					//.
 					Measurement.Start();
 					try {
-						SourceChannel.DoStreaming(Measurement.TLRChannel.DestrinationStream, Canceller, MeasurementMaxDuration);
+						SourceChannel.DoStreaming(Measurement.TLRChannel.DestinationStream, Canceller, MeasurementMaxDuration);
 					}
 					finally {
 						Measurement.Finish();

@@ -97,7 +97,7 @@ public class TLUMChannel extends TStreamChannel {
                 if (BytesRead1 <= 0) 
                 	break; //. >
 				//. parse and process
-            	ParseFromByteArrayAndProcess(TransferBuffer, 0);
+            	ParseFromByteArrayAndProcess(TransferBuffer, 0, Size);
             	//.
             	OnProgressHandler.DoOnProgress(BytesRead1, Canceller);
 			}
@@ -111,7 +111,7 @@ public class TLUMChannel extends TStreamChannel {
 	}		
 	
 	@Override
-	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
+	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx, int Size) throws Exception {
 		short ID = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; /*SizeOf(ID)*/
 		if (DataTypes != null) {
 			TDataType DataType = DataTypes.GetItemByID(ID);

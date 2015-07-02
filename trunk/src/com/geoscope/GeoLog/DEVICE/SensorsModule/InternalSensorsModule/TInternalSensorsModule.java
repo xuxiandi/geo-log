@@ -719,7 +719,7 @@ public class TInternalSensorsModule extends TModule {
 	//.
 	public TGPSChannel 	GPSChannel = null;
 	//.
-	private TAACChannel AACChannel = null;
+	public TAACChannel 	AACChannel = null;
 	
     public TInternalSensorsModule(TSensorsModule pSensorsModule) throws Exception {
     	super(pSensorsModule);

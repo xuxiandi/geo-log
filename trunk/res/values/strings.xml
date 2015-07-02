@@ -1099,5 +1099,7 @@
     <string name="SGettingSecurityInfo">Getting security info &#8230;</string>
     <string name="SAttachToMyUserActivityAsDatafile">Attach to my user activity as a data-file</string>
     <string name="SLink">Link</string>
+    <string name="SAudioAAC">Audio (AAC)</string>
+    <string name="SAudioBuffersProcessed">Audio buffers processed: </string>
     
 </resources>

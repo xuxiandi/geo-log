@@ -10,7 +10,7 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 
-public abstract class TStreamChannelProcessorAbstract {
+public abstract class TStreamChannelConnectorAbstract {
 
     public static abstract class TOnProgressHandler {
     	
@@ -47,15 +47,15 @@ public abstract class TStreamChannelProcessorAbstract {
     
     public static final int DefaultReadingTimeout = 1000*60; //. seconds
     
-    public static class TChannelProcessingAbstract extends TCancelableThread {
+    public static class TChannelConnectionAbstract extends TCancelableThread {
 		
-	    protected TStreamChannelProcessorAbstract Processor;
+	    protected TStreamChannelConnectorAbstract Connector;
 	    protected int StreamReadSize;
 		
-	    public TChannelProcessingAbstract(TStreamChannelProcessorAbstract pProcessor) {
+	    public TChannelConnectionAbstract(TStreamChannelConnectorAbstract pConnector) {
     		super();
     		//.
-	    	Processor = pProcessor;
+	    	Connector = pConnector;
 	    	//.
 	    	_Thread = new Thread(this);
 	    	_Thread.start();
@@ -73,35 +73,35 @@ public abstract class TStreamChannelProcessorAbstract {
 	    }
 	    
 	    protected void DoOnStart() {
-	    	Processor.DoOnStreamChannelStart();
+	    	Connector.DoOnStreamChannelStart();
 	    }
 	    
 	    protected void DoOnFinish() {
-	    	Processor.DoOnStreamChannelFinish();
+	    	Connector.DoOnStreamChannelFinish();
 	    	
 	    }
 	    
 	    protected void DoOnRead(TStream Stream, int ReadSize, TCanceller Canceller) {
-	    	  Processor.DoOnStreamChannelRead(Stream,ReadSize, Canceller);
+	    	  Connector.DoOnStreamChannelRead(Stream,ReadSize, Canceller);
 	    	  //.
 	    	  StreamReadSize = ReadSize;
 	    	  DoOnProcessed(Canceller);
 	    }
 	    
 	    protected void DoOnProcessed(TCanceller Canceller) {
-	    	Processor.DoOnStreamChannelReadProcessed(StreamReadSize, Canceller);
+	    	Connector.DoOnStreamChannelReadProcessed(StreamReadSize, Canceller);
 	    }
 	    
 	    protected void DoOnProgress(int ReadSize, TCanceller Canceller) {
-	    	Processor.DoOnStreamChannelProgress(ReadSize, Canceller);
+	    	Connector.DoOnStreamChannelProgress(ReadSize, Canceller);
 	    }
 	    
 	    protected void DoOnIdle(TCanceller Canceller) {
-	    	Processor.DoOnStreamChannelIdle(Canceller);
+	    	Connector.DoOnStreamChannelIdle(Canceller);
 	    }
 	    
 	    protected void DoOnException(Exception E) {
-	    	Processor.DoOnStreamChannelException(E);
+	    	Connector.DoOnStreamChannelException(E);
 	    }
 	}
 	
@@ -128,13 +128,13 @@ public abstract class TStreamChannelProcessorAbstract {
     //.
     protected int ReadingTimeout;
     //.
-    protected TChannelProcessingAbstract Processing = null;
+    protected TChannelConnectionAbstract Processing = null;
     //.
     protected TOnProgressHandler	OnProgressHandler;
     protected TOnIdleHandler 		OnIdleHandler;
     protected TOnExceptionHandler 	OnExceptionHandler;
 
-    public TStreamChannelProcessorAbstract(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, String pUserAccessKey, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    public TStreamChannelConnectorAbstract(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, String pUserAccessKey, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	context = pcontext;
     	//.
     	ServerAddress = pServerAddress;

@@ -77,8 +77,8 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TStreamChannelProcessor;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TStreamChannelProcessorAbstract;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TStreamChannelConnector;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TStreamChannelConnectorAbstract;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.DATAFile.Types.Image.Drawing.TDrawingEditor;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
@@ -247,7 +247,7 @@ public class TUserMessagingPanel extends Activity {
 	private TAsyncProcessing 								OutChannel_Parameters_Sending = null;
 	private TOutChannelMessageTable							OutChannel_MessageTable = new TOutChannelMessageTable();
 	//.
-	private TStreamChannelProcessorAbstract 				InChannel_Reader = null;
+	private TStreamChannelConnectorAbstract 				InChannel_Reader = null;
 	private TUserMessagingParametersDataType.TParameters 	InChannel_Parameters = null;
 	//.
 	private TAsyncProcessing Initializing = null;
@@ -850,18 +850,18 @@ public class TUserMessagingPanel extends Activity {
 		if (!ServersInfo.IsSpaceDataServerValid()) 
 			throw new Exception("Invalid space data server"); //. =>
 		//.
-		InChannel_Reader = new TStreamChannelProcessor(this, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, UserAgent.Server.User.UserID,UserAgent.Server.User.UserPassword, UserMessaging.Object, UserMessaging.InChannel, UserMessaging.SessionID(), new TStreamChannelProcessorAbstract.TOnProgressHandler(UserMessaging.InChannel) {
+		InChannel_Reader = new TStreamChannelConnector(this, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, UserAgent.Server.User.UserID,UserAgent.Server.User.UserPassword, UserMessaging.Object, UserMessaging.InChannel, UserMessaging.SessionID(), new TStreamChannelConnectorAbstract.TOnProgressHandler(UserMessaging.InChannel) {
 			@Override
 			public void DoOnProgress(int ReadSize, TCanceller Canceller) {
 				//. TUserMessagingPanel.this.DoOnStatusMessage("ReceivedPacket size: "+Integer.toString(ReadSize));
 				TUserMessagingPanel.this.PostOnStatusMessage("");
 			}
-		}, new TStreamChannelProcessorAbstract.TOnIdleHandler(UserMessaging.InChannel) {
+		}, new TStreamChannelConnectorAbstract.TOnIdleHandler(UserMessaging.InChannel) {
 			@Override
 			public void DoOnIdle(TCanceller Canceller) {
 				TUserMessagingPanel.this.PostOnStatusMessage(TUserMessagingPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
 			}
-		}, new TStreamChannelProcessorAbstract.TOnExceptionHandler(UserMessaging.InChannel) {
+		}, new TStreamChannelConnectorAbstract.TOnExceptionHandler(UserMessaging.InChannel) {
 			@Override
 			public void DoOnException(Exception E) {
 				TUserMessagingPanel.this.PostOnException(E);

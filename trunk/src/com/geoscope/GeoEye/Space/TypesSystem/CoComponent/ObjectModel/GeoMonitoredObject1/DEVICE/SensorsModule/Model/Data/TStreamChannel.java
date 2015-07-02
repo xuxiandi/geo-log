@@ -7,6 +7,7 @@ import java.net.Socket;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessor.TChannelProcessor;
 
 public class TStreamChannel extends TChannel {
 
@@ -27,6 +28,17 @@ public class TStreamChannel extends TChannel {
 	}
 	
 
+	public TStreamChannel() {
+		super();
+	}
+	
+	@Override
+	public void Close() throws Exception {
+		FreeProcessor();
+		//.
+		super.Close();
+	}
+	
 	public void DoStreaming(Socket Connection, InputStream pInputStream, int pInputStreamSize, OutputStream pOutputStream, TOnProgressHandler OnProgressHandler, int StreamingTimeout, int IdleTimeoutCounter, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws Exception {
 	}	
 
@@ -38,7 +50,20 @@ public class TStreamChannel extends TChannel {
 		DoStreaming(null, pInputStream, pInputStreamSize, pOutputStream, OnProgressHandler, StreamingTimeout, IdleTimeoutCounter, OnIdleHandler, Canceller);
 	}	
 
-	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
+	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx, int Size) throws Exception {
 		return Idx;
+	}
+	
+	protected TChannelProcessor Processor = null;
+	
+	public TChannelProcessor GetProcessor() throws Exception {
+		return Processor;
+	}
+
+	public void FreeProcessor() throws Exception {
+		if (Processor != null) {
+			Processor.Destroy();
+			Processor = null;
+		}
 	}
 }

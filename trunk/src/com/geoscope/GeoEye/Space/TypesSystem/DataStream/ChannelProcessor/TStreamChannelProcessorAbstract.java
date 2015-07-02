@@ -7,10 +7,10 @@ import com.geoscope.Classes.IO.Abstract.TStream;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Audio.TAudioChannelProcessor;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Audio.TAudioChannelProcessorUDP;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Video.TVideoChannelProcessor;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Video.TVideoChannelProcessorUDP;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessors.Audio.TAudioChannelProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessors.Audio.TAudioChannelProcessorUDP;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessors.Video.TVideoChannelProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessors.Video.TVideoChannelProcessorUDP;
 
 public abstract class TStreamChannelProcessorAbstract {
 

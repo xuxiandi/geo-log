@@ -2,7 +2,6 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.C
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.TStreamChannel;
@@ -40,7 +39,7 @@ public class TTLRChannel extends TStreamChannel {
 	}
 
 	@Override
-	public void Start() throws IOException {
+	public void Start() throws Exception {
 		super.Start();
 		//.
 		OutFileStream = new ByteArrayOutputStream();
@@ -48,7 +47,7 @@ public class TTLRChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void Stop() throws IOException {
+	public void Stop() throws Exception {
 		if (DestrinationStream != null) {
 			DestrinationStream.close();
 			DestrinationStream = null;

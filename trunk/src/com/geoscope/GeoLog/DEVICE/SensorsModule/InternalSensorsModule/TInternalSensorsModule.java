@@ -32,6 +32,7 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.EnvironmentConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
@@ -717,6 +718,8 @@ public class TInternalSensorsModule extends TModule {
 	private TDataType 	ECTLRChannel_Gyroscope;
 	//.
 	public TGPSChannel 	GPSChannel = null;
+	//.
+	private TAACChannel AACChannel = null;
 	
     public TInternalSensorsModule(TSensorsModule pSensorsModule) throws Exception {
     	super(pSensorsModule);
@@ -919,6 +922,9 @@ public class TInternalSensorsModule extends TModule {
 		//.
 		GPSChannel = new TGPSChannel(this);
 		Model.Stream.Channels.add(GPSChannel);
+		//.
+		AACChannel = new TAACChannel(this);
+		Model.Stream.Channels.add(AACChannel);
     }
     
     private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel GetDestinationADSChannel() {

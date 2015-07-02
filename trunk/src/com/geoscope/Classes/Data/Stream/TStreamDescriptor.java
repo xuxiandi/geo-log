@@ -2,7 +2,6 @@ package com.geoscope.Classes.Data.Stream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -49,13 +48,13 @@ public class TStreamDescriptor {
 			Channels.get(I).Initialize(Parameters);
 	}
 	
-	public void Start() throws IOException {
+	public void Start() throws Exception {
 		int Cnt = Channels.size();
 		for (int I = 0; I < Cnt; I++) 
 			Channels.get(I).Start();
 	}
 	
-	public void Stop() throws IOException {
+	public void Stop() throws Exception {
 		int Cnt = Channels.size();
 		for (int I = 0; I < Cnt; I++) 
 			Channels.get(I).Stop();

@@ -177,6 +177,8 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 	public static final int SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_DELIVERIED         = -102;
 	public static final int SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTCONNECTED   = -103;
 	public static final int SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTAVAILABLE   = -104;
+	public static final int SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERPROCESSED      = -105;
+	public static final int SERVICE_MESSAGING_SERVERMESSAGE_USERMESSAGE_STATUS_USERNOTPROCESSED   = -106;
 	
 	public static void CheckMessage(int Message) throws Exception {
 		if (Message >= 0)

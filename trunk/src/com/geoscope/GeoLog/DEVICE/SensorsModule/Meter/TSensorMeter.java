@@ -239,7 +239,7 @@ public class TSensorMeter extends TCancelableThread {
 		Finish();
 	}
 	
-	public void SetProfile(byte[] pProfile, boolean flSave) throws Exception {
+	public void SetProfile(byte[] pProfile, boolean flSave, boolean flRestart) throws Exception {
 		Profile.FromByteArray(pProfile);
 		//.
 		if (flSave)
@@ -250,8 +250,8 @@ public class TSensorMeter extends TCancelableThread {
 			Start();
 	}
 	
-	public void SetProfile(byte[] pProfile) throws Exception {
-		SetProfile(pProfile,true);
+	public void SetProfile(byte[] pProfile, boolean flRestart) throws Exception {
+		SetProfile(pProfile, true, flRestart);
 	}
 	
 	public byte[] GetProfile() throws Exception {

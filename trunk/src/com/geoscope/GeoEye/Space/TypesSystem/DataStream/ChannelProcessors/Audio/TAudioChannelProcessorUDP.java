@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.Audio;
+package com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessors.Audio;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

@@ -40,13 +40,14 @@
                 android:paddingRight="2dp"
                 android:text="@string/SLink"
                 android:textColor="@android:color/black"
-                android:textSize="16.0dip" />
+                android:textSize="16.0dip"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/lbUserChatContactUserState"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:background="@android:color/darker_gray"
+                android:background="#ff999999"
                 android:gravity="center_vertical" />
 
             <TextView

@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber;
 
 public class TStreamChannel extends TChannel {
 
@@ -49,6 +50,30 @@ public class TStreamChannel extends TChannel {
 			DestinationChannel.PacketSubscribers.SetItemsNotifier(DestinationChannel_PacketSubscribersItemsNotifier);
 	}
 
+	public void DoOnPacket(byte[] Packet, int PacketSize) throws Exception {
+		com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
+		if (DestinationChannel != null) 
+			DestinationChannel.DoOnPacket(Packet, PacketSize);
+		else
+			throw new IOException("DoOnData() error, DestinationChannel is not set"); //. =>
+	}
+
+	public void DoOnPacket(byte[] Packet) throws Exception {
+		DoOnPacket(Packet,Packet.length);
+	}
+	
+	public void DoOnPacket(byte[] Packet, int PacketSize, TPacketSubscriber Subscriber) throws Exception {
+		com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
+		if (DestinationChannel != null) 
+			DestinationChannel.DoOnPacket(Packet, PacketSize, Subscriber);
+		else
+			throw new IOException("DoOnData() error, DestinationChannel is not set"); //. =>
+	}
+	
+	public void DoOnPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
+		DoOnPacket(Packet, Packet.length, Subscriber);
+	}
+	
 	public void DoOnData(TDataType DataType) throws Exception {
 		com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
 		if (DestinationChannel != null) 

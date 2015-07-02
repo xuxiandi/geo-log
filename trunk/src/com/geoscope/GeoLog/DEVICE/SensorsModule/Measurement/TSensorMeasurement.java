@@ -119,6 +119,8 @@ public class TSensorMeasurement {
 	//.
 	public String DatabaseFolder;
 	//.
+	public String Domain;
+	//.
 	public TSensorMeasurementDescriptor Descriptor;
 	
 	public TSensorMeasurement(long pGeographServerObjectID, String pDatabaseFolder, String pDomain, String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
@@ -126,7 +128,9 @@ public class TSensorMeasurement {
 		//.
 		DatabaseFolder = pDatabaseFolder;
 		//.
-		Descriptor = GetMeasurementDescriptor(DatabaseFolder, pDomain, pMeasurementID, DescriptorClass, ChannelProvider);
+		Domain = pDomain;
+		//.
+		Descriptor = GetMeasurementDescriptor(DatabaseFolder, Domain, pMeasurementID, DescriptorClass, ChannelProvider);
 	}
 	
 	public TSensorMeasurement(String pDatabaseFolder, String pDomain, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
@@ -164,7 +168,7 @@ public class TSensorMeasurement {
 
 	public void Start() throws Exception {
 		Descriptor.StartTimestamp = OleDate.UTCCurrentTimestamp();
-		TSensorsModuleMeasurements.SetMeasurementDescriptor(DatabaseFolder, Descriptor.ID, Descriptor);
+		TSensorsModuleMeasurements.SetMeasurementDescriptor(DatabaseFolder, Domain, Descriptor.ID, Descriptor);
 		//.
 		Descriptor.Model.Start();
 	}
@@ -176,7 +180,7 @@ public class TSensorMeasurement {
 		Descriptor.GeographServerObjectID = GeographServerObjectID;
 		Descriptor.GUID = TUIDGenerator.GenerateWithTimestamp();
 		//.
-		TSensorsModuleMeasurements.SetMeasurementDescriptor(DatabaseFolder, Descriptor.ID, Descriptor);
+		TSensorsModuleMeasurements.SetMeasurementDescriptor(DatabaseFolder, Domain, Descriptor.ID, Descriptor);
 	}
 	
 	public byte[] ToByteArray() throws IOException {

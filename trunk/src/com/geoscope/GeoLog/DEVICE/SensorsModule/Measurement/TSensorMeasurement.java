@@ -39,7 +39,7 @@ public class TSensorMeasurement {
 		}
 	}
 	
-	public static TSensorMeasurement FromByteArray(byte[] BA, String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider, TCanceller Canceller) throws Exception {
+	public static TSensorMeasurement FromByteArray(byte[] BA, String pDatabaseFolder, String pDomain, String pMeasurementID, TChannelProvider ChannelProvider, TCanceller Canceller) throws Exception {
 		String MeasurementFolder = pDatabaseFolder+"/"+pMeasurementID;
 		File MF = new File(MeasurementFolder);
 		MF.mkdirs();
@@ -80,10 +80,10 @@ public class TSensorMeasurement {
 		finally {
 			BIS.close();
 		}
-		return (new TSensorMeasurement(pDatabaseFolder, pMeasurementID, ChannelProvider));
+		return (new TSensorMeasurement(pDatabaseFolder, pDomain, pMeasurementID, ChannelProvider));
 	}
 	
-	public static TSensorMeasurement FromDataFile(String DataFile, String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider, TCanceller Canceller) throws Exception {
+	public static TSensorMeasurement FromDataFile(String DataFile, String pDatabaseFolder, String pDomain, String pMeasurementID, TChannelProvider ChannelProvider, TCanceller Canceller) throws Exception {
 		File F = new File(DataFile);
 		if (!F.exists()) 
 			return null; //. ->
@@ -93,7 +93,7 @@ public class TSensorMeasurement {
     			byte[] BA = new byte[(int)F.length()];
     			FIS.read(BA);
     			//.
-    			return FromByteArray(BA, pDatabaseFolder, pMeasurementID, ChannelProvider, Canceller); //. ->    	
+    			return FromByteArray(BA, pDatabaseFolder, pDomain, pMeasurementID, ChannelProvider, Canceller); //. ->    	
     	}
 		finally
 		{
@@ -121,19 +121,19 @@ public class TSensorMeasurement {
 	//.
 	public TSensorMeasurementDescriptor Descriptor;
 	
-	public TSensorMeasurement(long pGeographServerObjectID, String pDatabaseFolder, String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+	public TSensorMeasurement(long pGeographServerObjectID, String pDatabaseFolder, String pDomain, String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
 		GeographServerObjectID = pGeographServerObjectID;
 		//.
 		DatabaseFolder = pDatabaseFolder;
 		//.
-		Descriptor = GetMeasurementDescriptor(DatabaseFolder, pMeasurementID, DescriptorClass, ChannelProvider);
+		Descriptor = GetMeasurementDescriptor(DatabaseFolder, pDomain, pMeasurementID, DescriptorClass, ChannelProvider);
 	}
 	
-	public TSensorMeasurement(String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
-		this(0, pDatabaseFolder, pMeasurementID, TSensorMeasurementDescriptor.class, ChannelProvider);
+	public TSensorMeasurement(String pDatabaseFolder, String pDomain, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
+		this(0, pDatabaseFolder, pDomain, pMeasurementID, TSensorMeasurementDescriptor.class, ChannelProvider);
 	}
 	
-	public TSensorMeasurement(long pGeographServerObjectID, String pMeasurementFolder, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+	public TSensorMeasurement(long pGeographServerObjectID, String pMeasurementFolder, String pDomain, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
 		GeographServerObjectID = pGeographServerObjectID;
 		//.
 		File MF = new File(pMeasurementFolder);
@@ -142,19 +142,19 @@ public class TSensorMeasurement {
 		//.
 		DatabaseFolder = MeasurementFolder;
 		//.
-		Descriptor = GetMeasurementDescriptor(DatabaseFolder, MeasurementID, DescriptorClass, ChannelProvider);
+		Descriptor = GetMeasurementDescriptor(DatabaseFolder, pDomain, MeasurementID, DescriptorClass, ChannelProvider);
 	}
 	
-	public TSensorMeasurement(long pGeographServerObjectID, String pMeasurementFolder, TChannelProvider ChannelProvider) throws Exception {
-		this(pGeographServerObjectID, pMeasurementFolder, TSensorMeasurementDescriptor.class, ChannelProvider);
+	public TSensorMeasurement(long pGeographServerObjectID, String pMeasurementFolder, String pDomain, TChannelProvider ChannelProvider) throws Exception {
+		this(pGeographServerObjectID, pMeasurementFolder, pDomain, TSensorMeasurementDescriptor.class, ChannelProvider);
 	}
 	
 	public String Folder() {
 		return (DatabaseFolder+"/"+Descriptor.ID);
 	}
 	
-	public TSensorMeasurementDescriptor GetMeasurementDescriptor(String pDatabaseFolder, String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
-		TSensorMeasurementDescriptor _Descriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(pDatabaseFolder, pMeasurementID, DescriptorClass, ChannelProvider);
+	public TSensorMeasurementDescriptor GetMeasurementDescriptor(String pDatabaseFolder, String pDomain, String pMeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
+		TSensorMeasurementDescriptor _Descriptor = TSensorsModuleMeasurements.GetMeasurementDescriptor(pDatabaseFolder, pDomain, pMeasurementID, DescriptorClass, ChannelProvider);
 		if (_Descriptor == null) {
 			_Descriptor = (TSensorMeasurementDescriptor)DescriptorClass.newInstance();
 			_Descriptor.ID = pMeasurementID; 

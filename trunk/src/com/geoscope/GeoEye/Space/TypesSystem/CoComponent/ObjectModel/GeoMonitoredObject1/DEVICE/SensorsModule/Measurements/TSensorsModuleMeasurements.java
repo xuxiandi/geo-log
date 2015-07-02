@@ -33,6 +33,8 @@ public class TSensorsModuleMeasurements {
 		return TSystemTGeographServerObject.ContextFolder+"/"+Long.toString(GeographServerObjectID)+"/"+"SensorsModule"+"/"+"Measurements";		
 	}
 	
+	public static final String Domain = "Context.Sensors.Measurements"; 
+	
 	public static String Context_GetMeasurementFolder(long GeographServerObjectID, String MeasurementID) throws Exception {
 		return Context_Folder(GeographServerObjectID)+"/"+MeasurementID;
 	}
@@ -229,7 +231,7 @@ public class TSensorsModuleMeasurements {
     	File MF = new File(MeasurementFolder);
     	String MeasurementDatabaseFolder = MF.getParent(); 
     	String MeasurementID = MF.getName();
-		TSensorMeasurement Measurement = new TSensorMeasurement(MeasurementDatabaseFolder,MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+		TSensorMeasurement Measurement = new TSensorMeasurement(MeasurementDatabaseFolder, Domain, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
     	//.
 		boolean flProcessAsDefault = true;
 		if (ProcessHandler != null) 

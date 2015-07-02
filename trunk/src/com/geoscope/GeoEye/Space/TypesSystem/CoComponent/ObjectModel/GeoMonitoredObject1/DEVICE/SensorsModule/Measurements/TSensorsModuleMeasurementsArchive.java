@@ -179,7 +179,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 				TSensorMeasurementDescriptor _MeasurementDescriptor;
 				if (Item.Location == TSensorMeasurementDescriptor.LOCATION_CLIENT)
 					try {
-						_MeasurementDescriptor = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.GetMeasurementDescriptor(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()),Item.ID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+						_MeasurementDescriptor = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.GetMeasurementDescriptor(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), TSensorsModuleMeasurements.Domain, Item.ID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 					} catch (Exception E) {
 						_MeasurementDescriptor = null;
 					}
@@ -333,7 +333,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 	    		    				public void Process() throws Exception {
 	    		    					ExportFile = TGeoLogApplication.TempFolder+"/"+ExpertFileName;
 	    		    					//.
-	    		    					com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, ExportFile);
+	    		    					com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), TSensorsModuleMeasurements.Domain, Item.ID, ExportFile);
 	    		    				}
 
 	    		    				@Override
@@ -392,7 +392,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
         	    	    				    		throw new Exception(TSensorsModuleMeasurementsArchive.this.getString(R.string.STrackerIsNotInitialized)); //. =>
         	    								//.
         	        		    				String NFN = TGPSModule.MapPOIComponentFolder()+"/"+MeasurementDescriptor.GUID+DataName+".MP4";
-        	        		    				com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, NFN);
+        	        		    				com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.ExportMeasurementToMP4File(TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), TSensorsModuleMeasurements.Domain, Item.ID, NFN);
         	    		    					//.
         	        		    		    	double Timestamp = OleDate.UTCCurrentTimestamp();
         	        		    				//. prepare and send data-file
@@ -977,7 +977,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
     				//.
     				boolean flLocal = (Object.GeographServerObjectID() == ThisGeographServerObjectID);
     				if (flLocal)
-    					flLocal = (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.GetMeasurementDescriptor(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance) != null);
+    					flLocal = (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.GetMeasurementDescriptor(com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance) != null);
     				//.
     				if (!flLocal) {
         				while (!Canceller.flCancel) {

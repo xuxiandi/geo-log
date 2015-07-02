@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -51,7 +52,7 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
             	//.
             	TSensorMeter Meter = SensorsModule.Meters.Items_GetItem(MeterID);
             	if (Meter != null) 
-                	Meter.SetProfile(Value);
+                	Meter.SetProfile(Value, true);
         		break; //. >
 
         	case 2: //. start/stop meter(s)
@@ -59,18 +60,42 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
             	switch (SubVersion) {
             	
             	case 1: //. set meters activity = true
-            		int Cnt = SA.length;
-            		for (int I = 3; I < Cnt; I++) {
-                    	Meter = SensorsModule.Meters.Items_GetItem(SA[I]);
-                    	if (Meter != null) 
-                        	Meter.SetActive(true);
+            		int Cnt = SA.length-3;
+            		if ((Value == null) || (Value.length == 0)) {
+                		for (int I = 0; I < Cnt; I++) {
+                        	Meter = SensorsModule.Meters.Items_GetItem(SA[I+3]);
+                        	if (Meter != null) 
+                            	Meter.SetActive(true);
+                		}
+            		}
+            		else {
+            			//. set meter profiles
+            			int Index = 0;
+                		for (int I = 0; I < Cnt; I++) {
+                        	Meter = SensorsModule.Meters.Items_GetItem(SA[I+3]);
+                        	//.
+                			int ProfileSize = TDataConverter.ConvertLEByteArrayToInt32(Value, Index); Index += 4; //. SizeOf(Int32)
+                			if (ProfileSize > 0) {
+                    			byte[] Profile = new byte[ProfileSize];
+                    			System.arraycopy(Value,Index, Profile,0, ProfileSize); Index += ProfileSize;
+                    			//.
+                            	if (Meter != null) 
+                                	Meter.SetProfile(Profile, false);
+                			}
+                		}
+                		//. activate meters
+                		for (int I = 0; I < Cnt; I++) {
+                        	Meter = SensorsModule.Meters.Items_GetItem(SA[I+3]);
+                        	if (Meter != null) 
+                            	Meter.SetActive(true);
+                		}
             		}
             		break; //. >
 
             	case 2: //. set meters activity = false
-            		Cnt = SA.length;
-            		for (int I = 3; I < Cnt; I++) {
-                    	Meter = SensorsModule.Meters.Items_GetItem(SA[I]);
+            		Cnt = SA.length-3;
+            		for (int I = 0; I < Cnt; I++) {
+                    	Meter = SensorsModule.Meters.Items_GetItem(SA[I+3]);
                     	if (Meter != null) 
                         	Meter.SetActive(false);
             		}

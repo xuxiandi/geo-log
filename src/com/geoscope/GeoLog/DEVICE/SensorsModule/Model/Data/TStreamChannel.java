@@ -202,12 +202,38 @@ public class TStreamChannel extends TChannel {
 			}
 		}
 
+		public void DoOnPacket(byte[] Packet, int PacketSize) throws Exception {
+			Lock.lock();
+			try {
+				WaitForResume();
+				//.
+				int Cnt = Items.size();
+				for (int I = 0; I < Cnt; I++)
+					Items.get(I).DoOnPacket(Packet,PacketSize);
+			}
+			finally {
+				Lock.unlock();
+			}
+		}
+
 		public void DoOnPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
 			Lock.lock();
 			try {
 				WaitForResume();
 				//.
 				Subscriber.DoOnPacket(Packet,Packet.length);
+			}
+			finally {
+				Lock.unlock();
+			}
+		}
+
+		public void DoOnPacket(byte[] Packet, int PacketSize, TPacketSubscriber Subscriber) throws Exception {
+			Lock.lock();
+			try {
+				WaitForResume();
+				//.
+				Subscriber.DoOnPacket(Packet,PacketSize);
 			}
 			finally {
 				Lock.unlock();
@@ -287,6 +313,22 @@ public class TStreamChannel extends TChannel {
 	
 	public boolean IsSuspended() {
 		return PacketSubscribers.IsSuspended();
+	}
+	
+	public void DoOnPacket(byte[] Packet, int PacketSize) throws Exception {
+		PacketSubscribers.DoOnPacket(Packet, PacketSize);
+	}
+
+	public void DoOnPacket(byte[] Packet) throws Exception {
+		PacketSubscribers.DoOnPacket(Packet, Packet.length);
+	}
+
+	public void DoOnPacket(byte[] Packet, int PacketSize, TPacketSubscriber Subscriber) throws Exception {
+		PacketSubscribers.DoOnPacket(Packet, PacketSize, Subscriber);
+	}
+	
+	public void DoOnPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
+		PacketSubscribers.DoOnPacket(Packet, Packet.length, Subscriber);
 	}
 	
 	protected byte[] DataType_ToByteArray(TDataType DataType) throws IOException {

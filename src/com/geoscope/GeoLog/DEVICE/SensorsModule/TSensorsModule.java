@@ -37,6 +37,10 @@ public class TSensorsModule extends TModule {
 		return TDEVICEModule.DeviceFolder()+"/"+"SensorsModule";
 	}
 	
+	public static String Channels_Folder() {
+		return Folder()+"/"+"Channels";
+	}
+	
 	public static String Meters_Folder() {
 		return Folder()+"/"+"Meters";
 	}
@@ -86,6 +90,9 @@ public class TSensorsModule extends TModule {
         Device = pDevice;
     	//. 
 		File F = new File(Folder());
+		if (!F.exists()) 
+			F.mkdirs();
+		F = new File(Channels_Folder());
 		if (!F.exists()) 
 			F.mkdirs();
 		F = new File(Meters_Folder());

@@ -1,7 +1,5 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement;
 
-import java.io.IOException;
-
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -45,11 +43,11 @@ public class TSensorMeasurementModel {
 		Stream.Initialize(Parameters);
 	}
 	
-    public void Start() throws IOException {
+    public void Start() throws Exception {
     	Stream.Start();
     }
 
-    public void Stop() throws IOException {
+    public void Stop() throws Exception {
     	Stream.Stop();
     }
 

@@ -8,6 +8,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Envir
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.UserMessaging.LUM.TLUMChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
 
@@ -32,6 +33,8 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 			return (new TLUMChannel(SensorsModule)); // =>
 		if (TGPSChannel.TypeID.equals(pTypeID))
 			return (new TGPSChannel(SensorsModule)); // =>
+		if (TAACChannel.TypeID.equals(pTypeID))
+			return (new TAACChannel(SensorsModule)); // =>
 		else
 			return null;
 	}	

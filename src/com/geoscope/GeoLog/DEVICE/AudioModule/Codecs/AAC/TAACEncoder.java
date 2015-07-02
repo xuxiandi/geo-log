@@ -143,6 +143,6 @@ public class TAACEncoder {
 	public void DoOnParameters(byte[] Buffer, int BufferSize) throws IOException {
 	}
 	
-	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws IOException {
+	public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp) throws Exception {
 	}
 }

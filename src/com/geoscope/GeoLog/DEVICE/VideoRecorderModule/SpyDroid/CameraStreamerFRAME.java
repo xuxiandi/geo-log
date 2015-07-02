@@ -76,7 +76,6 @@ public class CameraStreamerFRAME extends Camera {
 	
 	public class TAudioSampleSource extends TCancelableThread {
 		
-		//.
 		private AudioRecord Microphone_Recorder = null; 
 		public int 			Microphone_Source = MediaRecorder.AudioSource.DEFAULT;
 		public int 			Microphone_SamplePerSec = 8000;

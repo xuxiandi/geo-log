@@ -34,20 +34,20 @@ public class TTLRChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void Start() throws IOException {
+	public void Start() throws Exception {
 		super.Start();
 		//.
 		InFileStream = new FileInputStream(MeasurementFolder+"/"+com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel.FileName);
 	}
 	
 	@Override
-	public void Stop() throws IOException {
+	public void Stop() throws Exception {
 		if (InFileStream != null) {
 			InFileStream.close();
 			InFileStream = null;
 		}
 		//.
-		super.Close();
+		super.Stop();
 	}
 
 	@Override

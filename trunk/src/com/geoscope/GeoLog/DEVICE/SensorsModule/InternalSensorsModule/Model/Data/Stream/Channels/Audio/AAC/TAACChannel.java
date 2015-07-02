@@ -22,6 +22,7 @@ public class TAACChannel extends TStreamChannel {
 
 	public static final String TypeID = "Audio.AAC";
 	
+	
 	public class TAudioSampleSource extends TCancelableThread {
 		
 		private AudioRecord Recorder = null; 

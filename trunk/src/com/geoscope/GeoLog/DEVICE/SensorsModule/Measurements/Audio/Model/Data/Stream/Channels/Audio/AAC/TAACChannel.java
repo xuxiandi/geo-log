@@ -39,7 +39,7 @@ public class TAACChannel extends TStreamChannel {
 	}
 	
 	
-	private String OutFile;
+	private String MeasurementFolder;
 	//.
 	public TOutputStream DestinationStream;
 	//.
@@ -53,7 +53,7 @@ public class TAACChannel extends TStreamChannel {
 	public TAACChannel(String pMeasurementFolder) {
 		this();
 		//.
-		OutFile = pMeasurementFolder+"/"+FileName;
+		MeasurementFolder = pMeasurementFolder;
 	}
 	
 	@Override
@@ -86,7 +86,7 @@ public class TAACChannel extends TStreamChannel {
 	public void Start() throws Exception {
 		super.Start();
 		//.
-		DestinationStream = new TOutputStream(this, OutFile);
+		DestinationStream = new TOutputStream(this, MeasurementFolder+"/"+FileName);
 		//.
 		Packets = 0;
 	}

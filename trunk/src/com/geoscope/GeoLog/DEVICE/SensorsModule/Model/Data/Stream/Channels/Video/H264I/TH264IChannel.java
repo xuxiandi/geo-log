@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,13 +9,20 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
 
-public class TAACChannel extends TStreamChannel {
+public class TH264IChannel extends TStreamChannel {
 
-	public static final String TypeID = "Audio.AAC";
+	public static final String TypeID = "Video.H264I";
 
-	public static final int DescriptorSize = 2;
+	public static final int DescriptorSize = 4;
 	
-	public TAACChannel(TSensorsModule pSensorsModule) {
+	public static final int TagSize = 2;
+	
+	public static final short DataTag 		= 1;
+	public static final short IndexTag 		= 2;
+	public static final short TimestampTag 	= 3;
+	
+	
+	public TH264IChannel(TSensorsModule pSensorsModule) {
 		super(pSensorsModule);
 	}
 	
@@ -85,18 +92,46 @@ public class TAACChannel extends TStreamChannel {
 
 	@Override
 	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
-		return (new TAACChannelStreamer(this, pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters));
+		return (new TH264IChannelStreamer(this, pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters));
 	}
 	
-	private byte[] Packet = new byte[1024];
+	private byte[] Packet = new byte[65535];
 	
-	public void DoOnAACPacket(byte[] AACPacket, int AACPacketSize) throws Exception {
-		short Descriptor = (short)AACPacketSize;
+	public void DoOnH264Packet(byte[] H264Packet, int H264PacketSize) throws Exception {
+		int Descriptor = TagSize+H264PacketSize;
 		int PacketSize = DescriptorSize+Descriptor;
 		if (PacketSize > Packet.length) 
 			Packet = new byte[PacketSize];
-		TDataConverter.ConvertInt16ToLEByteArray(Descriptor, Packet, 0);
-		System.arraycopy(AACPacket,0, Packet,DescriptorSize, AACPacketSize);
+		int Idx = 0;
+		TDataConverter.ConvertInt32ToLEByteArray(Descriptor, Packet, Idx); Idx += DescriptorSize; 
+		TDataConverter.ConvertInt16ToLEByteArray(DataTag, Packet, Idx); Idx += TagSize; 
+		System.arraycopy(H264Packet,0, Packet,Idx, H264PacketSize);
+		//.
+		DoOnPacket(Packet, PacketSize);
+	}
+
+	public void DoOnH264Index(int Index) throws Exception {
+		int Descriptor = TagSize+4/*SizeOf(Index)*/;
+		int PacketSize = DescriptorSize+Descriptor;
+		if (PacketSize > Packet.length) 
+			Packet = new byte[PacketSize];
+		int Idx = 0;
+		TDataConverter.ConvertInt32ToLEByteArray(Descriptor, Packet, Idx); Idx += DescriptorSize; 
+		TDataConverter.ConvertInt16ToLEByteArray(IndexTag, Packet, Idx); Idx += TagSize; 
+		TDataConverter.ConvertInt32ToLEByteArray(Index, Packet, Idx);  
+		//.
+		DoOnPacket(Packet, PacketSize);
+	}
+
+	public void DoOnH264Timestamp(int Timestamp) throws Exception {
+		int Descriptor = TagSize+4/*SizeOf(Timestamp)*/;
+		int PacketSize = DescriptorSize+Descriptor;
+		if (PacketSize > Packet.length) 
+			Packet = new byte[PacketSize];
+		int Idx = 0;
+		TDataConverter.ConvertInt32ToLEByteArray(Descriptor, Packet, Idx); Idx += DescriptorSize; 
+		TDataConverter.ConvertInt16ToLEByteArray(TimestampTag, Packet, Idx); Idx += TagSize; 
+		TDataConverter.ConvertInt32ToLEByteArray(Timestamp, Packet, Idx);  
 		//.
 		DoOnPacket(Packet, PacketSize);
 	}

@@ -36,6 +36,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.EnvironmentConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.UserMessagingModule.TUserMessagingModule;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
@@ -720,6 +721,8 @@ public class TInternalSensorsModule extends TModule {
 	public TGPSChannel 	GPSChannel = null;
 	//.
 	public TAACChannel 	AACChannel = null;
+	//.
+	public TH264IChannel H264IChannel = null;
 	
     public TInternalSensorsModule(TSensorsModule pSensorsModule) throws Exception {
     	super(pSensorsModule);
@@ -925,6 +928,9 @@ public class TInternalSensorsModule extends TModule {
 		//.
 		AACChannel = new TAACChannel(this);
 		Model.Stream.Channels.add(AACChannel);
+		//.
+		H264IChannel = new TH264IChannel(this);
+		Model.Stream.Channels.add(H264IChannel);
     }
     
     private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel GetDestinationADSChannel() {

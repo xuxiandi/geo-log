@@ -12,6 +12,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Audio.TAudioMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ASTLR.TASTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TECTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.GPSTLR.TGPSTLRMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Video.TVideoMeter;
 
 public class TSensorsMeters {
 
@@ -51,6 +52,7 @@ public class TSensorsMeters {
 		TASTLRMeter 	ASTLRMeter 	= new TASTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(ASTLRMeter);
 		TGPSTLRMeter	GPSTLRMeter = new TGPSTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(GPSTLRMeter);
 		TAudioMeter		AudioMeter	= new TAudioMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(AudioMeter);
+		TVideoMeter		VideoMeter	= new TVideoMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(VideoMeter);
 	}
 	
 	private void Items_AddItem(TSensorMeter Meter) {

@@ -7,6 +7,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.UserMessaging.LUM.TLUMChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
@@ -31,6 +32,8 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 			return (new TGPSChannel(InternalSensorsModule)); // =>
 		if (TAACChannel.TypeID.equals(pTypeID))
 			return (new TAACChannel(InternalSensorsModule)); // =>
+		if (TH264IChannel.TypeID.equals(pTypeID))
+			return (new TH264IChannel(InternalSensorsModule)); // =>
 		else
 			return null;
 	}	

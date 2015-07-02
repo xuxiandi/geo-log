@@ -1101,5 +1101,7 @@
     <string name="SLink">Link</string>
     <string name="SAudioAAC">Audio (AAC)</string>
     <string name="SAudioBuffersProcessed">Audio buffers processed: </string>
+    <string name="SVideoH264">Video (H264)</string>
+    <string name="SVideoBuffersProcessed">"Video buffers processed: "</string>
     
 </resources>

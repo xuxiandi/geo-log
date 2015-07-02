@@ -155,7 +155,7 @@ public class TAACChannelProcessor extends TChannelProcessor {
 		//.
 		AACChannel = (TAACChannel)Channel;
 		//.
-		AACChannel.DoOnSamplesHandler = new TAACChannel.TDoOnSamplesHandler() {
+		AACChannel.OnSamplesHandler = new TAACChannel.TH264Channel() {
 			
 			@Override
 			public void DoOnConfiguration(int SampleRate, int ChannelCount) throws java.io.IOException {
@@ -201,7 +201,7 @@ public class TAACChannelProcessor extends TChannelProcessor {
 
 	@Override
 	public void Destroy() throws Exception {
-		AACChannel.DoOnSamplesHandler = null;
+		AACChannel.OnSamplesHandler = null;
 		//.
 		if (AudioBufferPlaying != null) {
 			AudioBufferPlaying.Destroy();

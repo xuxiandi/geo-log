@@ -16,6 +16,7 @@ import android.os.Message;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -40,12 +41,14 @@ import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessors.Audio.AAC.TAACChannelProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessors.Video.H264I.TH264IChannelProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 @SuppressLint("HandlerLeak")
@@ -80,6 +83,7 @@ public class TDataStreamPanel extends Activity {
 	private LinearLayout llEnvironmentConditionsXENVC;
 	private LinearLayout llTelemetryTLR;
 	private LinearLayout llAudioAAC;
+	private LinearLayout llVideoH264;
 	//.
 	private int LinkedReflectorID = 0;
 	
@@ -132,16 +136,13 @@ public class TDataStreamPanel extends Activity {
             llEnvironmentConditionsXENVC = (LinearLayout)findViewById(R.id.llEnvironmentConditionsXENVC);
             llTelemetryTLR = (LinearLayout)findViewById(R.id.llTelemetryTLR);
             llAudioAAC = (LinearLayout)findViewById(R.id.llAudioAAC);
+            llVideoH264 = (LinearLayout)findViewById(R.id.llVideoH264);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
 		}
     	//.
-    	try {
-    		StreamChannelConnectors_Initialize();
-		} catch (Exception E) {
-			PostException(E);
-		}
+		MessageHandler.obtainMessage(MESSAGE_INITIALIZE).sendToTarget();
 		//.
 		flExists = true;
     }
@@ -235,6 +236,8 @@ public class TDataStreamPanel extends Activity {
 		llTelemetryTLR.removeAllViews();
 		//.
 		llAudioAAC.setVisibility(View.GONE);
+		//.
+		llVideoH264.setVisibility(View.GONE);
 	}
 	
 	private void Layout_UpdateForChannel(TStreamChannel Channel) throws Exception {
@@ -642,12 +645,49 @@ public class TDataStreamPanel extends Activity {
 			//
 			llAudioAAC.setVisibility(View.VISIBLE);
 		};
+		if (Channel instanceof TH264IChannel) {
+			TH264IChannel H264Channel = (TH264IChannel)Channel;
+			//.
+			final EditText edVideoBuffersProcessed = (EditText)findViewById(R.id.edVideoH264BuffersProcessed);
+			final SurfaceView svVideoH264 = (SurfaceView)findViewById(R.id.svVideoH264);
+			//.
+			H264Channel.ReStart();
+			//.
+			final TH264IChannelProcessor H264ChannelProcessor = (TH264IChannelProcessor)H264Channel.GetProcessor();
+			H264ChannelProcessor.StatisticHandler = new TH264IChannelProcessor.TStatisticHandler() {
+				
+				@Override
+				public void DoOnVideoBuffer(int AudioBuffersCount) {
+					PostTextViewValueMessage(edVideoBuffersProcessed,Integer.toString(AudioBuffersCount));
+				}
+			};
+			//
+			llVideoH264.setVisibility(View.VISIBLE);
+			//.
+			svVideoH264.getHolder().addCallback(new SurfaceHolder.Callback() {
+				
+				@Override
+				public void surfaceDestroyed(SurfaceHolder holder) {
+					H264ChannelProcessor.Stop();
+				}
+				
+				@Override
+				public void surfaceCreated(SurfaceHolder holder) {
+				}
+				
+				@Override
+				public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+					H264ChannelProcessor.Start(holder.getSurface(), width,height);
+				}
+			});
+		};
 	}
 	
+	private static final int MESSAGE_SHOWEXCEPTION 			= -1;
+	private static final int MESSAGE_INITIALIZE 			= 0;
 	private static final int MESSAGE_SHOWSTATUSMESSAGE 		= 1;
-	private static final int MESSAGE_SHOWEXCEPTION 			= 2;
-	private static final int MESSAGE_DOONDATATYPE			= 3;
-	private static final int MESSAGE_TEXTVIEW_WRITEVALUE	= 4;
+	private static final int MESSAGE_DOONDATATYPE			= 2;
+	private static final int MESSAGE_TEXTVIEW_WRITEVALUE	= 3;
 	
 	public static class TTextViewValueString {
 		
@@ -675,6 +715,17 @@ public class TDataStreamPanel extends Activity {
     					EM = E.getClass().getName();
     				//.
     				Toast.makeText(TDataStreamPanel.this,EM,Toast.LENGTH_LONG).show();
+    				// .
+    				break; // . >
+
+    			case MESSAGE_INITIALIZE:
+					if (!flExists)
+						break; // . >
+			    	try {
+			    		StreamChannelConnectors_Initialize();
+					} catch (Exception Ex) {
+						PostException(Ex);
+					}
     				// .
     				break; // . >
 

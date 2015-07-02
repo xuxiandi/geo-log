@@ -1101,5 +1101,7 @@
     <string name="SLink">Связь</string>
     <string name="SAudioAAC">Аудио (AAC)</string>
     <string name="SAudioBuffersProcessed">Обработано аудио-буферов: </string>
+    <string name="SVideoH264">Видео (H264)</string>
+    <string name="SVideoBuffersProcessed">"Обработано видео-буферов: "</string>
     
 </resources>

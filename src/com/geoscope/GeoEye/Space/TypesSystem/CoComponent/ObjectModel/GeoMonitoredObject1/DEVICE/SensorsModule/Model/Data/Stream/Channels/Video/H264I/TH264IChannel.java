@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC;
+package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,36 +6,35 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessor.TChannelProcessor;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessors.Audio.AAC.TAACChannelProcessor;
-import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACADTSDecoder;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessors.Video.H264I.TH264IChannelProcessor;
 
-public class TAACChannel extends TStreamChannel {
+public class TH264IChannel extends TStreamChannel {
 
-	public static final String TypeID = "Audio.AAC";
+	public static final String TypeID = "Video.H264I";
 
-	public static final int DescriptorSize = 2;
-	//.
-	private static final int DefaultSampleRate = 16000;
+	public static final int DescriptorSize = 4;
 	
-	public static class TH264Channel {
+	public static final int TagSize = 2;
+	
+	public static final short DataTag 		= 1;
+	public static final short IndexTag 		= 2;
+	public static final short TimestampTag 	= 3;
+	
+	public static class TDoOnH264FramesHandler {
 		
-		public void DoOnConfiguration(int SampleRate, int ChannelCount) throws IOException {
-		}	
-
-		public void DoOnSamplesPacket(byte[] Packet, int PacketSize) {
+		public void DoOnH264Packet(byte[] Packet, int PacketOffset, int PacketSize) {
 		}
 	}	
 	
 	
-	private TAACADTSDecoder AACADTSDecoder;
-	//.
-	public volatile TH264Channel OnSamplesHandler = null;
+	public volatile TDoOnH264FramesHandler OnH264FramesHandler = null;
 	
-	public TAACChannel() throws IOException {
+	public TH264IChannel() throws IOException {
 		super();
 	}
 	
@@ -47,39 +46,18 @@ public class TAACChannel extends TStreamChannel {
 	@Override
 	public void Start() throws Exception {
 		super.Start();
-		//.
-		AACADTSDecoder = new TAACADTSDecoder(DefaultSampleRate) {
-			
-			@Override
-			public void DoOnConfiguration(int SampleRate, int ChannelCount) throws IOException {
-				if (OnSamplesHandler != null)
-					OnSamplesHandler.DoOnConfiguration(SampleRate, ChannelCount);
-			}
-			
-			@Override
-			public void DoOnOutputBuffer(byte[] input, int input_size, long Timestamp) throws IOException {
-				if (OnSamplesHandler != null)
-					OnSamplesHandler.DoOnSamplesPacket(input, input_size);
-				
-			}
-		};
 	}
 	
 	
 	@Override
 	public void Stop() throws Exception {
-		if (AACADTSDecoder != null) {
-			AACADTSDecoder.Destroy();
-			AACADTSDecoder = null;
-		}
-		//.
 		super.Stop();
 	}
 	
 	@Override
 	public void DoStreaming(Socket Connection, InputStream pInputStream, int pInputStreamSize, OutputStream pOutputStream, TOnProgressHandler OnProgressHandler, int StreamingTimeout, int IdleTimeoutCounter, TOnIdleHandler OnIdleHandler, TCanceller Canceller) throws Exception {
 		byte[] TransferBuffer = new byte[DescriptorSize];
-		short Size;
+		int Size;
 		int BytesRead,BytesRead1;
 		int IdleTimeoutCount = 0; 
 		int _StreamingTimeout = StreamingTimeout*IdleTimeoutCounter;
@@ -105,7 +83,7 @@ public class TAACChannel extends TStreamChannel {
 				throw new IOException("wrong data descriptor"); //. =>
 			//.
 			BytesRead1 = 0;
-			Size = (short)(((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF));
+			Size = (TransferBuffer[3] << 24)+((TransferBuffer[2] & 0xFF) << 16)+((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF);
 			if (Size > 0) { 
 				if (Size > TransferBuffer.length)
 					TransferBuffer = new byte[Size];
@@ -130,7 +108,15 @@ public class TAACChannel extends TStreamChannel {
 	
 	@Override
 	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx, int Size) throws Exception {
-		AACADTSDecoder.DoOnAACADTSPAcket(BA, Idx, Size); Idx += Size; 
+		short Descriptor = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += TagSize; Size -= TagSize;
+		switch (Descriptor) {
+		
+		case DataTag:
+			if (OnH264FramesHandler != null)
+				OnH264FramesHandler.DoOnH264Packet(BA, Idx, Size);
+			break; //. >
+		}
+		Idx += Size; 
 		return Idx;
 	}
 
@@ -139,7 +125,7 @@ public class TAACChannel extends TStreamChannel {
 		if (Processor != null)
 			Processor.Destroy();
 		//.
-		Processor = new TAACChannelProcessor(this);
+		Processor = new TH264IChannelProcessor(this);
 		//.
 		return Processor;
 	}

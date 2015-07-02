@@ -70,31 +70,31 @@ public class TSensorsModuleMeasurements {
 		}
 	}
 	
-	public static String CreateNewMeasurement(String DataBaseFolder, String NewMeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
+	public static String CreateNewMeasurement(String DataBaseFolder, String Domain, String NewMeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
 		String MeasurementFolder = DataBaseFolder+"/"+NewMeasurementID;
 		File Folder = new File(MeasurementFolder);
 		if (!Folder.exists())
 			Folder.mkdirs();
 		//.
 		if (Descriptor != null)
-			SetMeasurementDescriptor(DataBaseFolder, NewMeasurementID, Descriptor);
+			SetMeasurementDescriptor(DataBaseFolder, Domain, NewMeasurementID, Descriptor);
 		//.
 		return NewMeasurementID;
 	}
 	
 	public static String CreateNewMeasurement(String NewMeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
-		return CreateNewMeasurement(DataBaseFolder, NewMeasurementID, Descriptor);
+		return CreateNewMeasurement(DataBaseFolder, Domain, NewMeasurementID, Descriptor);
 	}
 	
 	public static String CreateNewMeasurement(TSensorMeasurementDescriptor Descriptor) throws Exception {
-		return CreateNewMeasurement(DataBaseFolder, TSensorMeasurement.GetNewID(), Descriptor);
+		return CreateNewMeasurement(DataBaseFolder, Domain, TSensorMeasurement.GetNewID(), Descriptor);
 	}
 	
 	public static String CreateNewMeasurement() throws Exception {
 		return CreateNewMeasurement(null);
 	}
 	
-	public static void DeleteMeasurement(String DataBaseFolder, String MeasurementID) throws IOException {
+	public static void DeleteMeasurement(String DataBaseFolder, String Domain, String MeasurementID) throws IOException {
 		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.WriteLock(Domain, MeasurementID);
 		try {
 			String MeasurementFolder = DataBaseFolder+"/"+MeasurementID;
@@ -109,7 +109,7 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static void DeleteMeasurement(String MeasurementID) throws IOException {
-		DeleteMeasurement(DataBaseFolder, MeasurementID);
+		DeleteMeasurement(DataBaseFolder, Domain, MeasurementID);
 	}
 	
 	public static boolean MeasurementExists(String MeasurementFolder) throws IOException {
@@ -253,7 +253,7 @@ public class TSensorsModuleMeasurements {
 		}
 	}
 	
-	public static long GetMeasurementSize(String DataBaseFolder, String MeasurementID) throws IOException {
+	public static long GetMeasurementSize(String DataBaseFolder, String Domain, String MeasurementID) throws IOException {
 		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.ReadLock(Domain, MeasurementID);
 		try {
 			File DF = new File(DataBaseFolder);
@@ -268,10 +268,10 @@ public class TSensorsModuleMeasurements {
 	}
 	
 	public static long GetMeasurementSize(String MeasurementID) throws IOException {
-		return GetMeasurementSize(DataBaseFolder, MeasurementID);
+		return GetMeasurementSize(DataBaseFolder, Domain, MeasurementID);
 	}
 	
-	public static void SetMeasurementDescriptor(String DataBaseFolder, String MeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
+	public static void SetMeasurementDescriptor(String DataBaseFolder, String Domain, String MeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
 		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.WriteLock(Domain, MeasurementID);
 		try {
 			int Version = 1;
@@ -339,7 +339,7 @@ public class TSensorsModuleMeasurements {
 	}
 
 	public static void SetMeasurementDescriptor(String MeasurementID, TSensorMeasurementDescriptor Descriptor) throws Exception {
-		SetMeasurementDescriptor(DataBaseFolder, MeasurementID, Descriptor);
+		SetMeasurementDescriptor(DataBaseFolder, Domain, MeasurementID, Descriptor);
 	}
 	
 	public static TSensorMeasurementDescriptor GetMeasurementDescriptor(String DataBaseFolder, String Domain, String MeasurementID, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
@@ -436,7 +436,7 @@ public class TSensorsModuleMeasurements {
 			throw new Exception("measurement descriptor is not found, ID:"+MeasurementID); //. =>
 		//.
 		Descriptor.StartTimestamp = OleDate.UTCCurrentTimestamp();
-		SetMeasurementDescriptor(DataBaseFolder, MeasurementID, Descriptor);
+		SetMeasurementDescriptor(DataBaseFolder, Domain, MeasurementID, Descriptor);
 	}
 
 	public static void SetMeasurementStartTimestamp(String MeasurementID) throws Exception {
@@ -460,7 +460,7 @@ public class TSensorsModuleMeasurements {
 			throw new Exception("measurement descriptor is not found, ID:"+MeasurementID); //. =>
 		//.
 		Descriptor.FinishTimestamp = OleDate.UTCCurrentTimestamp();
-		SetMeasurementDescriptor(DataBaseFolder, MeasurementID, Descriptor);
+		SetMeasurementDescriptor(DataBaseFolder, Domain, MeasurementID, Descriptor);
 	}
 
 	public static void SetMeasurementFinishTimestamp(String MeasurementID) throws Exception {
@@ -484,7 +484,7 @@ public class TSensorsModuleMeasurements {
 			throw new Exception("measurement descriptor is not found, ID:"+MeasurementID); //. =>
 		//.
 		Descriptor.FinishTimestamp = FinishTimestamp;
-		SetMeasurementDescriptor(DataBaseFolder, MeasurementID, Descriptor);
+		SetMeasurementDescriptor(DataBaseFolder, Domain, MeasurementID, Descriptor);
 	}
 
 	public static void SetMeasurementFinish(String MeasurementID, double FinishTimestamp) throws Exception {
@@ -495,7 +495,7 @@ public class TSensorsModuleMeasurements {
 		SetMeasurementFinish(DataBaseFolder, Domain, MeasurementID, OleDate.UTCCurrentTimestamp());
 	}
 	
-	public static byte[] GetMeasurementData(String DataBaseFolder, String MeasurementID) throws IOException {
+	public static byte[] GetMeasurementData(String DataBaseFolder, String Domain, String MeasurementID) throws IOException {
 		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.ReadLock(Domain, MeasurementID);
 		try {
 			final int BUFFER = 2048;
@@ -546,7 +546,7 @@ public class TSensorsModuleMeasurements {
 	}	
 	
 	public static byte[] GetMeasurementData(String MeasurementID) throws IOException {
-		return GetMeasurementData(DataBaseFolder, MeasurementID);
+		return GetMeasurementData(DataBaseFolder, Domain, MeasurementID);
 	}
 	
 	public static void ValidateMeasurements(String DataBaseFolder) throws Exception {

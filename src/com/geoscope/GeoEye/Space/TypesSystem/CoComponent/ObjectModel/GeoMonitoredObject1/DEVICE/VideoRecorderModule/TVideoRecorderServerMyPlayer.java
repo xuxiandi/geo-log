@@ -11,7 +11,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 
 @SuppressLint("HandlerLeak")
@@ -147,7 +146,7 @@ public class TVideoRecorderServerMyPlayer extends Activity {
 	}
 	
 	private void Setup() throws Exception {
-		ProcessorComponent.Setup(new TSensorMeasurement(MeasurementDatabaseFolder, TSensorsModuleMeasurements.Domain, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance));
+		ProcessorComponent.Setup(new TSensorMeasurement(MeasurementDatabaseFolder, MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance));
 		//.
 		ProcessorComponent.SetPosition(MeasurementStartPosition, 0/*Delay, ms*/, false);
 	}

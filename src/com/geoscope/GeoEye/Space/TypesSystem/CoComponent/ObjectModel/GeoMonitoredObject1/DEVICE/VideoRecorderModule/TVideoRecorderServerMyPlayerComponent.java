@@ -49,7 +49,6 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessor;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
@@ -981,7 +980,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	    		    				public void Process() throws Exception {
 	    		    					ExportFile = TGeoLogApplication.TempFolder+"/"+ExpertFileName;
 	    		    					//.
-	    		    					com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.ExportMeasurementToMP4File(Measurement.DatabaseFolder, TSensorsModuleMeasurements.Domain, Measurement.Descriptor.ID, ExportFile);
+	    		    					com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements.ExportMeasurementToMP4File(Measurement.DatabaseFolder, Measurement.DatabaseFolder, Measurement.Descriptor.ID, ExportFile);
 	    		    				}
 
 	    		    				@Override

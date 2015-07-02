@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 
 @SuppressLint("HandlerLeak")
@@ -58,9 +57,9 @@ public class TMeasurementProcessorPanel extends Activity {
     			@Override
     			public void Process() throws Exception {
     	        	if (MeasurementDataFile == null)
-    	        		_Measurement = new TSensorMeasurement(MeasurementDatabaseFolder, TSensorsModuleMeasurements.Domain, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+    	        		_Measurement = new TSensorMeasurement(MeasurementDatabaseFolder, MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
     	        	else
-    	        		_Measurement = TSensorMeasurement.FromDataFile(MeasurementDataFile, MeasurementDatabaseFolder, TSensorsModuleMeasurements.Domain, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance, Canceller);
+    	        		_Measurement = TSensorMeasurement.FromDataFile(MeasurementDataFile, MeasurementDatabaseFolder, MeasurementDatabaseFolder, MeasurementID, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance, Canceller);
     			}
 
     			@Override

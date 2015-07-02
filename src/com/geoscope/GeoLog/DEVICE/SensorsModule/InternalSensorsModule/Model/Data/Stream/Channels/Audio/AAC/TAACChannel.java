@@ -40,25 +40,18 @@ public class TAACChannel extends TStreamChannel {
 			Stop();
 		}
 		
-		public void SetSource(int pSource) {
-			Source = pSource;
-		}
-		
-		public void SetSampleRate(int SPS) {
-			SampleRate = SPS;
-		}
-		
 		public void Start() {
     		AACADTSEncoder = new TAACADTSEncoder(BitRate, SampleRate) {
     			
     			@Override
     			public void DoOnOutputPacket(byte[] Packet, int PacketSize) throws Exception {
     				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
-    				if (DestinationChannel != null)
-    					DestinationChannel.DoOnPacket(Packet, PacketSize);
+    				if (DestinationChannel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel)
+    					((com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel)DestinationChannel).DoOnAACPacket(Packet, PacketSize);
     			};
     		};
 			//.
+			Canceller.Reset();
 			_Thread = new Thread(this);
 			_Thread.start();
 		}
@@ -186,6 +179,10 @@ public class TAACChannel extends TStreamChannel {
 	@Override
 	public String GetTypeID() {
 		return TypeID;
+	}
+	
+	public int GetSampleRate() {
+		return AudioSampleSource.SampleRate;
 	}
 	
 	@Override

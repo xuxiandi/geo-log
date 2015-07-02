@@ -92,7 +92,7 @@ public class TADSChannel extends TStreamChannel {
                 if (BytesRead1 <= 0) 
                 	break; //. >
 				//. parse and process
-            	ParseFromByteArrayAndProcess(TransferBuffer, 0);
+            	ParseFromByteArrayAndProcess(TransferBuffer, 0, Size);
             	//.
             	OnProgressHandler.DoOnProgress(BytesRead1, Canceller);
 			}
@@ -106,7 +106,7 @@ public class TADSChannel extends TStreamChannel {
 	}		
 	
 	@Override
-	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
+	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx, int Size) throws Exception {
 		short Descriptor = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += DescriptorSize;
 		switch (Descriptor) {
 		

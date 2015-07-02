@@ -13,12 +13,19 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 	}
 	
 	@Override
-	public TChannel GetChannel(String pTypeID) {
+	public TChannel GetChannel(String pTypeID) throws Exception {
 		if (TTLRChannel.TypeID.equals(pTypeID))
 			return (new TTLRChannel()); // =>
 		//.
-		com.geoscope.Classes.Data.Stream.Channel.TChannelProvider CP = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.TChannelsProvider.Instance;
+		com.geoscope.Classes.Data.Stream.Channel.TChannelProvider CP;
+		//.
+		CP = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.Model.Data.Stream.Channels.TChannelsProvider.Instance;
 		TChannel Result = CP.GetChannel(pTypeID);
+		if (Result != null)
+			return Result; //. ->
+		//.
+		CP = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.TChannelsProvider.Instance;
+		Result = CP.GetChannel(pTypeID);
 		if (Result != null)
 			return Result; //. ->
 		//.

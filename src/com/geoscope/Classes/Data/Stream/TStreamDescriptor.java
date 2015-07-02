@@ -42,6 +42,12 @@ public class TStreamDescriptor {
 		FromByteArray(BA);
 	}
 	
+	public void Close() throws Exception {
+		int Cnt = Channels.size();
+		for (int I = 0; I < Cnt; I++) 
+			Channels.get(I).Close();
+	}
+	
 	public void Initialize(Object Parameters) throws Exception {
 		int Cnt = Channels.size();
 		for (int I = 0; I < Cnt; I++) 

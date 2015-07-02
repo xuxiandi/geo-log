@@ -1099,5 +1099,7 @@
     <string name="SGettingSecurityInfo">Получение файла безопасности &#8230;</string>
     <string name="SAttachToMyUserActivityAsDatafile">Прикрепить к моей активности как файл данных</string>
     <string name="SLink">Связь</string>
+    <string name="SAudioAAC">Аудио (AAC)</string>
+    <string name="SAudioBuffersProcessed">Обработано аудио-буферов: </string>
     
 </resources>

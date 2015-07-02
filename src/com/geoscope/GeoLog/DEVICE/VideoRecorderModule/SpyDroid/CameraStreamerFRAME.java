@@ -101,6 +101,8 @@ public class CameraStreamerFRAME extends Camera {
 		}
 		
 		public void Start() {
+			Canceller.Reset();
+			//.
 			_Thread = new Thread(this);
 			_Thread.start();
 		}

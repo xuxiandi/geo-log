@@ -39,7 +39,9 @@ import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessors.Audio.AAC.TAACChannelProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
@@ -66,7 +68,7 @@ public class TDataStreamPanel extends Activity {
 	private TStreamDescriptor 	StreamDescriptor;
 	private TChannelIDs			StreamChannels = null;
 	//.
-	private ArrayList<TStreamChannelProcessorAbstract> StreamChannelProcessors = new ArrayList<TStreamChannelProcessorAbstract>();
+	private ArrayList<TStreamChannelConnectorAbstract> StreamChannelConnectors = new ArrayList<TStreamChannelConnectorAbstract>();
 	//.
 	@SuppressWarnings("unused")
 	private boolean IsInFront = false;
@@ -77,6 +79,7 @@ public class TDataStreamPanel extends Activity {
 	private LinearLayout llEnvironmentConditionsENVC;
 	private LinearLayout llEnvironmentConditionsXENVC;
 	private LinearLayout llTelemetryTLR;
+	private LinearLayout llAudioAAC;
 	//.
 	private int LinkedReflectorID = 0;
 	
@@ -128,13 +131,14 @@ public class TDataStreamPanel extends Activity {
             llEnvironmentConditionsENVC = (LinearLayout)findViewById(R.id.llEnvironmentConditionsENVC);
             llEnvironmentConditionsXENVC = (LinearLayout)findViewById(R.id.llEnvironmentConditionsXENVC);
             llTelemetryTLR = (LinearLayout)findViewById(R.id.llTelemetryTLR);
+            llAudioAAC = (LinearLayout)findViewById(R.id.llAudioAAC);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
 		}
     	//.
     	try {
-    		StreamChannelProcessors_Initialize();
+    		StreamChannelConnectors_Initialize();
 		} catch (Exception E) {
 			PostException(E);
 		}
@@ -146,7 +150,12 @@ public class TDataStreamPanel extends Activity {
     	flExists = false;
 		//.
     	try {
-    		StreamChannelProcessors_Finalize();
+    		StreamChannelConnectors_Finalize();
+    		//.
+    		if (StreamDescriptor != null) {
+    			StreamDescriptor.Close();
+    			StreamDescriptor = null;
+    		}
 		} catch (Exception E) {
 			PostException(E);
 		}
@@ -165,50 +174,54 @@ public class TDataStreamPanel extends Activity {
 		IsInFront = true;
 	}
 
-	private void StreamChannelProcessors_Initialize(SurfaceHolder SH, int Width, int Height) throws Exception {
-		StreamChannelProcessors_Finalize();
+	private void StreamChannelConnectors_Initialize(SurfaceHolder SH, int Width, int Height) throws Exception {
+		StreamChannelConnectors_Finalize();
 		//.
-		Layout_Reset();
 		for (int I = 0; I < StreamDescriptor.Channels.size(); I++) {
 			TStreamChannel Channel = (TStreamChannel)StreamDescriptor.Channels.get(I);
 			if ((StreamChannels == null) || StreamChannels.IDExists(Channel.ID)) {
-				TStreamChannelProcessorAbstract ChannelProcessor = new TStreamChannelProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, Object, Channel, new TStreamChannelProcessorAbstract.TOnProgressHandler(Channel) {
+				TStreamChannelConnectorAbstract ChannelConnector = new TStreamChannelConnector(this, ServerAddress,ServerPort, UserID,UserPassword, Object, Channel, new TStreamChannelConnectorAbstract.TOnProgressHandler(Channel) {
+					
 					@Override
 					public void DoOnProgress(int ReadSize, TCanceller Canceller) {
 						TDataStreamPanel.this.PostStatusMessage("");
 					}
-				}, new TStreamChannelProcessorAbstract.TOnIdleHandler(Channel) {
+				}, new TStreamChannelConnectorAbstract.TOnIdleHandler(Channel) {
+					
 					@Override
 					public void DoOnIdle(TCanceller Canceller) {
 						TDataStreamPanel.this.PostStatusMessage(TDataStreamPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
 					}
-				}, new TStreamChannelProcessorAbstract.TOnExceptionHandler(Channel) {
+				}, new TStreamChannelConnectorAbstract.TOnExceptionHandler(Channel) {
+					
 					@Override
 					public void DoOnException(Exception E) {
 						TDataStreamPanel.this.PostException(E);
 					}
 				});
-				if (ChannelProcessor != null) {
-					StreamChannelProcessors.add(ChannelProcessor);
-					if (ChannelProcessor.IsVisual())
-						ChannelProcessor.VisualSurface_Set(SH, Width,Height);
+				if (ChannelConnector != null) {
+					StreamChannelConnectors.add(ChannelConnector);
+					if (ChannelConnector.IsVisual())
+						ChannelConnector.VisualSurface_Set(SH, Width,Height);
 					//.
 					Layout_UpdateForChannel(Channel);
 					//.
-					ChannelProcessor.Start();
+					ChannelConnector.Start();
 				}			  
 			}
 		}
 	}
 	
-	private void StreamChannelProcessors_Initialize() throws Exception {
-		StreamChannelProcessors_Initialize(null,0,0);
+	private void StreamChannelConnectors_Initialize() throws Exception {
+		StreamChannelConnectors_Initialize(null,0,0);
 	}
 	
-	private void StreamChannelProcessors_Finalize() throws Exception {
-		for (int I = 0; I < StreamChannelProcessors.size(); I++) 
-			StreamChannelProcessors.get(I).Destroy(false);
-		StreamChannelProcessors.clear();
+	private void StreamChannelConnectors_Finalize() throws Exception {
+		for (int I = 0; I < StreamChannelConnectors.size(); I++) 
+			StreamChannelConnectors.get(I).Destroy(false);
+		StreamChannelConnectors.clear();
+		//.
+		Layout_Reset();
 	}
 	
 	private void Layout_Reset() {
@@ -220,9 +233,11 @@ public class TDataStreamPanel extends Activity {
 		//.
 		llTelemetryTLR.setVisibility(View.GONE);
 		llTelemetryTLR.removeAllViews();
+		//.
+		llAudioAAC.setVisibility(View.GONE);
 	}
 	
-	private void Layout_UpdateForChannel(TStreamChannel Channel) {
+	private void Layout_UpdateForChannel(TStreamChannel Channel) throws Exception {
 		if (Channel instanceof TADSChannel) {
 			TADSChannel ADSChannel = (TADSChannel)Channel;
 			//.
@@ -608,6 +623,24 @@ public class TDataStreamPanel extends Activity {
 			llTelemetryTLR.setVisibility(View.VISIBLE);
 			//.
 			return; //. ->
+		};
+		if (Channel instanceof TAACChannel) {
+			TAACChannel AACChannel = (TAACChannel)Channel;
+			//.
+			final EditText edAudioBuffersProcessed = (EditText)findViewById(R.id.edAudioAACBuffersProcessed);
+			//.
+			AACChannel.ReStart();
+			//.
+			TAACChannelProcessor AACChannelProcessor = (TAACChannelProcessor)AACChannel.GetProcessor();
+			AACChannelProcessor.StatisticHandler = new TAACChannelProcessor.TStatisticHandler() {
+				
+				@Override
+				public void DoOnAudioBuffer(int AudioBuffersCount) {
+					PostTextViewValueMessage(edAudioBuffersProcessed,Integer.toString(AudioBuffersCount));
+				}
+			};
+			//
+			llAudioAAC.setVisibility(View.VISIBLE);
 		};
 	}
 	

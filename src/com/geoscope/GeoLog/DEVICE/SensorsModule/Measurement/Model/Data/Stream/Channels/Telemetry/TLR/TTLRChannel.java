@@ -18,13 +18,13 @@ public class TTLRChannel extends TStreamChannel {
 	private String OutFile;
 	//.
 	private ByteArrayOutputStream	OutFileStream;
-	public ZOutputStream			DestrinationStream;
+	public ZOutputStream			DestinationStream;
 	
 	public TTLRChannel() {
 		Kind = TChannel.CHANNEL_KIND_OUT;
 		//.
 		OutFileStream = null;
-		DestrinationStream = null;
+		DestinationStream = null;
 	}
 
 	public TTLRChannel(String pMeasurementFolder) {
@@ -43,14 +43,14 @@ public class TTLRChannel extends TStreamChannel {
 		super.Start();
 		//.
 		OutFileStream = new ByteArrayOutputStream();
-		DestrinationStream = new ZOutputStream(OutFileStream,JZlib.Z_BEST_SPEED);
+		DestinationStream = new ZOutputStream(OutFileStream,JZlib.Z_BEST_SPEED);
 	}
 	
 	@Override
 	public void Stop() throws Exception {
-		if (DestrinationStream != null) {
-			DestrinationStream.close();
-			DestrinationStream = null;
+		if (DestinationStream != null) {
+			DestinationStream.close();
+			DestinationStream = null;
 		}
 		if (OutFileStream != null) {
 			FileOutputStream FOS = new FileOutputStream(OutFile);
@@ -65,6 +65,6 @@ public class TTLRChannel extends TStreamChannel {
 			OutFileStream = null;
 		}
 		//.
-		super.Close();
+		super.Stop();
 	}
 }

@@ -1,26 +1,26 @@
-package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.GPSTLR;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Audio;
 
 import java.io.IOException;
 
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.GPSTLR.TMeasurement;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.TMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 
-public class TGPSTLRMeter extends TSensorMeter {
+public class TAudioMeter extends TSensorMeter {
 
-	public static final String TypeID = "Telemetry.GPSTLR";
+	public static final String TypeID = "Audio";
 	public static final String ContainerTypeID = "";
 	//.
-	public static final String Name = "Geo-location track";
-	public static final String Info = "GPS telemetry";
+	public static final String Name = "Audio";
+	public static final String Info = "microphone";
 	
 	public static class TMyProfile extends TProfile {
 	}
 	
-	public TGPSTLRMeter(TSensorsModule pSensorsModule, String pID, String pProfileFolder) throws Exception {
+	public TAudioMeter(TSensorsModule pSensorsModule, String pID, String pProfileFolder) throws Exception {
 		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
 	}
 	
@@ -31,9 +31,9 @@ public class TGPSTLRMeter extends TSensorMeter {
 	
 	@Override
 	protected void DoProcess() throws Exception {
-		if (SensorsModule.InternalSensorsModule.GPSChannel == null)
+		if (SensorsModule.InternalSensorsModule.AACChannel == null)
 			throw new IOException("no origin channel"); //. =>
-		TTLRChannel SourceChannel = (TTLRChannel)SensorsModule.InternalSensorsModule.GPSChannel.DestinationChannel_Get(); 	
+		TAACChannel SourceChannel = (TAACChannel)SensorsModule.InternalSensorsModule.AACChannel.DestinationChannel_Get(); 	
 		if (SourceChannel == null)
 			throw new IOException("no source channel"); //. =>
 		//.
@@ -44,11 +44,12 @@ public class TGPSTLRMeter extends TSensorMeter {
 				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 				while (!Canceller.flCancel) {
 					TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
-					Measurement.TLRChannel.Assign(SourceChannel);
+					Measurement.AACChannel.Assign(SourceChannel);
+					Measurement.AACChannel.SampleRate = SensorsModule.InternalSensorsModule.AACChannel.GetSampleRate();
 					//.
 					Measurement.Start();
 					try {
-						SourceChannel.DoStreaming(Measurement.TLRChannel.DestinationStream, Canceller, MeasurementMaxDuration);
+						SourceChannel.DoStreaming(Measurement.AACChannel.DestinationStream, Canceller, MeasurementMaxDuration);
 					}
 					finally {
 						Measurement.Finish();

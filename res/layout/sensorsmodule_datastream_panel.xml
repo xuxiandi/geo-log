@@ -554,6 +554,50 @@
             android:background="@android:color/white"
             android:orientation="vertical" >
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llAudioAAC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:gravity="center"
+                android:text="@string/SAudioAAC"
+                android:textColor="#ff000000"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SAudioBuffersProcessed"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edAudioAACBuffersProcessed"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
 </ScrollView>

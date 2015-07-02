@@ -51,7 +51,6 @@ import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessor;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 
 @SuppressLint("HandlerLeak")
@@ -143,10 +142,43 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 	
 	public static class TAudioAACChannelProcessor extends TChannelProcessor {
 		
-		public static final String TypeID = TAACChannel.TypeID;
+		public static final String TypeID = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Audio.AAC.TAACChannel.TypeID;
+		
+		public static class TAudioChannelParams {
+		
+			public int SampleRate;
+			public int Packets;
+			public String FileName;
+			
+			public TAudioChannelParams(int pSampleRate, int pPackets, String pFileName) {
+				SampleRate = pSampleRate;
+				Packets = pPackets;
+				FileName = pFileName;
+			}
+		}
+		
+		public static TAudioChannelParams GetAudioChannelParams(TChannel Channel) {
+			if (Channel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Audio.AAC.TAACChannel) {
+				com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Audio.AAC.TAACChannel AACChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Audio.AAC.TAACChannel)Channel;
+				if (AACChannel.Packets > 0)
+					return (new TAudioChannelParams(AACChannel.SampleRate, AACChannel.Packets, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.AudioAACADTSFileName)); //. ->
+				else
+					return null; //. -> 
+			}
+			else
+				if (Channel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.Model.Data.Stream.Channels.Audio.AAC.TAACChannel) {
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.Model.Data.Stream.Channels.Audio.AAC.TAACChannel AACChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.Model.Data.Stream.Channels.Audio.AAC.TAACChannel)Channel;
+					if (AACChannel.Packets > 0)
+						return (new TAudioChannelParams(AACChannel.SampleRate, AACChannel.Packets, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.TMeasurementDescriptor.AudioAACADTSFileName)); //. ->
+					else
+						return null; //. -> 
+				}
+				else
+					return null; //. -> 
+		}
 		
 		public static boolean ChannelIsMine(TChannel Channel) {
-			return ((Channel instanceof TAACChannel) && (((TAACChannel)Channel).Packets > 0));
+			return (GetAudioChannelParams(Channel) != null);
 		}
 		
 		private static final String CodecTypeName = "audio/mp4a-latm";
@@ -175,8 +207,8 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 			this(pPlayer, pAudioFileName, pPackets, pSampleRate, 0);
 		}
 		
-		public TAudioAACChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pFolder, TChannel Channel) {
-			this(pPlayer, pFolder+"/"+com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.AudioAACADTSFileName, ((TAACChannel)Channel).Packets, ((TAACChannel)Channel).SampleRate, 0);
+		public TAudioAACChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pFolder, TAudioChannelParams AudioChannelParams) {
+			this(pPlayer, pFolder+"/"+AudioChannelParams.FileName, AudioChannelParams.Packets, AudioChannelParams.SampleRate, 0);
 		}
 		
 		@Override
@@ -1107,7 +1139,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 							AudioChannelProcessor.Destroy();
 							AudioChannelProcessor = null;
 						}
-						AudioChannelProcessor = new TAudioAACChannelProcessor(this, Measurement.Folder(), Channel);
+						AudioChannelProcessor = new TAudioAACChannelProcessor(this, Measurement.Folder(), TAudioAACChannelProcessor.GetAudioChannelParams(Channel));
 					}
 				}
 				//.

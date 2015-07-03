@@ -259,7 +259,7 @@ public class TSensorsModule extends TModule {
     public void SensorsStreamingServer_Disconnect() {
     }
     
-    public void SensorsStreamingServer_Streaming(long DestinationUserID, String DestinationUserAccessKey, InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws IOException {
+    public void SensorsStreamingServer_Streaming(long DestinationUserID, String DestinationUserAccessKey, InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, TCanceller Canceller) throws Exception {
     	byte[] Descriptor = new byte[4];
   		if (DestinationConnectionInputStream.read(Descriptor,0,Descriptor.length) != Descriptor.length)
   			throw new IOException("error of reading connection"); //. =>

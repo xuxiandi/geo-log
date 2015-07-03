@@ -137,12 +137,12 @@ public class TDataStreamPanel extends Activity {
             llTelemetryTLR = (LinearLayout)findViewById(R.id.llTelemetryTLR);
             llAudioAAC = (LinearLayout)findViewById(R.id.llAudioAAC);
             llVideoH264 = (LinearLayout)findViewById(R.id.llVideoH264);
+        	//.
+    		StreamChannelConnectors_Initialize();
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
 		}
-    	//.
-		MessageHandler.obtainMessage(MESSAGE_INITIALIZE).sendToTarget();
 		//.
 		flExists = true;
     }
@@ -661,8 +661,6 @@ public class TDataStreamPanel extends Activity {
 					PostTextViewValueMessage(edVideoBuffersProcessed,Integer.toString(AudioBuffersCount));
 				}
 			};
-			//
-			llVideoH264.setVisibility(View.VISIBLE);
 			//.
 			svVideoH264.getHolder().addCallback(new SurfaceHolder.Callback() {
 				
@@ -680,11 +678,12 @@ public class TDataStreamPanel extends Activity {
 					H264ChannelProcessor.Start(holder.getSurface(), width,height);
 				}
 			});
+			//
+			llVideoH264.setVisibility(View.VISIBLE);
 		};
 	}
 	
 	private static final int MESSAGE_SHOWEXCEPTION 			= -1;
-	private static final int MESSAGE_INITIALIZE 			= 0;
 	private static final int MESSAGE_SHOWSTATUSMESSAGE 		= 1;
 	private static final int MESSAGE_DOONDATATYPE			= 2;
 	private static final int MESSAGE_TEXTVIEW_WRITEVALUE	= 3;
@@ -715,17 +714,6 @@ public class TDataStreamPanel extends Activity {
     					EM = E.getClass().getName();
     				//.
     				Toast.makeText(TDataStreamPanel.this,EM,Toast.LENGTH_LONG).show();
-    				// .
-    				break; // . >
-
-    			case MESSAGE_INITIALIZE:
-					if (!flExists)
-						break; // . >
-			    	try {
-			    		StreamChannelConnectors_Initialize();
-					} catch (Exception Ex) {
-						PostException(Ex);
-					}
     				// .
     				break; // . >
 

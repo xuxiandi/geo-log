@@ -108,8 +108,8 @@ public class TH264IChannel extends TStreamChannel {
 	
 	@Override
 	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx, int Size) throws Exception {
-		short Descriptor = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += TagSize; Size -= TagSize;
-		switch (Descriptor) {
+		short Tag = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += TagSize; Size -= TagSize;
+		switch (Tag) {
 		
 		case DataTag:
 			synchronized (this) {

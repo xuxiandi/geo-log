@@ -179,6 +179,8 @@ public class CameraStreamerFRAME extends Camera {
 					}
 				}
 			}
+        	catch (InterruptedException IE) {
+        	}
 			catch (Throwable T) {
 			}
 		}

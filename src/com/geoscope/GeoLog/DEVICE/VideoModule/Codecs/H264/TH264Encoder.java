@@ -100,7 +100,7 @@ public class TH264Encoder extends TH264EncoderAbstract {
 						outputBuffer.get(OutData, 0,bufferInfo.size);
 						//. process output
 						if (flParseParameters && (OutputBufferCount == 0))
-							DoOnParameters(OutData,bufferInfo.size);
+							DoOnConfiguration(OutData,bufferInfo.size);
 						else
 							DoOnOutputBuffer(OutData,bufferInfo.size, bufferInfo.presentationTimeUs,((bufferInfo.flags & MediaCodec.BUFFER_FLAG_SYNC_FRAME) > 0));
 						OutputBufferCount++;

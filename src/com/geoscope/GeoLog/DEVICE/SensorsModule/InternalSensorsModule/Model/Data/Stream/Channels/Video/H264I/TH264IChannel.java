@@ -12,12 +12,42 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
 
 @SuppressLint("HandlerLeak")
 public class TH264IChannel extends TStreamChannel {
 
 	public static final String TypeID = "Video.H264I";
+	
+	public static class TChannelConfiguration {
+	
+		private int 	StreamSession;
+		private byte[] 	Data = null;
+		
+		public synchronized void Set(byte[] pData, int pDataSize) {
+			StreamSession++;
+			//.
+			if ((Data == null) || (Data.length != pDataSize))
+				Data = new byte[pDataSize];
+			System.arraycopy(pData,0, Data,0, pDataSize);
+		}
+		
+		public synchronized TChannelConfiguration Get() {
+			if (Data == null)
+				return null; //. ->
+			//.
+			TChannelConfiguration Result = new TChannelConfiguration();
+			//.
+			Result.StreamSession = StreamSession;
+			//.
+			Result.Data = new byte[Data.length];
+			if (Data.length > 0)
+				System.arraycopy(Data,0, Result.Data,0, Data.length);
+			//.
+			return Result;
+		}
+	}
 	
 	
 	public class TVideoFrameSource extends TCancelableThread {
@@ -31,19 +61,22 @@ public class TH264IChannel extends TStreamChannel {
 			}
 
 			@Override
+			public void DoOnConfiguration(byte[] Buffer, int BufferSize) throws Exception {
+				//. start a new stream session and fill the channel configuration with data
+				ChannelConfiguration.Set(Buffer, BufferSize);
+				//.
+				super.DoOnConfiguration(Buffer, BufferSize);
+			}
+			
+			@Override
 			public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws Exception {
-				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
-				if (DestinationChannel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel) {
-					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)DestinationChannel;
+				DestinationChannel.DoOnH264Packet(Buffer, BufferSize);
+				//.
+				if (flSyncFrame) {
+					DestinationChannel.DoOnH264Index(Index);
 					//.
-					Channel.DoOnH264Packet(Buffer, BufferSize);
-					//.
-					if (flSyncFrame) {
-						Channel.DoOnH264Index(Index);
-						//.
-						Timestamp = Timestamp/1000; //. convert to milliseconds from microseconds
-						Channel.DoOnH264Timestamp((int)Timestamp);
-					}
+					Timestamp = Timestamp/1000; //. convert to milliseconds from microseconds
+					DestinationChannel.DoOnH264Timestamp((int)Timestamp);
 				}
 				//.
 				Index += BufferSize;
@@ -55,6 +88,9 @@ public class TH264IChannel extends TStreamChannel {
 		//.
 		public int FrameRate = 15;
 		public int BitRate = 1000000;
+		//.
+		private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel DestinationChannel;
+				
 		
 		public TVideoFrameSource() {
     		super();
@@ -80,39 +116,59 @@ public class TH264IChannel extends TStreamChannel {
 		@Override
 		public void run() {
 			try {
-		        if (!InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) 
-		        	throw new IOException("Video server is not available"); //. ->
-		        android.hardware.Camera camera = android.hardware.Camera.open();
-		        InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, Width,Height, BitRate, FrameRate, null,null);
-		        try {
-		        	TVideoFrameEncoderServerClient VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient();
-		        	try {
-			        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(VideoFrameEncoderServerClient);
+				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel _DestinationChannel = DestinationChannel_Get();
+				if (!(_DestinationChannel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)) 
+		        	throw new IOException("No destination channel"); //. ->
+				DestinationChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)_DestinationChannel;
+				DestinationChannel_PacketSubscribersItemsNotifier_Set(new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier() {
+
+					@Override
+					protected void DoOnSubscribe(TPacketSubscriber Subscriber) throws Exception {
+						TChannelConfiguration CC = ChannelConfiguration.Get();
+						if (CC != null)
+							DestinationChannel.DoOnH264Packet(CC.Data, CC.Data.length, Subscriber);
+					}
+				});
+				try {
+			        if (!InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) 
+			        	throw new IOException("Video server is not available"); //. ->
+			        android.hardware.Camera camera = android.hardware.Camera.open();
+			        InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, Width,Height, BitRate, FrameRate, null,null);
+			        try {
+			        	TVideoFrameEncoderServerClient VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient();
 			        	try {
-			    	        camera.startPreview();
-			    	        try {
-								while (!Canceller.flCancel) 
-									Thread.sleep(1000*60);
-			    	        }
-			        		finally {
-			        			camera.stopPreview();
-			        			camera.setPreviewDisplay(null);
-			        			camera.setPreviewCallback(null);
-			        			camera.release();
-			        		}
+				        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(VideoFrameEncoderServerClient);
+				        	try {
+				    	        camera.startPreview();
+				    	        try {
+									while (!Canceller.flCancel) 
+										Thread.sleep(1000*60);
+				    	        }
+				        		finally {
+				        			camera.stopPreview();
+				        			camera.setPreviewDisplay(null);
+				        			camera.setPreviewCallback(null);
+				        			camera.release();
+				        		}
+				        	}
+				        	finally {
+				        		InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(VideoFrameEncoderServerClient);
+				        	}
 			        	}
 			        	finally {
-			        		InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(VideoFrameEncoderServerClient);
+							VideoFrameEncoderServerClient.Destroy();
 			        	}
-		        	}
-		        	finally {
-						VideoFrameEncoderServerClient.Destroy();
-		        	}
-		        }
-		        finally {
-		        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Stop();
-		        }
+			        }
+			        finally {
+			        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Stop();
+			        }
+				}
+				finally {
+					DestinationChannel_PacketSubscribersItemsNotifier_Clear();
+				}
 			}
+        	catch (InterruptedException IE) {
+        	}
 			catch (Throwable TE) {
 				InternalSensorsModule.Device.Log.WriteWarning("H264Channel.VideoFrameSource","Exception: "+TE.getMessage());
 			}
@@ -120,6 +176,8 @@ public class TH264IChannel extends TStreamChannel {
 	}
 	
 	private TVideoFrameSource VideoFrameSource;
+	//.
+	private TChannelConfiguration ChannelConfiguration = new TChannelConfiguration();
 	
 	public TH264IChannel(TInternalSensorsModule pInternalSensorsModule) {
 		super(pInternalSensorsModule);

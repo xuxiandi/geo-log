@@ -61,7 +61,7 @@ public class TH264EncoderServer {
 		}
 		
 		@Override
-		public void DoOnParameters(byte[] Buffer, int BufferSize) throws Exception {
+		public void DoOnConfiguration(byte[] Buffer, int BufferSize) throws Exception {
 			DoOnOutputBuffer(Buffer,BufferSize, 0,false);
 		}
 		
@@ -858,7 +858,7 @@ public class TH264EncoderServer {
 			for (int I = 0; I < Cnt; I++) {
 				TClient Client = Clients.get(I);
 				if (Client.flApplyParameters)
-					Client.DoOnParameters(Buffer,BufferSize);
+					Client.DoOnConfiguration(Buffer,BufferSize);
 			}
 		}
 	}

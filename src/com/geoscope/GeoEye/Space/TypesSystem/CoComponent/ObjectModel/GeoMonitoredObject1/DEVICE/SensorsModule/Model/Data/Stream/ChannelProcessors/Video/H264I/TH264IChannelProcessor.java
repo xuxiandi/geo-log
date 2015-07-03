@@ -40,8 +40,25 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 		super(pChannel);
 		//.
 		H264Channel = (TH264IChannel)Channel;
+	}
+
+	@Override
+	public void Destroy() throws Exception {
+		Stop();
 		//.
-		H264Channel.OnH264FramesHandler = new TH264IChannel.TDoOnH264FramesHandler() {
+		super.Destroy();
+	}
+	
+	public void Start(Surface pSurface, int pWidth, int pHeight) {
+		Codec = MediaCodec.createDecoderByType(CodecTypeName);
+		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, pWidth,pHeight);
+		Codec.configure(format, pSurface, null, 0);
+		Codec.start();
+		//.
+		CodecInputBuffers = Codec.getInputBuffers();
+		CodecOutputBuffers = Codec.getOutputBuffers();
+		//.
+		H264Channel.SetOnH264FramesHandler(new TH264IChannel.TDoOnH264FramesHandler() {
 			
 			@Override
 			public void DoOnH264Packet(byte[] Packet, int PacketOffset,	int PacketSize) {
@@ -72,29 +89,12 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 				     ///? MediaFormat format = codec.getOutputFormat();
 				}
 			}
-		};
-	}
-
-	@Override
-	public void Destroy() throws Exception {
-		Stop();
-		//.
-		H264Channel.OnH264FramesHandler = null;
-		//.
-		super.Destroy();
-	}
-	
-	public void Start(Surface pSurface, int pWidth, int pHeight) {
-		Codec = MediaCodec.createDecoderByType(CodecTypeName);
-		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, pWidth,pHeight);
-		Codec.configure(format, pSurface, null, 0);
-		Codec.start();
-		//.
-		CodecInputBuffers = Codec.getInputBuffers();
-		CodecOutputBuffers = Codec.getOutputBuffers();
+		});
 	}
 	
 	public void Stop() {
+		H264Channel.SetOnH264FramesHandler(null);
+		//.
 		if (Codec != null) {
 			Codec.stop();
 			Codec.release();

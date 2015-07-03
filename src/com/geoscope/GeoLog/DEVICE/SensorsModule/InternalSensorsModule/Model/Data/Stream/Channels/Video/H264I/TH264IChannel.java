@@ -32,8 +32,6 @@ public class TH264IChannel extends TStreamChannel {
 
 			@Override
 			public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws Exception {
-				Timestamp = Timestamp/1000; //. convert to zero-based timestamp
-				//.
 				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
 				if (DestinationChannel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel) {
 					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)DestinationChannel;
@@ -43,6 +41,7 @@ public class TH264IChannel extends TStreamChannel {
 					if (flSyncFrame) {
 						Channel.DoOnH264Index(Index);
 						//.
+						Timestamp = Timestamp/1000; //. convert to milliseconds from microseconds
 						Channel.DoOnH264Timestamp((int)Timestamp);
 					}
 				}

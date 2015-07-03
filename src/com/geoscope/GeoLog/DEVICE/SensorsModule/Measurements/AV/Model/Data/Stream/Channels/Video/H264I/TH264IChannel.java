@@ -26,11 +26,13 @@ public class TH264IChannel extends TStreamChannel {
 		
 		private TH264IChannel Channel;
 		//.
-		private int TimestampBase = -1;
+		public long TimestampBase;
 		
 		public TOutputStream(TH264IChannel pChannel) {
 			Channel = pChannel;
 		}
+		
+		private byte[] TimestampBA = new byte[4];
 		
 		@Override
 		public void write(byte[] buffer, int byteOffset, int byteCount) throws IOException {
@@ -53,12 +55,10 @@ public class TH264IChannel extends TStreamChannel {
 			case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.TimestampTag:
 				//. make timestamp as zero-based
 				int Timestamp = TDataConverter.ConvertLEByteArrayToInt32(buffer, byteOffset);
-				if (TimestampBase < 0)
-					TimestampBase = Timestamp; 
 				Timestamp -= TimestampBase; 
-				TDataConverter.ConvertInt32ToLEByteArray(Timestamp, buffer, byteOffset);
+				TDataConverter.ConvertInt32ToLEByteArray(Timestamp, TimestampBA,0);
 				//.
-				Channel.VideoFrameTimestampBufferedStream.write(buffer, byteOffset, byteCount);
+				Channel.VideoFrameTimestampBufferedStream.write(TimestampBA);
 				break; //. >
 			}
 		}
@@ -129,9 +129,11 @@ public class TH264IChannel extends TStreamChannel {
 		VideoFrameTimestampFileStream = new FileOutputStream(MeasurementFolder+"/"+TMeasurementDescriptor.VideoTS32FileName);
 		VideoFrameTimestampBufferedStream = new BufferedOutputStream(VideoFrameTimestampFileStream, 65535);
 		//.
+		Packets = 0;
+		//.
 		DestinationStream = new TOutputStream(this);
 		//.
-		Packets = 0;
+		DestinationStream.TimestampBase = System.nanoTime()/1000000;
 	}
 	
 	@Override

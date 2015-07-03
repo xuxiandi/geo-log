@@ -736,7 +736,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 																	}
 																//.
 																Canceller.Check();
-																if (flSetPosition)
+																if (flRunning && flSetPosition)
 																	break; //. >
 																//.
 																_StartIndex = _FinishIndex;

@@ -55,7 +55,7 @@ public class TH264IChannel extends TStreamChannel {
 		public int Height = 480;
 		//.
 		public int FrameRate = 15;
-		public int BitRate = 500000;
+		public int BitRate = 1000000;
 		
 		public TVideoFrameSource() {
     		super();

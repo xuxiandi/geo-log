@@ -98,6 +98,8 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 		if (Codec != null) {
 			Codec.stop();
 			Codec.release();
+			//.
+			Codec = null;
 		}
 	}
 }

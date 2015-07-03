@@ -435,7 +435,7 @@ public class TSensorMeter extends TCancelableThread {
     	double MinTimestamp = OleDate.UTCCurrentTimestamp()-Profile.MeasurementLifeTime;
     	for (int I = 0; I < MIDs.size(); I++) {
     		String MeasurementID = MIDs.get(I); 
-			TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+			TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 			if (Measurement.Descriptor.IsTypeOf(GetTypeID())) {
 				if (Measurement.Descriptor.IsValid()) {
 					if (Measurement.Descriptor.FinishTimestamp < MinTimestamp)

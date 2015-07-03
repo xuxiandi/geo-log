@@ -14,9 +14,8 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.Model.Data.TS
 public class TAACChannel extends TStreamChannel {
 
 	public static final String TypeID = "Audio.AAC";
-	//.
-	public static final String FileName = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.TMeasurementDescriptor.AudioAACADTSFileName;
 
+	
 	public static class TOutputStream extends FileOutputStream {
 		
 		private static final int BufferDescriptorSize = 2;
@@ -86,7 +85,7 @@ public class TAACChannel extends TStreamChannel {
 	public void Start() throws Exception {
 		super.Start();
 		//.
-		DestinationStream = new TOutputStream(this, MeasurementFolder+"/"+FileName);
+		DestinationStream = new TOutputStream(this, MeasurementFolder+"/"+com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.AudioAACADTSFileName);
 		//.
 		Packets = 0;
 	}

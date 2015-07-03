@@ -292,7 +292,8 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
         	    	    				    	if (Tracker == null)
         	    	    				    		throw new Exception(TSensorsModuleMeasurementsArchive.this.getString(R.string.STrackerIsNotInitialized)); //. =>
         	    	    				    	//.
-        	    								TMeasurement Measurement = new TMeasurement(Tracker.GeoLog.idGeographServerObject, TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID()), Item.ID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+        	    	    				    	String MeasurementDatabaseFolder = TSensorsModuleMeasurements.Context_Folder(Object.GeographServerObjectID());
+        	    								TMeasurement Measurement = new TMeasurement(Tracker.GeoLog.idGeographServerObject, MeasurementDatabaseFolder, MeasurementDatabaseFolder, Item.ID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
         	        		    		    	byte[] Data = Measurement.ToByteArray();
         	        		    		    	double Timestamp = OleDate.UTCCurrentTimestamp();
         	        		    				String NFN = TGPSModule.MapPOIComponentFolder()+"/"+MeasurementDescriptor.GUID+DataName+TSensorMeasurement.DataFileFormat;

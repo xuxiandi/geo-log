@@ -8,8 +8,8 @@ public class TMeasurement extends TSensorMeasurement {
 
 	public TAACChannel AACChannel;
 	
-	public TMeasurement(long pGeographServerObjectID, String pDatabaseFolder, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
-		super(pGeographServerObjectID, pDatabaseFolder, pMeasurementID, TMeasurementDescriptor.class, ChannelProvider);
+	public TMeasurement(long pGeographServerObjectID, String pDatabaseFolder, String pDomain, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
+		super(pGeographServerObjectID, pDatabaseFolder, pDomain, pMeasurementID, TMeasurementDescriptor.class, ChannelProvider);
 		//.
 		AACChannel = new TAACChannel(Folder());
 		Descriptor.Model.Stream.Channels.add(AACChannel);

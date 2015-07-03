@@ -14,7 +14,7 @@ public class TAudioMeter extends TSensorMeter {
 	public static final String TypeID = "Audio";
 	public static final String ContainerTypeID = "";
 	//.
-	public static final String Name = "Audio";
+	public static final String Name = "Audio recorder";
 	public static final String Info = "microphone";
 	
 	public static class TMyProfile extends TProfile {
@@ -43,7 +43,7 @@ public class TAudioMeter extends TSensorMeter {
 			try {
 				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 				while (!Canceller.flCancel) {
-					TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+					TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 					Measurement.AACChannel.Assign(SourceChannel);
 					Measurement.AACChannel.SampleRate = SensorsModule.InternalSensorsModule.AACChannel.GetSampleRate();
 					//.

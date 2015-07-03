@@ -640,14 +640,22 @@
                     android:textColor="@android:color/holo_red_dark"
                     android:textSize="18sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
 
-            <SurfaceView
-                android:id="@+id/svVideoH264"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="256dp" />
+                android:layout_height="wrap_content"
+                android:background="@android:color/white" >
 
+                <SurfaceView
+                    android:id="@+id/svVideoH264"
+                    android:layout_width="256dp"
+                    android:layout_height="256dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true" />
+
+            </RelativeLayout>
         </LinearLayout>
     </LinearLayout>
 

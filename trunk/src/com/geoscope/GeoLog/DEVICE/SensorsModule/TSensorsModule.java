@@ -167,6 +167,7 @@ public class TSensorsModule extends TModule {
         		NewChannel.Assign(SourceChannel);
         		//. make a unique ID for new sensors stream channel
         		NewChannel.ID = TChannel.GetNextID();
+        		SourceChannel.ID = NewChannel.ID; //. assign the new ID to the source channel 
         		//. attaching the channel to the source channel
         		SourceChannel.DestinationChannel_Set(NewChannel);
         		NewChannel.SourceChannels_Add(SourceChannel);
@@ -182,6 +183,7 @@ public class TSensorsModule extends TModule {
         		NewChannel.Assign(SourceChannel);
         		//. make a unique ID for new sensors stream channel
         		NewChannel.ID = TChannel.GetNextID();
+        		SourceChannel.ID = NewChannel.ID; //. assign the new ID to the source channel 
         		//. attaching the channel to the source channel
         		SourceChannel.DestinationChannel = NewChannel;
         		NewChannel.SourceChannels_Add(SourceChannel);

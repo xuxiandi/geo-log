@@ -17,15 +17,16 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Video.Model.Data.TS
 public class TH264IChannel extends TStreamChannel {
 
 	public static final String TypeID = "Video.H264I";
-	//.
-	public static final String FileName = com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.TMeasurementDescriptor.AudioAACADTSFileName;
 
+	
 	public static class TOutputStream extends OutputStream {
 		
 		private static final int BufferDescriptorSize = 4;
 		
 		
 		private TH264IChannel Channel;
+		//.
+		private int TimestampBase = -1;
 		
 		public TOutputStream(TH264IChannel pChannel) {
 			Channel = pChannel;
@@ -40,6 +41,9 @@ public class TH264IChannel extends TStreamChannel {
 			
 			case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.DataTag:
 				Channel.VideoFrameBufferedStream.write(buffer, byteOffset, byteCount);
+				//.
+				Channel.Packets++;
+				//.
 				break; //. >
 				
 			case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.IndexTag:
@@ -47,11 +51,16 @@ public class TH264IChannel extends TStreamChannel {
 				break; //. >
 				
 			case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.TimestampTag:
+				//. make timestamp as zero-based
+				int Timestamp = TDataConverter.ConvertLEByteArrayToInt32(buffer, byteOffset);
+				if (TimestampBase < 0)
+					TimestampBase = Timestamp; 
+				Timestamp -= TimestampBase; 
+				TDataConverter.ConvertInt32ToLEByteArray(Timestamp, buffer, byteOffset);
+				//.
 				Channel.VideoFrameTimestampBufferedStream.write(buffer, byteOffset, byteCount);
 				break; //. >
 			}
-			//.
-			Channel.Packets++;
 		}
 
 		@Override
@@ -70,7 +79,7 @@ public class TH264IChannel extends TStreamChannel {
 	//.
 	public TOutputStream DestinationStream;
 	//.
-	public int		SampleRate = -1;
+	public int		FrameRate = -1;
 	public int		Packets = -1;
 	
 	public TH264IChannel() {
@@ -92,17 +101,17 @@ public class TH264IChannel extends TStreamChannel {
 	public void FromXMLNode(Node ANode) throws Exception {
 		super.FromXMLNode(ANode);
 		//.
-		SampleRate = Integer.parseInt(TMyXML.SearchNode(ANode,"SampleRate").getFirstChild().getNodeValue());
+		FrameRate = Integer.parseInt(TMyXML.SearchNode(ANode,"FrameRate").getFirstChild().getNodeValue());
 		Packets = Integer.parseInt(TMyXML.SearchNode(ANode,"Packets").getFirstChild().getNodeValue());
 	}
 	
 	@Override
 	public synchronized void ToXMLSerializer(XmlSerializer Serializer) throws Exception {
 		super.ToXMLSerializer(Serializer);
-    	//. SampleRate
-        Serializer.startTag("", "SampleRate");
-        Serializer.text(Integer.toString(SampleRate));
-        Serializer.endTag("", "SampleRate");
+    	//. FrameRate
+        Serializer.startTag("", "FrameRate");
+        Serializer.text(Integer.toString(FrameRate));
+        Serializer.endTag("", "FrameRate");
     	//. Packets
         Serializer.startTag("", "Packets");
         Serializer.text(Integer.toString(Packets));

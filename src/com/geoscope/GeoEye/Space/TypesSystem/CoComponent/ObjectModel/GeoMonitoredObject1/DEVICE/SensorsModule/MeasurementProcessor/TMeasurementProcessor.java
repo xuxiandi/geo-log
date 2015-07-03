@@ -9,6 +9,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.ASTLR.TASTLRMeasurementProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.ECTLR.TECTLRMeasurementProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.GPSTLR.TGPSTLRMeasurementProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Video.TVideoMeasurementProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerMyPlayerComponent;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurementDescriptor;
@@ -26,6 +27,8 @@ public class TMeasurementProcessor extends TUIComponent {
 			return new TGPSTLRMeasurementProcessor(); //. ->
 		if (MeasurementDescriptor.IsTypeOf(TAudioMeasurementProcessor.TypeID))
 			return new TAudioMeasurementProcessor(); //. ->
+		if (MeasurementDescriptor.IsTypeOf(TVideoMeasurementProcessor.TypeID))
+			return new TVideoMeasurementProcessor(); //. ->
 		else
 			return null; //. ->
 	}

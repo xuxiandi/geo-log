@@ -47,12 +47,12 @@ public class TSensorsMeters {
 	}
 
 	private void CreateMeters() throws Exception {
-		TAVMeter 		AVMeter		= new TAVMeter(SensorsModule, 		"AV",	ProfileFolder); 	Items_AddItem(AVMeter);
 		TECTLRMeter 	ECTLRMeter 	= new TECTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(ECTLRMeter);
 		TASTLRMeter 	ASTLRMeter 	= new TASTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(ASTLRMeter);
 		TGPSTLRMeter	GPSTLRMeter = new TGPSTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(GPSTLRMeter);
 		TAudioMeter		AudioMeter	= new TAudioMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(AudioMeter);
 		TVideoMeter		VideoMeter	= new TVideoMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(VideoMeter);
+		TAVMeter 		AVMeter		= new TAVMeter(SensorsModule, 		"0",	ProfileFolder); 	Items_AddItem(AVMeter);
 	}
 	
 	private void Items_AddItem(TSensorMeter Meter) {

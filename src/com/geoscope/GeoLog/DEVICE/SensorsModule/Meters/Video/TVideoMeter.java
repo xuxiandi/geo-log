@@ -14,7 +14,7 @@ public class TVideoMeter extends TSensorMeter {
 	public static final String TypeID = "Video";
 	public static final String ContainerTypeID = "";
 	//.
-	public static final String Name = "Video";
+	public static final String Name = "Video recorder";
 	public static final String Info = "camera";
 	
 	public static class TMyProfile extends TProfile {
@@ -31,7 +31,7 @@ public class TVideoMeter extends TSensorMeter {
 	
 	@Override
 	protected void DoProcess() throws Exception {
-		if (SensorsModule.InternalSensorsModule.AACChannel == null)
+		if (SensorsModule.InternalSensorsModule.H264IChannel == null)
 			throw new IOException("no origin channel"); //. =>
 		TH264IChannel SourceChannel = (TH264IChannel)SensorsModule.InternalSensorsModule.H264IChannel.DestinationChannel_Get(); 	
 		if (SourceChannel == null)
@@ -43,9 +43,9 @@ public class TVideoMeter extends TSensorMeter {
 			try {
 				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 				while (!Canceller.flCancel) {
-					TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+					TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 					Measurement.H264IChannel.Assign(SourceChannel);
-					//////////////Measurement.AACChannel.SampleRate = SensorsModule.InternalSensorsModule.AACChannel.GetSampleRate();
+					Measurement.H264IChannel.FrameRate = SensorsModule.InternalSensorsModule.H264IChannel.GetFrameRate();
 					//.
 					Measurement.Start();
 					try {

@@ -1,21 +1,23 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.AV;
 
+import java.io.IOException;
+
+import com.geoscope.Classes.MultiThreading.TStartableCancelableThread;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorder;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 
 public class TAVMeter extends TSensorMeter {
 
 	public static final String TypeID = "AV.FRAME";
 	public static final String ContainerTypeID = "";
 	//.
-	public static final String Name = "Video-recorder";
-	public static final String Info = "Camera";
-	
-	public static final int VideoRecorderCheckInterval = 1000*1; // seconds
+	public static final String Name = "AudioVideo recorder";
+	public static final String Info = "camera";
 	
 	public static class TMyProfile extends TProfile {
 	}
@@ -30,49 +32,105 @@ public class TAVMeter extends TSensorMeter {
 	}
 	
 	@Override
-	public void run() {
+	protected void DoProcess() throws Exception {
+		if (SensorsModule.InternalSensorsModule.AACChannel == null)
+			throw new IOException("no origin audio channel"); //. =>
+		final TAACChannel AudioSourceChannel = (TAACChannel)SensorsModule.InternalSensorsModule.AACChannel.DestinationChannel_Get(); 	
+		if (AudioSourceChannel == null)
+			throw new IOException("no source audio channel"); //. =>
+		//.
+		if (SensorsModule.InternalSensorsModule.H264IChannel == null)
+			throw new IOException("no origin video channel"); //. =>
+		final TH264IChannel VideoSourceChannel = (TH264IChannel)SensorsModule.InternalSensorsModule.H264IChannel.DestinationChannel_Get(); 	
+		if (VideoSourceChannel == null)
+			throw new IOException("no source video channel"); //. =>
+		//.
+		AudioSourceChannel.Suspend();
 		try {
-			SetStatus(STATUS_RUNNING);
+			AudioSourceChannel.SourceChannels_Start();
 			try {
+				VideoSourceChannel.Suspend();
 				try {
-					Camera.TCameraMeasurementInfo LastMeasurementInfo = null;
-					while (!Canceller.flCancel) {
-						if (!SensorsModule.Device.VideoRecorderModule.IsRecording())
-							SensorsModule.Device.VideoRecorderModule.SetRecorderState(true);
-						//.
-						Thread.sleep(VideoRecorderCheckInterval);
-						//.
-				    	TVideoRecorder VideoRecorder = TVideoRecorder.GetVideoRecorder();
-				    	if (VideoRecorder != null) {
-				    		Camera.TCameraMeasurementInfo MeasurementInfo = VideoRecorder.Recording_GetMeasurementInfo();
-				    		if ((MeasurementInfo == null) || !MeasurementInfo.Equals(LastMeasurementInfo)) {
-				    			if (LastMeasurementInfo != null) {
-									TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, LastMeasurementInfo.DatabaseFolder, LastMeasurementInfo.MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
-									DoOnMeasurementFinish(Measurement);
-				    			}
-								//.
-			    				LastMeasurementInfo = MeasurementInfo;
-				    		}
-				    	}
+					VideoSourceChannel.SourceChannels_Start();
+					try {
+						final int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
+						while (!Canceller.flCancel) {
+							final TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+							//.
+							Measurement.AACChannel.Assign(AudioSourceChannel);
+							Measurement.AACChannel.SampleRate = SensorsModule.InternalSensorsModule.AACChannel.GetSampleRate();
+							//.
+							Measurement.H264IChannel.Assign(VideoSourceChannel);
+							Measurement.H264IChannel.FrameRate = SensorsModule.InternalSensorsModule.H264IChannel.GetFrameRate();
+							//.
+							Measurement.Start();
+							try {
+								TStartableCancelableThread AudioRecording = new TStartableCancelableThread() {
+									
+									@Override
+									public void run() {
+										try {
+											AudioSourceChannel.DoStreaming(Measurement.AACChannel.DestinationStream, Canceller, MeasurementMaxDuration);
+										}
+								    	catch (Throwable E) {
+											SetStatus(STATUS_ERROR);
+											//.
+											String S = E.getMessage();
+											if (S == null)
+												S = E.getClass().getName();
+											SensorsModule.Device.Log.WriteError("AV recorder: "+GetTypeID()+", audio channel error",S);
+								    	}
+									}
+								};
+								TStartableCancelableThread VideoRecording = new TStartableCancelableThread() {
+									
+									@Override
+									public void run() {
+										try {
+											VideoSourceChannel.DoStreaming(Measurement.H264IChannel.DestinationStream, Canceller, MeasurementMaxDuration);
+										}
+								    	catch (Throwable E) {
+											SetStatus(STATUS_ERROR);
+											//.
+											String S = E.getMessage();
+											if (S == null)
+												S = E.getClass().getName();
+											SensorsModule.Device.Log.WriteError("AV recorder: "+GetTypeID()+", video channel error",S);
+								    	}
+									}
+								};
+								try {
+									AudioRecording.Start();
+									VideoRecording.Start();
+									//.
+									Thread.sleep(MeasurementMaxDuration);
+								}
+								finally {
+									VideoRecording.Destroy();
+									AudioRecording.Destroy();
+								}
+							}
+							finally {
+								Measurement.Finish();
+							}
+							//.
+							DoOnMeasurementFinish(Measurement);
+						}
+					}
+					finally {
+						VideoSourceChannel.SourceChannels_Stop();
 					}
 				}
 				finally {
-					SensorsModule.Device.VideoRecorderModule.SetRecorderState(false);
+					VideoSourceChannel.Resume();
 				}
 			}
 			finally {
-				SetStatus(STATUS_NOTRUNNING);
+				AudioSourceChannel.SourceChannels_Stop();
 			}
 		}
-		catch (InterruptedException IE) {
-		} 
-    	catch (Throwable E) {
-			SetStatus(STATUS_ERROR);
-			//.
-			String S = E.getMessage();
-			if (S == null)
-				S = E.getClass().getName();
-			SensorsModule.Device.Log.WriteError("Sensors meter: "+TypeID,S);
-    	}
+		finally {
+			AudioSourceChannel.Resume();
+		}
 	}
 }

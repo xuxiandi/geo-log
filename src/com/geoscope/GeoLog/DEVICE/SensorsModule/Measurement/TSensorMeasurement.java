@@ -137,22 +137,6 @@ public class TSensorMeasurement {
 		this(0, pDatabaseFolder, pDomain, pMeasurementID, TSensorMeasurementDescriptor.class, ChannelProvider);
 	}
 	
-	public TSensorMeasurement(long pGeographServerObjectID, String pMeasurementFolder, String pDomain, Class<?> DescriptorClass, TChannelProvider ChannelProvider) throws Exception {
-		GeographServerObjectID = pGeographServerObjectID;
-		//.
-		File MF = new File(pMeasurementFolder);
-		String MeasurementFolder = MF.getParent(); 
-		String MeasurementID = MF.getName();
-		//.
-		DatabaseFolder = MeasurementFolder;
-		//.
-		Descriptor = GetMeasurementDescriptor(DatabaseFolder, pDomain, MeasurementID, DescriptorClass, ChannelProvider);
-	}
-	
-	public TSensorMeasurement(long pGeographServerObjectID, String pMeasurementFolder, String pDomain, TChannelProvider ChannelProvider) throws Exception {
-		this(pGeographServerObjectID, pMeasurementFolder, pDomain, TSensorMeasurementDescriptor.class, ChannelProvider);
-	}
-	
 	public String Folder() {
 		return (DatabaseFolder+"/"+Descriptor.ID);
 	}

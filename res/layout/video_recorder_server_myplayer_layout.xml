@@ -18,6 +18,15 @@
         android:textSize="12sp"
         android:visibility="visible" />
 
+    <ImageView
+        android:id="@+id/ivVideoRecorderServerMyPlayerAudioOnly"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/SAudio"
+        android:scaleType="center"
+        android:src="@drawable/audio"
+        android:visibility="gone" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -44,14 +53,5 @@
             android:minHeight="20dp"
             android:progress="0" />
     </RelativeLayout>
-
-    <ImageView
-        android:id="@+id/ivVideoRecorderServerMyPlayerAudioOnly"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:contentDescription="@string/SAudio"
-        android:scaleType="center"
-        android:src="@drawable/audio"
-        android:visibility="gone" />
 
 </FrameLayout>

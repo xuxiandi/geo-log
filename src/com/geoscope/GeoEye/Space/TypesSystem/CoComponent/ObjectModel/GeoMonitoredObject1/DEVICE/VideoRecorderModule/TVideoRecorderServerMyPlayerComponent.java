@@ -448,8 +448,45 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 		
 		public static final String TypeID = TH264IChannel.TypeID;
 		
+		public static class TVideoChannelParams {
+			
+			public int FrameRate;
+			public int Packets;
+			public String FileName;
+			public String IndexFileName;
+			public String TimestampFileName;
+			
+			public TVideoChannelParams(int pFrameRate, int pPackets, String pFileName, String pIndexFileName, String pTimestampFileName) {
+				FrameRate = pFrameRate;
+				Packets = pPackets;
+				FileName = pFileName;
+				IndexFileName = pIndexFileName;
+				TimestampFileName = pTimestampFileName;
+			}
+		}
+		
+		public static TVideoChannelParams GetVideoChannelParams(TChannel Channel) {
+			if (Channel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Video.Model.Data.Stream.Channels.Video.H264I.TH264IChannel) {
+				com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Video.Model.Data.Stream.Channels.Video.H264I.TH264IChannel H264IChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Video.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)Channel;
+				if (H264IChannel.Packets > 0)
+					return (new TVideoChannelParams(H264IChannel.FrameRate, H264IChannel.Packets, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Video.TMeasurementDescriptor.VideoH264FileName,com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Video.TMeasurementDescriptor.VideoIndex32FileName,com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Video.TMeasurementDescriptor.VideoTS32FileName)); //. ->
+				else
+					return null; //. -> 
+			}
+			else
+				if (Channel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Video.H264I.TH264IChannel) {
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Video.H264I.TH264IChannel H264IChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)Channel;
+					if (H264IChannel.Packets > 0)
+						return (new TVideoChannelParams(H264IChannel.FrameRate, H264IChannel.Packets, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.VideoH264FileName,com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.VideoIndex32FileName,com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.VideoTS32FileName)); //. ->
+					else
+						return null; //. -> 
+				}
+				else
+					return null; //. -> 
+		}
+		
 		public static boolean ChannelIsMine(TChannel Channel) {
-			return ((Channel instanceof TH264IChannel) && (((TH264IChannel)Channel).Packets > 0));
+			return (GetVideoChannelParams(Channel) != null);
 		}
 		
 		private static final String CodecTypeName = "video/avc";
@@ -490,8 +527,8 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 			this(pPlayer, pVideoFileName,pVideoIndexFileName,pVideoTimestampFileName, pPackets, pFrameRate, pSurface, pWidth,pHeight, 0);
 		}
 		
-		public TVideoH264IChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pFolder, TChannel Channel, SurfaceHolder pSurface, int pWidth, int pHeight) {
-			this(pPlayer, pFolder+"/"+com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.VideoH264FileName,pFolder+"/"+com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.VideoIndex32FileName,pFolder+"/"+com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor.VideoTS32FileName, ((TH264IChannel)Channel).Packets, ((TH264IChannel)Channel).FrameRate, pSurface, pWidth,pHeight);		
+		public TVideoH264IChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pFolder, TVideoChannelParams VideoChannelParams, SurfaceHolder pSurface, int pWidth, int pHeight) {
+			this(pPlayer, pFolder+"/"+VideoChannelParams.FileName,pFolder+"/"+VideoChannelParams.IndexFileName,pFolder+"/"+VideoChannelParams.TimestampFileName, VideoChannelParams.Packets, VideoChannelParams.FrameRate, pSurface, pWidth,pHeight);		
 		}
 		
 		@SuppressWarnings("unused")
@@ -1110,7 +1147,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 					flVideo = true;
 					//.
 					synchronized (this) {
-						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, Measurement.Folder(), Channel, surface, Width,Height);
+						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, Measurement.Folder(), TVideoH264IChannelProcessor.GetVideoChannelParams(Channel), surface, Width,Height);
 					}
 				}
 			}
@@ -1151,7 +1188,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 							VideoChannelProcessor.Destroy();
 							VideoChannelProcessor = null;
 						}
-						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, Measurement.Folder(), Channel, surface, Width,Height);
+						VideoChannelProcessor = new TVideoH264IChannelProcessor(this, Measurement.Folder(), TVideoH264IChannelProcessor.GetVideoChannelParams(Channel), surface, Width,Height);
 					}
 				}
 			}

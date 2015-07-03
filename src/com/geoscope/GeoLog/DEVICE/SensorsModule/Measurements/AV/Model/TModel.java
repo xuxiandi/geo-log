@@ -9,7 +9,7 @@ public class TModel extends com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement
 
 	public static final String ModelTypeID = "AV.FRAME";
 	//.
-	private static final String ModelTypeName = "Video";
+	private static final String ModelTypeName = "AudioVideo";
 	private static final int 	ModelTypeColor = Color.BLUE;
 	//.
 	public static TTypeInfo 	GetTypeInfo(Context context) {

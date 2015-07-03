@@ -32,7 +32,7 @@ public class TH264IChannel extends TStreamChannel {
 	}	
 	
 	
-	public volatile TDoOnH264FramesHandler OnH264FramesHandler = null;
+	private TDoOnH264FramesHandler OnH264FramesHandler = null;
 	
 	public TH264IChannel() throws IOException {
 		super();
@@ -112,8 +112,10 @@ public class TH264IChannel extends TStreamChannel {
 		switch (Descriptor) {
 		
 		case DataTag:
-			if (OnH264FramesHandler != null)
-				OnH264FramesHandler.DoOnH264Packet(BA, Idx, Size);
+			synchronized (this) {
+				if (OnH264FramesHandler != null)
+					OnH264FramesHandler.DoOnH264Packet(BA, Idx, Size);
+			}
 			break; //. >
 		}
 		Idx += Size; 
@@ -128,5 +130,9 @@ public class TH264IChannel extends TStreamChannel {
 		Processor = new TH264IChannelProcessor(this);
 		//.
 		return Processor;
+	}
+	
+	public synchronized void SetOnH264FramesHandler(TDoOnH264FramesHandler pOnH264FramesHandler) {
+		OnH264FramesHandler = pOnH264FramesHandler;
 	}
 }

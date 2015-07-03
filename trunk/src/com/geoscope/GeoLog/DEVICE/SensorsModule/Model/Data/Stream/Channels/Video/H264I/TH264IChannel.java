@@ -32,7 +32,7 @@ public class TH264IChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws IOException {
+	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws Exception {
 		final long 		FinishTimestamp;
 		final Object 	FinishSignal;
 		if (MaxDuration > 0) { 
@@ -97,7 +97,7 @@ public class TH264IChannel extends TStreamChannel {
 	
 	private byte[] Packet = new byte[65535];
 	
-	public void DoOnH264Packet(byte[] H264Packet, int H264PacketSize) throws Exception {
+	private int H264Packet_ToPacket(byte[] H264Packet, int H264PacketSize) throws IOException {
 		int Descriptor = TagSize+H264PacketSize;
 		int PacketSize = DescriptorSize+Descriptor;
 		if (PacketSize > Packet.length) 
@@ -107,7 +107,15 @@ public class TH264IChannel extends TStreamChannel {
 		TDataConverter.ConvertInt16ToLEByteArray(DataTag, Packet, Idx); Idx += TagSize; 
 		System.arraycopy(H264Packet,0, Packet,Idx, H264PacketSize);
 		//.
-		DoOnPacket(Packet, PacketSize);
+		return PacketSize;
+	}
+	
+	public void DoOnH264Packet(byte[] H264Packet, int H264PacketSize) throws Exception {
+		DoOnPacket(Packet, H264Packet_ToPacket(H264Packet, H264PacketSize));
+	}
+
+	public void DoOnH264Packet(byte[] H264Packet, int H264PacketSize, TPacketSubscriber Subscriber) throws Exception {
+		DoOnPacket(Packet, H264Packet_ToPacket(H264Packet, H264PacketSize), Subscriber);
 	}
 
 	public void DoOnH264Index(int Index) throws Exception {

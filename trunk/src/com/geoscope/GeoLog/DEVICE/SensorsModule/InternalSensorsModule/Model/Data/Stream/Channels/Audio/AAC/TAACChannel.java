@@ -32,6 +32,8 @@ public class TAACChannel extends TStreamChannel {
         private int 		BufferSize;
         //.
         private TAACADTSEncoder AACADTSEncoder;
+        //.
+        private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel DestinationChannel;
 
 		public TAudioSampleSource() {
     		super();
@@ -46,9 +48,7 @@ public class TAACChannel extends TStreamChannel {
     			
     			@Override
     			public void DoOnOutputPacket(byte[] Packet, int PacketSize) throws Exception {
-    				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
-    				if (DestinationChannel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel)
-    					((com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel)DestinationChannel).DoOnAACPacket(Packet, PacketSize);
+					DestinationChannel.DoOnAACPacket(Packet, PacketSize);
     			};
     		};
 			//.
@@ -95,6 +95,10 @@ public class TAACChannel extends TStreamChannel {
 		@Override
 		public void run() {
 			try {
+				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel _DestinationChannel = DestinationChannel_Get();
+				if (!(_DestinationChannel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel))
+		        	throw new IOException("No destination channel"); //. ->
+				DestinationChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel)_DestinationChannel;
 				//. try to connect to an AudioModule.MicrophoneCapturingServer
 				TMicrophoneCapturingServer.TConfiguration Configuration = new TMicrophoneCapturingServer.TConfiguration(Source, SampleRate);
 				TMicrophoneCapturingServer.TPacketSubscriber PacketSubscriber = new TMicrophoneCapturingServer.TPacketSubscriber() {
@@ -135,6 +139,8 @@ public class TAACChannel extends TStreamChannel {
 					}
 				}
 			}
+        	catch (InterruptedException IE) {
+        	}
 			catch (Throwable T) {
 			}
 		}

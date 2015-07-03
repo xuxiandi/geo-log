@@ -32,13 +32,13 @@ public class TStreamChannel extends TChannel {
 	
 		public static class TItemsNotifier {
 			
-			protected void DoOnSubscribe(TPacketSubscriber Subscriber) {			
+			protected void DoOnSubscribe(TPacketSubscriber Subscriber) throws Exception {			
 			}
 
 			protected void DoOnSubscribed(TPacketSubscriber Subscriber) {			
 			}
 
-			protected void DoOnUnsubscribe(TPacketSubscriber Subscriber) {			
+			protected void DoOnUnsubscribe(TPacketSubscriber Subscriber) throws Exception {			
 			}
 
 			protected void DoOnUnsubscribed(TPacketSubscriber Subscriber) {			
@@ -68,6 +68,10 @@ public class TStreamChannel extends TChannel {
 			}
 		}
 		
+		public void ClearItemsNotifier() {
+			SetItemsNotifier(null);
+		}
+		
 		private void ClearSubscribers() {
 			Lock.lock();
 			try {
@@ -78,7 +82,7 @@ public class TStreamChannel extends TChannel {
 			}
 		}
 		
-		public void Subscribe(TPacketSubscriber Subscriber) {
+		public void Subscribe(TPacketSubscriber Subscriber) throws Exception {
 			synchronized (Items) {
 				if (ItemsNotifier != null)
 					ItemsNotifier.DoOnSubscribe(Subscriber);
@@ -105,7 +109,7 @@ public class TStreamChannel extends TChannel {
 			}
 		}
 
-		public void Unsubscribe(TPacketSubscriber Subscriber) {
+		public void Unsubscribe(TPacketSubscriber Subscriber) throws Exception {
 			synchronized (Items) {
 				if (ItemsNotifier != null)
 					ItemsNotifier.DoOnUnsubscribe(Subscriber);
@@ -292,10 +296,10 @@ public class TStreamChannel extends TChannel {
 		return (PacketSubscribers.Count() > 0);
 	}
 	
-	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws IOException {
+	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws Exception {
 	}	
 	
-	public void DoStreaming(OutputStream pOutputStream, TCanceller Canceller) throws IOException {
+	public void DoStreaming(OutputStream pOutputStream, TCanceller Canceller) throws Exception {
 		DoStreaming(pOutputStream, Canceller, -1);
 	}	
 	

@@ -34,7 +34,7 @@ public class TXENVCChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws IOException {
+	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws Exception {
 		TStreamChannel.TPacketSubscriber PacketSubscriber  = new TStreamChannel.TPacketSubscriber() {
     		@Override
     		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {

@@ -148,7 +148,7 @@ public class TVideoModule extends TModule
 		}
 		
 		@Override
-		public void DoOnParameters(byte[] Buffer, int BufferSize) throws IOException {
+		public void DoOnConfiguration(byte[] Buffer, int BufferSize) throws IOException {
 		}
 		
 		@Override

@@ -26,7 +26,7 @@ public class TTLRChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws IOException {
+	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws Exception {
 		final long 		FinishTimestamp;
 		final Object 	FinishSignal;
 		if (MaxDuration > 0) { 

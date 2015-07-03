@@ -153,7 +153,7 @@ public class TMediaFrameServer {
 			H264EncoderServer_Clients.add(Client);
 			//. send codec Parameters
 			if ((H264EncoderServer != null) && (H264EncoderServer.Parameters != null) && Client.flApplyParameters)
-				Client.DoOnParameters(H264EncoderServer.Parameters,H264EncoderServer.Parameters.length);
+				Client.DoOnConfiguration(H264EncoderServer.Parameters,H264EncoderServer.Parameters.length);
 		}
 	}
 

@@ -23,8 +23,14 @@ public class TStreamChannel extends TChannel {
 		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {			
 		}
 
-		protected void DoOnPacket(byte[] Packet) throws IOException {
-			DoOnPacket(Packet,Packet.length);
+		public void ProcessPacket(byte[] Packet, int PacketSize) throws IOException {
+			synchronized (this) {
+				DoOnPacket(Packet, PacketSize);
+			}
+		}
+
+		public void ProcessPacket(byte[] Packet) throws IOException {
+			ProcessPacket(Packet, Packet.length);
 		}
 	}
 	
@@ -191,7 +197,7 @@ public class TStreamChannel extends TChannel {
 			}
 		}
 		
-		public void DoOnPacket(byte[] Packet) throws Exception {
+		public void ProcessPacket(byte[] Packet) throws Exception {
 			Lock.lock();
 			try {
 				WaitForResume();
@@ -199,45 +205,45 @@ public class TStreamChannel extends TChannel {
 				int Cnt = Items.size();
 				int PacketSize = Packet.length;
 				for (int I = 0; I < Cnt; I++)
-					Items.get(I).DoOnPacket(Packet,PacketSize);
+					Items.get(I).ProcessPacket(Packet,PacketSize);
 			}
 			finally {
 				Lock.unlock();
 			}
 		}
 
-		public void DoOnPacket(byte[] Packet, int PacketSize) throws Exception {
+		public void ProcessPacket(byte[] Packet, int PacketSize) throws Exception {
 			Lock.lock();
 			try {
 				WaitForResume();
 				//.
 				int Cnt = Items.size();
 				for (int I = 0; I < Cnt; I++)
-					Items.get(I).DoOnPacket(Packet,PacketSize);
+					Items.get(I).ProcessPacket(Packet,PacketSize);
 			}
 			finally {
 				Lock.unlock();
 			}
 		}
 
-		public void DoOnPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
+		public void ProcessPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
 			Lock.lock();
 			try {
 				WaitForResume();
 				//.
-				Subscriber.DoOnPacket(Packet,Packet.length);
+				Subscriber.ProcessPacket(Packet,Packet.length);
 			}
 			finally {
 				Lock.unlock();
 			}
 		}
 
-		public void DoOnPacket(byte[] Packet, int PacketSize, TPacketSubscriber Subscriber) throws Exception {
+		public void ProcessPacket(byte[] Packet, int PacketSize, TPacketSubscriber Subscriber) throws Exception {
 			Lock.lock();
 			try {
 				WaitForResume();
 				//.
-				Subscriber.DoOnPacket(Packet,PacketSize);
+				Subscriber.ProcessPacket(Packet,PacketSize);
 			}
 			finally {
 				Lock.unlock();
@@ -319,20 +325,20 @@ public class TStreamChannel extends TChannel {
 		return PacketSubscribers.IsSuspended();
 	}
 	
-	public void DoOnPacket(byte[] Packet, int PacketSize) throws Exception {
-		PacketSubscribers.DoOnPacket(Packet, PacketSize);
+	public void ProcessPacket(byte[] Packet, int PacketSize) throws Exception {
+		PacketSubscribers.ProcessPacket(Packet, PacketSize);
 	}
 
-	public void DoOnPacket(byte[] Packet) throws Exception {
-		PacketSubscribers.DoOnPacket(Packet, Packet.length);
+	public void ProcessPacket(byte[] Packet) throws Exception {
+		ProcessPacket(Packet, Packet.length);
 	}
 
-	public void DoOnPacket(byte[] Packet, int PacketSize, TPacketSubscriber Subscriber) throws Exception {
-		PacketSubscribers.DoOnPacket(Packet, PacketSize, Subscriber);
+	public void ProcessPacket(byte[] Packet, int PacketSize, TPacketSubscriber Subscriber) throws Exception {
+		PacketSubscribers.ProcessPacket(Packet, PacketSize, Subscriber);
 	}
 	
-	public void DoOnPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
-		PacketSubscribers.DoOnPacket(Packet, Packet.length, Subscriber);
+	public void ProcessPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
+		PacketSubscribers.ProcessPacket(Packet, Packet.length, Subscriber);
 	}
 	
 	protected byte[] DataType_ToByteArray(TDataType DataType) throws IOException {
@@ -341,11 +347,11 @@ public class TStreamChannel extends TChannel {
 	
 	public void DoOnData(TDataType DataType) throws Exception {
 		byte[] BA = DataType_ToByteArray(DataType);
-		PacketSubscribers.DoOnPacket(BA);
+		PacketSubscribers.ProcessPacket(BA);
 	}
 
 	public void DoOnData(TDataType DataType, TPacketSubscriber Subscriber) throws Exception {
 		byte[] BA = DataType_ToByteArray(DataType);
-		PacketSubscribers.DoOnPacket(BA, Subscriber);
+		PacketSubscribers.ProcessPacket(BA, Subscriber);
 	}
 }

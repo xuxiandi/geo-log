@@ -21,9 +21,10 @@ public class TH264IChannel extends TStreamChannel {
 	
 	public static final int TagSize = 2;
 	
-	public static final short DataTag 		= 1;
-	public static final short IndexTag 		= 2;
-	public static final short TimestampTag 	= 3;
+	public static final short ChannelStreamSessionTag 	= 0;
+	public static final short DataTag 					= 1;
+	public static final short IndexTag 					= 2;
+	public static final short TimestampTag 				= 3;
 	
 	public static class TDoOnH264FramesHandler {
 		

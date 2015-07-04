@@ -153,41 +153,41 @@ public class TXENVCChannel extends TStreamChannel {
 	
 	public void DoOnTimestamp(double Timestamp) throws Exception {
 		byte[] BA = Timestamp_ToByteArray(Timestamp);
-		PacketSubscribers.DoOnPacket(BA);
+		PacketSubscribers.ProcessPacket(BA);
 	}
 
 	public void DoOnTemperature(double Temperature) throws Exception {
 		byte[] BA = Temperature_ToByteArray(Temperature);
-		PacketSubscribers.DoOnPacket(BA);
+		PacketSubscribers.ProcessPacket(BA);
 	}
 
 	public void DoOnPressure(double Pressure) throws Exception {
 		byte[] BA = Pressure_ToByteArray(Pressure);
-		PacketSubscribers.DoOnPacket(BA);
+		PacketSubscribers.ProcessPacket(BA);
 	}
 
 	public void DoOnRelativeHumidity(double RelativeHumidity) throws Exception {
 		byte[] BA = RelativeHumidity_ToByteArray(RelativeHumidity);
-		PacketSubscribers.DoOnPacket(BA);
+		PacketSubscribers.ProcessPacket(BA);
 	}
 
 	public void DoOnLight(double Light) throws Exception {
 		byte[] BA = Light_ToByteArray(Light);
-		PacketSubscribers.DoOnPacket(BA);
+		PacketSubscribers.ProcessPacket(BA);
 	}
 
 	public void DoOnAcceleration(double Acceleration) throws Exception {
 		byte[] BA = Acceleration_ToByteArray(Acceleration);
-		PacketSubscribers.DoOnPacket(BA);
+		PacketSubscribers.ProcessPacket(BA);
 	}
 
 	public void DoOnMagneticField(double MagneticField_X, double MagneticField_Y, double MagneticField_Z) throws Exception {
 		byte[] BA = MagneticField_ToByteArray(MagneticField_X,MagneticField_Y,MagneticField_Z);
-		PacketSubscribers.DoOnPacket(BA);
+		PacketSubscribers.ProcessPacket(BA);
 	}
 
 	public void DoOnGyroscope(double Gyroscope_X, double Gyroscope_Y, double Gyroscope_Z) throws Exception {
 		byte[] BA = Gyroscope_ToByteArray(Gyroscope_X,Gyroscope_Y,Gyroscope_Z);
-		PacketSubscribers.DoOnPacket(BA);
+		PacketSubscribers.ProcessPacket(BA);
 	}
 }

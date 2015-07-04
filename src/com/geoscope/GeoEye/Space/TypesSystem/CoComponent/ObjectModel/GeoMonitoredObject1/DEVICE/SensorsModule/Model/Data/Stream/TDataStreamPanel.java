@@ -8,12 +8,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -23,6 +25,8 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -76,6 +80,9 @@ public class TDataStreamPanel extends Activity {
 	@SuppressWarnings("unused")
 	private boolean IsInFront = false;
 	//.
+	@SuppressWarnings("unused")
+	private ScrollView svSpace;
+	//.
 	private TextView	lbStatus;
 	//.
 	private LinearLayout llAndroidStateADS;
@@ -128,6 +135,8 @@ public class TDataStreamPanel extends Activity {
     		requestWindowFeature(Window.FEATURE_NO_TITLE);
     		//.
             setContentView(R.layout.sensorsmodule_datastream_panel);
+            //.
+            svSpace = (ScrollView)findViewById(R.id.svSpace);
             //.
             lbStatus = (TextView)findViewById(R.id.lbStatus);
             //.
@@ -649,7 +658,14 @@ public class TDataStreamPanel extends Activity {
 			TH264IChannel H264Channel = (TH264IChannel)Channel;
 			//.
 			final EditText edVideoBuffersProcessed = (EditText)findViewById(R.id.edVideoH264BuffersProcessed);
+			//.
 			final SurfaceView svVideoH264 = (SurfaceView)findViewById(R.id.svVideoH264);
+			Display display = getWindowManager().getDefaultDisplay();
+			Point size = new Point();
+			display.getSize(size);
+			int height = size.y;
+			RelativeLayout.LayoutParams RLP = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,height);
+			svVideoH264.setLayoutParams(RLP);
 			//.
 			H264Channel.ReStart();
 			//.

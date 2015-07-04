@@ -25,12 +25,14 @@ public class TH264IChannel extends TStreamChannel {
 		private int 	StreamSession;
 		private byte[] 	Data = null;
 		
-		public synchronized void Set(byte[] pData, int pDataSize) {
+		public synchronized int Set(byte[] pData, int pDataSize) {
 			StreamSession++;
 			//.
 			if ((Data == null) || (Data.length != pDataSize))
 				Data = new byte[pDataSize];
 			System.arraycopy(pData,0, Data,0, pDataSize);
+			//.
+			return StreamSession;
 		}
 		
 		public synchronized TChannelConfiguration Get() {
@@ -63,9 +65,11 @@ public class TH264IChannel extends TStreamChannel {
 			@Override
 			public void DoOnConfiguration(byte[] Buffer, int BufferSize) throws Exception {
 				//. start a new stream session and fill the channel configuration with data
-				ChannelConfiguration.Set(Buffer, BufferSize);
-				//.
-				super.DoOnConfiguration(Buffer, BufferSize);
+				int StreamSession = ChannelConfiguration.Set(Buffer, BufferSize);
+				//. send new session packet
+				DestinationChannel.DoOnChannelStreamSession(StreamSession);
+				//. send configuration
+				DestinationChannel.DoOnH264Packet(Buffer, BufferSize);
 			}
 			
 			@Override
@@ -125,8 +129,12 @@ public class TH264IChannel extends TStreamChannel {
 					@Override
 					protected void DoOnSubscribe(TPacketSubscriber Subscriber) throws Exception {
 						TChannelConfiguration CC = ChannelConfiguration.Get();
-						if (CC != null)
-							DestinationChannel.DoOnH264Packet(CC.Data, CC.Data.length, Subscriber);
+						if (CC != null) {
+							//. send new session packet
+							Subscriber.ProcessPacket(DestinationChannel.ChannelStreamSession_ToByteArray(CC.StreamSession));
+							//. send channel configuration
+							Subscriber.ProcessPacket(DestinationChannel.H264Packet_ToByteArray(CC.Data, CC.Data.length));
+						}
 					}
 				});
 				try {

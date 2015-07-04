@@ -60,7 +60,7 @@ public class TStreamChannel extends TChannel {
 	public void DoOnPacket(byte[] Packet, int PacketSize) throws Exception {
 		com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
 		if (DestinationChannel != null) 
-			DestinationChannel.DoOnPacket(Packet, PacketSize);
+			DestinationChannel.ProcessPacket(Packet, PacketSize);
 		else
 			throw new IOException("DoOnData() error, DestinationChannel is not set"); //. =>
 	}
@@ -72,7 +72,7 @@ public class TStreamChannel extends TChannel {
 	public void DoOnPacket(byte[] Packet, int PacketSize, TPacketSubscriber Subscriber) throws Exception {
 		com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
 		if (DestinationChannel != null) 
-			DestinationChannel.DoOnPacket(Packet, PacketSize, Subscriber);
+			DestinationChannel.ProcessPacket(Packet, PacketSize, Subscriber);
 		else
 			throw new IOException("DoOnData() error, DestinationChannel is not set"); //. =>
 	}

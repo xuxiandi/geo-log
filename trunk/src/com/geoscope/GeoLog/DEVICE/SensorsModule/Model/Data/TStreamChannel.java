@@ -5,6 +5,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.w3c.dom.Node;
+import org.xmlpull.v1.XmlSerializer;
+
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.MultiThreading.TCanceller;
@@ -41,13 +44,13 @@ public class TStreamChannel extends TChannel {
 			protected void DoOnSubscribe(TPacketSubscriber Subscriber) throws Exception {			
 			}
 
-			protected void DoOnSubscribed(TPacketSubscriber Subscriber) {			
+			protected void DoOnSubscribed(TPacketSubscriber Subscriber) throws Exception {			
 			}
 
 			protected void DoOnUnsubscribe(TPacketSubscriber Subscriber) throws Exception {			
 			}
 
-			protected void DoOnUnsubscribed(TPacketSubscriber Subscriber) {			
+			protected void DoOnUnsubscribed(TPacketSubscriber Subscriber) throws Exception {			
 			}
 		}
 		
@@ -94,10 +97,10 @@ public class TStreamChannel extends TChannel {
 					ItemsNotifier.DoOnSubscribe(Subscriber);
 			}
 			//.
-			boolean flStartSources;
+			boolean flStartSource;
 			Lock.lock();
 			try {
-				flStartSources = (Items.size() == 0);
+				flStartSource = (Items.size() == 0);
 				//.
 				Items.add(Subscriber);
 				Subscriber.Channel = Channel;
@@ -106,8 +109,8 @@ public class TStreamChannel extends TChannel {
 				Lock.unlock();
 			}
 			//.
-			if (flStartSources)
-				Channel.SourceChannels_Start();
+			if (flStartSource)
+				Channel.SourceChannel_Start();
 			//.
 			synchronized (Items) {
 				if (ItemsNotifier != null)
@@ -135,7 +138,7 @@ public class TStreamChannel extends TChannel {
 			}
 			//.
 			if (flStopSources)
-				Channel.SourceChannels_Stop();
+				Channel.SourceChannel_Stop();
 			//.
 			synchronized (Items) {
 				if (ItemsNotifier != null)
@@ -254,46 +257,95 @@ public class TStreamChannel extends TChannel {
 
 	public TSensorsModule SensorsModule;
 	
-	public ArrayList<TChannel> 	SourceChannels = new ArrayList<TChannel>();
-	protected int 				SourceChannels_StartCounter = 0;
+	protected TChannel 			SourceChannel = null;
+	protected int 				SourceChannel_StartCounter = 0;
 	//.
 	public TPacketSubscribers PacketSubscribers = new TPacketSubscribers(this);
 	
 	public TStreamChannel(TSensorsModule pSensorsModule) {
 		SensorsModule = pSensorsModule;
 	}
+
+	@Override
+	public void Profile_FromByteArray(byte[] BA) throws Exception {
+		SourceChannel_Profile_FromByteArray(BA);
+	}
 	
-	public void SourceChannels_Add(TChannel SC) {
-		synchronized (SourceChannels) {
-			SourceChannels.add(SC);
+	@Override
+	public void Profile_FromXMLNode(Node ANode) throws Exception {
+		SourceChannel_Profile_FromXMLNode(ANode);
+	}
+	
+	@Override
+	public byte[] Profile_ToByteArray() throws Exception {
+		return SourceChannel_Profile_ToByteArray();
+	}
+	
+	@Override
+	public void Profile_ToXMLSerializer(XmlSerializer Serializer) throws Exception {
+		SourceChannel_Profile_ToXMLSerializer(Serializer);
+	}
+	
+	public void SourceChannel_Set(TChannel SC) {
+		synchronized (this) {
+			SourceChannel = SC;
 		}
 	}
 	
-	public void SourceChannels_Remove(TChannel SC) {
-		synchronized (SourceChannels) {
-			SourceChannels.remove(SC);
+	public void SourceChannel_Clear(TChannel SC) {
+		synchronized (this) {
+			if (SC == SourceChannel)
+				SourceChannel = null;
 		}
 	}
 	
-	public void SourceChannels_Start() {
-		synchronized (SourceChannels) {
-			SourceChannels_StartCounter++;
-			if (SourceChannels_StartCounter == 1) {
-				int Cnt = SourceChannels.size();
-				for (int I = 0; I < Cnt; I++)
-					SourceChannels.get(I).StartSource();
+	public void SourceChannel_Start() {
+		synchronized (this) {
+			SourceChannel_StartCounter++;
+			if (SourceChannel_StartCounter == 1) {
+				if (SourceChannel != null)
+					SourceChannel.StartSource();
 			}
 		}
 	}
 	
-	public void SourceChannels_Stop() {
-		synchronized (SourceChannels) {
-			SourceChannels_StartCounter--;
-			if (SourceChannels_StartCounter == 0) {
-				int Cnt = SourceChannels.size();
-				for (int I = 0; I < Cnt; I++)
-					SourceChannels.get(I).StopSource();
+	public void SourceChannel_Stop() {
+		synchronized (this) {
+			SourceChannel_StartCounter--;
+			if (SourceChannel_StartCounter == 0) {
+				if (SourceChannel != null)
+					SourceChannel.StopSource();
 			}
+		}
+	}
+	
+	public void SourceChannel_Profile_FromByteArray(byte[] BA) throws Exception {
+		synchronized (this) {
+			if (SourceChannel != null)
+				SourceChannel.Profile_FromByteArray(BA);
+		}
+	}
+	
+	public void SourceChannel_Profile_FromXMLNode(Node ANode) throws Exception {
+		synchronized (this) {
+			if (SourceChannel != null)
+				SourceChannel.Profile_FromXMLNode(ANode);
+		}
+	}
+	
+	public byte[] SourceChannel_Profile_ToByteArray() throws Exception {
+		synchronized (this) {
+			if (SourceChannel != null)
+				return SourceChannel.Profile_ToByteArray(); //. ->
+			else
+				return null; //. ->
+		}
+	}
+	
+	public void SourceChannel_Profile_ToXMLSerializer(XmlSerializer Serializer) throws Exception {
+		synchronized (this) {
+			if (SourceChannel != null)
+				SourceChannel.Profile_ToXMLSerializer(Serializer);
 		}
 	}
 	

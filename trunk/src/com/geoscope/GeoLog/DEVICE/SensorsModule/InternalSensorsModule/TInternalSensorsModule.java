@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule;
 
+import java.io.File;
 import java.io.IOException;
 
 import android.annotation.SuppressLint;
@@ -674,6 +675,8 @@ public class TInternalSensorsModule extends TModule {
 		}
 	}
 	
+	public TSensorsModule SensorsModule;
+	//.
 	public boolean flStartOnDeviceStart = false;
 	//.
 	public boolean flInitialized = false;
@@ -727,7 +730,13 @@ public class TInternalSensorsModule extends TModule {
     public TInternalSensorsModule(TSensorsModule pSensorsModule) throws Exception {
     	super(pSensorsModule);
     	//.
+    	SensorsModule = pSensorsModule;
+    	//.
         Device = pSensorsModule.Device;
+    	//. 
+		File F = new File(Folder());
+		if (!F.exists()) 
+			F.mkdirs();
         //.
         UserMessagingModule = new TUserMessagingModule(this);
         //.
@@ -841,12 +850,14 @@ public class TInternalSensorsModule extends TModule {
     	}
     }
     
-    private void Model_Build() {
+    private void Model_Build() throws Exception {
     	Model = new TModel();
+    	//. set model stream folder
+    	Model.Stream.Folder = TSensorsModule.Folder();
     	//.
     	if (ASTLRChannel_flUse) {
 			ASTLRChannel = new TTLRChannel(this); 
-			ASTLRChannel.ID = TChannel.GetNextID();
+			ASTLRChannel.ID = 1;
 			ASTLRChannel.Enabled = true;
 			ASTLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			ASTLRChannel.DataFormat = 0;
@@ -868,7 +879,7 @@ public class TInternalSensorsModule extends TModule {
     	}
     	else {
     		ADSChannel = new TADSChannel(this); 
-    		ADSChannel.ID = TChannel.GetNextID();
+    		ADSChannel.ID = 2;
     		ADSChannel.Enabled = true;
     		ADSChannel.Kind = TChannel.CHANNEL_KIND_OUT;
     		ADSChannel.DataFormat = 0;
@@ -883,7 +894,7 @@ public class TInternalSensorsModule extends TModule {
     	//.
 		if (ECTLRChannel_flUse) {
 			ECTLRChannel = new TTLRChannel(this); 
-			ECTLRChannel.ID = TChannel.GetNextID();
+			ECTLRChannel.ID = 3;
 			ECTLRChannel.Enabled = true;
 			ECTLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			ECTLRChannel.DataFormat = 0;
@@ -910,7 +921,7 @@ public class TInternalSensorsModule extends TModule {
 		}
 		else {
 			XENVCChannel = new TXENVCChannel(this); 
-			XENVCChannel.ID = TChannel.GetNextID();
+			XENVCChannel.ID = 4;
 			XENVCChannel.Enabled = true;
 			XENVCChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			XENVCChannel.DataFormat = 0;

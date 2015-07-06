@@ -18,14 +18,18 @@ public class TLUMChannel extends TStreamChannel {
 
 	public static final String TypeID = "UserMessaging.LUM";
 	
+	public static class TMyProfile extends TChannel.TProfile {
+		
+	}
+	
 	
 	public TDataType	UserMessagingParameters;
 	public TDataType	UserStatus;
 	public TDataType	UserMessage;
 	public TDataType	UserMessageDelivery;
 	
-	public TLUMChannel(TInternalSensorsModule pInternalSensorsModule) {
-		super(pInternalSensorsModule);
+	public TLUMChannel(TInternalSensorsModule pInternalSensorsModule) throws Exception {
+		super(pInternalSensorsModule, TMyProfile.class);
 		//.
 		Enabled = true;
 		Kind = TChannel.CHANNEL_KIND_OUT;

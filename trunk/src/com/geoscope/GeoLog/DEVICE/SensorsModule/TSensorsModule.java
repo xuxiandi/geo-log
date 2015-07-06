@@ -37,6 +37,10 @@ public class TSensorsModule extends TModule {
 		return TDEVICEModule.DeviceFolder()+"/"+"SensorsModule";
 	}
 	
+	public static String Channels_Folder() {
+		return Folder()+"/"+"Channels";
+	}
+	
 	public static String Meters_Folder() {
 		return Folder()+"/"+"Meters";
 	}
@@ -71,7 +75,7 @@ public class TSensorsModule extends TModule {
 	//.
 	public TSensorsDataValue Data;
 	//.
-	private TModel Model;
+	public TModel Model;
 	//.
 	public TSensorsMeters Meters;
 	//.
@@ -86,6 +90,9 @@ public class TSensorsModule extends TModule {
         Device = pDevice;
     	//. 
 		File F = new File(Folder());
+		if (!F.exists()) 
+			F.mkdirs();
+		F = new File(Channels_Folder());
 		if (!F.exists()) 
 			F.mkdirs();
 		F = new File(Meters_Folder());
@@ -165,12 +172,9 @@ public class TSensorsModule extends TModule {
         		com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.TStreamChannel SourceChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.TStreamChannel)InternalSensorsModule.Model.Stream.Channels.get(I); 
         		TStreamChannel NewChannel = ChannelsProvider.GetChannel(SourceChannel.GetTypeID());
         		NewChannel.Assign(SourceChannel);
-        		//. make a unique ID for new sensors stream channel
-        		NewChannel.ID = TChannel.GetNextID();
-        		SourceChannel.ID = NewChannel.ID; //. assign the new ID to the source channel 
         		//. attaching the channel to the source channel
         		SourceChannel.DestinationChannel_Set(NewChannel);
-        		NewChannel.SourceChannels_Add(SourceChannel);
+        		NewChannel.SourceChannel_Set(SourceChannel);
         		//.
         		NewModel.Stream.Channels.add(NewChannel);
         	}
@@ -181,12 +185,9 @@ public class TSensorsModule extends TModule {
         		com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel SourceChannel = (com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel)Device.PluginsModule.USBPluginModule.PIOModel.Stream.Channels.get(I); 
         		TStreamChannel NewChannel = ChannelsProvider.GetChannel(SourceChannel.GetTypeID());
         		NewChannel.Assign(SourceChannel);
-        		//. make a unique ID for new sensors stream channel
-        		NewChannel.ID = TChannel.GetNextID();
-        		SourceChannel.ID = NewChannel.ID; //. assign the new ID to the source channel 
         		//. attaching the channel to the source channel
         		SourceChannel.DestinationChannel = NewChannel;
-        		NewChannel.SourceChannels_Add(SourceChannel);
+        		NewChannel.SourceChannel_Set(SourceChannel);
         		//.
         		NewModel.Stream.Channels.add(NewChannel);
         	}
@@ -239,7 +240,7 @@ public class TSensorsModule extends TModule {
 			Result.Assign(UserMessaging.OutChannel);
 			//. attaching the channel to the source channel
 			UserMessaging.OutChannel.DestinationChannel_Set(Result);
-			Result.SourceChannels_Add(UserMessaging.OutChannel);
+			Result.SourceChannel_Set(UserMessaging.OutChannel);
 			return Result;
 		}
 		//.

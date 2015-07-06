@@ -345,7 +345,7 @@ public class TUSBPluginModule extends TPluginModule {
 		PIOModel = new TModel(this);
 		//.
 		TChannel Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel(this); 
-		Channel.ID = TChannel.GetNextID();
+		Channel.ID = 8;
 		Channel.Enabled = true;
 		Channel.Kind = TChannel.CHANNEL_KIND_IN;
 		Channel.DataFormat = 0;
@@ -360,7 +360,7 @@ public class TUSBPluginModule extends TPluginModule {
 		PIOModel.ControlStream.Channels.add(Channel);
 		//.
 		Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel(this); 
-		Channel.ID = TChannel.GetNextID();
+		Channel.ID = 9;
 		Channel.Enabled = true;
 		Channel.Kind = TChannel.CHANNEL_KIND_OUT;
 		Channel.DataFormat = 0;
@@ -506,7 +506,7 @@ public class TUSBPluginModule extends TPluginModule {
 		PIOModel.ControlStream.Channels.add(Channel);*/
 		//.
 		TChannel Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.Telecontrol.TLC.TTLCChannel(this); 
-		Channel.ID = TChannel.GetNextID();
+		Channel.ID = 8;
 		Channel.Enabled = true;
 		Channel.Kind = TChannel.CHANNEL_KIND_IN;
 		Channel.DataFormat = 0;
@@ -539,7 +539,7 @@ public class TUSBPluginModule extends TPluginModule {
 		PIOModel.Stream.Channels.add(Channel);*/
 		//.
 		Channel = new com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel(this); 
-		Channel.ID = TChannel.GetNextID();
+		Channel.ID = 9;
 		Channel.Enabled = true;
 		Channel.Kind = TChannel.CHANNEL_KIND_OUT;
 		Channel.DataFormat = 0;

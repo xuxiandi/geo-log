@@ -19,7 +19,7 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 	}
 	
 	@Override
-	public TChannel GetChannel(String pTypeID) {
+	public TChannel GetChannel(String pTypeID) throws Exception {
 		if (TADSChannel.TypeID.equals(pTypeID))
 			return (new TADSChannel(InternalSensorsModule)); // =>
 		if (TXENVCChannel.TypeID.equals(pTypeID))

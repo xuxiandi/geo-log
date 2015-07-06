@@ -2,6 +2,9 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Dat
 
 import java.io.IOException;
 
+import org.w3c.dom.Node;
+import org.xmlpull.v1.XmlSerializer;
+
 import android.annotation.SuppressLint;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -9,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -22,13 +26,49 @@ public class TAACChannel extends TStreamChannel {
 
 	public static final String TypeID = "Audio.AAC";
 	
+	public static class TMyProfile extends TChannel.TProfile {
+		
+		public int	SampleRate 	= 16000;
+		public int	BitRate 	= 16000;
+
+		@Override
+		public void FromXMLNode(Node ANode) throws Exception {
+			super.FromXMLNode(ANode);
+			//. SampleRate
+			Node _Node = TMyXML.SearchNode(ANode,"SampleRate");
+			if (_Node != null) {
+				Node ValueNode = _Node.getFirstChild();
+				if (ValueNode != null)
+					SampleRate = Integer.parseInt(ValueNode.getNodeValue());
+			}
+			//. BitRate
+			_Node = TMyXML.SearchNode(ANode,"BitRate");
+			if (_Node != null) {
+				Node ValueNode = _Node.getFirstChild();
+				if (ValueNode != null)
+					BitRate = Integer.parseInt(ValueNode.getNodeValue());
+			}
+		}
+		
+		@Override
+		public synchronized void ToXMLSerializer(XmlSerializer Serializer) throws Exception {
+			super.ToXMLSerializer(Serializer);
+	    	//. SampleRate
+	        Serializer.startTag("", "SampleRate");
+	        Serializer.text(Integer.toString(SampleRate));
+	        Serializer.endTag("", "SampleRate");
+	    	//. BitRate
+	        Serializer.startTag("", "BitRate");
+	        Serializer.text(Integer.toString(BitRate));
+	        Serializer.endTag("", "BitRate");
+		}
+	}
+	
 	
 	public class TAudioSampleSource extends TCancelableThread {
 		
 		private AudioRecord Recorder = null; 
 		public int 			Source = TMicrophoneCapturingServer.TConfiguration.SOURCE_ANY;
-		public int 			SampleRate = 16000;
-		public int			BitRate = 16000;
         private int 		BufferSize;
         //.
         private TAACADTSEncoder AACADTSEncoder;
@@ -44,7 +84,7 @@ public class TAACChannel extends TStreamChannel {
 		}
 		
 		public void Start() {
-    		AACADTSEncoder = new TAACADTSEncoder(BitRate, SampleRate) {
+    		AACADTSEncoder = new TAACADTSEncoder(MyProfile.BitRate, MyProfile.SampleRate) {
     			
     			@Override
     			public void DoOnOutputPacket(byte[] Packet, int PacketSize) throws Exception {
@@ -70,9 +110,9 @@ public class TAACChannel extends TStreamChannel {
 		}
 		
 	    private void Microphone_Initialize() throws IOException {
-	    	BufferSize = AudioRecord.getMinBufferSize(SampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+	    	BufferSize = AudioRecord.getMinBufferSize(MyProfile.SampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 	        if (BufferSize != AudioRecord.ERROR_BAD_VALUE && BufferSize != AudioRecord.ERROR) {
-	            Recorder = new AudioRecord(Source, SampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, BufferSize);
+	            Recorder = new AudioRecord(Source, MyProfile.SampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, BufferSize);
 	            if (Recorder != null && Recorder.getState() == AudioRecord.STATE_INITIALIZED) 
 	            	Recorder.startRecording();
 	            else 
@@ -100,7 +140,7 @@ public class TAACChannel extends TStreamChannel {
 		        	throw new IOException("No destination channel"); //. ->
 				DestinationChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel)_DestinationChannel;
 				//. try to connect to an AudioModule.MicrophoneCapturingServer
-				TMicrophoneCapturingServer.TConfiguration Configuration = new TMicrophoneCapturingServer.TConfiguration(Source, SampleRate);
+				TMicrophoneCapturingServer.TConfiguration Configuration = new TMicrophoneCapturingServer.TConfiguration(Source, MyProfile.SampleRate);
 				TMicrophoneCapturingServer.TPacketSubscriber PacketSubscriber = new TMicrophoneCapturingServer.TPacketSubscriber() {
 					
 					@Override
@@ -156,10 +196,15 @@ public class TAACChannel extends TStreamChannel {
 		}
 	}
 	
+	private TMyProfile MyProfile;
+	//.
 	private TAudioSampleSource AudioSampleSource;
 	
-	public TAACChannel(TInternalSensorsModule pInternalSensorsModule) {
-		super(pInternalSensorsModule);
+	public TAACChannel(TInternalSensorsModule pInternalSensorsModule) throws Exception {
+		super(pInternalSensorsModule, TMyProfile.class);
+		MyProfile = (TMyProfile)Profile;
+		//.
+		ID = 6;
 		//.
 		Enabled = true;
 		Kind = TChannel.CHANNEL_KIND_OUT;
@@ -189,7 +234,7 @@ public class TAACChannel extends TStreamChannel {
 	}
 	
 	public int GetSampleRate() {
-		return AudioSampleSource.SampleRate;
+		return MyProfile.SampleRate;
 	}
 	
 	@Override

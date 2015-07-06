@@ -22,6 +22,8 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 
 public class TStreamDescriptor {
 
+	public String Folder = null;
+	//.
     public String Name = "";
     public String Info = "";
     //.

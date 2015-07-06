@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber;
 
@@ -14,7 +15,9 @@ public class TStreamChannel extends TChannel {
 	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel 										DestinationChannel = null;
 	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier 	DestinationChannel_PacketSubscribersItemsNotifier = null;  
 	
-	public TStreamChannel(TInternalSensorsModule pInternalSensorsModule) {
+	public TStreamChannel(TInternalSensorsModule pInternalSensorsModule, Class<?> ChannelProfile) throws Exception {
+		super(TSensorsModule.Channels_Folder(), ChannelProfile);
+		//.
 		InternalSensorsModule = pInternalSensorsModule;
 	}
 	

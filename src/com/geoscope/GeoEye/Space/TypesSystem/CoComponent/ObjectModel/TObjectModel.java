@@ -485,6 +485,20 @@ public class TObjectModel {
 		return new TObjectHistoryRecords(ObjectModelRecords,BusinessModelRecords);
 	}
 	
+	public void Sensors_Channel_SetProfile(int ChannelID, byte[] Profile) throws IOException, Exception {
+	}
+	
+	public byte[] Sensors_Channel_GetProfile(int ChannelID) throws Exception {
+		return null;
+	}
+	
+	public void Sensors_Channels_SetProfile(byte[] Profile) throws IOException, Exception {
+	}
+	
+	public byte[] Sensors_Channels_GetProfile() throws Exception {
+		return null;
+	}
+	
 	public void Sensors_Meter_SetProfile(String MeterID, byte[] Profile) throws IOException, Exception {
 	}
 	

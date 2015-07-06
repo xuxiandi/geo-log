@@ -2,13 +2,13 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Dat
 
 import java.io.IOException;
 
-import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TSourceStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber;
 
-public class TStreamChannel extends TChannel {
+public class TStreamChannel extends TSourceStreamChannel {
 
 	protected TInternalSensorsModule InternalSensorsModule;
 	//.

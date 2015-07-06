@@ -184,6 +184,26 @@ public class TGeoMonitoredObject1Model extends TObjectModel
     }
 	
 	@Override
+	public void Sensors_Channel_SetProfile(int ChannelID, byte[] Profile) throws IOException, Exception {
+		SensorsModule_Channel_SetProfile(ChannelID, Profile);
+	}
+	
+	@Override
+	public byte[] Sensors_Channel_GetProfile(int ChannelID) throws Exception {
+		return SensorsModule_Channel_GetProfile(ChannelID);
+	}
+	
+	@Override
+	public void Sensors_Channels_SetProfile(byte[] Profile) throws IOException, Exception {
+		SensorsModule_Channels_SetProfile(Profile);
+	}
+	
+	@Override
+	public byte[] Sensors_Channels_GetProfile() throws Exception {
+		return SensorsModule_Channels_GetProfile();
+	}
+	
+	@Override
 	public void Sensors_Meter_SetProfile(String MeterID, byte[] Profile) throws IOException, Exception {
 		SensorsModule_Meter_SetProfile(MeterID, Profile);
 	}
@@ -684,10 +704,10 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 	public TLANConnectionUDPStopHandler TLANConnectionUDPStopHandler_Create(TCoGeoMonitorObject Object) {
 		return new TLANConnectionUDPStopper(Object);
 	}
-	
-	public void SensorsModule_Channel_SetProfile(String ChannelID, byte[] Profile) throws IOException, Exception {
+
+	public void SensorsModule_Channel_SetProfile(int ChannelID, byte[] Profile) throws IOException, Exception {
 		int Version = 1;
-		String Params = "1,"+Integer.toString(Version)+","+ChannelID;
+		String Params = "1,"+Integer.toString(Version)+","+Integer.toString(ChannelID);
 		//.
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,19,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");
@@ -715,9 +735,9 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		}
 	}
 	
-	public byte[] SensorsModule_Channel_GetProfile(String ChannelID) throws Exception {
+	public byte[] SensorsModule_Channel_GetProfile(int ChannelID) throws Exception {
 		int Version = 1;
-		String Params = "1,"+Integer.toString(Version)+","+ChannelID;
+		String Params = "1,"+Integer.toString(Version)+","+Integer.toString(ChannelID);
 		//.
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,19,1000});
 		byte[] _AddressData = Params.getBytes("US-ASCII");

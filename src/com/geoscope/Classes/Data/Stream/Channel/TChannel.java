@@ -14,6 +14,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
@@ -129,6 +131,10 @@ public class TChannel {
 		public TProfile() {
 		}
 
+		public TProfile(byte[] ProfileData) throws Exception {
+			FromByteArray(ProfileData);
+		}
+
 		public void FromXMLNode(Node ANode) throws Exception {
 		}
 		
@@ -175,6 +181,10 @@ public class TChannel {
 		    	BOS.close();
 		    }
 	    }
+		
+		public Intent GetProfilePanel(Activity Parent) throws Exception {
+			return null;
+		}
 	}
 	
 	
@@ -246,7 +256,10 @@ public class TChannel {
 	}
 	
 	public void Profile_Save() throws Exception {
-		String FN = Folder()+"/"+TProfile.FileName;
+		File F = new File(Folder());
+		F.mkdirs();
+		//.
+		String FN = F.getAbsolutePath()+"/"+TProfile.FileName;
 		FileOutputStream FOS = new FileOutputStream(FN);
         try
         {

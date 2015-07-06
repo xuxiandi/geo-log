@@ -16,8 +16,9 @@ import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.TSourceModel;
 
-public class TModel {
+public class TModel extends TSourceModel {
 
 	private TPluginModule PluginModule;
 	//.

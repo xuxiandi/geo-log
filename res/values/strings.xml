@@ -1103,5 +1103,13 @@
     <string name="SAudioBuffersProcessed">Audio buffers processed: </string>
     <string name="SVideoH264">Video (H264)</string>
     <string name="SVideoBuffersProcessed">"Video buffers processed: "</string>
+    <string name="SProfile1">Channel profile</string>
+    <string name="SSampleRate">Sample rate</string>
+    <string name="SBitRate">Bit rate</string>
+    <string name="SThereIsNoProfilePanel">there is no profile panel</string>
+    <string name="SNewProfileHasBeenSet">New profile has been set.</string>
+    <string name="SWidth">Width</string>
+    <string name="SHeight">Height</string>
+    <string name="SFrameRate">Frame rate</string>
     
 </resources>

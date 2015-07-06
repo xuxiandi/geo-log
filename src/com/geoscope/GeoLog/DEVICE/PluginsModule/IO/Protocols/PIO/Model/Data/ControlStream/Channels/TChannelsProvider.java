@@ -7,14 +7,21 @@ import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Cont
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
 
+	public static final TChannelsProvider Instance = new TChannelsProvider();
+	
+	
 	private TPluginModule PluginModule;
+	
+	public TChannelsProvider() {
+		PluginModule = null;
+	}
 	
 	public TChannelsProvider(TPluginModule pPluginModule) {
 		PluginModule = pPluginModule;
 	}
 	
 	@Override
-	public TStreamChannel GetChannel(String pTypeID) {
+	public TStreamChannel GetChannel(String pTypeID) throws Exception {
 		if (TDVRTChannel.TypeID.equals(pTypeID))
 			return (new TDVRTChannel(PluginModule)); // =>
 		if (TTLCChannel.TypeID.equals(pTypeID))

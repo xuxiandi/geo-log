@@ -62,6 +62,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPIValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPSFixSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPSModuleConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetSensorDataValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetSensorsModuleChannelsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetSensorsModuleMeasurementsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetSensorsModuleMetersValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetVideoRecorderConfigurationDataValueSO;
@@ -2069,6 +2070,8 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TGetControlDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetSensorDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TGetSensorDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
+        if (TGetSensorsModuleChannelsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TGetSensorsModuleChannelsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetSensorsModuleMetersValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TGetSensorsModuleMetersValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetSensorsModuleMeasurementsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))

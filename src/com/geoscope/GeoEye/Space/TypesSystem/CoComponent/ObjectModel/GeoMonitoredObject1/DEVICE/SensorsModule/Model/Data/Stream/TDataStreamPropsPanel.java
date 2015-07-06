@@ -17,12 +17,15 @@ import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
@@ -30,14 +33,20 @@ import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
+import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TSourceStreamChannel;
 
 @SuppressLint("HandlerLeak")
 public class TDataStreamPropsPanel extends Activity {
 
 	public static final int PARAMETERS_TYPE_OID 	= 1;
 	public static final int PARAMETERS_TYPE_OIDX 	= 2;
+	
+	public static final int REQUEST_EDITCHANNELPROFILE = 1;
 	
 	private int ParametersType;
 	//.
@@ -50,7 +59,10 @@ public class TDataStreamPropsPanel extends Activity {
 	private TextView lbStreamName;
 	private TextView lbStreamInfo;
 	private TextView lbStreamChannels;
-	private ListView lvChannels;	
+	//.
+	private ListView 	lvChannels;
+	private int			lvChannels_SelectedIndex = -1;
+	//.
 	private Button btnOpenStream;
 	private Button btnGetStreamDescriptor;
 	//.
@@ -88,9 +100,24 @@ public class TDataStreamPropsPanel extends Activity {
         //.
         lvChannels = (ListView)findViewById(R.id.lvChannels);
         lvChannels.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        lvChannels.setOnItemLongClickListener(new OnItemLongClickListener() {
+        	
+        	@Override
+        	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+            	try {
+            		lvChannels_SelectedIndex = arg2;
+            		return (OpenChannelProfile(lvChannels_SelectedIndex));
+				} catch (Exception E) {
+					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					//.
+					return false; //. ->
+				}
+        	}
+		});
         //.
         btnOpenStream = (Button)findViewById(R.id.btnOpenStream);
         btnOpenStream.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
             	try {
@@ -104,6 +131,7 @@ public class TDataStreamPropsPanel extends Activity {
         btnGetStreamDescriptor = (Button)findViewById(R.id.btnGetStreamDescriptor);
         btnGetStreamDescriptor.setVisibility(TGeoLogApplication.DebugOptions_IsDebugging() ? View.VISIBLE : View.GONE);
         btnGetStreamDescriptor.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
             	try {
@@ -125,6 +153,80 @@ public class TDataStreamPropsPanel extends Activity {
 		}
 		//.
     	super.onDestroy();
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {        
+
+        case REQUEST_EDITCHANNELPROFILE: 
+        	if (resultCode == RESULT_OK) {
+            	try {
+    				Bundle extras = data.getExtras();
+					final byte[] ProfileData = extras.getByteArray("ProfileData");
+					//.
+            		if (lvChannels_SelectedIndex >= 0) {
+                    	final TChannel Channel = DataStreamDescriptor.Channels.get(lvChannels_SelectedIndex);
+                    	//.
+                    	final TSourceStreamChannel SourceChannel = com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TSourceChannelsProvider.Instance.GetChannel(Channel.GetTypeID());
+                    	if (SourceChannel != null) {
+                        	SourceChannel.ID = Channel.ID;
+                        	//.
+                    		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+                    			
+                    			@Override
+                    			public void Process() throws Exception {
+                    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+                    				if (UserAgent == null)
+                    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+                    				TCoGeoMonitorObject	Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
+                    				byte[] ObjectModelData = Object.GetData(1000001);
+                    				if (ObjectModelData != null) {
+                        				Canceller.Check();
+                        				//.
+                    					int Idx = 0;
+                    					int ObjectModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+                    					int BusinessModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+                    					//.
+                    					if (ObjectModelID != 0) {
+                    						TObjectModel ObjectModel = TObjectModel.GetObjectModel(ObjectModelID);
+                    						if (ObjectModel != null) 
+                    							try {
+                    								ObjectModel.SetBusinessModel(BusinessModelID);
+                    								//.
+                    								TGeographServerObjectController GSOC = Object.GeographServerObjectController();
+                    								ObjectModel.SetObjectController(GSOC, true);
+                    								//.
+                    								ObjectModel.Sensors_Channel_SetProfile(SourceChannel.ID, ProfileData); 
+                    							}
+                    							finally {
+                    								ObjectModel.Destroy();
+                    							}								
+                    					}
+                    				}
+                    			}
+                    			
+                    			@Override 
+                    			public void DoOnCompleted() throws Exception {
+                    				Toast.makeText(TDataStreamPropsPanel.this, R.string.SNewProfileHasBeenSet, Toast.LENGTH_LONG).show();
+                    			}
+                    			
+                    			@Override
+                    			public void DoOnException(Exception E) {
+                    				Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+                    			}
+                    		};
+                    		Processing.Start();
+                    	}
+            		}
+				} catch (Exception E) {
+					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
+        	}
+            break; //. >
+        }
+    	//.
+    	super.onActivityResult(requestCode, resultCode, data);
     }
     
 	private class TUpdating extends TCancelableThread {
@@ -339,6 +441,7 @@ public class TDataStreamPropsPanel extends Activity {
 				//.
 				DescriptorData = DataStreamDescriptorData;
 			}
+			
 			@Override 
 			public void DoOnCompleted() throws Exception {
 				Intent intent = new Intent(TDataStreamPropsPanel.this, TDataStreamPanel.class);
@@ -368,6 +471,7 @@ public class TDataStreamPropsPanel extends Activity {
 				//.
 				startActivity(intent);
 			}
+			
 			@Override
 			public void DoOnException(Exception E) {
 				Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -391,6 +495,7 @@ public class TDataStreamPropsPanel extends Activity {
 					fos.close();
 				}
 			}
+			
 			@Override 
 			public void DoOnCompleted() throws Exception {
 				Intent intent = new Intent();
@@ -398,11 +503,73 @@ public class TDataStreamPropsPanel extends Activity {
 				intent.setAction(android.content.Intent.ACTION_VIEW);
 				startActivity(intent);
 			}
+			
 			@Override
 			public void DoOnException(Exception E) {
 				Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		};
 		Processing.Start();
+    }
+
+    private boolean OpenChannelProfile(int Idx) throws Exception {
+    	final TChannel Channel = DataStreamDescriptor.Channels.get(Idx);
+    	//.
+    	final TSourceStreamChannel SourceChannel = com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TSourceChannelsProvider.Instance.GetChannel(Channel.GetTypeID());
+    	if (SourceChannel == null)
+    		return false; //. ->
+    	SourceChannel.ID = Channel.ID;
+    	//.
+		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+			
+			@Override
+			public void Process() throws Exception {
+				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+				if (UserAgent == null)
+					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+				TCoGeoMonitorObject	Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
+				byte[] ObjectModelData = Object.GetData(1000001);
+				if (ObjectModelData != null) {
+    				Canceller.Check();
+    				//.
+					int Idx = 0;
+					int ObjectModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+					int BusinessModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+					//.
+					if (ObjectModelID != 0) {
+						TObjectModel ObjectModel = TObjectModel.GetObjectModel(ObjectModelID);
+						if (ObjectModel != null) 
+							try {
+								ObjectModel.SetBusinessModel(BusinessModelID);
+								//.
+								TGeographServerObjectController GSOC = Object.GeographServerObjectController();
+								ObjectModel.SetObjectController(GSOC, true);
+								//.
+								SourceChannel.Profile.FromByteArray(ObjectModel.Sensors_Channel_GetProfile(SourceChannel.ID)); 
+							}
+							finally {
+								ObjectModel.Destroy();
+							}								
+					}
+				}
+			}
+			
+			@Override 
+			public void DoOnCompleted() throws Exception {
+		    	Intent ProfilePanel = SourceChannel.Profile.GetProfilePanel(TDataStreamPropsPanel.this);
+		    	if (ProfilePanel != null) 
+		    		startActivityForResult(ProfilePanel, REQUEST_EDITCHANNELPROFILE);
+		    	else
+		    		throw new Exception(getString(R.string.SThereIsNoProfilePanel)); //. ->
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		Processing.Start();
+		//.
+    	return true; //. ->
     }
 }

@@ -1,10 +1,10 @@
 package com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data;
 
-import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TSourceStreamChannel;
 
-public class TStreamChannel extends TChannel {
+public class TStreamChannel extends TSourceStreamChannel {
 
 	protected TPluginModule PluginModule = null;
 	

@@ -6,6 +6,8 @@ import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
@@ -31,6 +33,14 @@ public class TH264IChannel extends TStreamChannel {
 		//.
 		public int FrameRate = 15;
 		public int BitRate	 = 1000000;
+
+		public TMyProfile() {
+			super();
+		}
+
+		public TMyProfile(byte[] ProfileData) throws Exception {
+			super(ProfileData);
+		}
 
 		@Override
 		public void FromXMLNode(Node ANode) throws Exception {
@@ -85,30 +95,38 @@ public class TH264IChannel extends TStreamChannel {
 	        Serializer.text(Integer.toString(BitRate));
 	        Serializer.endTag("", "BitRate");
 		}
+		
+		@Override
+		public Intent GetProfilePanel(Activity Parent) throws Exception {
+			Intent Result = new Intent(Parent, TH264IChannelProfilePanel.class);
+			Result.putExtra("ProfileData", ToByteArray());
+			//.
+			return Result;
+		}
 	}
 	
-	public static class TChannelConfiguration {
+	public static class TChannelStreamConfiguration {
 	
-		private int 	StreamSession;
+		private int 	Session;
 		private byte[] 	Data = null;
 		
 		public synchronized int Set(byte[] pData, int pDataSize) {
-			StreamSession++;
+			Session++;
 			//.
 			if ((Data == null) || (Data.length != pDataSize))
 				Data = new byte[pDataSize];
 			System.arraycopy(pData,0, Data,0, pDataSize);
 			//.
-			return StreamSession;
+			return Session;
 		}
 		
-		public synchronized TChannelConfiguration Get() {
+		public synchronized TChannelStreamConfiguration Get() {
 			if (Data == null)
 				return null; //. ->
 			//.
-			TChannelConfiguration Result = new TChannelConfiguration();
+			TChannelStreamConfiguration Result = new TChannelStreamConfiguration();
 			//.
-			Result.StreamSession = StreamSession;
+			Result.Session = Session;
 			//.
 			Result.Data = new byte[Data.length];
 			if (Data.length > 0)
@@ -132,7 +150,7 @@ public class TH264IChannel extends TStreamChannel {
 			@Override
 			public void DoOnConfiguration(byte[] Buffer, int BufferSize) throws Exception {
 				//. start a new stream session and fill the channel configuration with data
-				int StreamSession = ChannelConfiguration.Set(Buffer, BufferSize);
+				int StreamSession = ChannelStreamConfiguration.Set(Buffer, BufferSize);
 				//. send new session packet
 				DestinationChannel.DoOnChannelStreamSession(StreamSession);
 				//. send configuration
@@ -189,10 +207,10 @@ public class TH264IChannel extends TStreamChannel {
 
 					@Override
 					protected void DoOnSubscribed(TPacketSubscriber Subscriber) throws Exception {
-						TChannelConfiguration CC = ChannelConfiguration.Get();
+						TChannelStreamConfiguration CC = ChannelStreamConfiguration.Get();
 						if (CC != null) {
 							//. send new session packet
-							Subscriber.ProcessPacket(DestinationChannel.ChannelStreamSession_ToByteArray(CC.StreamSession));
+							Subscriber.ProcessPacket(DestinationChannel.ChannelStreamSession_ToByteArray(CC.Session));
 							//. send channel configuration
 							Subscriber.ProcessPacket(DestinationChannel.H264Packet_ToByteArray(CC.Data, CC.Data.length));
 						}
@@ -248,7 +266,7 @@ public class TH264IChannel extends TStreamChannel {
 	//.
 	private TVideoFrameSource VideoFrameSource;
 	//.
-	private TChannelConfiguration ChannelConfiguration = new TChannelConfiguration();
+	private TChannelStreamConfiguration ChannelStreamConfiguration = new TChannelStreamConfiguration();
 	
 	public TH264IChannel(TInternalSensorsModule pInternalSensorsModule) throws Exception {
 		super(pInternalSensorsModule, TMyProfile.class);

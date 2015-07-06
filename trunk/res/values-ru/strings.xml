@@ -1103,5 +1103,13 @@
     <string name="SAudioBuffersProcessed">Обработано аудио-буферов: </string>
     <string name="SVideoH264">Видео (H264)</string>
     <string name="SVideoBuffersProcessed">"Обработано видео-буферов: "</string>
+    <string name="SProfile1">Профиль канала</string>
+    <string name="SSampleRate">Частота дискретизации</string>
+    <string name="SBitRate">Битрейт</string>
+    <string name="SThereIsNoProfilePanel">нет панели профиля для данного канала</string>
+    <string name="SNewProfileHasBeenSet">Новый профиль канала установлен.</string>
+    <string name="SWidth">Ширина</string>
+    <string name="SHeight">Высота</string>
+    <string name="SFrameRate">Частота кадровё</string>
     
 </resources>

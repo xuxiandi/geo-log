@@ -6,6 +6,8 @@ import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.os.Handler;
@@ -30,6 +32,14 @@ public class TAACChannel extends TStreamChannel {
 		
 		public int	SampleRate 	= 16000;
 		public int	BitRate 	= 16000;
+
+		public TMyProfile() {
+			super();
+		}
+
+		public TMyProfile(byte[] ProfileData) throws Exception {
+			super(ProfileData);
+		}
 
 		@Override
 		public void FromXMLNode(Node ANode) throws Exception {
@@ -61,6 +71,14 @@ public class TAACChannel extends TStreamChannel {
 	        Serializer.startTag("", "BitRate");
 	        Serializer.text(Integer.toString(BitRate));
 	        Serializer.endTag("", "BitRate");
+		}
+		
+		@Override
+		public Intent GetProfilePanel(Activity Parent) throws Exception {
+			Intent Result = new Intent(Parent, TAACChannelProfilePanel.class);
+			Result.putExtra("ProfileData", ToByteArray());
+			//.
+			return Result;
 		}
 	}
 	

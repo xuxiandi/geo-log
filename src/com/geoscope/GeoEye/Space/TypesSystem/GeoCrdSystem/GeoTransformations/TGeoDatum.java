@@ -97,6 +97,11 @@ public class TGeoDatum {
         fRho = (a * (1 - e2)) / Math.pow(fTemp, 1.5);
         fNu = a / (Math.sqrt(1 - e2 * (Math.sin(fPhimean) * Math.sin(fPhimean))));
         fz = Math.sqrt(Math.pow(Math.sin(fdPhi / 2.0), 2) + Math.cos(Latitude1 * D2R) * Math.cos(Latitude * D2R) * Math.pow(Math.sin(fdLambda / 2.0), 2));
+        if (fz > 1.0) //. workaround on a case like fz = 1.0000000002
+        	fz = 1.0;
+        else
+            if (fz < -1.0)
+            	fz = -1.0;
         fz = 2 * Math.asin(fz);
         fAlpha = Math.cos(Latitude1 * D2R) * Math.sin(fdLambda) * 1 / Math.sin(fz);
         if (fAlpha > 1.0) //. workaround on a case like fAlpha = 1.0000000002

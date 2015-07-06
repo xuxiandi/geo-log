@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
-import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
@@ -48,8 +47,6 @@ public class TControlsModule extends TModule {
         		com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel DestinationChannel = (com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel)Device.PluginsModule.USBPluginModule.PIOModel.ControlStream.Channels.get(I); 
         		TStreamChannel NewChannel = ChannelsProvider.GetChannel(DestinationChannel.GetTypeID());
         		NewChannel.Assign(DestinationChannel);
-        		//. make a unique ID for new sensors stream channel
-        		NewChannel.ID = TChannel.GetNextID();
         		//. attaching the channel to the source channel
         		NewChannel.DestinationChannel = DestinationChannel;
         		//.

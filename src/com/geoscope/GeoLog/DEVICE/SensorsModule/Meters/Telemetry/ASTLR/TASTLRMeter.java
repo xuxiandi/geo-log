@@ -39,7 +39,7 @@ public class TASTLRMeter extends TSensorMeter {
 		//.
 		SourceChannel.Suspend();
 		try {
-			SourceChannel.SourceChannels_Start();
+			SourceChannel.SourceChannel_Start();
 			try {
 				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 				while (!Canceller.flCancel) {
@@ -58,7 +58,7 @@ public class TASTLRMeter extends TSensorMeter {
 				}
 			}
 			finally {
-				SourceChannel.SourceChannels_Stop();
+				SourceChannel.SourceChannel_Stop();
 			}
 		}
 		finally {

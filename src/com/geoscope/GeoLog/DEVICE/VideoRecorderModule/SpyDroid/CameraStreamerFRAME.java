@@ -20,7 +20,6 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Identification.TUIDGenerator;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
@@ -634,7 +633,7 @@ public class CameraStreamerFRAME extends Camera {
 		        if (MeasurementDescriptor != null) {
 		        	if (flAudio) {
 		        		AACChannel = new TAACChannel();
-		        		AACChannel.ID = TChannel.GetNextID();
+		        		AACChannel.ID = 1;
 		        		AACChannel.Enabled = true;
 		        		AACChannel.DataFormat = 0;
 		        		AACChannel.Name = "Audio channel";
@@ -651,7 +650,7 @@ public class CameraStreamerFRAME extends Camera {
 		        	}
 		        	if (flVideo) {
 		        		H264IChannel = new TH264IChannel();
-		        		H264IChannel.ID = TChannel.GetNextID();
+		        		H264IChannel.ID = 2;
 		        		H264IChannel.Enabled = true;
 		        		H264IChannel.DataFormat = 0;
 		        		H264IChannel.Name = "Video channel";

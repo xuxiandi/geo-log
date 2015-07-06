@@ -2,11 +2,15 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Dat
 
 import java.io.IOException;
 
+import org.w3c.dom.Node;
+import org.xmlpull.v1.XmlSerializer;
+
 import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -19,6 +23,69 @@ import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
 public class TH264IChannel extends TStreamChannel {
 
 	public static final String TypeID = "Video.H264I";
+	
+	public static class TMyProfile extends TChannel.TProfile {
+		
+		public int Width 	= 640;
+		public int Height 	= 480;
+		//.
+		public int FrameRate = 15;
+		public int BitRate	 = 1000000;
+
+		@Override
+		public void FromXMLNode(Node ANode) throws Exception {
+			super.FromXMLNode(ANode);
+			//. Width
+			Node _Node = TMyXML.SearchNode(ANode,"Width");
+			if (_Node != null) {
+				Node ValueNode = _Node.getFirstChild();
+				if (ValueNode != null)
+					Width = Integer.parseInt(ValueNode.getNodeValue());
+			}
+			//. Height
+			_Node = TMyXML.SearchNode(ANode,"Height");
+			if (_Node != null) {
+				Node ValueNode = _Node.getFirstChild();
+				if (ValueNode != null)
+					Height = Integer.parseInt(ValueNode.getNodeValue());
+			}
+			//. FrameRate
+			_Node = TMyXML.SearchNode(ANode,"FrameRate");
+			if (_Node != null) {
+				Node ValueNode = _Node.getFirstChild();
+				if (ValueNode != null)
+					FrameRate = Integer.parseInt(ValueNode.getNodeValue());
+			}
+			//. BitRate
+			_Node = TMyXML.SearchNode(ANode,"BitRate");
+			if (_Node != null) {
+				Node ValueNode = _Node.getFirstChild();
+				if (ValueNode != null)
+					BitRate = Integer.parseInt(ValueNode.getNodeValue());
+			}
+		}
+		
+		@Override
+		public synchronized void ToXMLSerializer(XmlSerializer Serializer) throws Exception {
+			super.ToXMLSerializer(Serializer);
+	    	//. Width
+	        Serializer.startTag("", "Width");
+	        Serializer.text(Integer.toString(Width));
+	        Serializer.endTag("", "Width");
+	    	//. Height
+	        Serializer.startTag("", "Height");
+	        Serializer.text(Integer.toString(Height));
+	        Serializer.endTag("", "Height");
+	    	//. FrameRate
+	        Serializer.startTag("", "FrameRate");
+	        Serializer.text(Integer.toString(FrameRate));
+	        Serializer.endTag("", "FrameRate");
+	    	//. BitRate
+	        Serializer.startTag("", "BitRate");
+	        Serializer.text(Integer.toString(BitRate));
+	        Serializer.endTag("", "BitRate");
+		}
+	}
 	
 	public static class TChannelConfiguration {
 	
@@ -87,12 +154,6 @@ public class TH264IChannel extends TStreamChannel {
 			}
 		}
 
-		public int Width = 640;
-		public int Height = 480;
-		//.
-		public int FrameRate = 15;
-		public int BitRate = 1000000;
-		//.
 		private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel DestinationChannel;
 				
 		
@@ -127,7 +188,7 @@ public class TH264IChannel extends TStreamChannel {
 				DestinationChannel_PacketSubscribersItemsNotifier_Set(new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier() {
 
 					@Override
-					protected void DoOnSubscribe(TPacketSubscriber Subscriber) throws Exception {
+					protected void DoOnSubscribed(TPacketSubscriber Subscriber) throws Exception {
 						TChannelConfiguration CC = ChannelConfiguration.Get();
 						if (CC != null) {
 							//. send new session packet
@@ -141,7 +202,7 @@ public class TH264IChannel extends TStreamChannel {
 			        if (!InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) 
 			        	throw new IOException("Video server is not available"); //. ->
 			        android.hardware.Camera camera = android.hardware.Camera.open();
-			        InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, Width,Height, BitRate, FrameRate, null,null);
+			        InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, MyProfile.Width,MyProfile.Height, MyProfile.BitRate, MyProfile.FrameRate, null,null);
 			        try {
 			        	TVideoFrameEncoderServerClient VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient();
 			        	try {
@@ -183,12 +244,17 @@ public class TH264IChannel extends TStreamChannel {
 		}
 	}
 	
+	private TMyProfile MyProfile;
+	//.
 	private TVideoFrameSource VideoFrameSource;
 	//.
 	private TChannelConfiguration ChannelConfiguration = new TChannelConfiguration();
 	
-	public TH264IChannel(TInternalSensorsModule pInternalSensorsModule) {
-		super(pInternalSensorsModule);
+	public TH264IChannel(TInternalSensorsModule pInternalSensorsModule) throws Exception {
+		super(pInternalSensorsModule, TMyProfile.class);
+		MyProfile = (TMyProfile)Profile;
+		//.
+		ID = 7;
 		//.
 		Enabled = true;
 		Kind = TChannel.CHANNEL_KIND_OUT;
@@ -218,7 +284,7 @@ public class TH264IChannel extends TStreamChannel {
 	}
 	
 	public int GetFrameRate() {
-		return VideoFrameSource.FrameRate;
+		return MyProfile.FrameRate;
 	}
 	
 	@Override

@@ -51,7 +51,7 @@ public class TUserMessagingModule extends TModule {
 		//.
 		public int CallingNotificationID = 0;
 		
-		public TUserMessaging(TUserMessagings pUserMessagings, long pObjectID, TCoGeoMonitorObject pObject, String pSessionID) {
+		public TUserMessaging(TUserMessagings pUserMessagings, long pObjectID, TCoGeoMonitorObject pObject, String pSessionID) throws Exception {
 			UserMessagings = pUserMessagings;
 			//.
 			ID = GetNextID();

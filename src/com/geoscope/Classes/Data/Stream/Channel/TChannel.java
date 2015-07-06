@@ -2,6 +2,9 @@ package com.geoscope.Classes.Data.Stream.Channel;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,6 +21,8 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 
 
 public class TChannel {
+	
+	public static final int NextID = 10; //. a next unique channel ID
 	
 	public static TChannel GetChannelFromXMLNode(Node ANode, TChannelProvider pChannelProvider) throws Exception {
 		int Version = Integer.parseInt(TMyXML.SearchNode(ANode,"Version").getFirstChild().getNodeValue());
@@ -56,12 +61,6 @@ public class TChannel {
 		}
 		Element RootNode = XmlDoc.getDocumentElement();
 		return GetChannelFromXMLNode(RootNode, pChannelProvider);
-	}
-	
-	private static int 				NextID = 1;
-	public static synchronized int 	GetNextID() {
-		NextID++;
-		return NextID;
 	}
 	
 	public static final int CHANNEL_KIND_IN		= 0;
@@ -121,8 +120,68 @@ public class TChannel {
 			}
 		}
 	}
+
+	public static class TProfile {
+		
+		private static final String FileName = "Profile.xml"; 
+		
+		
+		public TProfile() {
+		}
+
+		public void FromXMLNode(Node ANode) throws Exception {
+		}
+		
+		public synchronized void ToXMLSerializer(XmlSerializer Serializer) throws Exception {
+		}
+		
+		public void FromByteArray(byte[] BA) throws Exception {
+	    	Document XmlDoc;
+			ByteArrayInputStream BIS = new ByteArrayInputStream(BA);
+			try {
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();      
+				factory.setNamespaceAware(true);     
+				DocumentBuilder builder = factory.newDocumentBuilder(); 			
+				XmlDoc = builder.parse(BIS); 
+			}
+			finally {
+				BIS.close();
+			}
+			Element RootNode = XmlDoc.getDocumentElement();
+			try {
+				FromXMLNode(RootNode);
+			}
+			catch (Exception E) {
+    			throw new Exception("error of parsing channel profile: "+E.getMessage()); //. =>
+			}
+		}
+		
+	    public byte[] ToByteArray() throws Exception {
+		    XmlSerializer Serializer = Xml.newSerializer();
+		    ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+		    try {
+		        Serializer.setOutput(BOS,"UTF-8");
+		        Serializer.startDocument("UTF-8",true);
+		        Serializer.startTag("", "ROOT");
+		        //. 
+		        ToXMLSerializer(Serializer);
+		        //.
+		        Serializer.endTag("", "ROOT");
+		        Serializer.endDocument();
+		        //.
+				return BOS.toByteArray(); //. ->
+		    }
+		    finally {
+		    	BOS.close();
+		    }
+	    }
+	}
 	
 	
+	private String ProfilesFolder;
+	//.
+	public TProfile Profile;
+	//.
 	public long 	UserID = 0;
 	public String 	UserAccessKey = null;
 	//.
@@ -139,6 +198,15 @@ public class TChannel {
 	public TDataTypes DataTypes = null;
 	
 	public TChannel() {
+		ProfilesFolder = null;
+		Profile = null;
+	}
+
+	public TChannel(String pProfilesFolder, Class<?> ProfileClass) throws Exception {
+		ProfilesFolder = pProfilesFolder;
+		//.
+		Profile = (TProfile)ProfileClass.newInstance();
+		Profile_Load();
 	}
 
 	public void Close() throws Exception {
@@ -151,6 +219,73 @@ public class TChannel {
 	
 	public boolean IsTypeOf(String TypeID) {
 		return (GetTypeID().startsWith(TypeID));
+	}
+	
+	public String Folder() {
+		if (ProfilesFolder == null)
+			return null; //. ->
+		return (ProfilesFolder+"/"+GetTypeID()+"."+Integer.toString(ID));
+	}
+	
+	public void Profile_Load() throws Exception {
+		String FN = Folder()+"/"+TProfile.FileName;
+		File F = new File(FN);
+		if (F.exists()) { 
+	    	FileInputStream FIS = new FileInputStream(FN);
+	    	try {
+	    		byte[] BA = new byte[(int)F.length()];
+	    		FIS.read(BA);
+	    		//.
+	    		Profile.FromByteArray(BA);
+	    	}
+			finally
+			{
+				FIS.close(); 
+			}
+		}
+	}
+	
+	public void Profile_Save() throws Exception {
+		String FN = Folder()+"/"+TProfile.FileName;
+		FileOutputStream FOS = new FileOutputStream(FN);
+        try
+        {
+        	FOS.write(Profile.ToByteArray());
+        }
+        finally
+        {
+        	FOS.close();
+        }
+	}
+
+	public void Profile_FromByteArray(byte[] BA) throws Exception {
+		if (Profile != null) {
+			Profile.FromByteArray(BA);
+			Profile_Save();
+			//.
+			ReStart();
+		}
+	}
+	
+	public void Profile_FromXMLNode(Node ANode) throws Exception {
+		if (Profile != null) {
+			Profile.FromXMLNode(ANode);
+			Profile_Save();
+			//.
+			ReStart();
+		}
+	}
+	
+	public byte[] Profile_ToByteArray() throws Exception {
+		if (Profile != null) 
+			return Profile.ToByteArray(); //. ->
+		else
+			return null; //. ->
+	}
+	
+	public void Profile_ToXMLSerializer(XmlSerializer Serializer) throws Exception {
+		if (Profile != null) 
+			Profile.ToXMLSerializer(Serializer); 
 	}
 	
 	public void Initialize(Object pParameters) throws Exception {
@@ -186,7 +321,7 @@ public class TChannel {
 	public void Process(TCanceller Canceller) throws Exception {
 	}
 	
-	public void FromXMLNode(Node ANode) throws Exception {
+	public synchronized void FromXMLNode(Node ANode) throws Exception {
 		ID = Integer.parseInt(TMyXML.SearchNode(ANode,"ID").getFirstChild().getNodeValue());
 		//.
 		Enabled = true;

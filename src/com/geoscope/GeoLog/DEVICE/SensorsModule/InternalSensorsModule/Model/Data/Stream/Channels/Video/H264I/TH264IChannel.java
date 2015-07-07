@@ -268,11 +268,9 @@ public class TH264IChannel extends TStreamChannel {
 	//.
 	private TChannelStreamConfiguration ChannelStreamConfiguration = new TChannelStreamConfiguration();
 	
-	public TH264IChannel(TInternalSensorsModule pInternalSensorsModule) throws Exception {
-		super(pInternalSensorsModule, TMyProfile.class);
+	public TH264IChannel(TInternalSensorsModule pInternalSensorsModule, int pID) throws Exception {
+		super(pInternalSensorsModule, pID, TMyProfile.class);
 		MyProfile = (TMyProfile)Profile;
-		//.
-		ID = 7;
 		//.
 		Enabled = true;
 		Kind = TChannel.CHANNEL_KIND_OUT;

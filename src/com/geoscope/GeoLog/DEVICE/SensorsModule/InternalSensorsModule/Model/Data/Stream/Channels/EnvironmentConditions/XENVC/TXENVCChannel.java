@@ -13,8 +13,8 @@ public class TXENVCChannel extends TStreamChannel {
 	}
 
 	
-	public TXENVCChannel(TInternalSensorsModule pInternalSensorsModule) throws Exception {
-		super(pInternalSensorsModule, TMyProfile.class);
+	public TXENVCChannel(TInternalSensorsModule pInternalSensorsModule, int pID) throws Exception {
+		super(pInternalSensorsModule, pID, TMyProfile.class);
 	}
 	
 	@Override

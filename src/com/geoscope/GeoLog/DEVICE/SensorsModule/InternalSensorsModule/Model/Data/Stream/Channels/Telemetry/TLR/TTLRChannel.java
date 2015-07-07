@@ -13,12 +13,12 @@ public class TTLRChannel extends TStreamChannel {
 	}
 	
 	
-	public TTLRChannel(TInternalSensorsModule pInternalSensorsModule, Class<?> ChannelProfile) throws Exception {
-		super(pInternalSensorsModule, ChannelProfile);
+	public TTLRChannel(TInternalSensorsModule pInternalSensorsModule, int pID, Class<?> ChannelProfile) throws Exception {
+		super(pInternalSensorsModule, pID, ChannelProfile);
 	}
 	
-	public TTLRChannel(TInternalSensorsModule pInternalSensorsModule) throws Exception {
-		super(pInternalSensorsModule, TMyProfile.class);
+	public TTLRChannel(TInternalSensorsModule pInternalSensorsModule, int pID) throws Exception {
+		super(pInternalSensorsModule, pID, TMyProfile.class);
 	}
 	
 	@Override

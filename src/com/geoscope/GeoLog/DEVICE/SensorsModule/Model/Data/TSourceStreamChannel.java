@@ -8,7 +8,7 @@ public class TSourceStreamChannel extends TChannel {
 		super();
 	}
 	
-	public TSourceStreamChannel(String pProfilesFolder, Class<?> ProfileClass) throws Exception {
-		super(pProfilesFolder, ProfileClass);
+	public TSourceStreamChannel(int pID, String pProfilesFolder, Class<?> ProfileClass) throws Exception {
+		super(pID, pProfilesFolder, ProfileClass);
 	}
 }

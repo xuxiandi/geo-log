@@ -59,7 +59,7 @@ public class TUserMessagingModule extends TModule {
 			ObjectID = pObjectID;
 			Object = pObject;
 			//.
-			OutChannel = new com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.UserMessaging.LUM.TLUMChannel(UserMessagings.UserMessagingModule.InternalSensorsModule);
+			OutChannel = new com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.UserMessaging.LUM.TLUMChannel(UserMessagings.UserMessagingModule.InternalSensorsModule, -1);
 			if (pSessionID != null)
 				OutChannel.UserAccessKey = pSessionID;
 			else

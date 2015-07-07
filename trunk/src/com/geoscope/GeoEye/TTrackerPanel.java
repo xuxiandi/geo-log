@@ -91,6 +91,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOITextValue;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleConsole;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMetersPanel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
@@ -590,10 +591,11 @@ public class TTrackerPanel extends Activity {
     private Button btnAddPOIDrawing;	
     private Button btnAddPOIFile;	
 	private ToggleButton tbAlarm;
-    private CheckBox cbVideoRecorderModuleRecording;
-    private Button btnVideoRecorderModulePanel;	
+    private Button btnSensorsModuleChannelsPanel;
     private Button btnSensorsModuleMetersPanel;
     private Button btnSensorsModuleMeasurementsTransferProcessPanel;	
+    private CheckBox cbVideoRecorderModuleRecording;
+    private Button btnVideoRecorderModulePanel;	
     private CheckBox cbDataStreamerModuleActive;
     private Button btnDataStreamerModulePanel;	
     private EditText edConnectorInfo;
@@ -950,6 +952,60 @@ public class TTrackerPanel extends Activity {
     	    	return true;
 			}
 		});
+        btnSensorsModuleChannelsPanel = (Button)findViewById(R.id.btnSensorsModuleChannelsPanel);
+        btnSensorsModuleChannelsPanel.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+            	try {
+    				Intent intent = new Intent(TTrackerPanel.this, TDataStreamPropsPanel.class);
+    		        startActivity(intent);
+            	}
+            	catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+            	}
+            }
+        }); 
+        btnSensorsModuleMetersPanel = (Button)findViewById(R.id.btnSensorsModuleMetersPanel);
+        btnSensorsModuleMetersPanel.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+            	try {
+    				Intent intent = new Intent(TTrackerPanel.this, TSensorsMetersPanel.class);
+    		        startActivity(intent);
+            	}
+            	catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+            	}
+            }
+        }); 
+        btnSensorsModuleMeasurementsTransferProcessPanel = (Button)findViewById(R.id.btnSensorsModuleMeasurementsTransferProcessPanel);
+        btnSensorsModuleMeasurementsTransferProcessPanel.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+            	try {
+            		TTracker Tracker = TTracker.GetTracker();
+			    	if (Tracker == null)
+			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
+			    	//.
+        			Tracker.GeoLog.SensorsModule.ShowMeasurementsTransferProcessPanel(TTrackerPanel.this);
+            	}
+            	catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+            	}
+            }
+        });
         cbVideoRecorderModuleRecording =  (CheckBox)findViewById(R.id.cbVideoRecorderModuleRecording);
         cbVideoRecorderModuleRecording.setOnClickListener(new OnClickListener() {
         	
@@ -997,43 +1053,6 @@ public class TTrackerPanel extends Activity {
 			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 			    	//.
         			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TTrackerPanel.this);
-            	}
-            	catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
-            	}
-            }
-        });
-        btnSensorsModuleMetersPanel = (Button)findViewById(R.id.btnSensorsModuleMetersPanel);
-        btnSensorsModuleMetersPanel.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	try {
-    				Intent intent = new Intent(TTrackerPanel.this, TSensorsMetersPanel.class);
-    		        startActivity(intent);
-            	}
-            	catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
-            	}
-            }
-        }); 
-        btnSensorsModuleMeasurementsTransferProcessPanel = (Button)findViewById(R.id.btnSensorsModuleMeasurementsTransferProcessPanel);
-        btnSensorsModuleMeasurementsTransferProcessPanel.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	try {
-            		TTracker Tracker = TTracker.GetTracker();
-			    	if (Tracker == null)
-			    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
-			    	//.
-        			Tracker.GeoLog.SensorsModule.ShowMeasurementsTransferProcessPanel(TTrackerPanel.this);
             	}
             	catch (Exception E) {
 					String S = E.getMessage();

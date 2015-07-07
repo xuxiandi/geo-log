@@ -1,8 +1,10 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="#ff000000"
-    android:scrollbars="vertical" >
+    android:scrollbars="vertical"
+    tools:ignore="all" >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -324,48 +326,81 @@
                     android:layout_height="wrap_content"
                     android:background="#ff999999" >
 
-                    <CheckBox
-                        android:id="@+id/cbVideoRecorderModuleRecording"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="@string/SRecording1"
-                        android:textSize="18sp" />
+                        android:layout_weight="1.0" >
 
-                    <Button
-                        android:id="@+id/btnVideoRecorderModulePanel"
+                        <Button
+                            android:id="@+id/btnSensorsModuleChannelsPanel"
+                            style="android:attr/buttonBarButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1.0"
+                            android:text="@string/SSensors"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btnSensorsModuleMetersPanel"
+                            style="android:attr/buttonBarButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1.0"
+                            android:text="@string/SRecorders"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btnSensorsModuleMeasurementsTransferProcessPanel"
+                            style="android:attr/buttonBarButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1.0"
+                            android:text="@string/STransfer"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="@string/SPanel"
-                        android:textSize="18sp" />
-
-                    <Button
-                        android:id="@+id/btnSensorsModuleMetersPanel"
-                        android:layout_width="0dip"
                         android:layout_height="match_parent"
                         android:layout_weight="1.0"
-                        android:text="@string/SRecorders"
-                        android:textSize="18sp" />
+                        android:orientation="vertical" >
 
-                    <Button
-                        android:id="@+id/btnSensorsModuleMeasurementsTransferProcessPanel"
+                        <CheckBox
+                            android:id="@+id/cbVideoRecorderModuleRecording"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SRecording1"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btnVideoRecorderModulePanel"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="@string/SPanel"
+                            android:textSize="18sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="@string/STransfer"
-                        android:textSize="18sp" />
+                        android:layout_weight="1.0"
+                        android:orientation="vertical" >
 
-                    <CheckBox
-                        android:id="@+id/cbDataStreamerModuleActive"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="@string/SStreaming"
-                        android:textSize="18sp" />
+                        <CheckBox
+                            android:id="@+id/cbDataStreamerModuleActive"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SStreaming"
+                            android:textSize="16sp" />
 
-                    <Button
-                        android:id="@+id/btnDataStreamerModulePanel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="@string/SPanel"
-                        android:textSize="18sp" />
+                        <Button
+                            android:id="@+id/btnDataStreamerModulePanel"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="@string/SPanel"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 
@@ -635,7 +670,6 @@
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:visibility="gone" />
-
                 </RelativeLayout>
             </LinearLayout>
         </LinearLayout>

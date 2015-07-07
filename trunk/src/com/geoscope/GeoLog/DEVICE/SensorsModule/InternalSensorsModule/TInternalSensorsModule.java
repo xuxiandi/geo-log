@@ -856,8 +856,7 @@ public class TInternalSensorsModule extends TModule {
     	Model.Stream.Folder = TSensorsModule.Folder();
     	//.
     	if (ASTLRChannel_flUse) {
-			ASTLRChannel = new TTLRChannel(this); 
-			ASTLRChannel.ID = 1;
+			ASTLRChannel = new TTLRChannel(this, 1/*ID*/); 
 			ASTLRChannel.Enabled = true;
 			ASTLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			ASTLRChannel.DataFormat = 0;
@@ -878,8 +877,7 @@ public class TInternalSensorsModule extends TModule {
     		Model.Stream.Channels.add(ASTLRChannel);
     	}
     	else {
-    		ADSChannel = new TADSChannel(this); 
-    		ADSChannel.ID = 2;
+    		ADSChannel = new TADSChannel(this, 2/*ID*/); 
     		ADSChannel.Enabled = true;
     		ADSChannel.Kind = TChannel.CHANNEL_KIND_OUT;
     		ADSChannel.DataFormat = 0;
@@ -893,8 +891,7 @@ public class TInternalSensorsModule extends TModule {
     	}
     	//.
 		if (ECTLRChannel_flUse) {
-			ECTLRChannel = new TTLRChannel(this); 
-			ECTLRChannel.ID = 3;
+			ECTLRChannel = new TTLRChannel(this, 3/*ID*/); 
 			ECTLRChannel.Enabled = true;
 			ECTLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			ECTLRChannel.DataFormat = 0;
@@ -920,8 +917,7 @@ public class TInternalSensorsModule extends TModule {
 			Model.Stream.Channels.add(ECTLRChannel);
 		}
 		else {
-			XENVCChannel = new TXENVCChannel(this); 
-			XENVCChannel.ID = 4;
+			XENVCChannel = new TXENVCChannel(this, 4/*ID*/); 
 			XENVCChannel.Enabled = true;
 			XENVCChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			XENVCChannel.DataFormat = 0;
@@ -934,13 +930,13 @@ public class TInternalSensorsModule extends TModule {
 			Model.Stream.Channels.add(XENVCChannel);
 		}
 		//.
-		GPSChannel = new TGPSChannel(this);
+		GPSChannel = new TGPSChannel(this, 5/*ID*/);
 		Model.Stream.Channels.add(GPSChannel);
 		//.
-		AACChannel = new TAACChannel(this);
+		AACChannel = new TAACChannel(this, 6/*pID*/);
 		Model.Stream.Channels.add(AACChannel);
 		//.
-		H264IChannel = new TH264IChannel(this);
+		H264IChannel = new TH264IChannel(this, 7/*ID*/);
 		Model.Stream.Channels.add(H264IChannel);
     }
     

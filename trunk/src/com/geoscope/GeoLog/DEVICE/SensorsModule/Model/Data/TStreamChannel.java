@@ -257,8 +257,8 @@ public class TStreamChannel extends TChannel {
 
 	public TSensorsModule SensorsModule;
 	
-	protected TChannel 			SourceChannel = null;
-	protected int 				SourceChannel_StartCounter = 0;
+	protected TSourceStreamChannel	SourceChannel = null;
+	protected int 					SourceChannel_StartCounter = 0;
 	//.
 	public TPacketSubscribers PacketSubscribers = new TPacketSubscribers(this);
 	
@@ -286,16 +286,22 @@ public class TStreamChannel extends TChannel {
 		SourceChannel_Profile_ToXMLSerializer(Serializer);
 	}
 	
-	public void SourceChannel_Set(TChannel SC) {
+	public void SourceChannel_Set(TSourceStreamChannel SC) {
 		synchronized (this) {
 			SourceChannel = SC;
 		}
 	}
 	
-	public void SourceChannel_Clear(TChannel SC) {
+	public void SourceChannel_Clear(TSourceStreamChannel SC) {
 		synchronized (this) {
 			if (SC == SourceChannel)
 				SourceChannel = null;
+		}
+	}
+	
+	public TSourceStreamChannel SourceChannel_Get() {
+		synchronized (this) {
+			return SourceChannel; //. ->
 		}
 	}
 	

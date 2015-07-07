@@ -128,6 +128,8 @@ public class TChannel {
 		private static final String FileName = "Profile.xml"; 
 		
 		
+		public boolean Enabled = true;
+		
 		public TProfile() {
 		}
 
@@ -136,9 +138,20 @@ public class TChannel {
 		}
 
 		public void FromXMLNode(Node ANode) throws Exception {
+			//. Enabled
+			Node _Node = TMyXML.SearchNode(ANode,"Enabled");
+			if (_Node != null) {
+				Node ValueNode = _Node.getFirstChild();
+				if (ValueNode != null)
+					Enabled = (Integer.parseInt(ValueNode.getNodeValue()) != 0);
+			}
 		}
 		
 		public synchronized void ToXMLSerializer(XmlSerializer Serializer) throws Exception {
+	    	//. Enabled
+	        Serializer.startTag("", "Enabled");
+	        Serializer.text(Enabled ? "1" : "0");
+	        Serializer.endTag("", "Enabled");
 		}
 		
 		public void FromByteArray(byte[] BA) throws Exception {
@@ -192,10 +205,7 @@ public class TChannel {
 	//.
 	public TProfile Profile;
 	//.
-	public long 	UserID = 0;
-	public String 	UserAccessKey = null;
-	//.
-	public int 	ID = -1;
+	public int 	ID;
 	public boolean Enabled = true;
 	public int Kind = CHANNEL_KIND_OUT;
 	public int 	DataFormat = 0;
@@ -206,13 +216,19 @@ public class TChannel {
 	public String Parameters = "";
 	//.
 	public TDataTypes DataTypes = null;
+	//.
+	public long 	UserID = 0;
+	public String 	UserAccessKey = null;
 	
 	public TChannel() {
+		ID = -1;
 		ProfilesFolder = null;
 		Profile = null;
 	}
 
-	public TChannel(String pProfilesFolder, Class<?> ProfileClass) throws Exception {
+	public TChannel(int pID, String pProfilesFolder, Class<?> ProfileClass) throws Exception {
+		ID = pID;
+		//.
 		ProfilesFolder = pProfilesFolder;
 		//.
 		Profile = (TProfile)ProfileClass.newInstance();

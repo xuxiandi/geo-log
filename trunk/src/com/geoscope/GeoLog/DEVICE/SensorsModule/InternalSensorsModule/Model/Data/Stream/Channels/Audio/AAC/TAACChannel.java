@@ -218,11 +218,9 @@ public class TAACChannel extends TStreamChannel {
 	//.
 	private TAudioSampleSource AudioSampleSource;
 	
-	public TAACChannel(TInternalSensorsModule pInternalSensorsModule) throws Exception {
-		super(pInternalSensorsModule, TMyProfile.class);
+	public TAACChannel(TInternalSensorsModule pInternalSensorsModule, int pID) throws Exception {
+		super(pInternalSensorsModule, pID, TMyProfile.class);
 		MyProfile = (TMyProfile)Profile;
-		//.
-		ID = 6;
 		//.
 		Enabled = true;
 		Kind = TChannel.CHANNEL_KIND_OUT;

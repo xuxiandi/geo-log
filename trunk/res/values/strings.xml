@@ -1114,5 +1114,7 @@
     <string name="SDisabled2">disabled</string>
     <string name="SActive3">active &#8230;</string>
     <string name="SCouldNotSetProfileChannelIsActive">could not set profile: channel is active</string>
+    <string name="SRecordersDataTransfer">Recorders data transfer</string>
+    <string name="SSummaryInLocalDatabase">"Summary in the local database: "</string>
     
 </resources>

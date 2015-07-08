@@ -234,6 +234,22 @@ public class TSensorsModuleMeasurements {
 		return Result;
 	}
 	
+	public static int GetMeasurementsCount(String DataBaseFolder) {
+		int Result = 0;
+		File DF = new File(DataBaseFolder);
+		if (!DF.exists())
+			return Result; //. ->
+		File[] MeasurementFolders = DF.listFiles();
+		for (int I = 0; I < MeasurementFolders.length; I++)
+			if (MeasurementFolders[I].isDirectory()) 
+				Result++;
+		return Result;
+	}
+	
+	public static int GetMeasurementsCount() {
+		return GetMeasurementsCount(DataBaseFolder);
+	}
+	
 	public static File[] GetMeasurementFolderContent(String MeasurementID) {
 		TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.ReadLock(Domain, MeasurementID);
 		try {

@@ -221,7 +221,7 @@ public class TSensorsModuleMeasurementsTransferProcessPanel extends Activity {
 			pbProcessProgress.setProgress((int)TransferProcess.ProcessProgressPercentage());
 		else
 			pbProcessProgress.setProgress(0);
-		tvProcessProgress.setText(getString(R.string.SItemsToTransfer)+Integer.toString(ProcessCounter));
+		tvProcessProgress.setText(getString(R.string.SItemsToTransfer)+Integer.toString(ProcessCounter)+"  "+"["+getString(R.string.SSummaryInLocalDatabase)+Integer.toString(TSensorsModuleMeasurements.GetMeasurementsCount())+"]");
 	}
 	
 	private void UpdateScheduler() {

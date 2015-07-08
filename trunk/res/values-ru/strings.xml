@@ -1114,5 +1114,7 @@
     <string name="SDisabled2">недоступен</string>
     <string name="SActive3">активен &#8230;</string>
     <string name="SCouldNotSetProfileChannelIsActive">не смог установить профиль: канал активен</string>
+    <string name="SRecordersDataTransfer">Передача данных с регистраторов</string>
+    <string name="SSummaryInLocalDatabase">"Суммарно в локальной базе данных: "</string>
     
 </resources>

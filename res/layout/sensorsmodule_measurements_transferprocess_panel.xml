@@ -8,7 +8,7 @@
         android:layout_height="wrap_content"
         android:background="#ff999999"
         android:gravity="center"
-        android:text="@string/SVideoRecorderDataTransfer"
+        android:text="@string/SRecordersDataTransfer"
         android:textColor="#ff000000"
         android:textSize="18sp" />
 

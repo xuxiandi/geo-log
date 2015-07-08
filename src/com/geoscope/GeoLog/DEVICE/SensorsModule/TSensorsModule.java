@@ -75,7 +75,7 @@ public class TSensorsModule extends TModule {
 	//.
 	public TSensorsDataValue Data;
 	//.
-	public TModel Model;
+	public volatile TModel Model;
 	//.
 	public TSensorsMeters Meters;
 	//.
@@ -253,6 +253,7 @@ public class TSensorsModule extends TModule {
     public static final int SENSORSSTREAMINGSERVER_MESSAGE_UNAVAILABLE_ERROR		= -3;
     public static final int SENSORSSTREAMINGSERVER_MESSAGE_CHANNELNOTFOUND_ERROR	= -4;
     public static final int SENSORSSTREAMINGSERVER_MESSAGE_ACCESSDENIED_ERROR		= -5;
+    public static final int SENSORSSTREAMINGSERVER_MESSAGE_CHANNELDISABLED_ERROR	= -6;
     
     public void SensorsStreamingServer_Connect() {
     }
@@ -278,6 +279,11 @@ public class TSensorsModule extends TModule {
   	  			DestinationConnectionOutputStream.write(Descriptor);		
   	  			return; //. ->
   	  		}
+  	  		if (!Channel.Enabled) {
+  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_CHANNELDISABLED_ERROR);
+  	  			DestinationConnectionOutputStream.write(Descriptor);		
+  	  			return; //. ->
+  	  		}
   	  		//.
   			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_OK);
   	  		DestinationConnectionOutputStream.write(Descriptor);		
@@ -300,6 +306,11 @@ public class TSensorsModule extends TModule {
   	  	  		Channel = (TStreamChannel)Model_Channels_GetOneByDescriptor(DestinationUserAccessKey,ChannelDescriptor);
   	  	  		if (Channel == null) {
   	  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_CHANNELNOTFOUND_ERROR);
+  	  	  			DestinationConnectionOutputStream.write(Descriptor);		
+  	  	  			return; //. ->
+  	  	  		}
+  	  	  		if (!Channel.Enabled) {
+  	  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_CHANNELDISABLED_ERROR);
   	  	  			DestinationConnectionOutputStream.write(Descriptor);		
   	  	  			return; //. ->
   	  	  		}
@@ -331,6 +342,11 @@ public class TSensorsModule extends TModule {
   	  	  		Channel = (TStreamChannel)Model_Channels_GetOneByDescriptor(DestinationUserAccessKey,ChannelDescriptor);
   	  	  		if (Channel == null) {
   	  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_CHANNELNOTFOUND_ERROR);
+  	  	  			DestinationConnectionOutputStream.write(Descriptor);		
+  	  	  			return; //. ->
+  	  	  		}
+  	  	  		if (!Channel.Enabled) {
+  	  	  			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_CHANNELDISABLED_ERROR);
   	  	  			DestinationConnectionOutputStream.write(Descriptor);		
   	  	  			return; //. ->
   	  	  		}

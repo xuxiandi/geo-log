@@ -92,6 +92,8 @@ public class TAACChannel extends TStreamChannel {
         private TAACADTSEncoder AACADTSEncoder;
         //.
         private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel DestinationChannel;
+		//.
+		public boolean flStarted = false;
 
 		public TAudioSampleSource() {
     		super();
@@ -153,48 +155,54 @@ public class TAACChannel extends TStreamChannel {
 		@Override
 		public void run() {
 			try {
-				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel _DestinationChannel = DestinationChannel_Get();
-				if (!(_DestinationChannel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel))
-		        	throw new IOException("No destination channel"); //. ->
-				DestinationChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel)_DestinationChannel;
-				//. try to connect to an AudioModule.MicrophoneCapturingServer
-				TMicrophoneCapturingServer.TConfiguration Configuration = new TMicrophoneCapturingServer.TConfiguration(Source, MyProfile.SampleRate);
-				TMicrophoneCapturingServer.TPacketSubscriber PacketSubscriber = new TMicrophoneCapturingServer.TPacketSubscriber() {
-					
-					@Override
-					protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
-						DoOnAudioPacket(Packet,PacketSize);
+				flStarted = true;
+				try {
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel _DestinationChannel = DestinationChannel_Get();
+					if (!(_DestinationChannel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel))
+			        	throw new IOException("No destination channel"); //. ->
+					DestinationChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel)_DestinationChannel;
+					//. try to connect to an AudioModule.MicrophoneCapturingServer
+					TMicrophoneCapturingServer.TConfiguration Configuration = new TMicrophoneCapturingServer.TConfiguration(Source, MyProfile.SampleRate);
+					TMicrophoneCapturingServer.TPacketSubscriber PacketSubscriber = new TMicrophoneCapturingServer.TPacketSubscriber() {
+						
+						@Override
+						protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
+							DoOnAudioPacket(Packet,PacketSize);
+						}
+					};  
+					if (
+							(InternalSensorsModule.Device.AudioModule.MicrophoneCapturingServer != null) &&
+							(InternalSensorsModule.Device.AudioModule.MicrophoneCapturingServer.Connect(Configuration, PacketSubscriber)) 
+					) {
+						try {
+							while (!Canceller.flCancel) 
+								Thread.sleep(1000*60);
+						}
+						finally {
+							InternalSensorsModule.Device.AudioModule.MicrophoneCapturingServer.Disconnect(PacketSubscriber);
+						}
 					}
-				};  
-				if (
-						(InternalSensorsModule.Device.AudioModule.MicrophoneCapturingServer != null) &&
-						(InternalSensorsModule.Device.AudioModule.MicrophoneCapturingServer.Connect(Configuration, PacketSubscriber)) 
-				) {
-					try {
-						while (!Canceller.flCancel) 
-							Thread.sleep(1000*60);
-					}
-					finally {
-						InternalSensorsModule.Device.AudioModule.MicrophoneCapturingServer.Disconnect(PacketSubscriber);
+					else {
+						InternalSensorsModule.Device.Log.WriteWarning("AACChannel.AudioSampleSource","unable to connect to the MicrophoneCapturingServer (the configuration is differ with a current one), using default method");
+		    			//.
+						Microphone_Initialize();
+						try {
+					        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO); 
+					        byte[] TransferBuffer = new byte[BufferSize];
+					        int Size;
+							while (!Canceller.flCancel) {
+					            Size = Recorder.read(TransferBuffer, 0,TransferBuffer.length);     
+								if (Size > 0)  
+									DoOnAudioPacket(TransferBuffer,Size);
+					        }
+						}
+						finally {
+							Microphone_Finalize();
+						}
 					}
 				}
-				else {
-					InternalSensorsModule.Device.Log.WriteWarning("AACChannel.AudioSampleSource","unable to connect to the MicrophoneCapturingServer (the configuration is differ with a current one), using default method");
-	    			//.
-					Microphone_Initialize();
-					try {
-				        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO); 
-				        byte[] TransferBuffer = new byte[BufferSize];
-				        int Size;
-						while (!Canceller.flCancel) {
-				            Size = Recorder.read(TransferBuffer, 0,TransferBuffer.length);     
-							if (Size > 0)  
-								DoOnAudioPacket(TransferBuffer,Size);
-				        }
-					}
-					finally {
-						Microphone_Finalize();
-					}
+				finally {
+					flStarted = false;
 				}
 			}
         	catch (InterruptedException IE) {
@@ -222,7 +230,6 @@ public class TAACChannel extends TStreamChannel {
 		super(pInternalSensorsModule, pID, TMyProfile.class);
 		MyProfile = (TMyProfile)Profile;
 		//.
-		Enabled = true;
 		Kind = TChannel.CHANNEL_KIND_OUT;
 		DataFormat = 0;
 		Name = "Audio";
@@ -261,6 +268,11 @@ public class TAACChannel extends TStreamChannel {
 	@Override
 	public void StopSource() {
 		PostStop();
+	}
+	
+	@Override
+	public boolean IsActive() {
+		return AudioSampleSource.flStarted;
 	}
 	
     public void PostStart() {

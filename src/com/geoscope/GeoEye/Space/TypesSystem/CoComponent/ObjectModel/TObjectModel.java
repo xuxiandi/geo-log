@@ -499,6 +499,23 @@ public class TObjectModel {
 		return null;
 	}
 	
+	public static class TSensorChannelStatus {
+		
+		public boolean Enabled;
+		public boolean Active;
+		
+		public int FromByteArray(byte[] BA, int Idx) {
+			Enabled = (BA[Idx] != 0); Idx++;
+			Active = (BA[Idx] != 0); Idx++;
+			//.
+			return Idx;
+		}
+	}
+	
+	public TSensorChannelStatus[] Sensors_Channels_GetStatus(int[] ChannelIDs) throws Exception {
+		return null;
+	}
+	
 	public void Sensors_Meter_SetProfile(String MeterID, byte[] Profile) throws IOException, Exception {
 	}
 	

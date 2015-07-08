@@ -40,13 +40,12 @@ public class TSensorsMeters {
 	}
 	
 	public void Finalize() throws Exception {
-		int Cnt = Items.size();
-		for (int I = 0; I < Cnt; I++)
-			Items.get(I).Destroy();
-		Items.clear();
+		Items_Clear();
 	}
 
 	private void CreateMeters() throws Exception {
+		Items_Clear();
+		//.
 		TECTLRMeter 	ECTLRMeter 	= new TECTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(ECTLRMeter);
 		TASTLRMeter 	ASTLRMeter 	= new TASTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(ASTLRMeter);
 		TGPSTLRMeter	GPSTLRMeter = new TGPSTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(GPSTLRMeter);
@@ -57,6 +56,13 @@ public class TSensorsMeters {
 	
 	private void Items_AddItem(TSensorMeter Meter) {
 		Items.add(Meter);
+	}
+	
+	private void Items_Clear() throws Exception {
+		int Cnt = Items.size();
+		for (int I = 0; I < Cnt; I++)
+			Items.get(I).Destroy();
+		Items.clear();
 	}
 	
 	public TSensorMeter Items_GetItem(String MeterID) {

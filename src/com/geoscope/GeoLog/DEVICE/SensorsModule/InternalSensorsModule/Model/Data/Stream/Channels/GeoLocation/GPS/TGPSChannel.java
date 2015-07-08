@@ -27,7 +27,6 @@ public class TGPSChannel extends TTLRChannel {
 	public TGPSChannel(TInternalSensorsModule pInternalSensorsModule, int pID) throws Exception {
 		super(pInternalSensorsModule, pID, TMyProfile.class);
 		//.
-		Enabled = true;
 		Kind = TChannel.CHANNEL_KIND_OUT;
 		DataFormat = 0;
 		Name = "Geo-location";

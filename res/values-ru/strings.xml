@@ -1110,6 +1110,9 @@
     <string name="SNewProfileHasBeenSet">Новый профиль канала установлен.</string>
     <string name="SWidth">Ширина</string>
     <string name="SHeight">Высота</string>
-    <string name="SFrameRate">Частота кадровё</string>
+    <string name="SFrameRate">Частота кадров</string>
+    <string name="SDisabled2">недоступен</string>
+    <string name="SActive3">активен &#8230;</string>
+    <string name="SCouldNotSetProfileChannelIsActive">не смог установить профиль: канал активен</string>
     
 </resources>

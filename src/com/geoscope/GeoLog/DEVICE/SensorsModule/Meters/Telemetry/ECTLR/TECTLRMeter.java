@@ -33,6 +33,8 @@ public class TECTLRMeter extends TSensorMeter {
 	protected void DoProcess() throws Exception {
 		if (SensorsModule.InternalSensorsModule.ECTLRChannel == null)
 			throw new IOException("no origin channel"); //. =>
+		if (!SensorsModule.InternalSensorsModule.ECTLRChannel.Enabled)
+			throw new IOException("the origin channel is disabled"); //. =>
 		TTLRChannel SourceChannel = (TTLRChannel)SensorsModule.InternalSensorsModule.ECTLRChannel.DestinationChannel_Get(); 	
 		if (SourceChannel == null)
 			throw new IOException("no source channel"); //. =>

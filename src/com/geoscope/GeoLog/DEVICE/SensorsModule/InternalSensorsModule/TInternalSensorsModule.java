@@ -754,7 +754,7 @@ public class TInternalSensorsModule extends TModule {
     	}
     }
 
-	private int StartCount = 0;
+	private volatile int StartCount = 0;
     
     @Override
     public void Start() throws Exception {
@@ -857,7 +857,6 @@ public class TInternalSensorsModule extends TModule {
     	//.
     	if (ASTLRChannel_flUse) {
 			ASTLRChannel = new TTLRChannel(this, 1/*ID*/); 
-			ASTLRChannel.Enabled = true;
 			ASTLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			ASTLRChannel.DataFormat = 0;
 			ASTLRChannel.Name = "Android state";
@@ -878,7 +877,6 @@ public class TInternalSensorsModule extends TModule {
     	}
     	else {
     		ADSChannel = new TADSChannel(this, 2/*ID*/); 
-    		ADSChannel.Enabled = true;
     		ADSChannel.Kind = TChannel.CHANNEL_KIND_OUT;
     		ADSChannel.DataFormat = 0;
     		ADSChannel.Name = "Android device state";
@@ -892,7 +890,6 @@ public class TInternalSensorsModule extends TModule {
     	//.
 		if (ECTLRChannel_flUse) {
 			ECTLRChannel = new TTLRChannel(this, 3/*ID*/); 
-			ECTLRChannel.Enabled = true;
 			ECTLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			ECTLRChannel.DataFormat = 0;
 			ECTLRChannel.Name = "Device telemetry";
@@ -918,7 +915,6 @@ public class TInternalSensorsModule extends TModule {
 		}
 		else {
 			XENVCChannel = new TXENVCChannel(this, 4/*ID*/); 
-			XENVCChannel.Enabled = true;
 			XENVCChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			XENVCChannel.DataFormat = 0;
 			XENVCChannel.Name = "Environment conditions (Extended)";

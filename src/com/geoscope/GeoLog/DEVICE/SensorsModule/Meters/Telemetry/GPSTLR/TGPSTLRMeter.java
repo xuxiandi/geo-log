@@ -33,6 +33,8 @@ public class TGPSTLRMeter extends TSensorMeter {
 	protected void DoProcess() throws Exception {
 		if (SensorsModule.InternalSensorsModule.GPSChannel == null)
 			throw new IOException("no origin channel"); //. =>
+		if (!SensorsModule.InternalSensorsModule.GPSChannel.Enabled)
+			throw new IOException("the origin channel is disabled"); //. =>
 		TTLRChannel SourceChannel = (TTLRChannel)SensorsModule.InternalSensorsModule.GPSChannel.DestinationChannel_Get(); 	
 		if (SourceChannel == null)
 			throw new IOException("no source channel"); //. =>

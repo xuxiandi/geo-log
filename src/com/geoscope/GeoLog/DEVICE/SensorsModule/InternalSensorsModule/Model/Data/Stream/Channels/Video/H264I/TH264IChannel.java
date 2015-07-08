@@ -173,6 +173,8 @@ public class TH264IChannel extends TStreamChannel {
 		}
 
 		private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel DestinationChannel;
+		//.
+		public boolean flStarted = false;
 				
 		
 		public TVideoFrameSource() {
@@ -199,59 +201,65 @@ public class TH264IChannel extends TStreamChannel {
 		@Override
 		public void run() {
 			try {
-				com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel _DestinationChannel = DestinationChannel_Get();
-				if (!(_DestinationChannel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)) 
-		        	throw new IOException("No destination channel"); //. ->
-				DestinationChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)_DestinationChannel;
-				DestinationChannel_PacketSubscribersItemsNotifier_Set(new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier() {
-
-					@Override
-					protected void DoOnSubscribed(TPacketSubscriber Subscriber) throws Exception {
-						TChannelStreamConfiguration CC = ChannelStreamConfiguration.Get();
-						if (CC != null) {
-							//. send new session packet
-							Subscriber.ProcessPacket(DestinationChannel.ChannelStreamSession_ToByteArray(CC.Session));
-							//. send channel configuration
-							Subscriber.ProcessPacket(DestinationChannel.H264Packet_ToByteArray(CC.Data, CC.Data.length));
-						}
-					}
-				});
+				flStarted = true;
 				try {
-			        if (!InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) 
-			        	throw new IOException("Video server is not available"); //. ->
-			        android.hardware.Camera camera = android.hardware.Camera.open();
-			        InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, MyProfile.Width,MyProfile.Height, MyProfile.BitRate, MyProfile.FrameRate, null,null);
-			        try {
-			        	TVideoFrameEncoderServerClient VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient();
-			        	try {
-				        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(VideoFrameEncoderServerClient);
+					com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel _DestinationChannel = DestinationChannel_Get();
+					if (!(_DestinationChannel instanceof com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)) 
+			        	throw new IOException("No destination channel"); //. ->
+					DestinationChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)_DestinationChannel;
+					DestinationChannel_PacketSubscribersItemsNotifier_Set(new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier() {
+
+						@Override
+						protected void DoOnSubscribed(TPacketSubscriber Subscriber) throws Exception {
+							TChannelStreamConfiguration CC = ChannelStreamConfiguration.Get();
+							if (CC != null) {
+								//. send new session packet
+								Subscriber.ProcessPacket(DestinationChannel.ChannelStreamSession_ToByteArray(CC.Session));
+								//. send channel configuration
+								Subscriber.ProcessPacket(DestinationChannel.H264Packet_ToByteArray(CC.Data, CC.Data.length));
+							}
+						}
+					});
+					try {
+				        if (!InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) 
+				        	throw new IOException("Video server is not available"); //. ->
+				        android.hardware.Camera camera = android.hardware.Camera.open();
+				        InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, MyProfile.Width,MyProfile.Height, MyProfile.BitRate, MyProfile.FrameRate, null,null);
+				        try {
+				        	TVideoFrameEncoderServerClient VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient();
 				        	try {
-				    	        camera.startPreview();
-				    	        try {
-									while (!Canceller.flCancel) 
-										Thread.sleep(1000*60);
-				    	        }
-				        		finally {
-				        			camera.stopPreview();
-				        			camera.setPreviewDisplay(null);
-				        			camera.setPreviewCallback(null);
-				        			camera.release();
-				        		}
+					        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(VideoFrameEncoderServerClient);
+					        	try {
+					    	        camera.startPreview();
+					    	        try {
+										while (!Canceller.flCancel) 
+											Thread.sleep(1000*60);
+					    	        }
+					        		finally {
+					        			camera.stopPreview();
+					        			camera.setPreviewDisplay(null);
+					        			camera.setPreviewCallback(null);
+					        			camera.release();
+					        		}
+					        	}
+					        	finally {
+					        		InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(VideoFrameEncoderServerClient);
+					        	}
 				        	}
 				        	finally {
-				        		InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(VideoFrameEncoderServerClient);
+								VideoFrameEncoderServerClient.Destroy();
 				        	}
-			        	}
-			        	finally {
-							VideoFrameEncoderServerClient.Destroy();
-			        	}
-			        }
-			        finally {
-			        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Stop();
-			        }
+				        }
+				        finally {
+				        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Stop();
+				        }
+					}
+					finally {
+						DestinationChannel_PacketSubscribersItemsNotifier_Clear();
+					}
 				}
 				finally {
-					DestinationChannel_PacketSubscribersItemsNotifier_Clear();
+					flStarted = false;
 				}
 			}
         	catch (InterruptedException IE) {
@@ -272,7 +280,6 @@ public class TH264IChannel extends TStreamChannel {
 		super(pInternalSensorsModule, pID, TMyProfile.class);
 		MyProfile = (TMyProfile)Profile;
 		//.
-		Enabled = true;
 		Kind = TChannel.CHANNEL_KIND_OUT;
 		DataFormat = 0;
 		Name = "Video";
@@ -311,6 +318,11 @@ public class TH264IChannel extends TStreamChannel {
 	@Override
 	public void StopSource() {
 		PostStop();
+	}
+	
+	@Override
+	public boolean IsActive() {
+		return VideoFrameSource.flStarted;
 	}
 	
     public void PostStart() {

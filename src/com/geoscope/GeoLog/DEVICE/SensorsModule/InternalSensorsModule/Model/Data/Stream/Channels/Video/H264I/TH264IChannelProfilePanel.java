@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +22,7 @@ public class TH264IChannelProfilePanel extends Activity {
 	//.
 	@SuppressWarnings("unused")
 	private TextView lbName;
+	private CheckBox cbEnabled;
 	private EditText edWidth;
 	private EditText edHeight;
 	private EditText edFrameRate;
@@ -41,6 +43,8 @@ public class TH264IChannelProfilePanel extends Activity {
             setContentView(R.layout.sensorsmodule_channels_video_h264i_profile_panel);
             //.
             lbName = (TextView)findViewById(R.id.lbName);
+            //.
+            cbEnabled = (CheckBox)findViewById(R.id.cbEnabled);
             //.
             edWidth = (EditText)findViewById(R.id.edWidth);
             //.
@@ -90,6 +94,8 @@ public class TH264IChannelProfilePanel extends Activity {
     }
     
     private void Update() {
+    	cbEnabled.setChecked(Profile.Enabled);
+    	//.
 		edWidth.setText(Integer.toString(Profile.Width));
 		//.
 		edHeight.setText(Integer.toString(Profile.Height));
@@ -100,6 +106,8 @@ public class TH264IChannelProfilePanel extends Activity {
     }
 
     private void ApplyChangesAndExit() throws Exception {
+    	Profile.Enabled = cbEnabled.isChecked(); 
+    	//.
     	Profile.Width = Integer.parseInt(edWidth.getText().toString());
     	//.
     	Profile.Height = Integer.parseInt(edHeight.getText().toString());

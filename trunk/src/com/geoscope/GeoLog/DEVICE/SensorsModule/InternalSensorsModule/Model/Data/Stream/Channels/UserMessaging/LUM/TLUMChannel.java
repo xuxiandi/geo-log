@@ -31,7 +31,6 @@ public class TLUMChannel extends TStreamChannel {
 	public TLUMChannel(TInternalSensorsModule pInternalSensorsModule, int pID) throws Exception {
 		super(pInternalSensorsModule, pID, TMyProfile.class);
 		//.
-		Enabled = true;
 		Kind = TChannel.CHANNEL_KIND_OUT;
 		DataFormat = 0;
 		Name = "user messaging";

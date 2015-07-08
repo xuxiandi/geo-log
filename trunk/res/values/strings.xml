@@ -1111,5 +1111,8 @@
     <string name="SWidth">Width</string>
     <string name="SHeight">Height</string>
     <string name="SFrameRate">Frame rate</string>
+    <string name="SDisabled2">disabled</string>
+    <string name="SActive3">active &#8230;</string>
+    <string name="SCouldNotSetProfileChannelIsActive">could not set profile: channel is active</string>
     
 </resources>

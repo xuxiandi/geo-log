@@ -33,6 +33,8 @@ public class TAudioMeter extends TSensorMeter {
 	protected void DoProcess() throws Exception {
 		if (SensorsModule.InternalSensorsModule.AACChannel == null)
 			throw new IOException("no origin channel"); //. =>
+		if (!SensorsModule.InternalSensorsModule.AACChannel.Enabled)
+			throw new IOException("the origin channel is disabled"); //. =>
 		TAACChannel SourceChannel = (TAACChannel)SensorsModule.InternalSensorsModule.AACChannel.DestinationChannel_Get(); 	
 		if (SourceChannel == null)
 			throw new IOException("no source channel"); //. =>

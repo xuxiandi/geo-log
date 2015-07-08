@@ -22,6 +22,7 @@ public class TSetSensorsModuleChannelsValueSO extends TDeviceSetComponentDataByA
     
 	public static final int OperationErrorCode_DataIsNotFound 			= TGeographServerServiceOperation.ErrorCode_CustomOperationError-1;
 	public static final int OperationErrorCode_DataIsLocked 			= TGeographServerServiceOperation.ErrorCode_CustomOperationError-2;
+	public static final int OperationErrorCode_ChannelIsActive 			= TGeographServerServiceOperation.ErrorCode_CustomOperationError-3;
 	
     public TSetSensorsModuleChannelsValueSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short pSession, short[] pSubAddress, byte[] pAddressData)
     {

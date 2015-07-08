@@ -29,15 +29,21 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
+import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1DeviceSchema;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TSourceStreamChannel;
 
 @SuppressLint("HandlerLeak")
@@ -46,6 +52,8 @@ public class TDataStreamPropsPanel extends Activity {
 	public static final int PARAMETERS_TYPE_OID 	= 1;
 	public static final int PARAMETERS_TYPE_OIDX 	= 2;
 	
+	public static final int PanelUpdatinginterval = 1000*900; //. seconds
+	
 	public static final int REQUEST_EDITCHANNELPROFILE = 1;
 	
 	private int ParametersType;
@@ -53,8 +61,10 @@ public class TDataStreamPropsPanel extends Activity {
 	private long				ObjectID = -1;
 	private int					ObjectIndex = -1;
 	//.
-	private byte[] 				DataStreamDescriptorData = null;
-	private TStreamDescriptor 	DataStreamDescriptor = null;
+	private byte[] 								DataStreamDescriptorData = null;
+	private TStreamDescriptor 					DataStreamDescriptor = null;
+	//.
+	private TObjectModel.TSensorChannelStatus[] DataStreamChannelsStatus = null;
 	//.
 	private TextView lbStreamName;
 	private TextView lbStreamInfo;
@@ -84,10 +94,12 @@ public class TDataStreamPropsPanel extends Activity {
         		
         	case PARAMETERS_TYPE_OIDX:
             	ObjectIndex = extras.getInt("ObjectIndex");
+            	//.
+        		TReflector Reflector = TReflector.GetReflector();
+            	TCoGeoMonitorObject Object = Reflector.Component.CoGeoMonitorObjects.Items[ObjectIndex];
+            	ObjectID = Object.ID;
         		break; //. >
         	}
-        	//.
-        	DataStreamDescriptorData = extras.getByteArray("DataStreamDescriptorData");
         }
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -141,20 +153,25 @@ public class TDataStreamPropsPanel extends Activity {
 				}
             }
         });
-        //.
-        StartUpdating();
+    	//.
+    	Updating = new TUpdating(PanelUpdatinginterval);
+    	//.
+    	Updating.StartUpdate();
     }
     
     @Override
     protected void onDestroy() {
-		if (Updating != null) {
-			Updating.Cancel();
-			Updating = null;
-		}
-		//.
+    	if (Updating != null) {
+			try {
+				Updating.Destroy(false);
+			} catch (InterruptedException IE) {
+			}
+    		Updating = null;
+    	}
+		//. 
     	super.onDestroy();
     }
-    
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
@@ -208,11 +225,15 @@ public class TDataStreamPropsPanel extends Activity {
                     			
                     			@Override 
                     			public void DoOnCompleted() throws Exception {
+                    		    	Updating.StartUpdate();
+                    		    	//.
                     				Toast.makeText(TDataStreamPropsPanel.this, R.string.SNewProfileHasBeenSet, Toast.LENGTH_LONG).show();
                     			}
                     			
                     			@Override
                     			public void DoOnException(Exception E) {
+                    		    	Updating.StartUpdate();
+                    		    	//.
                     				Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
                     			}
                     		};
@@ -238,57 +259,166 @@ public class TDataStreamPropsPanel extends Activity {
     	private static final int MESSAGE_PROGRESSBAR_HIDE = 3;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS = 4;
     	
+    	
+    	private int UpdateInterval;
+    	//.
+    	private TAutoResetEvent UpdateSignal = new TAutoResetEvent();
+    	//.
+    	private TCanceller ProcessingCanceller = new TCanceller();
+        //.
     	private boolean flShowProgress = false;
     	private boolean flClosePanelOnCancel = false;
     	
         private ProgressDialog progressDialog;
         //.
-    	private TStreamDescriptor DataStreamDescriptor = null;
-    	
-    	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
+    	private byte[] 								DataStreamDescriptorData = null;
+    	private TStreamDescriptor 					DataStreamDescriptor = null;
+    	//.
+    	private TObjectModel.TSensorChannelStatus[] DataStreamChannelsStatus = null;
+        
+    	public TUpdating(int pUpdateInterval) {
     		super();
     		//.
-    		flShowProgress = pflShowProgress;
-    		flClosePanelOnCancel = pflClosePanelOnCancel;
+    		UpdateInterval = pUpdateInterval;
     		//.
     		_Thread = new Thread(this);
     		_Thread.start();
     	}
 
+    	public void Destroy(boolean flWaitForTermination) throws InterruptedException {
+			Cancel();
+			//.
+			StartUpdate();
+			//.
+			if (flWaitForTermination)
+				Wait();
+    	}
+    	
 		@Override
 		public void run() {
 			try {
 				try {
-					if (flShowProgress)
-						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
-	    			try {
-	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
-	    				if (UserAgent == null)
-	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    				//.
-	    				try {
-	    					DataStreamDescriptor = new TStreamDescriptor(DataStreamDescriptorData,com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.TChannelsProvider.Instance);
-	    				}
-	    				catch (Exception E) {
-	    					DataStreamDescriptor = null;
-	    					//.
-	    	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
-	    				}
-					}
-					finally {
-						if (flShowProgress)
-							MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
-					}
+    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+    				if (UserAgent == null)
+    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+    				TCoGeoMonitorObject	Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
     				//.
-	    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
+					int UpdateCount = 0;
+					while (!Canceller.flCancel) {
+						//. wait for an update signal
+						boolean flStartedByUser = UpdateSignal.WaitOne(UpdateInterval);
+						Canceller.Check();
+						//.
+						try {
+							flShowProgress = flStartedByUser; 
+							flClosePanelOnCancel = (UpdateCount == 0);
+							//.
+							ProcessingCanceller.Reset();
+			    			try {
+								if (flShowProgress)
+									MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
+								//.
+		        				byte[] ObjectModelData = Object.GetData(1000001);
+		        				if (ObjectModelData != null) {
+				    				Canceller.Check();
+				    				ProcessingCanceller.Check();
+		            				//.
+		        					int Idx = 0;
+		        					int ObjectModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+		        					int BusinessModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+		        					//.
+		        					if (ObjectModelID != 0) {
+		        						TObjectModel ObjectModel = TObjectModel.GetObjectModel(ObjectModelID);
+		        						if (ObjectModel != null) 
+		        							try {
+		        								ObjectModel.SetBusinessModel(BusinessModelID);
+		        								//.
+				    							TGeographServerObjectController GSOC = Object.GeographServerObjectController();
+				    							synchronized (GSOC) {
+				    								boolean flKeepConnectionLast = GSOC.KeepConnection();
+				    								try {
+					    								GSOC.Connect();
+					    								try {
+					    				    				Canceller.Check();
+					    				    				ProcessingCanceller.Check();
+					    				    				//.
+					    									byte[] ObjectSchemaData = GSOC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
+					    									//.
+					    				    				Canceller.Check();
+					    				    				ProcessingCanceller.Check();
+					    				    				//.
+					    									if (ObjectSchemaData == null)
+					    										throw new Exception("there is no object schema data"); //. =>
+					    									ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
+					    									//.
+					    									byte[] ObjectDeviceSchemaData = GSOC.Component_ReadAllCUAC(new int[] {2/*device side*/});
+					    									//.
+					    				    				Canceller.Check();
+					    				    				ProcessingCanceller.Check();
+					    				    				//.
+					    									if (ObjectDeviceSchemaData == null)
+					    										throw new Exception("there is no device schema data"); //. =>
+					    									ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
+					    									//.
+					        								TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent DC = (TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
+					        								DataStreamDescriptorData = DC.SensorsModule.SensorsDataValue.Value;
+					        								com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel Model = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel(DataStreamDescriptorData);
+					        								DataStreamDescriptor = Model.Stream;
+					        								//.
+					        			    				Canceller.Check();
+					        			    				ProcessingCanceller.Check();
+					        								//.
+					        								int Cnt = DataStreamDescriptor.Channels.size();
+					        								int[] ChannelIDs = new int[Cnt];
+					        								for (int I = 0; I < Cnt; I++)
+					        									ChannelIDs[I] = DataStreamDescriptor.Channels.get(I).ID;
+					    									ObjectModel.ObjectController = GSOC;
+					        								DataStreamChannelsStatus = ObjectModel.Sensors_Channels_GetStatus(ChannelIDs); 
+					    								}
+				    									finally {
+						    								GSOC.Disconnect();
+				    									}
+				    								}
+				    								finally {
+				    									GSOC.Connection_flKeepAlive = flKeepConnectionLast;
+				    								}
+												}
+		        							}
+		        							finally {
+		        								ObjectModel.Destroy();
+		        							}								
+		        					}
+		        				}
+							}
+							finally {
+								if (flShowProgress)
+									MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_HIDE).sendToTarget();
+							}
+		    				//.
+			    			MessageHandler.obtainMessage(MESSAGE_COMPLETED).sendToTarget();
+			    			UpdateCount++;
+						}
+			        	catch (InterruptedException E) {
+			        		return; //. ->
+			        	}
+						catch (CancelException CE) {
+							if (CE.Canceller != ProcessingCanceller)
+								throw CE; //. =>
+						}
+			        	catch (IOException E) {
+			    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
+			        	}
+			        	catch (Throwable E) {
+			    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
+			        	}
+					}
 	        	}
 	        	catch (InterruptedException E) {
 	        	}
-	        	catch (IOException E) {
+				catch (CancelException CE) {
+				}
+	        	catch (Exception E) {
 	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,E).sendToTarget();
-	        	}
-	        	catch (Throwable E) {
-	    			MessageHandler.obtainMessage(MESSAGE_EXCEPTION,new Exception(E.getMessage())).sendToTarget();
 	        	}
 			}
 			finally {
@@ -296,6 +426,12 @@ public class TDataStreamPropsPanel extends Activity {
 			}
 		}
 
+		public void StartUpdate() {
+			ProcessingCanceller.Cancel();
+			//.
+			UpdateSignal.Set();
+		}
+		
 		private final Handler MessageHandler = new Handler() {
 	        @Override
 	        public void handleMessage(Message msg) {
@@ -313,7 +449,10 @@ public class TDataStreamPropsPanel extends Activity {
 		            case MESSAGE_COMPLETED:
 		            	if (Canceller.flCancel)
 			            	break; //. >
+		            	TDataStreamPropsPanel.this.DataStreamDescriptorData = DataStreamDescriptorData;
 		            	TDataStreamPropsPanel.this.DataStreamDescriptor = DataStreamDescriptor;
+		            	//.
+		            	TDataStreamPropsPanel.this.DataStreamChannelsStatus = DataStreamChannelsStatus;
 	           		 	//.
 		            	TDataStreamPropsPanel.this.Update();
 		            	//.
@@ -389,7 +528,16 @@ public class TDataStreamPropsPanel extends Activity {
     				TChannel Channel = DataStreamDescriptor.Channels.get(I);
     				lvChannelsItems[I] = Channel.Name;
     				if (Channel.Info.length() > 0)
-    					lvChannelsItems[I] += " "+"/"+Channel.Info+"/"; 
+    					lvChannelsItems[I] += " "+"/"+Channel.Info+"/";
+    				//.
+    				if ((DataStreamChannelsStatus != null) && (I < DataStreamChannelsStatus.length)) {
+        				if (DataStreamChannelsStatus[I].Enabled) {
+        					if (DataStreamChannelsStatus[I].Active)
+            					lvChannelsItems[I] += "  "+getString(R.string.SActive3);
+        				}
+        				else
+        					lvChannelsItems[I] += "  "+"("+getString(R.string.SDisabled2)+")";
+    				}
     			}
     			ArrayAdapter<String> lvChannelsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvChannelsItems);             
     			lvChannels.setAdapter(lvChannelsAdapter);
@@ -408,12 +556,6 @@ public class TDataStreamPropsPanel extends Activity {
     	}
     }
 
-    private void StartUpdating() {
-    	if (Updating != null)
-    		Updating.Cancel();
-    	Updating = new TUpdating(true,true);
-    }    
-    
     private void OpenStream() {
     	if (DataStreamDescriptor == null)
     		return; //. ->

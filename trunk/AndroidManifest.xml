@@ -45,6 +45,12 @@
         android:largeHeap="true"
         android:theme="@style/Theme.Base" >
         <activity
+            android:name="com.geoscope.Classes.Data.Stream.Channel.UI.TChannelProfilePanel"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
             android:name="com.geoscope.Classes.Data.Types.Image.TImageViewerPanel"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:label=""

@@ -3,9 +3,11 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleChannelsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 
 public class TSensorsChannelsValue extends TComponentTimestampedDataValue {
 
@@ -49,9 +51,17 @@ public class TSensorsChannelsValue extends TComponentTimestampedDataValue {
         	case 1: //. set the channel profile 
             	int ChannelID = Integer.parseInt(SA[2]);
         		//.
-            	TChannel Channel = SensorsModule.Model.StreamChannels_GetOneByID(ChannelID);
-            	if (Channel != null)
-            		Channel.Profile_FromByteArray(Value);
+            	TStreamChannel Channel = (TStreamChannel)SensorsModule.Model.StreamChannels_GetOneByID(ChannelID);
+            	if (Channel != null) {
+            		try {
+                		Channel.Profile_FromByteArray(Value);
+            		}
+            		catch (TChannel.ChannelIsActiveException CAE) {
+            			throw new OperationException(TSetSensorsModuleChannelsValueSO.OperationErrorCode_ChannelIsActive); //. =>
+            		}
+            		//.
+            		SensorsModule.Model_BuildAndPublish();
+            	}
         		break; //. >
         		
         	case 2: //. set channels profiles 
@@ -90,7 +100,7 @@ public class TSensorsChannelsValue extends TComponentTimestampedDataValue {
         	case 1: //. get the channel profile
             	int ChannelID = Integer.parseInt(SA[2]);
         		//.
-            	TChannel Channel = SensorsModule.Model.StreamChannels_GetOneByID(ChannelID);
+            	TStreamChannel Channel = (TStreamChannel)SensorsModule.Model.StreamChannels_GetOneByID(ChannelID);
         		Timestamp = OleDate.UTCCurrentTimestamp();
             	if (Channel != null)
             		Value = Channel.Profile_ToByteArray();
@@ -105,6 +115,85 @@ public class TSensorsChannelsValue extends TComponentTimestampedDataValue {
         		//.
                 return ToByteArray(); //. ->
         		
+        	case 3: //. get channels status
+            	int SubVersion = Integer.parseInt(SA[2]);
+        		switch (SubVersion) {
+
+        		case 1: //. get channel "enabled" status
+            		int Cnt = SA.length-3;
+            		byte[] EnabledArray = new byte[Cnt];
+            		for (int I = 0; I < Cnt; I++) {
+            			ChannelID = Integer.parseInt(SA[I+3]);
+            			Channel = (TStreamChannel)SensorsModule.Model.StreamChannels_GetOneByID(ChannelID);
+            			if (Channel != null) {
+            				TChannel SourceChannel = Channel.SourceChannel_Get();
+            				if (SourceChannel != null)
+            					EnabledArray[I] = (Channel.Enabled ? (byte)1 : (byte)0);
+                			else
+                				EnabledArray[I] = 0;
+            			}
+            			else
+            				EnabledArray[I] = 0;
+            		}
+            		//.
+            		Timestamp = OleDate.UTCCurrentTimestamp();
+            		Value = EnabledArray;
+            		//.
+            		break; //. >
+
+        		case 2: //. get channel "active" status
+            		Cnt = SA.length-3;
+            		byte[] ActiveArray = new byte[Cnt];
+            		for (int I = 0; I < Cnt; I++) {
+            			ChannelID = Integer.parseInt(SA[I+3]);
+            			Channel = (TStreamChannel)SensorsModule.Model.StreamChannels_GetOneByID(ChannelID);
+            			if (Channel != null) {
+            				TChannel SourceChannel = Channel.SourceChannel_Get();
+            				if (SourceChannel != null)
+            					ActiveArray[I] = (SourceChannel.IsActive() ? (byte)1 : (byte)0);
+                			else
+                				ActiveArray[I] = 0;
+            			}
+            			else
+            				ActiveArray[I] = 0;
+            		}
+            		//.
+            		Timestamp = OleDate.UTCCurrentTimestamp();
+            		Value = ActiveArray;
+            		//.
+            		break; //. >
+
+        		case 3: //. get channel "enabled" and "active" status
+            		Cnt = SA.length-3;
+            		byte[] StatusArray = new byte[Cnt << 1];
+            		for (int I = 0; I < Cnt; I++) {
+            			ChannelID = Integer.parseInt(SA[I+3]);
+            			Channel = (TStreamChannel)SensorsModule.Model.StreamChannels_GetOneByID(ChannelID);
+            			if (Channel != null) {
+            				TChannel SourceChannel = Channel.SourceChannel_Get();
+            				if (SourceChannel != null) {
+                				StatusArray[(I << 1)] = (Channel.Enabled ? (byte)1 : (byte)0);
+            					StatusArray[(I << 1)+1] = (SourceChannel.IsActive() ? (byte)1 : (byte)0);
+            				}
+                			else {
+                				StatusArray[(I << 1)] = 0;
+                				StatusArray[(I << 1)+1] = 0;
+                			}
+            			}
+            			else {
+            				StatusArray[(I << 1)] = 0;
+            				StatusArray[(I << 1)+1] = 0;
+            			}
+            		}
+            		//.
+            		Timestamp = OleDate.UTCCurrentTimestamp();
+            		Value = StatusArray;
+            		//.
+            		break; //. >
+        		}
+        		//.
+                return ToByteArray(); //. ->
+
         	default:
         		Timestamp = OleDate.UTCCurrentTimestamp();
         		Value = null;

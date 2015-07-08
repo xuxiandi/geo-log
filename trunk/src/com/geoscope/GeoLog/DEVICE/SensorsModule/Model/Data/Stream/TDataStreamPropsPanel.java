@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TSourceStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -26,6 +27,8 @@ public class TDataStreamPropsPanel extends Activity {
 	public static final int REQUEST_EDITCHANNELPROFILE = 1;
 	
 	
+	private TSensorsModule SensorsModule;
+	//.
 	private TStreamDescriptor 	DataStreamDescriptor = null;
 	//.
 	private TextView lbStreamName;
@@ -46,8 +49,10 @@ public class TDataStreamPropsPanel extends Activity {
         	if (Tracker == null)
         		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
         	if (Tracker.GeoLog.SensorsModule.Model == null)
-        		throw new Exception("sensors module stream model is not defined"); //. =>
-        	DataStreamDescriptor = Tracker.GeoLog.SensorsModule.Model.Stream; 
+        		throw new Exception("sensors module stream model is not defined"); //. => 
+        	SensorsModule = Tracker.GeoLog.SensorsModule;
+        	//.
+        	DataStreamDescriptor = SensorsModule.Model.Stream; 
     		//.
     		requestWindowFeature(Window.FEATURE_NO_TITLE);
             //.
@@ -99,8 +104,13 @@ public class TDataStreamPropsPanel extends Activity {
                     	TStreamChannel Channel = (TStreamChannel)DataStreamDescriptor.Channels.get(lvChannels_SelectedIndex);
                     	//.
                     	TSourceStreamChannel SourceChannel = Channel.SourceChannel_Get();
-                    	if (SourceChannel != null) 
+                    	if (SourceChannel != null) {
                     		SourceChannel.Profile_FromByteArray(ProfileData);
+                    		//.
+                    		SensorsModule.Model_BuildAndPublish();
+                    		//.
+                    		Update();
+                    	}
             		}
 				} catch (Exception E) {
 					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -124,10 +134,19 @@ public class TDataStreamPropsPanel extends Activity {
     			lbStreamChannels.setText(getString(R.string.SChannels1));
     			String[] lvChannelsItems = new String[DataStreamDescriptor.Channels.size()];
     			for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++) {
-    				TChannel Channel = DataStreamDescriptor.Channels.get(I);
+    				TStreamChannel Channel = (TStreamChannel)DataStreamDescriptor.Channels.get(I);
     				lvChannelsItems[I] = Channel.Name;
     				if (Channel.Info.length() > 0)
     					lvChannelsItems[I] += " "+"/"+Channel.Info+"/"; 
+    				//.
+					TChannel SourceChannel = Channel.SourceChannel_Get();
+					if (SourceChannel != null)
+	    				if (SourceChannel.Enabled) {
+        					if (SourceChannel.IsActive())
+            					lvChannelsItems[I] += "  "+getString(R.string.SActive3);
+	    				}
+	    				else
+	    					lvChannelsItems[I] += "  "+"("+getString(R.string.SDisabled2)+")";
     			}
     			ArrayAdapter<String> lvChannelsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_single_choice,lvChannelsItems);             
     			lvChannels.setAdapter(lvChannelsAdapter);

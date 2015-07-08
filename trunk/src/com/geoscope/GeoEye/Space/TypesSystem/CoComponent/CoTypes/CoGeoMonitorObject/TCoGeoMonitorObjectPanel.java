@@ -1179,7 +1179,6 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 										intent.putExtra("ObjectIndex", ObjectIndex);
 						        		break; //. >
 						        	}
-				    	        	intent.putExtra("DataStreamDescriptorData",Model.Stream.ToByteArray());
 						            startActivity(intent);
 								} catch (Exception E) {
 							    	Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();

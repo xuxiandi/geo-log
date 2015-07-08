@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -19,6 +20,7 @@ import android.content.Intent;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Stream.Channel.UI.TChannelProfilePanel;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 
 
@@ -196,7 +198,19 @@ public class TChannel {
 	    }
 		
 		public Intent GetProfilePanel(Activity Parent) throws Exception {
-			return null;
+			Intent Result = new Intent(Parent, TChannelProfilePanel.class);
+			Result.putExtra("ProfileData", ToByteArray());
+			//.
+			return Result;
+		}
+	}
+	
+	public static final class ChannelIsActiveException extends IOException {
+		
+		private static final long serialVersionUID = 1L;
+
+		public ChannelIsActiveException() {
+			super("channel is active");
 		}
 	}
 	
@@ -263,6 +277,8 @@ public class TChannel {
 	    		FIS.read(BA);
 	    		//.
 	    		Profile.FromByteArray(BA);
+	    		//.
+				Profile_ApplyToChannel();
 	    	}
 			finally
 			{
@@ -289,19 +305,27 @@ public class TChannel {
 
 	public void Profile_FromByteArray(byte[] BA) throws Exception {
 		if (Profile != null) {
-			Profile.FromByteArray(BA);
-			Profile_Save();
+			if (IsActive())
+				throw new ChannelIsActiveException(); //. =>
 			//.
-			ReStart();
+			Profile.FromByteArray(BA);
+			//.
+			Profile_ApplyToChannel();
+			//.
+			Profile_Save();
 		}
 	}
 	
 	public void Profile_FromXMLNode(Node ANode) throws Exception {
 		if (Profile != null) {
-			Profile.FromXMLNode(ANode);
-			Profile_Save();
+			if (IsActive())
+				throw new ChannelIsActiveException(); //. =>
 			//.
-			ReStart();
+			Profile.FromXMLNode(ANode);
+			//.
+			Profile_ApplyToChannel();
+			//.
+			Profile_Save();
 		}
 	}
 	
@@ -315,6 +339,10 @@ public class TChannel {
 	public void Profile_ToXMLSerializer(XmlSerializer Serializer) throws Exception {
 		if (Profile != null) 
 			Profile.ToXMLSerializer(Serializer); 
+	}
+	
+	protected void Profile_ApplyToChannel() {
+		Enabled = Profile.Enabled;
 	}
 	
 	public void Initialize(Object pParameters) throws Exception {
@@ -513,6 +541,10 @@ public class TChannel {
 	}
 
 	public void StopSource() {
+	}
+	
+	public boolean IsActive() { //. true if the channel started or the channel source started
+		return true;
 	}
 	
 	public boolean DestinationIsConnected() {

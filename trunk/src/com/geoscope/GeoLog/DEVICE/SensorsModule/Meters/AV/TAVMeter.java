@@ -35,12 +35,16 @@ public class TAVMeter extends TSensorMeter {
 	protected void DoProcess() throws Exception {
 		if (SensorsModule.InternalSensorsModule.AACChannel == null)
 			throw new IOException("no origin audio channel"); //. =>
+		if (!SensorsModule.InternalSensorsModule.AACChannel.Enabled)
+			throw new IOException("the origin audio channel is disabled"); //. =>
 		final TAACChannel AudioSourceChannel = (TAACChannel)SensorsModule.InternalSensorsModule.AACChannel.DestinationChannel_Get(); 	
 		if (AudioSourceChannel == null)
 			throw new IOException("no source audio channel"); //. =>
 		//.
 		if (SensorsModule.InternalSensorsModule.H264IChannel == null)
 			throw new IOException("no origin video channel"); //. =>
+		if (!SensorsModule.InternalSensorsModule.H264IChannel.Enabled)
+			throw new IOException("the origin video channel is disabled"); //. =>
 		final TH264IChannel VideoSourceChannel = (TH264IChannel)SensorsModule.InternalSensorsModule.H264IChannel.DestinationChannel_Get(); 	
 		if (VideoSourceChannel == null)
 			throw new IOException("no source video channel"); //. =>

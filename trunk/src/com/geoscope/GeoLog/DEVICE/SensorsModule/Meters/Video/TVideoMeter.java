@@ -33,6 +33,8 @@ public class TVideoMeter extends TSensorMeter {
 	protected void DoProcess() throws Exception {
 		if (SensorsModule.InternalSensorsModule.H264IChannel == null)
 			throw new IOException("no origin channel"); //. =>
+		if (!SensorsModule.InternalSensorsModule.H264IChannel.Enabled)
+			throw new IOException("the origin channel is disabled"); //. =>
 		TH264IChannel SourceChannel = (TH264IChannel)SensorsModule.InternalSensorsModule.H264IChannel.DestinationChannel_Get(); 	
 		if (SourceChannel == null)
 			throw new IOException("no source channel"); //. =>

@@ -31,6 +31,11 @@ public class TStreamChannel extends TSourceStreamChannel {
 		InternalSensorsModule.PostStop();
 	}
 	
+	@Override
+	public boolean IsActive() {
+		return InternalSensorsModule.IsStarted();
+	}
+	
 	public synchronized void DestinationChannel_Set(com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel pDestinationChannel) {
 		DestinationChannel = pDestinationChannel;
 		//.

@@ -107,7 +107,7 @@ public class TURLFolderListComponent extends TUIComponent {
 		return null;
 	}
 	
-	public static synchronized void Components_AddNewURL(String URLListFolder, String URLName, byte[] URLData, TGeoScopeServerUser User) throws Exception {
+	public static synchronized com.geoscope.GeoEye.Space.URL.TURL Components_AddNewURL(String URLListFolder, String URLName, byte[] URLData, TGeoScopeServerUser User) throws Exception {
 		TURLFolderListComponent.TURLFolderList URLFolderList = new TURLFolderListComponent.TURLFolderList(URLListFolder, User);
 		com.geoscope.GeoEye.Space.URL.TURL URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlData(URLData, User);
 		if (URL != null) {
@@ -119,6 +119,7 @@ public class TURLFolderListComponent extends TUIComponent {
 			if (Component != null)
 				Component.PostStartUpdating();
 		}
+		return URL;
 	}
 	
 	public static class TURLFolderList {
@@ -1259,12 +1260,17 @@ public class TURLFolderListComponent extends TUIComponent {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {        
        
-        case REQUEST_SELECT_USER:
+        case REQUEST_SELECT_USER_FORURL:
         	if (resultCode == Activity.RESULT_OK) {
                 Bundle extras = data.getExtras(); 
                 if (extras != null) {
             		long UserID = extras.getLong("UserID");
-            		SelectedURL_DoSendToUser(UserID);
+    				try {
+                		SelectedURL_DoSendToUser(UserID);
+    		    	}
+    		    	catch (Exception E) {
+    		    		Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    	}
             	}
         	}
             break; //. >
@@ -1625,7 +1631,18 @@ public class TURLFolderListComponent extends TUIComponent {
 		}
 	}
 
-	private class TURLsToUserSending extends TCancelableThread {
+	public static class TURLsToUserSendingItem {
+		
+		public String Name;
+		public byte[] Data;
+		
+		public TURLsToUserSendingItem(String pName, byte[] pData) {
+			Name = pName;
+			Data = pData;
+		}
+	}
+	
+	public static class TURLsToUserSending extends TCancelableThread {
 
     	private static final int MESSAGE_EXCEPTION 				= 0;
     	private static final int MESSAGE_DONE 					= 1;
@@ -1633,17 +1650,24 @@ public class TURLFolderListComponent extends TUIComponent {
     	private static final int MESSAGE_PROGRESSBAR_HIDE 		= 3;
     	private static final int MESSAGE_PROGRESSBAR_PROGRESS 	= 4;
 
+    	
+    	private Context context;;
+    	//.
+    	private TGeoScopeServerUser User;
+    	//.
     	private long UserID;
-    	private TURLFolderList List;
-    	private TURLFolderList.TItem[] Items;
+    	private TURLsToUserSendingItem[] Items;
     	
         private ProgressDialog progressDialog; 
     	
-    	public TURLsToUserSending(long pUserID, TURLFolderList pList, TURLFolderList.TItem[] pItems) {
+    	public TURLsToUserSending(Context pcontext, TGeoScopeServerUser pUser, long pUserID, TURLsToUserSendingItem[] pItems) {
     		super();
     		//.
+    		context = pcontext;
+    		//.
+    		User = pUser;
+    		//.
     		UserID = pUserID;
-    		List = pList;
     		Items = pItems;
     		//.
     		_Thread = new Thread(this);
@@ -1656,9 +1680,9 @@ public class TURLFolderListComponent extends TUIComponent {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
     				for (int I = 0; I < Items.length; I++) {
-    					TURLFolderList.TItem Item = Items[I];
-    					TGeoScopeServerUser.TURLCommandMessage CommandMessage = new TGeoScopeServerUser.TURLCommandMessage(TGeoScopeServerUser.TGeoMonitorObjectCommandMessage.Version_0, Item.Name, List.GetItemData(Item.ID));
-    					Component.User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
+    					TURLsToUserSendingItem Item = Items[I];
+    					TGeoScopeServerUser.TURLCommandMessage CommandMessage = new TGeoScopeServerUser.TURLCommandMessage(TGeoScopeServerUser.TGeoMonitorObjectCommandMessage.Version_0, Item.Name, Item.Data);
+    					User.IncomingMessages_SendNewCommand(UserID,CommandMessage);
     					//.
     	    			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_PROGRESS,(Integer)(int)(100.0*I/Items.length)).sendToTarget();
         				//.
@@ -1692,18 +1716,18 @@ public class TURLFolderListComponent extends TUIComponent {
 		            
 		            case MESSAGE_EXCEPTION:
 		            	Exception E = (Exception)msg.obj;
-		                Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+		                Toast.makeText(context, E.getMessage(), Toast.LENGTH_LONG).show();
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_DONE:
-	                    Toast.makeText(ParentActivity, ParentActivity.getString(R.string.SBookmarkHasBeenSent), Toast.LENGTH_SHORT).show();
+	                    Toast.makeText(context, context.getString(R.string.SBookmarkHasBeenSent), Toast.LENGTH_SHORT).show();
 		            	//.
 		            	break; //. >
 		            	
 		            case MESSAGE_PROGRESSBAR_SHOW:
-		            	progressDialog = new ProgressDialog(ParentActivity);
-		            	progressDialog.setMessage(ParentActivity.getString(R.string.SSending));    
+		            	progressDialog = new ProgressDialog(context);
+		            	progressDialog.setMessage(context.getString(R.string.SSending));    
 		            	if (Items.length > 1) {
 			            	progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		            		progressDialog.setIndeterminate(false);
@@ -1795,19 +1819,22 @@ public class TURLFolderListComponent extends TUIComponent {
 		}
 	}
 	
-	private static final int REQUEST_SELECT_USER = 1;
+	private static final int REQUEST_SELECT_USER_FORURL = 1;
 	
 	private void SelectedURL_SendToUser() {
     	Intent intent = new Intent(ParentActivity, TUserListPanel.class);
-		intent.putExtra("ComponentID", Component.ID);
+    	if (Component != null)
+    		intent.putExtra("ComponentID", Component.ID);
     	intent.putExtra("Mode",TUserListComponent.MODE_FORURL);    	
-    	ParentActivity.startActivityForResult(intent, REQUEST_SELECT_USER);		
+    	ParentActivity.startActivityForResult(intent, REQUEST_SELECT_USER_FORURL);		
 	}
 	
-	private void SelectedURL_DoSendToUser(long UserID) {
+	private void SelectedURL_DoSendToUser(long UserID) throws IOException {
 		TURLFolderList.TItem SelectedItem = URLList.GetItem(lvURLListAdapter.Items_GetSelectedItemID());
 		if (SelectedItem == null)
 			return; //. ->
-		new TURLsToUserSending(UserID, URLList, new TURLFolderList.TItem[] {SelectedItem});
+		TURLsToUserSendingItem[] Items = new TURLsToUserSendingItem[1];
+		Items[0] = new TURLsToUserSendingItem(SelectedItem.Name, URLList.GetItemData(SelectedItem.ID));  
+		new TURLsToUserSending(ParentActivity, Component.User, UserID, Items);
 	}
 }

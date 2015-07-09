@@ -3241,9 +3241,9 @@ public class TTrackerPanel extends Activity {
                     S = DoubleToString(fix.Latitude)+"; "+DoubleToString(fix.Longitude)+"; "+DoubleToString(fix.Altitude);
                     edFix.setText(S);
                     edFix.setTextColor(Color.GREEN);
-                    edFixSpeed.setText(Double.toString(fix.Speed));
+                    edFixSpeed.setText(Integer.toString((int)fix.Speed));
                     edFixSpeed.setTextColor(Color.GREEN);
-                    edFixPrecision.setText(Double.toString(fix.Precision));
+                    edFixPrecision.setText(Integer.toString((int)fix.Precision));
                     edFixPrecision.setTextColor(Color.GREEN);
                     ///? btnObtainCurrentFix.setEnabled(true);
                     ///? btnInterfacePanel.setEnabled(true);
@@ -3263,9 +3263,9 @@ public class TTrackerPanel extends Activity {
                     S = getString(R.string.SLastCoordinates)+DoubleToString(fix.Latitude)+"; "+DoubleToString(fix.Longitude)+"; "+DoubleToString(fix.Altitude)+")";
                     edFix.setText(S);
                     edFix.setTextColor(Color.RED);
-                    edFixSpeed.setText(Double.toString(fix.Speed));
+                    edFixSpeed.setText(Integer.toString((int)fix.Speed));
                     edFixSpeed.setTextColor(Color.RED);
-                    edFixPrecision.setText(Double.toString(fix.Precision));
+                    edFixPrecision.setText(Integer.toString((int)fix.Precision));
                     edFixPrecision.setTextColor(Color.RED);
                     ///? btnObtainCurrentFix.setEnabled(true);
                     ///? btnInterfacePanel.setEnabled(false);

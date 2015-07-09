@@ -61,7 +61,6 @@ public class TDataStreamPropsPanel extends Activity {
 	private long				ObjectID = -1;
 	private int					ObjectIndex = -1;
 	//.
-	private byte[] 								DataStreamDescriptorData = null;
 	private TStreamDescriptor 					DataStreamDescriptor = null;
 	//.
 	private TObjectModel.TSensorChannelStatus[] DataStreamChannelsStatus = null;
@@ -271,7 +270,6 @@ public class TDataStreamPropsPanel extends Activity {
     	
         private ProgressDialog progressDialog;
         //.
-    	private byte[] 								DataStreamDescriptorData = null;
     	private TStreamDescriptor 					DataStreamDescriptor = null;
     	//.
     	private TObjectModel.TSensorChannelStatus[] DataStreamChannelsStatus = null;
@@ -361,8 +359,8 @@ public class TDataStreamPropsPanel extends Activity {
 					    									ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
 					    									//.
 					        								TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent DC = (TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
-					        								DataStreamDescriptorData = DC.SensorsModule.SensorsDataValue.Value;
-					        								com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel Model = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel(DataStreamDescriptorData);
+					        								byte[] ModelData = DC.SensorsModule.SensorsDataValue.Value;
+					        								com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel Model = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel(ModelData);
 					        								DataStreamDescriptor = Model.Stream;
 					        								//.
 					        			    				Canceller.Check();
@@ -449,7 +447,6 @@ public class TDataStreamPropsPanel extends Activity {
 		            case MESSAGE_COMPLETED:
 		            	if (Canceller.flCancel)
 			            	break; //. >
-		            	TDataStreamPropsPanel.this.DataStreamDescriptorData = DataStreamDescriptorData;
 		            	TDataStreamPropsPanel.this.DataStreamDescriptor = DataStreamDescriptor;
 		            	//.
 		            	TDataStreamPropsPanel.this.DataStreamChannelsStatus = DataStreamChannelsStatus;
@@ -581,7 +578,7 @@ public class TDataStreamPropsPanel extends Activity {
 				if (!ServersInfo.IsSpaceDataServerValid()) 
 					throw new Exception("Invalid space data server"); //. =>
 				//.
-				DescriptorData = DataStreamDescriptorData;
+				DescriptorData = DataStreamDescriptor.ToByteArray();
 			}
 			
 			@Override 
@@ -632,7 +629,8 @@ public class TDataStreamPropsPanel extends Activity {
 				DescriptorFile = new File(TGeoLogApplication.GetTempFolder()+"/"+"DataStreamDescriptor.xml");
 				FileOutputStream fos = new FileOutputStream(DescriptorFile);
 				try {
-					fos.write(DataStreamDescriptorData, 0,DataStreamDescriptorData.length);
+					byte[] BA = DataStreamDescriptor.ToByteArray();
+					fos.write(BA, 0,BA.length);
 				} finally {
 					fos.close();
 				}

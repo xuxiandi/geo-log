@@ -554,10 +554,15 @@ public class CameraStreamerFRAME extends Camera {
 			}
 			//. VIDEO
 			if (flVideo) {
-				if ((vsrc > 0) && (android.hardware.Camera.getNumberOfCameras() > vsrc)) 
-					camera = android.hardware.Camera.open(vsrc);
-				else
-					camera = android.hardware.Camera.open();
+				try {
+					if ((vsrc > 0) && (android.hardware.Camera.getNumberOfCameras() > vsrc)) 
+						camera = android.hardware.Camera.open(vsrc);
+					else
+						camera = android.hardware.Camera.open();
+				}
+				catch (NullPointerException NPE) {
+					throw new IOException("camera is unavailable or busy"); //. =>
+				}
 		        camera_parameters = camera.getParameters();
 		        camera_parameters.setPreviewSize(resX,resY);
 		        if (fps > 0)

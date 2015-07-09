@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
@@ -72,6 +73,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.TTypesSystem;
 import com.geoscope.GeoEye.Space.TypesSystem.SecurityFile.TSecurityFileFunctionality;
 import com.geoscope.GeoEye.Space.TypesSystem.SecurityFile.TSecurityFileInstanceListPanel;
 import com.geoscope.GeoEye.Space.URL.TURL;
+import com.geoscope.GeoEye.Space.URLs.TURLFolderListComponent;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.THintManager;
@@ -90,6 +92,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	
 	public static final int REQUEST_COMPONENT_CONTENT 			= 1;
 	public static final int REQUEST_COMPONENT_CHANGESECURITY 	= 2;
+	public static final int REQUEST_SELECT_USER_FORURL 			= 3;
 	
 	public static class TOnItemsLoadedHandler {
 		
@@ -676,8 +679,9 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		    		_items[2] = ParentActivity.getString(R.string.SUserActivity); 
 		    		_items[3] = ParentActivity.getString(R.string.SShowGeoLocation); 
 		    		_items[4] = ParentActivity.getString(R.string.SGetURLFile); 
-		    		_items[5] = ParentActivity.getString(R.string.SSecurity1); 
-		    		_items[6] = ParentActivity.getString(R.string.SRemove); 
+		    		_items[5] = ParentActivity.getString(R.string.SSendURLLinkToUser); 
+		    		_items[6] = ParentActivity.getString(R.string.SSecurity1); 
+		    		_items[7] = ParentActivity.getString(R.string.SRemove); 
 		    		//.
 		    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		    		builder.setTitle(R.string.SSelect);
@@ -820,7 +824,63 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 5: //. component security
+		    		    		case 5: //. send URL-file to user
+    								if (_Component.TypedDataFiles.Count() > 0) {
+	    								final TComponentTypedDataFile ComponentTypedDataFile = _Component.TypedDataFiles.Items[0].Clone();
+	    								//.
+	    		    					TAsyncProcessing Processing = new TAsyncProcessing(ParentActivity) {
+
+	    		    						@Override
+	    		    						public void Process() throws Exception {
+	    	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID);
+	    	    								if (CF != null) 
+	    	    									try {
+	    	    										TURL URL = CF.GetDefaultURL();
+	    	    										if (URL != null) 
+	    	    											try {
+	    	    												if (URL.HasData()) {
+	    	    													ComponentTypedDataFile.DataType = SpaceDefines.TYPEDDATAFILE_TYPE_Document; 
+	    	    													ComponentTypedDataFile.PrepareForComponent(ComponentTypedDataFile.DataComponentType,ComponentTypedDataFile.DataComponentID, false, UserAgent.Server);
+			    													if (ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) 
+			    	    	    										CF.ParseFromXMLDocument(ComponentTypedDataFile.GetFileData());
+	    	    												}
+	    	    	    										//.
+	    	    												String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+	    		    											URL.Name = ComponentTypedDataFile.DataName;
+	    		    											URL.ConstructURLFile(URLFN);
+	    	    											}
+	    	    											finally {
+	    	    												URL.Release();
+	    	    											}
+		    	    										else
+		    	    											throw new Exception("there is no URL there"); //. =>
+	    	    												
+	    	    									}
+	    	    									finally {
+	    	    										CF.Release();
+	    	    									}
+    	    										else
+    	    											throw new Exception("there is no component functionality there"); //. =>
+	    		    						}
+
+	    		    						@Override
+	    		    						public void DoOnCompleted() throws Exception {
+	    		    							SendComponentURLToUser();
+	    		    						}
+	    		    						
+	    		    						@Override
+	    		    						public void DoOnException(Exception E) {
+	    		    							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+	    		    						}
+	    		    					};
+	    		    					Processing.Start();
+    								}
+		    		    			//.
+		        		    		arg0.dismiss();
+		        		    		//.
+		    		    			break; //. >
+		    		    			
+		    		    		case 6: //. component security
 		    						final CharSequence[] _items;
 		    						_items = new CharSequence[2];
 		    						_items[0] = ParentActivity.getString(R.string.SShowSecurity);
@@ -997,7 +1057,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 6: //. remove component
+		    		    		case 7: //. remove component
 		    		    			AlertDialog.Builder alert = new AlertDialog.Builder(ParentActivity);
 		    		    			//.
 		    		    			alert.setTitle(R.string.SRemoval);
@@ -1200,6 +1260,21 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 					Toast.makeText(ParentActivity, "component is not selected",	Toast.LENGTH_LONG).show();
         	}
         	break; //. >
+        	
+        case REQUEST_SELECT_USER_FORURL:
+        	if (resultCode == Activity.RESULT_OK) {
+                Bundle extras = data.getExtras(); 
+                if (extras != null) {
+            		long UserID = extras.getLong("UserID");
+    				try {
+                		DoSendComponentURLToUser(UserID);
+    		    	}
+    		    	catch (Exception E) {
+    		    		Toast.makeText(ParentActivity, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    	}
+            	}
+        	}
+            break; //. >
         }
         //.
     	super.onActivityResult(requestCode, resultCode, data);
@@ -1994,6 +2069,25 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 			ParentActivity.startActivity(intent);
 		} catch (Exception E) {
 			Toast.makeText(ParentActivity, E.getMessage(),Toast.LENGTH_LONG).show();
+		}
+	}
+	
+	private void SendComponentURLToUser() {
+    	Intent intent = new Intent(ParentActivity, TUserListPanel.class);
+		intent.putExtra("ComponentID", Component.ID);
+    	intent.putExtra("Mode",TUserListComponent.MODE_FORURL);    	
+    	ParentActivity.startActivityForResult(intent, REQUEST_SELECT_USER_FORURL);		
+	}
+	
+	private void DoSendComponentURLToUser(long UserID) throws Exception {
+		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+		File UF = new File(URLFN);
+		if (UF.exists()) {
+			com.geoscope.GeoEye.Space.URL.TURL URL = com.geoscope.GeoEye.Space.URL.TURL.GetURLFromXmlFile(URLFN, UserAgent.User());
+			//.
+			TURLFolderListComponent.TURLsToUserSendingItem[] Items = new TURLFolderListComponent.TURLsToUserSendingItem[1];
+			Items[0] = new TURLFolderListComponent.TURLsToUserSendingItem(URL.Name, URL.XMLDocumentData);  
+			new TURLFolderListComponent.TURLsToUserSending(ParentActivity, Component.User, UserID, Items);
 		}
 	}
 	

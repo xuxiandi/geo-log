@@ -878,7 +878,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
 
 			default:
-				throw new OperationException(OE.Code,"error SensorsModule_Channels_GetProfile(), "+OE.getMessage()); //. =>
+				throw new OperationException(OE.Code,"error SensorsModule_Channels_GetStatus(), "+OE.getMessage()); //. =>
 			}
 		}
 	}

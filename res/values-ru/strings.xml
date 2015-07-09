@@ -819,7 +819,7 @@
     <string name="SLatitude">"Широта: "</string>
     <string name="SLongitude">"Долгота: "</string>
     <string name="SControls">Каналы управления</string>
-    <string name="SSensors">Каналы сенсоров</string>
+    <string name="SSensors">Сенсоры</string>
     <string name="SEnvironmentConditionsXENVC">Условия среды (XENVC)</string>
     <string name="SRelativeHumidity">Относительная влажность: </string>
     <string name="SLight">Освещенность: </string>
@@ -1116,5 +1116,6 @@
     <string name="SCouldNotSetProfileChannelIsActive">не смог установить профиль: канал активен</string>
     <string name="SRecordersDataTransfer">Передача данных с регистраторов</string>
     <string name="SSummaryInLocalDatabase">"Суммарно в локальной базе данных: "</string>
+    <string name="SSendURLLinkToUser">Послать URL-ссылку пользователю &#8230;</string>
     
 </resources>

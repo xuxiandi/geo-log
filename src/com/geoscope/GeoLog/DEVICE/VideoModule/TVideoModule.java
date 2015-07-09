@@ -1148,6 +1148,9 @@ public class TVideoModule extends TModule
     }
     
     public void VideoFrameServer_Capturing(InputStream DestinationConnectionInputStream, OutputStream DestinationConnectionOutputStream, final TCanceller Canceller) throws Exception {
+    	if (Device.VideoRecorderModule.MediaFrameServer.FrameSize == null)
+    		throw new Exception("MediaFrameServer is not set(FrameSize = null)"); //. =>
+    	//.
     	int InitializationCode = VideoFrameServer_Initialization_Code_Ok;
     	byte[] DataDescriptor = new byte[4];
         int Size = DestinationConnectionInputStream.read(DataDescriptor,0,DataDescriptor.length);
@@ -1490,6 +1493,8 @@ public class TVideoModule extends TModule
     }
     
     public void VideoFrameServer_Capturing(String Configuration, DatagramSocket IOSocket, String OutputAddress, int OutputPort, int OutputProxyType, String ProxyServerAddress, int ProxyServerPort, final TCanceller Canceller) throws Exception {
+    	if (Device.VideoRecorderModule.MediaFrameServer.FrameSize == null)
+    		throw new Exception("MediaFrameServer is not set(FrameSize = null)"); //. =>
 		//. capturing
 		switch (OutputProxyType) {
 		

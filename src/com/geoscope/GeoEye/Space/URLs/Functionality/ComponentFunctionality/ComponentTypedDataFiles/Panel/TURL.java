@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
+import com.geoscope.Classes.MultiThreading.TProgressor;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
@@ -194,11 +195,26 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.Functionality.Component
 							if (ComponentTypedDataFile.IsLoaded())
 								ComponentTypedDataFile.Open(User, context);
 							else {
-								TAsyncProcessing Opening = new TAsyncProcessing(context) {
+								TAsyncProcessing Opening = new TAsyncProcessing(context, R.string.SLoading) {
+									
+									@Override
+									public boolean ProcessIsIndeterminate() {
+										return false;
+									}
 									
 									@Override
 									public void Process() throws Exception {
-										ComponentTypedDataFile.PrepareAsFullFromServer(User, Canceller, null/*Progressor*/);
+										final TAsyncProcessing Self = this;
+										//.
+										ComponentTypedDataFile.PrepareAsFullFromServer(User, Canceller, new TProgressor() {
+											
+											@Override
+											public synchronized boolean DoOnProgress(int pPercentage) {
+												Self.DoOnProgress(pPercentage);
+												//.
+												return super.DoOnProgress(pPercentage);
+											}
+										});
 									}
 									
 									@Override 

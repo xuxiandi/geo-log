@@ -1116,5 +1116,6 @@
     <string name="SCouldNotSetProfileChannelIsActive">could not set profile: channel is active</string>
     <string name="SRecordersDataTransfer">Recorders data transfer</string>
     <string name="SSummaryInLocalDatabase">"Summary in the local database: "</string>
+    <string name="SSendURLLinkToUser">Send URL-link to user &#8230;</string>
     
 </resources>

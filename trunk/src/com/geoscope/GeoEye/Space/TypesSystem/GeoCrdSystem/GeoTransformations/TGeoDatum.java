@@ -85,11 +85,13 @@ public class TGeoDatum {
         double fTemp;
         double Distance;
         //. 
+        if ((Latitude == Latitude1) && (Longitude == Longitude1))
+        	return 0.0; //. ->
+        if (Double.isNaN(Latitude) || Double.isNaN(Longitude) || Double.isNaN(Latitude1) || Double.isNaN(Longitude1))
+            return Double.NaN; //. ->
+    	//.
         double a = Ellipsoide_EquatorialRadius;
         double e2 = (Ellipsoid_EccentricitySquared)/(1.0-Ellipsoid_EccentricitySquared); 
-        if (Double.isNaN(Latitude) || Double.isNaN(Longitude) || Double.isNaN(Latitude1) || Double.isNaN(Longitude1))
-                return Double.NaN; //. ->
-        
         fdLambda = (Longitude - Longitude1) * D2R;
         fdPhi = (Latitude - Latitude1) * D2R;
         fPhimean = ((Latitude + Latitude1) / 2.0) * D2R;

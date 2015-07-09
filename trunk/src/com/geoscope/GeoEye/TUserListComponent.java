@@ -283,8 +283,6 @@ public class TUserListComponent extends TUIComponent {
 		ListRowSizeID = pListRowSizeID;
 		//.
 		Mode = pMode;
-		//.		
-		Component = pComponent;
         //.
 		Component = pComponent;
 		//.

@@ -1053,10 +1053,12 @@ public class TReflectorComponent extends TUIComponent {
 										public void onClick(
 												DialogInterface dialog, int id) {
 											try {
-												TURLFolderListComponent.Components_AddNewURL(URLListFolder, _Message.URLName,_Message.URLData, User);
+												com.geoscope.GeoEye.Space.URL.TURL URL = TURLFolderListComponent.Components_AddNewURL(URLListFolder, _Message.URLName,_Message.URLData, User);
 												//.
 												_Message.SetAsProcessed();
-												// .
+												//. open incoming URL
+												URL.Open(ParentActivity, null); 
+												//.
 												Toast.makeText(
 														context,
 														context.getString(R.string.SBookmark)

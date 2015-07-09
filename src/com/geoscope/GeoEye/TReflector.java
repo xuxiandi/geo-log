@@ -27,7 +27,6 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.geoscope.Classes.IO.File.TFileSystem;
-import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.Application.TSplashPanel;
 import com.geoscope.GeoLog.Application.TUserAccess;
@@ -37,7 +36,7 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 @SuppressLint("HandlerLeak")
 public class TReflector extends Activity {
 
-	public static final String ProgramVersion = "v3.010215";
+	public static final String ProgramVersion = "v3.100715";
 	// .
 	public static final String GarryG = "Когда мила родная сторона, которой возлелеян и воспитан, то к куче ежедневного дерьма относишься почти-что с аппетитом.";
 
@@ -424,39 +423,11 @@ public class TReflector extends Activity {
 		return false;
 	}
 
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (requestCode) {
-
-		case TReflectorComponent.REQUEST_SHOW_TRACKER:
-			break; // . >
-
-		case TReflectorComponent.REQUEST_EDIT_REFLECTOR_CONFIGURATION:
-			break; // . >
-
-		case TReflectorComponent.REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE:
-			break; // . >
-
-		case TReflectorComponent.REQUEST_OPEN_USERSEARCH:
-			if (resultCode == RESULT_OK) {
-				Bundle extras = data.getExtras();
-				if (extras != null) {
-					TGeoScopeServerUser.TUserDescriptor User = new TGeoScopeServerUser.TUserDescriptor();
-					User.UserID = extras.getLong("UserID");
-					User.UserIsDisabled = extras.getBoolean("UserIsDisabled");
-					User.UserIsOnline = extras.getBoolean("UserIsOnline");
-					User.UserName = extras.getString("UserName");
-					User.UserFullName = extras.getString("UserFullName");
-					User.UserContactInfo = extras.getString("UserContactInfo");
-					// .
-					Intent intent = new Intent(TReflector.this, TUserPanel.class);
-					intent.putExtra("ComponentID", Component.ID);
-					intent.putExtra("UserID", User.UserID);
-					startActivity(intent);
-				}
-			}
-			break; // . >
-		}
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	if (Component != null)
+    		Component.onActivityResult(requestCode, resultCode, data);
+    	//.
 		super.onActivityResult(requestCode, resultCode, data);
-	}
-
+    }
 }

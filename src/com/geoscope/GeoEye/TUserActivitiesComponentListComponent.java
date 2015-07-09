@@ -90,9 +90,9 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 
 	private static final int MESSAGE_TYPEDDATAFILE_LOADED = 1;
 	
-	public static final int REQUEST_COMPONENT_CONTENT 			= 1;
-	public static final int REQUEST_COMPONENT_CHANGESECURITY 	= 2;
-	public static final int REQUEST_SELECT_USER_FORURL 			= 3;
+	public static final int REQUEST_COMPONENT_CONTENT 			= 301;
+	public static final int REQUEST_COMPONENT_CHANGESECURITY 	= 302;
+	public static final int REQUEST_SELECT_USER_FORURL 			= 303;
 	
 	public static class TOnItemsLoadedHandler {
 		

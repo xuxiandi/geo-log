@@ -190,7 +190,7 @@ public class TReflectorComponent extends TUIComponent {
 	}
 
 	private static final int MaxLastWindowsCount = 10;
-
+	
 	public static class TReflectorConfiguration {
 
 		public static final String ConfigurationFileName = "GeoEye.Configuration";
@@ -7178,10 +7178,11 @@ public class TReflectorComponent extends TUIComponent {
 	private static final int MESSAGE_LOADINGPROGRESSBAR_HIDE 								= 12;
 	private static final int MESSAGE_LOADINGPROGRESSBAR_PROGRESS 							= 13;
 	// .
-	public static final int REQUEST_SHOW_TRACKER 							= 1;
-	public static final int REQUEST_EDIT_REFLECTOR_CONFIGURATION 			= 2;
-	public static final int REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE 	= 3;
-	public static final int REQUEST_OPEN_USERSEARCH 						= 4;
+	public static final int REQUEST_SHOW_TRACKER 							= 101;
+	public static final int REQUEST_EDIT_REFLECTOR_CONFIGURATION 			= 102;
+	public static final int REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE 	= 103;
+	public static final int REQUEST_OPEN_USERSEARCH 						= 104;
+	public static final int REQUEST_CREATINGOBJECT_PARAMETERS 				= 105;
 	// .
 	private static final int BUTTONS_GROUP_LEFT	 	= 1;
 	private static final int BUTTONS_GROUP_RIGHT	= 2;
@@ -7964,6 +7965,66 @@ public class TReflectorComponent extends TUIComponent {
 		ParentActivity.finish();
 	}
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {        
+
+		case REQUEST_SHOW_TRACKER:
+			break; // . >
+
+		case REQUEST_EDIT_REFLECTOR_CONFIGURATION:
+			break; // . >
+
+		case REQUEST_OPEN_SELECTEDOBJ_OWNER_TYPEDDATAFILE:
+			break; // . >
+
+		case REQUEST_OPEN_USERSEARCH:
+			if (resultCode == Activity.RESULT_OK) {
+				Bundle extras = data.getExtras();
+				if (extras != null) {
+					TGeoScopeServerUser.TUserDescriptor User = new TGeoScopeServerUser.TUserDescriptor();
+					User.UserID = extras.getLong("UserID");
+					User.UserIsDisabled = extras.getBoolean("UserIsDisabled");
+					User.UserIsOnline = extras.getBoolean("UserIsOnline");
+					User.UserName = extras.getString("UserName");
+					User.UserFullName = extras.getString("UserFullName");
+					User.UserContactInfo = extras.getString("UserContactInfo");
+					// .
+					Intent intent = new Intent(ParentActivity, TUserPanel.class);
+					intent.putExtra("ComponentID", ID);
+					intent.putExtra("UserID", User.UserID);
+					ParentActivity.startActivity(intent);
+				}
+			}
+			break; // . >
+		
+        case REQUEST_CREATINGOBJECT_PARAMETERS: 
+        	if (resultCode == Activity.RESULT_OK)
+				try {
+	                Bundle extras = data.getExtras(); 
+                	String DataFile = extras.getString("DataFile");
+                	String Name = extras.getString("Name");
+                	long SecurityFileID = extras.getLong("SecurityFileID");
+                	//.
+					int DataNameMaxSize = TMyUserPanel.TConfiguration.TActivityConfiguration.DataNameMaxSize;
+    				if (Name.length() > DataNameMaxSize)
+    					Name = Name.substring(0,DataNameMaxSize);
+    				final String DataName; 
+    		    	if ((Name != null) && (Name.length() > 0))
+    		    		DataName = "@"+TComponentFileStreaming.CheckAndEncodeFileNameString(Name);
+    		    	else
+    		    		DataName = "";
+    				//. creating ...
+    		    	ObjectCreatingGallery_StartCreatingObject(new File(DataFile), DataName, SecurityFileID);
+				} catch (Exception E) {
+					Toast.makeText(context, E.getMessage(),	Toast.LENGTH_LONG).show();
+				}
+				else
+					ObjectCreatingGallery_CancelCreatingObject();
+        	break; //. >
+        }
+    }
+    
 	private void InitializeUser(boolean flUserSession) throws Exception {
 		User = Server.InitializeUser(Configuration.UserID,
 				Configuration.UserPassword, flUserSession);
@@ -9139,57 +9200,11 @@ public class TReflectorComponent extends TUIComponent {
         	
             @Override
             public void OnSelectedFile(String fileName) {
-                final File ChosenFile = new File(fileName);
-                //.
-        		AlertDialog.Builder DataNameDialog = new AlertDialog.Builder(context);
-        		// .
-        		DataNameDialog.setTitle(R.string.SDataName);
-        		DataNameDialog.setMessage(R.string.SEnterName);
-        		// .
-        		final EditText input = new EditText(context);
-        		input.setInputType(InputType.TYPE_CLASS_TEXT);
-        		DataNameDialog.setView(input);
-        		// .
-        		DataNameDialog.setCancelable(false);
-        		DataNameDialog.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
-        			
-        					@Override
-        					public void onClick(DialogInterface dialog, int whichButton) {
-        						//. hide keyboard
-        						InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-        						//.
-        						try {
-        							String Name = input.getText().toString();
-        							int DataNameMaxSize = TMyUserPanel.TConfiguration.TActivityConfiguration.DataNameMaxSize;
-                    				if (Name.length() > DataNameMaxSize)
-                    					Name = Name.substring(0,DataNameMaxSize);
-                    				final String DataName; 
-                    		    	if ((Name != null) && (Name.length() > 0))
-                    		    		DataName = "@"+TComponentFileStreaming.CheckAndEncodeFileNameString(Name);
-                    		    	else
-                    		    		DataName = "";
-                    				//. creating ...
-                    		    	ObjectCreatingGallery_StartCreatingObject(ChosenFile,DataName);
-        						} catch (Exception E) {
-        							Toast.makeText(context, E.getMessage(),	Toast.LENGTH_LONG).show();
-        						}
-        					}
-        				});
-        		// .
-        		DataNameDialog.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
-        			
-        					@Override
-        					public void onClick(DialogInterface dialog, int whichButton) {
-        						// . hide keyboard
-        						InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        						imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-        						//.
-        						ObjectCreatingGallery_CancelCreatingObject();
-        					}
-        				});
-        		// .
-        		DataNameDialog.show();
+		    	Intent intent = new Intent(ParentActivity, TMyUserNewDatafilePanel.class);
+		    	//.
+		    	intent.putExtra("DataFile", fileName);
+		    	//.
+		    	ParentActivity.startActivityForResult(intent, REQUEST_CREATINGOBJECT_PARAMETERS);    		
             }
 
 			@Override
@@ -9202,7 +9217,7 @@ public class TReflectorComponent extends TUIComponent {
 		Toast.makeText(context, R.string.SSelectAFileToLoad, Toast.LENGTH_LONG).show();
 	}
 	
-	private void ObjectCreatingGallery_StartCreatingObject(final File DataFile, final String DataName) {
+	private void ObjectCreatingGallery_StartCreatingObject(final File DataFile, final String DataName, final long SecurityFileID) {
 		TAsyncProcessing Creating = new TAsyncProcessing(context,context.getString(R.string.SWaitAMoment)) {
 
 			private String 	DataFileName;
@@ -9287,6 +9302,9 @@ public class TReflectorComponent extends TUIComponent {
     					    	//.
     				    		throw E; //. =>
     						}
+    						//. change security
+    						if (SecurityFileID != 0)
+    							CCF.ChangeSecurity(SecurityFileID);
     					} finally {
     						CCF.Release();
     					}

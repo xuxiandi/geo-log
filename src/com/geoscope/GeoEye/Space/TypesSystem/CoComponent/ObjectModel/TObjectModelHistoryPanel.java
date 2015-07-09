@@ -1787,6 +1787,9 @@ public class TObjectModelHistoryPanel extends Activity {
 	}
 	
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	if (ObjectTrackViewer != null)
+    		ObjectTrackViewer.onActivityResult(requestCode, resultCode, data);
+		//.
 		if (UserActivitiesComponentList != null)
 			UserActivitiesComponentList.onActivityResult(requestCode, resultCode, data);
 		//.

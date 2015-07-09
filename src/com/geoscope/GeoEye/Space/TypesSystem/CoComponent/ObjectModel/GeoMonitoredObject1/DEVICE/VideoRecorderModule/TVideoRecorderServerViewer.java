@@ -31,6 +31,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	public static final int PARAMETERS_TYPE_OID 	= 1;
 	public static final int PARAMETERS_TYPE_OIDX 	= 2;
 	
+	public static final boolean flUseTCP = true; //. TCP or UDPRTP
+	
 	private boolean 				flAudioEnabled = false;
 	private boolean 				flVideoEnabled = false;
 	//.
@@ -84,13 +86,24 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         		break; //. >
         	}
         	//.
-            //. TCP version VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled, flVideoEnabled, null, new TExceptionHandler() {
-        	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled,AudioManager.STREAM_MUSIC, flVideoEnabled, null, new TExceptionHandler() {
-				@Override
-				public void DoOnException(Throwable E) {
-					TVideoRecorderServerViewer.this.DoOnException(E);
-				}
-			}, lbVideoRecorderServer,ivAudioOnly);
+        	if (flUseTCP) {
+        		VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled,AudioManager.STREAM_MUSIC, flVideoEnabled, null, new TExceptionHandler() {
+        			
+    				@Override
+    				public void DoOnException(Throwable E) {
+    					TVideoRecorderServerViewer.this.DoOnException(E);
+    				}
+    			}, lbVideoRecorderServer,ivAudioOnly);
+        	}
+        	else {
+            	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled,AudioManager.STREAM_MUSIC, flVideoEnabled, null, new TExceptionHandler() {
+            		
+    				@Override
+    				public void DoOnException(Throwable E) {
+    					TVideoRecorderServerViewer.this.DoOnException(E);
+    				}
+    			}, lbVideoRecorderServer,ivAudioOnly);
+        	}
         	//.
         	try {
         		VideoRecorderServerView.Initialize();

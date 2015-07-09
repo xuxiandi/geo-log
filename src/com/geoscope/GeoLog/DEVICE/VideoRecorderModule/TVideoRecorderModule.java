@@ -714,8 +714,11 @@ public class TVideoRecorderModule extends TModule {
                 		Device.context.startActivity(intent);
         			}
     	    	}
-    	    	else
+    	    	else {
             		new TVideoRecorder(Device.context, this); //. start recorder silently
+            		//.
+            		UpdateRecorderState(); //. start recording
+    	    	}
     		else {
     			if (VideoRecorder != null)
     				VideoRecorder.Destroy();

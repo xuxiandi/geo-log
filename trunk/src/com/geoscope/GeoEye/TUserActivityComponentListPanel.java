@@ -88,5 +88,7 @@ public class TUserActivityComponentListPanel extends Activity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
     	ListComponent.onActivityResult(requestCode, resultCode, data);
+    	//.
+		super.onActivityResult(requestCode, resultCode, data);
     }
 }

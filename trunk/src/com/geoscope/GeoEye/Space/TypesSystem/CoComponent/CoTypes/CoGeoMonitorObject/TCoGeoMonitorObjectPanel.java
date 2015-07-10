@@ -1113,6 +1113,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						        	}
 				    	        	intent.putExtra("flAudio",DC.VideoRecorderModule.Audio.BooleanValue());
 				    	        	intent.putExtra("flVideo",DC.VideoRecorderModule.Video.BooleanValue());
+				    	        	intent.putExtra("ConnectionType", TVideoRecorderServerViewer.CONNECTION_TYPE_UDPRTP);
+				    	        	//.
 						            startActivity(intent);
 								} catch (Exception E) {
 							    	Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();

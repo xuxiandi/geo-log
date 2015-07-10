@@ -31,7 +31,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	public static final int PARAMETERS_TYPE_OID 	= 1;
 	public static final int PARAMETERS_TYPE_OIDX 	= 2;
 	
-	public static final boolean flUseTCP = true; //. TCP or UDPRTP
+	public static final int CONNECTION_TYPE_TCP 	= 0;
+	public static final int CONNECTION_TYPE_UDPRTP 	= 1;
 	
 	private boolean 				flAudioEnabled = false;
 	private boolean 				flVideoEnabled = false;
@@ -55,6 +56,7 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         svVideoRecorderServerViewer = (SurfaceView)findViewById(R.id.svVideoRecorderServerViewer);
         svVideoRecorderServerViewer.getHolder().addCallback(this);
         svVideoRecorderServerViewer.setOnClickListener(new OnClickListener() {
+        	
 			@Override
 			public void onClick(View v) {
 				ShowInitializationDialog();
@@ -85,27 +87,35 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
         		Object = Reflector.Component.CoGeoMonitorObjects.Items[ObjectIndex];
         		break; //. >
         	}
-        	//.
-        	if (flUseTCP) {
-        		VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled,AudioManager.STREAM_MUSIC, flVideoEnabled, null, new TExceptionHandler() {
-        			
-    				@Override
-    				public void DoOnException(Throwable E) {
-    					TVideoRecorderServerViewer.this.DoOnException(E);
-    				}
-    			}, lbVideoRecorderServer,ivAudioOnly);
-        	}
-        	else {
-            	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled,AudioManager.STREAM_MUSIC, flVideoEnabled, null, new TExceptionHandler() {
-            		
-    				@Override
-    				public void DoOnException(Throwable E) {
-    					TVideoRecorderServerViewer.this.DoOnException(E);
-    				}
-    			}, lbVideoRecorderServer,ivAudioOnly);
-        	}
+        	int ConnectionType = extras.getInt("ConnectionType");
         	//.
         	try {
+            	switch (ConnectionType) {
+            	
+            	case CONNECTION_TYPE_TCP:
+            		VideoRecorderServerView = new TVideoRecorderServerViewTCP(this,extras.getString("GeographProxyServerAddress"), extras.getInt("GeographProxyServerPort"), extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled,AudioManager.STREAM_MUSIC, flVideoEnabled, null, new TExceptionHandler() {
+            			
+        				@Override
+        				public void DoOnException(Throwable E) {
+        					TVideoRecorderServerViewer.this.DoOnException(E);
+        				}
+        			}, lbVideoRecorderServer,ivAudioOnly);
+            		break; //. >
+            		
+            	case CONNECTION_TYPE_UDPRTP:
+                	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Object, flAudioEnabled,AudioManager.STREAM_MUSIC, flVideoEnabled, null, new TExceptionHandler() {
+                		
+        				@Override
+        				public void DoOnException(Throwable E) {
+        					TVideoRecorderServerViewer.this.DoOnException(E);
+        				}
+        			}, lbVideoRecorderServer,ivAudioOnly);
+            		break; //. >
+            		
+            	default:
+            		throw new Exception("unknown connection type"); //. =>
+            	}
+            	//.
         		VideoRecorderServerView.Initialize();
         		//.
         		VideoRecorderServerView.UpdateInfo();
@@ -117,7 +127,8 @@ public class TVideoRecorderServerViewer extends Activity implements SurfaceHolde
 	
     public void onDestroy() {
     	try {
-    		VideoRecorderServerView.Finalize();
+    		if (VideoRecorderServerView != null)
+    			VideoRecorderServerView.Finalize();
 		} catch (Exception E) {
 			DoOnException(E);
 		}

@@ -946,6 +946,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
         super.onCreate(savedInstanceState);
 		//.
         svSurface.setOnClickListener(new OnClickListener() {
+        	
 			@Override
 			public void onClick(View v) {
 				ShowInitializationDialog();
@@ -963,6 +964,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
         	AudioDestination = AudioManager.STREAM_VOICE_CALL;
         //.
     	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Session.Object, Session.flAudio,AudioDestination, Session.flVideo, Session.GetValue(), new TExceptionHandler() {
+    		
 			@Override
 			public void DoOnException(Throwable E) {
 				TVideoRecorderServerVideoPhoneServer.this.DoOnException(E);

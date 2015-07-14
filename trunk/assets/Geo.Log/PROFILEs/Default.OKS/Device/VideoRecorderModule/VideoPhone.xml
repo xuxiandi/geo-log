@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ROOT>
+  <Version>1</Version>
+  <VideoRecorderModule>
+    <Version>1</Version>
+    <flVideoRecorderModuleIsEnabled>1</flVideoRecorderModuleIsEnabled>
+    <Name>VideoPhone</Name>
+    <Mode>5</Mode>
+    <Active>0</Active>
+    <Recording>0</Recording>
+    <Audio>1</Audio>
+    <Video>1</Video>
+    <Transmitting>1</Transmitting>
+    <Saving>0</Saving>
+    <SDP></SDP>
+    <Receivers>,0</Receivers>
+    <SavingServer>,0</SavingServer>
+    <Measurement>
+      <MaxDuration>0.0416666666666667</MaxDuration>
+      <LifeTime>2.0</LifeTime>
+      <AutosaveInterval>1000.0</AutosaveInterval>
+    </Measurement>
+    <Camera>
+      <Audio>
+        <AudioSource>7</AudioSource>
+        <SampleRate>8000</SampleRate>
+        <ABitRate>8000</ABitRate>
+      </Audio>
+      <Video>
+        <VideoSource>1</VideoSource>
+        <ResX>320</ResX>
+        <ResY>240</ResY>
+        <FrameRate>15</FrameRate>
+        <VBitRate>100000</VBitRate>
+      </Video>
+    </Camera>
+  </VideoRecorderModule>
+</ROOT>

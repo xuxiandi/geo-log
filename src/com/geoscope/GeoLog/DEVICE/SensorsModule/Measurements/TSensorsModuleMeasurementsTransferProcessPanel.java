@@ -48,6 +48,8 @@ public class TSensorsModuleMeasurementsTransferProcessPanel extends Activity {
 	//.
 	private Button btnStartTransfer;
 	//.
+	private Button btnStopTransfer;
+	//.
 	private ListView lvSchedulerPlan;
 	//.
 	private Timer Updater;
@@ -84,6 +86,22 @@ public class TSensorsModuleMeasurementsTransferProcessPanel extends Activity {
             		StartTransfer();
             		//.
     	            Toast.makeText(TSensorsModuleMeasurementsTransferProcessPanel.this, R.string.SDataTransferHasBeenStarted, Toast.LENGTH_LONG).show();
+            	}
+            	catch (Exception E) {
+            		Toast.makeText(TSensorsModuleMeasurementsTransferProcessPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+            	}
+            }
+        });
+        //.
+        btnStopTransfer = (Button)findViewById(R.id.btnStopTransfer);
+        btnStopTransfer.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+        		try {
+            		StopTransfer();
+            		//.
+    	            Toast.makeText(TSensorsModuleMeasurementsTransferProcessPanel.this, R.string.SDataTransferHasBeenStopped, Toast.LENGTH_LONG).show();
             	}
             	catch (Exception E) {
             		Toast.makeText(TSensorsModuleMeasurementsTransferProcessPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -216,12 +234,17 @@ public class TSensorsModuleMeasurementsTransferProcessPanel extends Activity {
     }
     
 	private void Update() {
+		int DatabaseMeasurementsCount = TSensorsModuleMeasurements.GetMeasurementsCount();
 		int ProcessCounter = TransferProcess.MeasurementsCount();
+		//.
 		if (ProcessCounter > 0)
 			pbProcessProgress.setProgress((int)TransferProcess.ProcessProgressPercentage());
 		else
 			pbProcessProgress.setProgress(0);
-		tvProcessProgress.setText(getString(R.string.SItemsToTransfer)+Integer.toString(ProcessCounter)+"  "+"["+getString(R.string.SSummaryInLocalDatabase)+Integer.toString(TSensorsModuleMeasurements.GetMeasurementsCount())+"]");
+		tvProcessProgress.setText(getString(R.string.SItemsToTransfer)+Integer.toString(ProcessCounter)+"  "+"["+getString(R.string.SSummaryInLocalDatabase)+Integer.toString(DatabaseMeasurementsCount)+"]");
+		//.
+		btnStartTransfer.setEnabled(DatabaseMeasurementsCount > 0);
+		btnStopTransfer.setEnabled(ProcessCounter > 0);
 	}
 	
 	private void UpdateScheduler() {
@@ -248,6 +271,10 @@ public class TSensorsModuleMeasurementsTransferProcessPanel extends Activity {
 	
 	private void StartTransfer() throws Exception {
 		TransferProcess.StartProcess();
+	}
+	
+	private void StopTransfer() throws Exception {
+		TransferProcess.StopProcess();
 	}
 	
 	private static final int MESSAGE_UPDATE = 1; 

@@ -710,6 +710,12 @@ public class TSensorsModuleMeasurementsTransferProcess implements Runnable {
 		StartProcess("");		
 	}
 	
+	public void StopProcess() {
+		Measurements.Clear();
+		//.
+		ProcessSignal.Set();
+	}
+	
 	public double ProcessProgressPercentage() {
 		return Measurements.ProgressPercentage();
 	}

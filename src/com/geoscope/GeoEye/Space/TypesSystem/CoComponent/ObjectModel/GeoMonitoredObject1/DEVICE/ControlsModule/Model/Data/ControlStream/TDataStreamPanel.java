@@ -171,8 +171,6 @@ public class TDataStreamPanel extends Activity {
 				});
 				if (ChannelProcessor != null) {
 					StreamChannelProcessors.add(ChannelProcessor);
-					if (ChannelProcessor.IsVisual())
-						ChannelProcessor.VisualSurface_Set(SH, Width,Height);
 					//.
 					Layout_UpdateForChannel(Channel);
 					//.

@@ -141,6 +141,7 @@ public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
 	    }
 	}
 	
+    
     public TStreamChannelConnector(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, String pUserAccessKey, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pObject, pChannel, pUserAccessKey, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
     }
@@ -153,11 +154,6 @@ public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
     public void Start() throws Exception {
     	super.Start();
     	//.
-    	Processing = new TChannelConnection(this);
-    }
-    
-    @Override
-    public boolean IsVisual() {
-    	return false;
+    	ChannelConnection = new TChannelConnection(this);
     }
 }

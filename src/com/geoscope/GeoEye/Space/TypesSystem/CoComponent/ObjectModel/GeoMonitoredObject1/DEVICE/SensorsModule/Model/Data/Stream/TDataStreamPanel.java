@@ -58,8 +58,10 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 @SuppressLint("HandlerLeak")
 public class TDataStreamPanel extends Activity {
 
+	public static final int PARAMETERS_TYPE_NOO 	= 0;
 	public static final int PARAMETERS_TYPE_OID 	= 1;
 	public static final int PARAMETERS_TYPE_OIDX 	= 2;
+
 	
 	private boolean flExists = false;
 	//.
@@ -75,7 +77,7 @@ public class TDataStreamPanel extends Activity {
 	private TStreamDescriptor 	StreamDescriptor;
 	private TChannelIDs			StreamChannels = null;
 	//.
-	private ArrayList<TStreamChannelConnectorAbstract> StreamChannelConnectors = new ArrayList<TStreamChannelConnectorAbstract>();
+	private ArrayList<TStreamChannelConnectorAbstract> 	StreamChannelConnectors = new ArrayList<TStreamChannelConnectorAbstract>();
 	//.
 	@SuppressWarnings("unused")
 	private boolean IsInFront = false;
@@ -111,6 +113,10 @@ public class TDataStreamPanel extends Activity {
         		TReflector Reflector = TReflector.GetReflector();
             	switch (ParametersType) {
             	
+            	case PARAMETERS_TYPE_NOO:
+                	Object = null;
+            		break; //. >
+            		
             	case PARAMETERS_TYPE_OID:
                 	long ObjectID = extras.getLong("ObjectID");
                 	Object = new TCoGeoMonitorObject(Reflector.Component.Server, ObjectID);
@@ -190,29 +196,9 @@ public class TDataStreamPanel extends Activity {
 		for (int I = 0; I < StreamDescriptor.Channels.size(); I++) {
 			TStreamChannel Channel = (TStreamChannel)StreamDescriptor.Channels.get(I);
 			if ((StreamChannels == null) || StreamChannels.IDExists(Channel.ID)) {
-				TStreamChannelConnectorAbstract ChannelConnector = new TStreamChannelConnector(this, ServerAddress,ServerPort, UserID,UserPassword, Object, Channel, new TStreamChannelConnectorAbstract.TOnProgressHandler(Channel) {
-					
-					@Override
-					public void DoOnProgress(int ReadSize, TCanceller Canceller) {
-						TDataStreamPanel.this.PostStatusMessage("");
-					}
-				}, new TStreamChannelConnectorAbstract.TOnIdleHandler(Channel) {
-					
-					@Override
-					public void DoOnIdle(TCanceller Canceller) {
-						TDataStreamPanel.this.PostStatusMessage(TDataStreamPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
-					}
-				}, new TStreamChannelConnectorAbstract.TOnExceptionHandler(Channel) {
-					
-					@Override
-					public void DoOnException(Exception E) {
-						TDataStreamPanel.this.PostException(E);
-					}
-				});
+				TStreamChannelConnectorAbstract ChannelConnector = StreamChannelConnectors_CreateOneForChannel(Channel);
 				if (ChannelConnector != null) {
 					StreamChannelConnectors.add(ChannelConnector);
-					if (ChannelConnector.IsVisual())
-						ChannelConnector.VisualSurface_Set(SH, Width,Height);
 					//.
 					Layout_UpdateForChannel(Channel);
 					//.
@@ -232,6 +218,30 @@ public class TDataStreamPanel extends Activity {
 		StreamChannelConnectors.clear();
 		//.
 		Layout_Reset();
+	}
+	
+	protected TStreamChannelConnectorAbstract StreamChannelConnectors_CreateOneForChannel(TStreamChannel Channel) throws Exception {
+		TStreamChannelConnectorAbstract ChannelConnector = new TStreamChannelConnector(this, ServerAddress,ServerPort, UserID,UserPassword, Object, Channel, new TStreamChannelConnectorAbstract.TOnProgressHandler(Channel) {
+			
+			@Override
+			public void DoOnProgress(int ReadSize, TCanceller Canceller) {
+				TDataStreamPanel.this.PostStatusMessage("");
+			}
+		}, new TStreamChannelConnectorAbstract.TOnIdleHandler(Channel) {
+			
+			@Override
+			public void DoOnIdle(TCanceller Canceller) {
+				TDataStreamPanel.this.PostStatusMessage(TDataStreamPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
+			}
+		}, new TStreamChannelConnectorAbstract.TOnExceptionHandler(Channel) {
+			
+			@Override
+			public void DoOnException(Exception E) {
+				TDataStreamPanel.this.PostException(E);
+			}
+		});
+		//.
+		return ChannelConnector;
 	}
 	
 	private void Layout_Reset() {
@@ -784,19 +794,19 @@ public class TDataStreamPanel extends Activity {
 		}
 	};
 	
-	private void PostStatusMessage(String S) {
+	protected void PostStatusMessage(String S) {
 		MessageHandler.obtainMessage(MESSAGE_SHOWSTATUSMESSAGE,S).sendToTarget();
 	}
 	
-	private void PostException(Throwable E) {
+	protected void PostException(Throwable E) {
 		MessageHandler.obtainMessage(MESSAGE_SHOWEXCEPTION,E).sendToTarget();
 	}
 	
-	private void PostDataType(TDataType DataType) {
+	protected void PostDataType(TDataType DataType) {
 		MessageHandler.obtainMessage(MESSAGE_DOONDATATYPE,DataType).sendToTarget();
 	}
 	
-	private void PostTextViewValueMessage(TextView TW, String Message) {
+	protected void PostTextViewValueMessage(TextView TW, String Message) {
 		MessageHandler.obtainMessage(MESSAGE_TEXTVIEW_WRITEVALUE,new TTextViewValueString(TW, Message)).sendToTarget();
 	}
 	

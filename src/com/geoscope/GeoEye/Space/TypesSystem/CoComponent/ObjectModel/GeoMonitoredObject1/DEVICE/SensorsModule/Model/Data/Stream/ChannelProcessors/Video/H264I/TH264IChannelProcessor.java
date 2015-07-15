@@ -31,8 +31,8 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 	//.
 	public volatile TStatisticHandler StatisticHandler = null;
 	//.
-	private MediaCodec 		Codec = null;
-	private ByteBuffer[] 	CodecInputBuffers;
+	private volatile MediaCodec Codec = null;
+	private ByteBuffer[] 		CodecInputBuffers;
 	@SuppressWarnings("unused")
 	private ByteBuffer[] 	CodecOutputBuffers;
 	
@@ -40,66 +40,77 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 		super(pChannel);
 		//.
 		H264Channel = (TH264IChannel)Channel;
-	}
-
-	@Override
-	public void Destroy() throws Exception {
-		Stop();
-		//.
-		super.Destroy();
-	}
-	
-	public void Start(Surface pSurface, int pWidth, int pHeight) {
-		Codec = MediaCodec.createDecoderByType(CodecTypeName);
-		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, pWidth,pHeight);
-		Codec.configure(format, pSurface, null, 0);
-		Codec.start();
-		//.
-		CodecInputBuffers = Codec.getInputBuffers();
-		CodecOutputBuffers = Codec.getOutputBuffers();
 		//.
 		H264Channel.SetOnH264FramesHandler(new TH264IChannel.TDoOnH264FramesHandler() {
 			
 			@Override
-			public void DoOnH264Packet(byte[] Packet, int PacketOffset,	int PacketSize) {
-				int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
+			public void DoOnH264Packet(byte[] Packet, int PacketOffset,	int PacketSize) throws Exception {
+				//. wait for the codec initialization, it is done as soon as video surface is created
+				MediaCodec _Codec;
+				while (true) {
+					_Codec = Codec;
+					if (_Codec != null)
+						break; //. >
+					Thread.sleep(10);
+				}
+				//.
+				int inputBufferIndex = _Codec.dequeueInputBuffer(CodecWaitInterval);
 				if (inputBufferIndex >= 0) {
 					ByteBuffer inputBuffer = CodecInputBuffers[inputBufferIndex];
 					inputBuffer.clear();
 					inputBuffer.put(Packet, PacketOffset, PacketSize);
-					Codec.queueInputBuffer(inputBufferIndex, 0, PacketSize, SystemClock.elapsedRealtime(), 0);
+					_Codec.queueInputBuffer(inputBufferIndex, 0, PacketSize, SystemClock.elapsedRealtime(), 0);
 				}
 				//.
 				MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-				int outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
+				int outputBufferIndex = _Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 				while (outputBufferIndex >= 0) {
 					//. no need for buffer render it on surface ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
 					//.
-					Codec.releaseOutputBuffer(outputBufferIndex, true);
-					outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
+					_Codec.releaseOutputBuffer(outputBufferIndex, true);
+					outputBufferIndex = _Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 					//.
 					VideoBuffersCount++;
 					if (StatisticHandler != null)
 						StatisticHandler.DoOnVideoBuffer(VideoBuffersCount);
 				}
 				if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) 
-				     CodecOutputBuffers = Codec.getOutputBuffers();
+				     CodecOutputBuffers = _Codec.getOutputBuffers();
 				else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
 				     // Subsequent data will conform to new format.
-				     ///? MediaFormat format = codec.getOutputFormat();
+				     ///? MediaFormat format = _Codec.getOutputFormat();
 				}
 			}
 		});
 	}
-	
-	public void Stop() {
+
+	@Override
+	public void Destroy() throws Exception {
+		Stop();
+		//.
 		H264Channel.SetOnH264FramesHandler(null);
 		//.
-		if (Codec != null) {
-			Codec.stop();
-			Codec.release();
-			//.
-			Codec = null;
+		super.Destroy();
+	}
+	
+	public void Start(Surface pSurface, int pWidth, int pHeight) {
+		MediaCodec _Codec = MediaCodec.createDecoderByType(CodecTypeName);
+		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, pWidth,pHeight);
+		_Codec.configure(format, pSurface, null, 0);
+		_Codec.start();
+		//.
+		CodecInputBuffers = _Codec.getInputBuffers();
+		CodecOutputBuffers = _Codec.getOutputBuffers();
+		//.
+		Codec = _Codec;
+	}
+	
+	public void Stop() {
+		MediaCodec _Codec = Codec;
+		Codec = null;
+		if (_Codec != null) {
+			_Codec.stop();
+			_Codec.release();
 		}
 	}
 }

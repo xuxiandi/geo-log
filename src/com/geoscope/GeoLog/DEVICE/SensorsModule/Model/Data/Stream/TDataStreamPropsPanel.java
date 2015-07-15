@@ -9,8 +9,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
@@ -24,8 +24,6 @@ import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
-import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TSourceStreamChannel;
@@ -191,8 +189,8 @@ public class TDataStreamPropsPanel extends Activity {
     			}
     			ArrayAdapter<String> lvChannelsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvChannelsItems);             
     			lvChannels.setAdapter(lvChannelsAdapter);
-    			for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
-    				lvChannels.setItemChecked(I,true);
+    			/* for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
+    				lvChannels.setItemChecked(I,true); */
     		}
     		else {
     			lbStreamName.setText("?");
@@ -218,19 +216,10 @@ public class TDataStreamPropsPanel extends Activity {
     	//.
 		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
 			
-			private TUserAgent UserAgent;
-			private TGeoScopeServerInfo.TInfo ServersInfo;
 			private byte[] DescriptorData;
 			
 			@Override
 			public void Process() throws Exception {
-				UserAgent = TUserAgent.GetUserAgent();
-				if (UserAgent == null)
-					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-				ServersInfo = UserAgent.Server.Info.GetInfo();
-				if (!ServersInfo.IsSpaceDataServerValid()) 
-					throw new Exception("Invalid space data server"); //. =>
-				//.
 				DescriptorData = DataStreamDescriptor.ToByteArray();
 			}
 			

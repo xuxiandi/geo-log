@@ -2966,8 +2966,12 @@ public class TReflectorComponent extends TUIComponent {
 				}
 				// .
 				// . draw tracks
-				if (flDrawObjectTracks)
+				if (flDrawObjectTracks) {
 					Reflector.ObjectTracks.DrawOnCanvas(RW, canvas);
+					//.
+					if (Reflector.CurrentTrack != null) 
+						Reflector.CurrentTrack.DrawOnCanvas(RW, canvas);
+				}
 				//. draw selected object
 				if (flDrawSelectedObject) {
 					if (Reflector.SelectedObj != null)
@@ -7311,6 +7315,8 @@ public class TReflectorComponent extends TUIComponent {
 	public TReflectorObjectTracks 					ObjectTracks;
 	private TAsyncProcessing						ObjectTracks_TrackAdding = null;
 	//.
+	public TReflectorTrack CurrentTrack = null;
+	//.
 	public MediaPlayer _MediaPlayer = null;
 	//.
 	private ProgressDialog progressDialog;
@@ -8303,7 +8309,7 @@ public class TReflectorComponent extends TUIComponent {
 		SetReflectionWindow(RWS, true);
 	}
 
-	public void MoveReflectionWindow(TXYCoord Position, boolean flUpdate) {
+	public TXYCoord MoveReflectionWindow(TXYCoord Position, boolean flUpdate) {
 		int RW_Xmd, RW_Ymd;
 		TXYCoord Pmd;
 		synchronized (ReflectionWindow) {
@@ -8331,10 +8337,12 @@ public class TReflectorComponent extends TUIComponent {
 		// .
 		if (flUpdate)
 			StartUpdatingSpaceImage();
+		//.
+		return Pmd;
 	}
 
-	public void MoveReflectionWindow(TXYCoord Position) {
-		MoveReflectionWindow(Position, true);
+	public TXYCoord MoveReflectionWindow(TXYCoord Position) {
+		return MoveReflectionWindow(Position, true);
 	}
 
 	public void RotateReflectionWindow(double Angle, boolean flUpdate) {
@@ -9963,6 +9971,19 @@ public class TReflectorComponent extends TUIComponent {
 			}
 		};
 		ObjectTracks_TrackAdding.Start();
+	}
+
+	public TReflectorTrack CurrentTrack_Begin() {
+		CurrentTrack = new TReflectorTrack(this);
+		return CurrentTrack;
+	}
+	
+	public void CurrentTrack_Clear() {
+		CurrentTrack = null;
+	}
+	
+	public TReflectorTrack CurrentTrack_Get() {
+		return CurrentTrack;
 	}
 	
 	public void MediaPlayer_PlayAlarmSound() {

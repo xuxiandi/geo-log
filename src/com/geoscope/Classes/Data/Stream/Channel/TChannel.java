@@ -26,7 +26,11 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 
 public class TChannel {
 	
-	public static final int NextID = 10; //. a next unique channel ID
+	public static final int NextID = 11; //. a next unique channel ID
+	
+	public static boolean TypeIsTypeOfChannel(String TypeID, String ChannelTypeID) {
+		return (TypeID.startsWith(ChannelTypeID));
+	}
 	
 	public static TChannel GetChannelFromXMLNode(Node ANode, TChannelProvider pChannelProvider) throws Exception {
 		int Version = Integer.parseInt(TMyXML.SearchNode(ANode,"Version").getFirstChild().getNodeValue());

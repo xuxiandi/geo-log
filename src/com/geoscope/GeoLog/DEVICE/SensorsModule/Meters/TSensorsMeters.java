@@ -9,6 +9,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterInfo;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.AV.TAVMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Audio.TAudioMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.AOSS.TAOSSMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ASTLR.TASTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TECTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.GPSTLR.TGPSTLRMeter;
@@ -48,6 +49,7 @@ public class TSensorsMeters {
 		//.
 		TECTLRMeter 	ECTLRMeter 	= new TECTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(ECTLRMeter);
 		TASTLRMeter 	ASTLRMeter 	= new TASTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(ASTLRMeter);
+		TAOSSMeter 		AOSSMeter 	= new TAOSSMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(AOSSMeter);
 		TGPSTLRMeter	GPSTLRMeter = new TGPSTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(GPSTLRMeter);
 		TAudioMeter		AudioMeter	= new TAudioMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(AudioMeter);
 		TVideoMeter		VideoMeter	= new TVideoMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(VideoMeter);

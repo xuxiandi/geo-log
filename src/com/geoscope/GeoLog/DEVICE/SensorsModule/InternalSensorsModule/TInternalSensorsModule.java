@@ -33,6 +33,7 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.AOSS.TAOSSChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.EnvironmentConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
@@ -711,6 +712,8 @@ public class TInternalSensorsModule extends TModule {
 	private TDataType 	ASTLRChannel_BatteryPlugType;
 	private TDataType 	ASTLRChannel_CellularConnectorSignalStrength;
 	//.
+	public TAOSSChannel AOSSChannel = null;
+	//.
 	private boolean 	ECTLRChannel_flUse = true;
 	public TTLRChannel 	ECTLRChannel = null;
 	private TDataType 	ECTLRChannel_Temperature;
@@ -887,6 +890,9 @@ public class TInternalSensorsModule extends TModule {
     		//.
     		Model.Stream.Channels.add(ADSChannel);
     	}
+		//.
+		AOSSChannel = new TAOSSChannel(this, 10/*ID*/);
+		Model.Stream.Channels.add(AOSSChannel);
     	//.
 		if (ECTLRChannel_flUse) {
 			ECTLRChannel = new TTLRChannel(this, 3/*ID*/); 
@@ -929,7 +935,7 @@ public class TInternalSensorsModule extends TModule {
 		GPSChannel = new TGPSChannel(this, 5/*ID*/);
 		Model.Stream.Channels.add(GPSChannel);
 		//.
-		AACChannel = new TAACChannel(this, 6/*pID*/);
+		AACChannel = new TAACChannel(this, 6/*ID*/);
 		Model.Stream.Channels.add(AACChannel);
 		//.
 		H264IChannel = new TH264IChannel(this, 7/*ID*/);

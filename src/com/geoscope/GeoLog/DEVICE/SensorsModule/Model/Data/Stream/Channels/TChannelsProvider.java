@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
@@ -28,7 +29,7 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 			return (new TENVCChannel(SensorsModule)); // =>
 		if (TXENVCChannel.TypeID.equals(pTypeID))
 			return (new TXENVCChannel(SensorsModule)); // =>
-		if (TTLRChannel.TypeID.equals(pTypeID))
+		if (TChannel.TypeIsTypeOfChannel(pTypeID, TTLRChannel.TypeID))
 			return (new TTLRChannel(SensorsModule)); // =>
 		if (TLUMChannel.TypeID.equals(pTypeID))
 			return (new TLUMChannel(SensorsModule)); // =>

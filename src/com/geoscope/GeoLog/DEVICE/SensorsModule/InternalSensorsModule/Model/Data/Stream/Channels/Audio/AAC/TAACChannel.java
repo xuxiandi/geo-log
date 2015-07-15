@@ -207,7 +207,8 @@ public class TAACChannel extends TStreamChannel {
 			}
         	catch (InterruptedException IE) {
         	}
-			catch (Throwable T) {
+			catch (Throwable TE) {
+				InternalSensorsModule.Device.Log.WriteWarning("AACChannel.AudioSampleSource","Exception: "+TE.getMessage());
 			}
 		}
 		

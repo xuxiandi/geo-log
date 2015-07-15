@@ -1,4 +1,4 @@
-package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.GPSTLR;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.AOSS;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
 

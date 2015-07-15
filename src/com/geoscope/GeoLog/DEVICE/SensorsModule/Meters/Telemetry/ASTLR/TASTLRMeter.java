@@ -3,13 +3,13 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ASTLR;
 import java.io.IOException;
 
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Telemetry.TLR.TMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.TMeasurement;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.Telemetry.TLR.TTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 
-public class TASTLRMeter extends TSensorMeter {
+public class TASTLRMeter extends TTLRMeter {
 
 	public static final String TypeID = "Telemetry.ASTLR";
 	public static final String ContainerTypeID = "";
@@ -19,6 +19,7 @@ public class TASTLRMeter extends TSensorMeter {
 	
 	public static class TMyProfile extends TProfile {
 	}
+	
 	
 	public TASTLRMeter(TSensorsModule pSensorsModule, String pID, String pProfileFolder) throws Exception {
 		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
@@ -30,41 +31,16 @@ public class TASTLRMeter extends TSensorMeter {
 	}
 	
 	@Override
-	protected void DoProcess() throws Exception {
+	protected TTLRChannel GetSourceTLRChannel() throws Exception {
 		if (SensorsModule.InternalSensorsModule.ASTLRChannel == null)
 			throw new IOException("no origin channel"); //. =>
 		if (!SensorsModule.InternalSensorsModule.ASTLRChannel.Enabled)
 			throw new IOException("the origin channel is disabled"); //. =>
-		TTLRChannel SourceChannel = (TTLRChannel)SensorsModule.InternalSensorsModule.ASTLRChannel.DestinationChannel_Get(); 	
-		if (SourceChannel == null)
-			throw new IOException("no source channel"); //. =>
-		//.
-		SourceChannel.Suspend();
-		try {
-			SourceChannel.SourceChannel_Start();
-			try {
-				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
-				while (!Canceller.flCancel) {
-					TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
-					Measurement.TLRChannel.Assign(SourceChannel);
-					//.
-					Measurement.Start();
-					try {
-						SourceChannel.DoStreaming(Measurement.TLRChannel.DestinationStream, Canceller, MeasurementMaxDuration);
-					}
-					finally {
-						Measurement.Finish();
-					}
-					//.
-					DoOnMeasurementFinish(Measurement);
-				}
-			}
-			finally {
-				SourceChannel.SourceChannel_Stop();
-			}
-		}
-		finally {
-			SourceChannel.Resume();
-		}
+		return (TTLRChannel)SensorsModule.InternalSensorsModule.ASTLRChannel.DestinationChannel_Get(); 	
+	}
+	
+	@Override
+	protected TMeasurement CreateTLRMeasurement() throws Exception {
+		return new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 	}
 }

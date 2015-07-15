@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Stream.Channel.TContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TDoubleContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt32ContainerType;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
@@ -825,7 +826,7 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 				TDataType DT = TLRChannel.DataTypes.Items.get(I);
 				//.
 				ChannelSamples_ChannelNames[I] = DT.TypeID;
-				ChannelSamples_Enabled[I] = (DT.ContainerType instanceof TDoubleContainerType);
+				ChannelSamples_Enabled[I] = ((DT.ContainerType instanceof TInt32ContainerType) || (DT.ContainerType instanceof TDoubleContainerType));
 			};
 	        ChannelSamples = new double[ChannelSamples_ChannelsCount][];
 	        ChannelSamples_MinValues = new double[ChannelSamples_ChannelsCount];
@@ -837,7 +838,7 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 				//.
 	        	ChannelSamples_Units[I] = DT.ValueUnit;				
 				//.
-				if (DT.ContainerType instanceof TDoubleContainerType) {
+				if ((DT.ContainerType instanceof TInt32ContainerType) || (DT.ContainerType instanceof TDoubleContainerType)) {
 					@SuppressWarnings("unchecked")
 					ArrayList<TContainerType> Values = (ArrayList<TContainerType>)DT.Extra;
 		        	if (Values != null) {
@@ -845,13 +846,27 @@ public class TTLRMeasurementProcessor extends TMeasurementProcessor implements S
 			        	ChannelSamples[I] = new double[Size];
 			        	double MinValue = Double.MAX_VALUE;
 			        	double MaxValue = Double.MIN_VALUE;
-			        	for (int J = 0; J < Size; J++) {
-			        		short V = ((Double)Values.get(J).GetValue()).shortValue();
-			        		ChannelSamples[I][J] = V;
-			        		if (V < MinValue)
-			        			MinValue = V;
-			        		if (V > MaxValue)
-			        			MaxValue = V;
+			        	if (DT.ContainerType instanceof TDoubleContainerType) {
+				        	for (int J = 0; J < Size; J++) {
+				        		short V = ((Double)Values.get(J).GetValue()).shortValue();
+				        		ChannelSamples[I][J] = V;
+				        		if (V < MinValue)
+				        			MinValue = V;
+				        		if (V > MaxValue)
+				        			MaxValue = V;
+				        	}			        		
+			        	}
+			        	else
+			        		if (DT.ContainerType instanceof TInt32ContainerType) {
+					        	for (int J = 0; J < Size; J++) {
+					        		short V = ((Integer)Values.get(J).GetValue()).shortValue();
+					        		ChannelSamples[I][J] = V;
+					        		if (V < MinValue)
+					        			MinValue = V;
+					        		if (V > MaxValue)
+					        			MaxValue = V;
+			        			
+			        		}
 			        	}
 			        	double Range = (MaxValue-MinValue);
 			        	//.

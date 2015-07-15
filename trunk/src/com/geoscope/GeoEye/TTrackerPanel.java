@@ -90,6 +90,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIImageValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOITextValue;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleConsole;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsArchive;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMetersPanel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
@@ -593,6 +594,7 @@ public class TTrackerPanel extends Activity {
 	private ToggleButton tbAlarm;
     private Button btnSensorsModuleChannelsPanel;
     private Button btnSensorsModuleMetersPanel;
+    private Button btnSensorsModuleMeasurementsArchive;
     private Button btnSensorsModuleMeasurementsTransferProcessPanel;	
     private CheckBox cbVideoRecorderModuleRecording;
     private Button btnVideoRecorderModulePanel;	
@@ -976,6 +978,23 @@ public class TTrackerPanel extends Activity {
             public void onClick(View v) {
             	try {
     				Intent intent = new Intent(TTrackerPanel.this, TSensorsMetersPanel.class);
+    		        startActivity(intent);
+            	}
+            	catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+            	}
+            }
+        }); 
+        btnSensorsModuleMeasurementsArchive = (Button)findViewById(R.id.btnSensorsModuleMeasurementsArchive);
+        btnSensorsModuleMeasurementsArchive.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+            	try {
+    				Intent intent = new Intent(TTrackerPanel.this, TSensorsModuleMeasurementsArchive.class);
     		        startActivity(intent);
             	}
             	catch (Exception E) {
@@ -3143,7 +3162,10 @@ public class TTrackerPanel extends Activity {
         tbAlarm.setEnabled(flEnabled);
         cbVideoRecorderModuleRecording.setEnabled(flEnabled);
         btnVideoRecorderModulePanel.setEnabled(flEnabled);
+        btnSensorsModuleChannelsPanel.setEnabled(flEnabled);
         btnSensorsModuleMetersPanel.setEnabled(flEnabled);
+        btnSensorsModuleMeasurementsArchive.setEnabled(flEnabled);
+        btnSensorsModuleMeasurementsTransferProcessPanel.setEnabled(flEnabled);
         cbDataStreamerModuleActive.setEnabled(flEnabled);
         btnDataStreamerModulePanel.setEnabled(flEnabled);
         edConnectorInfo.setEnabled(flEnabled);

@@ -15,6 +15,8 @@ public class TModel extends TSensorMeasurementModel {
 			return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ECTLR.Model.TModel.GetTypeInfo(context); //. -> 
 		if (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.Model.TModel.ModelTypeID.equals(TypeID))
 			return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.Model.TModel.GetTypeInfo(context); //. ->
+		if (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.AOSS.Model.TModel.ModelTypeID.equals(TypeID))
+			return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.AOSS.Model.TModel.GetTypeInfo(context); //. ->
 		if (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.GPSTLR.Model.TModel.ModelTypeID.equals(TypeID))
 			return com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.GPSTLR.Model.TModel.GetTypeInfo(context); //. ->
 		if (com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.Model.TModel.ModelTypeID.equals(TypeID))

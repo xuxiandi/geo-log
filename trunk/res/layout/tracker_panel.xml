@@ -326,70 +326,60 @@
                     android:layout_height="wrap_content"
                     android:background="#ff999999" >
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1.0" >
-
-                        <Button
-                            android:id="@+id/btnSensorsModuleChannelsPanel"
-                            style="android:attr/buttonBarButtonStyle"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1.0"
-                            android:text="@string/SSensors"
-                            android:textSize="16sp" />
-
-                        <Button
-                            android:id="@+id/btnSensorsModuleMetersPanel"
-                            style="android:attr/buttonBarButtonStyle"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1.0"
-                            android:text="@string/SRecorders"
-                            android:textSize="16sp" />
-
-                        <Button
-                            android:id="@+id/btnSensorsModuleMeasurementsTransferProcessPanel"
-                            style="android:attr/buttonBarButtonStyle"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1.0"
-                            android:text="@string/STransfer"
-                            android:textSize="16sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
+                    <Button
+                        android:id="@+id/btnSensorsModuleChannelsPanel"
+                        style="android:attr/buttonBarButtonStyle"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1.0"
-                        android:orientation="vertical" >
+                        android:text="@string/SSensors"
+                        android:textSize="16sp" />
 
-                        <CheckBox
-                            android:id="@+id/cbVideoRecorderModuleRecording"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/SRecording1"
-                            android:textSize="16sp" />
-
-                        <Button
-                            android:id="@+id/btnVideoRecorderModulePanel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="@string/SPanel"
-                            android:textSize="18sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
+                    <Button
+                        android:id="@+id/btnSensorsModuleMetersPanel"
+                        style="android:attr/buttonBarButtonStyle"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1.0"
-                        android:orientation="vertical" >
+                        android:text="@string/SRecorders"
+                        android:textSize="16sp" />
+
+                    <Button
+                        android:id="@+id/btnSensorsModuleMeasurementsArchive"
+                        style="android:attr/buttonBarButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.0"
+                        android:text="@string/SArchive"
+                        android:textSize="16sp" />
+
+                    <Button
+                        android:id="@+id/btnSensorsModuleMeasurementsTransferProcessPanel"
+                        style="android:attr/buttonBarButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.0"
+                        android:text="@string/STransfer"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    layout_width="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.0"
+                        android:orientation="horizontal" >
 
                         <CheckBox
                             android:id="@+id/cbDataStreamerModuleActive"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1.0"
                             android:text="@string/SStreaming"
                             android:textSize="16sp" />
 
@@ -397,6 +387,31 @@
                             android:id="@+id/btnDataStreamerModulePanel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:layout_weight="1.0"
+                            android:text="@string/SPanel"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.0"
+                        android:orientation="horizontal" >
+
+                        <CheckBox
+                            android:id="@+id/cbVideoRecorderModuleRecording"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1.0"
+                            android:text="@string/SRecording1"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btnVideoRecorderModulePanel"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1.0"
                             android:text="@string/SPanel"
                             android:textSize="18sp" />
 

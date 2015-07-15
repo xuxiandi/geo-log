@@ -6,6 +6,7 @@ import android.widget.LinearLayout;
 
 import com.geoscope.Classes.IO.UI.TUIComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Audio.TAudioMeasurementProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.AOSS.TAOSSMeasurementProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.ASTLR.TASTLRMeasurementProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.ECTLR.TECTLRMeasurementProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessors.Telemetry.GPSTLR.TGPSTLRMeasurementProcessor;
@@ -23,6 +24,8 @@ public class TMeasurementProcessor extends TUIComponent {
 			return new TECTLRMeasurementProcessor(); //. ->
 		if (MeasurementDescriptor.IsTypeOf(TASTLRMeasurementProcessor.TypeID))
 			return new TASTLRMeasurementProcessor(); //. ->
+		if (MeasurementDescriptor.IsTypeOf(TAOSSMeasurementProcessor.TypeID))
+			return new TAOSSMeasurementProcessor(); //. ->
 		if (MeasurementDescriptor.IsTypeOf(TGPSTLRMeasurementProcessor.TypeID))
 			return new TGPSTLRMeasurementProcessor(); //. ->
 		if (MeasurementDescriptor.IsTypeOf(TAudioMeasurementProcessor.TypeID))

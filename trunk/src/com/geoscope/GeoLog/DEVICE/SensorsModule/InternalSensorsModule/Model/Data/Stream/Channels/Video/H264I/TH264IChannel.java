@@ -265,7 +265,7 @@ public class TH264IChannel extends TStreamChannel {
         	catch (InterruptedException IE) {
         	}
 			catch (Throwable TE) {
-				InternalSensorsModule.Device.Log.WriteWarning("H264Channel.VideoFrameSource","Exception: "+TE.getMessage());
+				InternalSensorsModule.Device.Log.WriteWarning("H264IChannel.VideoFrameSource","Exception: "+TE.getMessage());
 			}
 		}
 	}

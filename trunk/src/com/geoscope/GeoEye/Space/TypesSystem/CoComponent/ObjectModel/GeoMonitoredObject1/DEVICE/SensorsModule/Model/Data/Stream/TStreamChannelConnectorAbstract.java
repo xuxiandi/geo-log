@@ -1,7 +1,6 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream;
 
 import android.content.Context;
-import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.IO.Abstract.TStream;
@@ -105,6 +104,7 @@ public abstract class TStreamChannelConnectorAbstract {
 	    }
 	}
 	
+    
 	protected Context context;
 	//.
     protected String 	ServerAddress;
@@ -128,7 +128,7 @@ public abstract class TStreamChannelConnectorAbstract {
     //.
     protected int ReadingTimeout;
     //.
-    protected TChannelConnectionAbstract Processing = null;
+    protected TChannelConnectionAbstract ChannelConnection = null;
     //.
     protected TOnProgressHandler	OnProgressHandler;
     protected TOnIdleHandler 		OnIdleHandler;
@@ -176,24 +176,14 @@ public abstract class TStreamChannelConnectorAbstract {
     }
     
     public void Stop(boolean flWaitForProcessingTermination) throws Exception {
-    	if (Processing != null) {
-    		Processing.Destroy(flWaitForProcessingTermination);
-    		Processing = null;
+    	if (ChannelConnection != null) {
+    		ChannelConnection.Destroy(flWaitForProcessingTermination);
+    		ChannelConnection = null;
     	}
     	//.
     	Close();
     }
 
-    public boolean IsVisual() {
-    	return true;
-    }
-    
-	public void VisualSurface_Set(SurfaceHolder SH, int Width, int Height) {
-	}
-	
-	public void VisualSurface_Clear(SurfaceHolder SH) {
-	}
-	
     public void DoOnStreamChannelStart() {
     }
     

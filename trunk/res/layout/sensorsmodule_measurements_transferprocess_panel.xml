@@ -32,12 +32,30 @@
         android:paddingLeft="8dp"
         android:textSize="8pt" />
 
-    <Button
-        android:id="@+id/btnStartTransfer"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/SStartTransfer"
-        android:textSize="8pt" />
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/btnStartTransfer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btnStopTransfer"
+            android:text="@string/SStartTransfer"
+            android:textSize="8pt" />
+
+        <Button
+            android:id="@+id/btnStopTransfer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="false"
+            android:layout_centerVertical="true"
+            android:text="@string/SStop"
+            android:textSize="8pt" />
+
+        </RelativeLayout>
 
     <TextView
         android:layout_width="fill_parent"

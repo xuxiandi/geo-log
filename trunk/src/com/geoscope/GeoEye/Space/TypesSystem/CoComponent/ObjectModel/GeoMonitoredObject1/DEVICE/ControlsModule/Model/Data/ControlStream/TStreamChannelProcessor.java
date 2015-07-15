@@ -24,7 +24,7 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
 
 	public static final int DeviceControlsModuleStreamingServerPort = 10008;
 	
-    public static class TChannelProcessing extends TChannelProcessingAbstract {
+    public static class TChannelProcessing extends TChannelConnectionAbstract {
 		
     	public static final int LocalPort = 10008;
     	
@@ -121,11 +121,6 @@ public class TStreamChannelProcessor extends TStreamChannelProcessorAbstract {
     public void Start() throws Exception {
     	super.Start();
     	//.
-    	Processing = new TChannelProcessing(this);
-    }
-    
-    @Override
-    public boolean IsVisual() {
-    	return false;
+    	ChannelConnection = new TChannelProcessing(this);
     }
 }

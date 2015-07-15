@@ -1,21 +1,32 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream;
 
+import java.io.File;
+import java.io.FileOutputStream;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.Space.Server.TGeoScopeServerInfo;
+import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TSourceStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
@@ -38,6 +49,9 @@ public class TDataStreamPropsPanel extends Activity {
 	private ListView 	lvChannels;
 	private int			lvChannels_SelectedIndex = -1;
 	//.
+	private Button btnOpenStream;
+	private Button btnGetStreamDescriptor;
+	//.
 	@SuppressWarnings("unused")
 	private boolean flUpdate = false;
 	
@@ -56,7 +70,7 @@ public class TDataStreamPropsPanel extends Activity {
     		//.
     		requestWindowFeature(Window.FEATURE_NO_TITLE);
             //.
-            setContentView(R.layout.sensorsmodule_model_datastream_props_panel);
+            setContentView(R.layout.sensorsmodule_datastream_props_panel);
             //.
             lbStreamName = (TextView)findViewById(R.id.lbStreamName);
             lbStreamInfo = (TextView)findViewById(R.id.lbStreamInfo);
@@ -78,6 +92,33 @@ public class TDataStreamPropsPanel extends Activity {
     				}
             	}
     		});
+            //.
+            btnOpenStream = (Button)findViewById(R.id.btnOpenStream);
+            btnOpenStream.setOnClickListener(new OnClickListener() {
+            	
+            	@Override
+                public void onClick(View v) {
+                	try {
+                		OpenStream();
+    				} catch (Exception E) {
+    					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    				}
+                }
+            });
+            //.
+            btnGetStreamDescriptor = (Button)findViewById(R.id.btnGetStreamDescriptor);
+            btnGetStreamDescriptor.setVisibility(TGeoLogApplication.DebugOptions_IsDebugging() ? View.VISIBLE : View.GONE);
+            btnGetStreamDescriptor.setOnClickListener(new OnClickListener() {
+            	
+            	@Override
+                public void onClick(View v) {
+                	try {
+                		GetStreamDescriptor();
+    				} catch (Exception E) {
+    					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    				}
+                }
+            });
             //.
             Update();
 		} catch (Exception E) {
@@ -148,8 +189,10 @@ public class TDataStreamPropsPanel extends Activity {
 	    				else
 	    					lvChannelsItems[I] += "  "+"("+getString(R.string.SDisabled2)+")";
     			}
-    			ArrayAdapter<String> lvChannelsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_single_choice,lvChannelsItems);             
+    			ArrayAdapter<String> lvChannelsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvChannelsItems);             
     			lvChannels.setAdapter(lvChannelsAdapter);
+    			for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
+    				lvChannels.setItemChecked(I,true);
     		}
     		else {
     			lbStreamName.setText("?");
@@ -161,6 +204,88 @@ public class TDataStreamPropsPanel extends Activity {
     	finally {
     		flUpdate = false;
     	}
+    }
+
+    private void OpenStream() {
+    	if (DataStreamDescriptor == null)
+    		return; //. ->
+    	final TChannelIDs Channels = new TChannelIDs();
+		for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
+			if (lvChannels.isItemChecked(I))
+				Channels.AddID(DataStreamDescriptor.Channels.get(I).ID);
+		if (Channels.Count() == 0)
+			return; // ->
+    	//.
+		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+			
+			private TUserAgent UserAgent;
+			private TGeoScopeServerInfo.TInfo ServersInfo;
+			private byte[] DescriptorData;
+			
+			@Override
+			public void Process() throws Exception {
+				UserAgent = TUserAgent.GetUserAgent();
+				if (UserAgent == null)
+					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
+				ServersInfo = UserAgent.Server.Info.GetInfo();
+				if (!ServersInfo.IsSpaceDataServerValid()) 
+					throw new Exception("Invalid space data server"); //. =>
+				//.
+				DescriptorData = DataStreamDescriptor.ToByteArray();
+			}
+			
+			@Override 
+			public void DoOnCompleted() throws Exception {
+				Intent intent = new Intent(TDataStreamPropsPanel.this, TDataStreamPanel.class);
+				//.
+				intent.putExtra("ParametersType", TDataStreamPanel.PARAMETERS_TYPE_NOO);
+				//.
+				intent.putExtra("StreamDescriptorData", DescriptorData);
+				//.
+				intent.putExtra("StreamChannels", Channels.ToByteArray());
+				//.
+				startActivity(intent);
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		Processing.Start();
+    }
+
+    private void GetStreamDescriptor() {
+		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+			
+			private File DescriptorFile;
+			
+			@Override
+			public void Process() throws Exception {
+				DescriptorFile = new File(TGeoLogApplication.GetTempFolder()+"/"+"DataStreamDescriptor.xml");
+				FileOutputStream fos = new FileOutputStream(DescriptorFile);
+				try {
+					byte[] BA = DataStreamDescriptor.ToByteArray();
+					fos.write(BA, 0,BA.length);
+				} finally {
+					fos.close();
+				}
+			}
+			
+			@Override 
+			public void DoOnCompleted() throws Exception {
+				Intent intent = new Intent();
+				intent.setDataAndType(Uri.fromFile(DescriptorFile), "text/xml");
+				intent.setAction(android.content.Intent.ACTION_VIEW);
+				startActivity(intent);
+			}
+			
+			@Override
+			public void DoOnException(Exception E) {
+				Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		};
+		Processing.Start();
     }
 
     private boolean OpenChannelProfile(int Idx) throws Exception {

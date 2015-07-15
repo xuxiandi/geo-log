@@ -41,6 +41,7 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.TReflectorComponent;
+import com.geoscope.GeoEye.TReflectorTrack;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
@@ -651,8 +652,6 @@ public class TDataStreamPanel extends Activity {
 			//.
 			final EditText edAudioBuffersProcessed = (EditText)findViewById(R.id.edAudioAACBuffersProcessed);
 			//.
-			AACChannel.ReStart();
-			//.
 			TAACChannelProcessor AACChannelProcessor = (TAACChannelProcessor)AACChannel.GetProcessor();
 			AACChannelProcessor.StatisticHandler = new TAACChannelProcessor.TStatisticHandler() {
 				
@@ -663,6 +662,8 @@ public class TDataStreamPanel extends Activity {
 			};
 			//
 			llAudioAAC.setVisibility(View.VISIBLE);
+			//.
+			AACChannel.ReStart();
 		};
 		if (Channel instanceof TH264IChannel) {
 			TH264IChannel H264Channel = (TH264IChannel)Channel;
@@ -676,8 +677,6 @@ public class TDataStreamPanel extends Activity {
 			int height = size.y;
 			RelativeLayout.LayoutParams RLP = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,height);
 			svVideoH264.setLayoutParams(RLP);
-			//.
-			H264Channel.ReStart();
 			//.
 			final TH264IChannelProcessor H264ChannelProcessor = (TH264IChannelProcessor)H264Channel.GetProcessor();
 			H264ChannelProcessor.StatisticHandler = new TH264IChannelProcessor.TStatisticHandler() {
@@ -706,6 +705,8 @@ public class TDataStreamPanel extends Activity {
 			});
 			//
 			llVideoH264.setVisibility(View.VISIBLE);
+			//.
+			H264Channel.ReStart();
 		};
 	}
 	
@@ -838,8 +839,15 @@ public class TDataStreamPanel extends Activity {
 						//.
 						flAccept = ((DoOnGPSFixDataType_LastLocationXY == null) || !LocationXY.IsTheSame(DoOnGPSFixDataType_LastLocationXY));
 						//.
-						if (flAccept)
+						if (flAccept) {
+							TReflectorTrack CurrentTrack = Reflector.Component.CurrentTrack_Get();
+							if (CurrentTrack == null) 
+								CurrentTrack = Reflector.Component.CurrentTrack_Begin();
+							//.
+							CurrentTrack.Nodes_Add(LocationXY);
+							//.
 							Reflector.Component.MoveReflectionWindow(LocationXY);
+						}
 					}
 				} catch (Exception E) {
 				}

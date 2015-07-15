@@ -28,7 +28,7 @@ public class TH264IChannel extends TStreamChannel {
 	
 	public static class TDoOnH264FramesHandler {
 		
-		public void DoOnH264Packet(byte[] Packet, int PacketOffset, int PacketSize) {
+		public void DoOnH264Packet(byte[] Packet, int PacketOffset, int PacketSize) throws Exception {
 		}
 	}	
 	

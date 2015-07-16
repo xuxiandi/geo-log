@@ -18,6 +18,7 @@ public class TSecurityFileFunctionality extends TComponentFunctionality {
 
 	public String _Name = "";
 	public String _Info = "";
+	public String _Domains = "";
 	
 	public TSecurityFileFunctionality(TTypeFunctionality pTypeFunctionality, long pidComponent) {
 		super(pTypeFunctionality,pidComponent);
@@ -48,6 +49,13 @@ public class TSecurityFileFunctionality extends TComponentFunctionality {
 				node = TMyXML.SearchNode(ANode,"Info").getFirstChild();
 				if (node != null)
 					_Info = node.getNodeValue();
+				//.
+				node = TMyXML.SearchNode(ANode,"Domains");
+				if (node != null) {
+					node = node.getFirstChild();
+					if (node != null)
+						_Domains = node.getNodeValue();
+				}
 			}
 			catch (Exception E) {
     			throw new Exception("error of parsing XML: "+E.getMessage()); //. =>
@@ -73,13 +81,19 @@ public class TSecurityFileFunctionality extends TComponentFunctionality {
         Serializer.startTag("", "Info");
         Serializer.text(_Info);
         Serializer.endTag("", "Info");
-        //.
-        Serializer.endTag("", "RW");
+        //. Domains
+        if (_Domains.length() > 0) {
+            Serializer.startTag("", "Domains");
+            Serializer.text(_Domains);
+            Serializer.endTag("", "Domains");
+        }
 	}
 	
 	@Override
 	public void Open(Context context, Object Params) throws Exception {
 		String SecurityFileInfo = _Name+"\n"+"("+_Info+")";
+        if (_Domains.length() > 0)
+        	SecurityFileInfo += "\n"+"["+_Domains+"]";
 		//.
 	    new AlertDialog.Builder(context)
         .setIcon(android.R.drawable.ic_dialog_alert)

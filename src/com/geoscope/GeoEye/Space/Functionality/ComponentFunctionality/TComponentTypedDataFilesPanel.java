@@ -1072,8 +1072,10 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		                if ((!isFinishing()) && progressDialog.isShowing()) 
+	                	try {
 		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} //. TODO
 		            	//.
 		            	break; //. >
 		            
@@ -1378,8 +1380,10 @@ public class TComponentTypedDataFilesPanel extends Activity {
 						break; // . >
 
 					case MESSAGE_PROGRESSBAR_HIDE:
-		                if ((!isFinishing()) && progressDialog.isShowing()) 
+	                	try {
 		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} //. TODO
 						// .
 						break; // . >
 

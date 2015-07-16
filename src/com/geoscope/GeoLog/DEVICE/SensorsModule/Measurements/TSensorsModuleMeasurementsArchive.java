@@ -738,8 +738,10 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		            	if (flRunning)
-		            		progressDialog.dismiss(); 
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} //. TODO
 		            	//.
 		            	break; //. >
 		            
@@ -914,8 +916,10 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		            	//. if (flRunning)
-		            	progressDialog.dismiss(); 
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} //. TODO
 		            	//.
 		            	break; //. >
 		            

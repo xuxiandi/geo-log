@@ -4591,7 +4591,10 @@ public class TReflectorComponent extends TUIComponent {
 						break; // . >
 
 					case MESSAGE_PROGRESSBAR_HIDE:
-						progressDialog.dismiss();
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} //. TODO
 						// .
 						break; // . >
 
@@ -4812,7 +4815,10 @@ public class TReflectorComponent extends TUIComponent {
 						break; // . >
 
 					case MESSAGE_PROGRESSBAR_HIDE:
-						progressDialog.dismiss();
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} //. TODO
 						// .
 						break; // . >
 
@@ -5102,7 +5108,10 @@ public class TReflectorComponent extends TUIComponent {
 						break; // . >
 
 					case MESSAGE_PROGRESSBAR_HIDE:
-						progressDialog.dismiss();
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} //. TODO
 						// .
 						break; // . >
 
@@ -5968,11 +5977,9 @@ public class TReflectorComponent extends TUIComponent {
 							
 						case MESSAGE_FINISH:
 		                	try {
-		                    	if ((progressDialog != null) && progressDialog.isShowing())
-		                    		progressDialog.dismiss(); 
+			                	progressDialog.dismiss(); 
 		                	}
-		                	catch (Exception Ex) {
-		                	}
+		                	catch (IllegalArgumentException IAE) {} //. TODO
 							//.
 							break; // . >
 							
@@ -7575,8 +7582,10 @@ public class TReflectorComponent extends TUIComponent {
 					break; // . >
 
 				case MESSAGE_LOADINGPROGRESSBAR_HIDE:
-					if (flVisible && progressDialog.isShowing())
-						progressDialog.dismiss();
+                	try {
+	                	progressDialog.dismiss(); 
+                	}
+                	catch (IllegalArgumentException IAE) {} //. TODO
 					// .
 					break; // . >
 
@@ -8689,8 +8698,10 @@ public class TReflectorComponent extends TUIComponent {
 						break; // . >
 
 					case MESSAGE_PROGRESSBAR_HIDE:
-						if (flRunning)
-							progressDialog.dismiss();
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} //. TODO
 						// .
 						break; // . >
 

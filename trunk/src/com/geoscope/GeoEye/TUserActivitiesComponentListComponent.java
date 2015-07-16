@@ -1497,8 +1497,10 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		                if ((!ParentActivity.isFinishing()) && progressDialog.isShowing()) 
+	                	try {
 		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} //. TODO
 		            	//.
 		            	break; //. >
 		            
@@ -1891,8 +1893,10 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 						break; // . >
 
 					case MESSAGE_PROGRESSBAR_HIDE:
-		                if ((!ParentActivity.isFinishing()) && progressDialog.isShowing()) 
+	                	try {
 		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} //. TODO
 						// .
 						break; // . >
 

@@ -31,8 +31,9 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 	//.
 	public volatile TStatisticHandler StatisticHandler = null;
 	//.
-	private volatile MediaCodec Codec = null;
-	private ByteBuffer[] 		CodecInputBuffers;
+	private Object 			CodecLock = new Object();
+	private MediaCodec 		Codec = null;
+	private ByteBuffer[]	CodecInputBuffers;
 	@SuppressWarnings("unused")
 	private ByteBuffer[] 	CodecOutputBuffers;
 	
@@ -45,40 +46,41 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 			
 			@Override
 			public void DoOnH264Packet(byte[] Packet, int PacketOffset,	int PacketSize) throws Exception {
-				//. wait for the codec initialization, it is done as soon as video surface is created
-				MediaCodec _Codec;
 				while (true) {
-					_Codec = Codec;
-					if (_Codec != null)
-						break; //. >
+					synchronized (CodecLock) {
+						if (Codec != null) {
+							int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
+							if (inputBufferIndex >= 0) {
+								ByteBuffer inputBuffer = CodecInputBuffers[inputBufferIndex];
+								inputBuffer.clear();
+								inputBuffer.put(Packet, PacketOffset, PacketSize);
+								Codec.queueInputBuffer(inputBufferIndex, 0, PacketSize, SystemClock.elapsedRealtime(), 0);
+							}
+							//.
+							MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+							int outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
+							while (outputBufferIndex >= 0) {
+								//. no need for buffer render it on surface ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
+								//.
+								Codec.releaseOutputBuffer(outputBufferIndex, true);
+								outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
+								//.
+								VideoBuffersCount++;
+								if (StatisticHandler != null)
+									StatisticHandler.DoOnVideoBuffer(VideoBuffersCount);
+							}
+							if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) 
+							     CodecOutputBuffers = Codec.getOutputBuffers();
+							else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+							     // Subsequent data will conform to new format.
+							     ///? MediaFormat format = _Codec.getOutputFormat();
+							}
+							//.
+							return; //. ->
+						}
+					}
+					//. wait for the codec initialization, it is done as soon as video surface is created
 					Thread.sleep(10);
-				}
-				//.
-				int inputBufferIndex = _Codec.dequeueInputBuffer(CodecWaitInterval);
-				if (inputBufferIndex >= 0) {
-					ByteBuffer inputBuffer = CodecInputBuffers[inputBufferIndex];
-					inputBuffer.clear();
-					inputBuffer.put(Packet, PacketOffset, PacketSize);
-					_Codec.queueInputBuffer(inputBufferIndex, 0, PacketSize, SystemClock.elapsedRealtime(), 0);
-				}
-				//.
-				MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-				int outputBufferIndex = _Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
-				while (outputBufferIndex >= 0) {
-					//. no need for buffer render it on surface ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
-					//.
-					_Codec.releaseOutputBuffer(outputBufferIndex, true);
-					outputBufferIndex = _Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
-					//.
-					VideoBuffersCount++;
-					if (StatisticHandler != null)
-						StatisticHandler.DoOnVideoBuffer(VideoBuffersCount);
-				}
-				if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) 
-				     CodecOutputBuffers = _Codec.getOutputBuffers();
-				else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-				     // Subsequent data will conform to new format.
-				     ///? MediaFormat format = _Codec.getOutputFormat();
 				}
 			}
 		});
@@ -94,23 +96,24 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 	}
 	
 	public void Start(Surface pSurface, int pWidth, int pHeight) {
-		MediaCodec _Codec = MediaCodec.createDecoderByType(CodecTypeName);
-		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, pWidth,pHeight);
-		_Codec.configure(format, pSurface, null, 0);
-		_Codec.start();
-		//.
-		CodecInputBuffers = _Codec.getInputBuffers();
-		CodecOutputBuffers = _Codec.getOutputBuffers();
-		//.
-		Codec = _Codec;
+		synchronized (CodecLock) {
+			Codec = MediaCodec.createDecoderByType(CodecTypeName);
+			MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, pWidth,pHeight);
+			Codec.configure(format, pSurface, null, 0);
+			Codec.start();
+			//.
+			CodecInputBuffers = Codec.getInputBuffers();
+			CodecOutputBuffers = Codec.getOutputBuffers();
+		}
 	}
 	
 	public void Stop() {
-		MediaCodec _Codec = Codec;
-		Codec = null;
-		if (_Codec != null) {
-			_Codec.stop();
-			_Codec.release();
+		synchronized (CodecLock) {
+			if (Codec != null) {
+				Codec.stop();
+				Codec.release();
+				Codec = null;
+			}
 		}
 	}
 }

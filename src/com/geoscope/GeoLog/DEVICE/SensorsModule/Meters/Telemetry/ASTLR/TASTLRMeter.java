@@ -7,6 +7,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Telemetry.TLR.TMeasu
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.Telemetry.TLR.TTLRMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 
 public class TASTLRMeter extends TTLRMeter {
@@ -31,16 +32,19 @@ public class TASTLRMeter extends TTLRMeter {
 	}
 	
 	@Override
-	protected TTLRChannel GetSourceTLRChannel() throws Exception {
+	protected TStreamChannel[] GetSourceChannels() throws Exception {
 		if (SensorsModule.InternalSensorsModule.ASTLRChannel == null)
 			throw new IOException("no origin channel"); //. =>
 		if (!SensorsModule.InternalSensorsModule.ASTLRChannel.Enabled)
 			throw new IOException("the origin channel is disabled"); //. =>
-		return (TTLRChannel)SensorsModule.InternalSensorsModule.ASTLRChannel.DestinationChannel_Get(); 	
+		SourceChannel = (TTLRChannel)SensorsModule.InternalSensorsModule.ASTLRChannel.DestinationChannel_Get(); 	
+		if (SourceChannel == null)
+			throw new IOException("no source channel"); //. =>
+		return (new TStreamChannel[] {SourceChannel}); 	
 	}
 	
 	@Override
-	protected TMeasurement CreateTLRMeasurement() throws Exception {
+	protected TMeasurement CreateMeasurement() throws Exception {
 		return new com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 	}
 }

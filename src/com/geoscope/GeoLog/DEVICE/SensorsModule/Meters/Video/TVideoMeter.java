@@ -7,6 +7,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasu
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Video.TMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 
 public class TVideoMeter extends TSensorMeter {
@@ -20,6 +21,9 @@ public class TVideoMeter extends TSensorMeter {
 	public static class TMyProfile extends TProfile {
 	}
 	
+
+	private TH264IChannel SourceChannel;
+	
 	public TVideoMeter(TSensorsModule pSensorsModule, String pID, String pProfileFolder) throws Exception {
 		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
 	}
@@ -30,14 +34,20 @@ public class TVideoMeter extends TSensorMeter {
 	}
 	
 	@Override
-	protected void DoProcess() throws Exception {
+	protected TStreamChannel[] GetSourceChannels() throws Exception {
 		if (SensorsModule.InternalSensorsModule.H264IChannel == null)
 			throw new IOException("no origin channel"); //. =>
 		if (!SensorsModule.InternalSensorsModule.H264IChannel.Enabled)
 			throw new IOException("the origin channel is disabled"); //. =>
-		TH264IChannel SourceChannel = (TH264IChannel)SensorsModule.InternalSensorsModule.H264IChannel.DestinationChannel_Get(); 	
+		SourceChannel = (TH264IChannel)SensorsModule.InternalSensorsModule.H264IChannel.DestinationChannel_Get(); 	
 		if (SourceChannel == null)
 			throw new IOException("no source channel"); //. =>
+		return (new TStreamChannel[] {SourceChannel}); 	
+	}
+	
+	@Override
+	protected void DoProcess() throws Exception {
+		GetSourceChannels();
 		//.
 		SourceChannel.Suspend();
 		try {

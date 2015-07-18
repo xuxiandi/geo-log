@@ -133,6 +133,10 @@ public class TSensorMeasurement {
 		Descriptor = GetMeasurementDescriptor(DatabaseFolder, Domain, pMeasurementID, DescriptorClass, ChannelProvider);
 	}
 	
+	public TSensorMeasurement(long pGeographServerObjectID, String pDatabaseFolder, String pDomain, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
+		this(pGeographServerObjectID, pDatabaseFolder, pDomain, pMeasurementID, TSensorMeasurementDescriptor.class, ChannelProvider);
+	}
+	
 	public TSensorMeasurement(String pDatabaseFolder, String pDomain, String pMeasurementID, TChannelProvider ChannelProvider) throws Exception {
 		this(0, pDatabaseFolder, pDomain, pMeasurementID, TSensorMeasurementDescriptor.class, ChannelProvider);
 	}

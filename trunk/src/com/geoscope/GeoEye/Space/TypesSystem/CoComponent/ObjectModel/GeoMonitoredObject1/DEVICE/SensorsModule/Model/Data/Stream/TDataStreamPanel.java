@@ -203,6 +203,8 @@ public class TDataStreamPanel extends Activity {
 					//.
 					Layout_UpdateForChannel(Channel);
 					//.
+					Channel.Start();
+					//.
 					ChannelConnector.Start();
 				}			  
 			}
@@ -214,8 +216,15 @@ public class TDataStreamPanel extends Activity {
 	}
 	
 	private void StreamChannelConnectors_Finalize() throws Exception {
-		for (int I = 0; I < StreamChannelConnectors.size(); I++) 
-			StreamChannelConnectors.get(I).Destroy(false);
+		for (int I = 0; I < StreamChannelConnectors.size(); I++) {
+			TStreamChannelConnectorAbstract ChannelConnector = StreamChannelConnectors.get(I);
+			//.
+			ChannelConnector.Stop(false);
+			//.
+			ChannelConnector.Channel.Close();
+			//.
+			ChannelConnector.Destroy(false);
+		}
 		StreamChannelConnectors.clear();
 		//.
 		Layout_Reset();
@@ -662,8 +671,6 @@ public class TDataStreamPanel extends Activity {
 			};
 			//
 			llAudioAAC.setVisibility(View.VISIBLE);
-			//.
-			AACChannel.ReStart();
 		};
 		if (Channel instanceof TH264IChannel) {
 			TH264IChannel H264Channel = (TH264IChannel)Channel;
@@ -705,8 +712,6 @@ public class TDataStreamPanel extends Activity {
 			});
 			//
 			llVideoH264.setVisibility(View.VISIBLE);
-			//.
-			H264Channel.ReStart();
 		};
 	}
 	

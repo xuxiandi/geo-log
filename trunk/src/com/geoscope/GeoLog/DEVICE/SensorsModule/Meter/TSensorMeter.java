@@ -28,7 +28,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.TSensorMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Telemetry.ASTLR.TMeasurement;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentFileStreaming;
 
 public class TSensorMeter extends TCancelableThread {
@@ -211,8 +211,6 @@ public class TSensorMeter extends TCancelableThread {
 	//.
 	private int Status = STATUS_NOTRUNNING;
 	//.
-	private TSensorMeasurement Measurement = null;
-	//.
 	private Thread OnMeasurementFinishProcessing = null;
 	
 	public TSensorMeter(TSensorsModule pSensorsModule, TSensorMeterDescriptor pDescriptor, Class<?> ProfileClass, String pProfileFolder) throws Exception {
@@ -375,17 +373,13 @@ public class TSensorMeter extends TCancelableThread {
 		SetStatus(STATUS_NOTRUNNING);
 	}
 	
+	protected TStreamChannel[] GetSourceChannels() throws Exception {
+		return null;
+	}
+	
 	protected void DoProcess() throws Exception {
 	}
 	
-	protected synchronized void SetMeasurement(TSensorMeasurement Value) {
-		Measurement = Value;
-	}
-	
-	public synchronized TSensorMeasurement GetMeasurement() {
-		return Measurement;
-	}
-
 	private void CreateMeasurementAsDataFile(TSensorMeasurement Measurement) throws Exception {
 		String DataName = Measurement.Descriptor.TypeID()+"("+OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(Measurement.Descriptor.StartTimestamp))+")"; 
 		//.
@@ -435,7 +429,7 @@ public class TSensorMeter extends TCancelableThread {
     	double MinTimestamp = OleDate.UTCCurrentTimestamp()-Profile.MeasurementLifeTime;
     	for (int I = 0; I < MIDs.size(); I++) {
     		String MeasurementID = MIDs.get(I); 
-			TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
+			TSensorMeasurement Measurement = new TSensorMeasurement(TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, MeasurementID, com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
 			if (Measurement.Descriptor.IsTypeOf(GetTypeID())) {
 				if (Measurement.Descriptor.IsValid()) {
 					if (Measurement.Descriptor.FinishTimestamp < MinTimestamp)

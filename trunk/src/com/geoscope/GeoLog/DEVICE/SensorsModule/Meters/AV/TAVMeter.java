@@ -8,6 +8,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasu
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeterDescriptor;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 
@@ -22,6 +23,10 @@ public class TAVMeter extends TSensorMeter {
 	public static class TMyProfile extends TProfile {
 	}
 	
+	
+	private TAACChannel 	AudioSourceChannel;
+	private TH264IChannel 	VideoSourceChannel;
+	
 	public TAVMeter(TSensorsModule pSensorsModule, String pID, String pProfileFolder) throws Exception {
 		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
 	}
@@ -32,12 +37,12 @@ public class TAVMeter extends TSensorMeter {
 	}
 	
 	@Override
-	protected void DoProcess() throws Exception {
+	protected TStreamChannel[] GetSourceChannels() throws Exception {
 		if (SensorsModule.InternalSensorsModule.AACChannel == null)
 			throw new IOException("no origin audio channel"); //. =>
 		if (!SensorsModule.InternalSensorsModule.AACChannel.Enabled)
 			throw new IOException("the origin audio channel is disabled"); //. =>
-		final TAACChannel AudioSourceChannel = (TAACChannel)SensorsModule.InternalSensorsModule.AACChannel.DestinationChannel_Get(); 	
+		AudioSourceChannel = (TAACChannel)SensorsModule.InternalSensorsModule.AACChannel.DestinationChannel_Get(); 	
 		if (AudioSourceChannel == null)
 			throw new IOException("no source audio channel"); //. =>
 		//.
@@ -45,9 +50,15 @@ public class TAVMeter extends TSensorMeter {
 			throw new IOException("no origin video channel"); //. =>
 		if (!SensorsModule.InternalSensorsModule.H264IChannel.Enabled)
 			throw new IOException("the origin video channel is disabled"); //. =>
-		final TH264IChannel VideoSourceChannel = (TH264IChannel)SensorsModule.InternalSensorsModule.H264IChannel.DestinationChannel_Get(); 	
+		VideoSourceChannel = (TH264IChannel)SensorsModule.InternalSensorsModule.H264IChannel.DestinationChannel_Get(); 	
 		if (VideoSourceChannel == null)
 			throw new IOException("no source video channel"); //. =>
+		return (new TStreamChannel[] {AudioSourceChannel,VideoSourceChannel}); 	
+	}
+	
+	@Override
+	protected void DoProcess() throws Exception {
+		GetSourceChannels();
 		//.
 		AudioSourceChannel.Suspend();
 		try {
@@ -60,7 +71,7 @@ public class TAVMeter extends TSensorMeter {
 						final int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 						while (!Canceller.flCancel) {
 							final TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
-							//.
+							//. setup measurement
 							Measurement.AACChannel.Assign(AudioSourceChannel);
 							Measurement.AACChannel.SampleRate = SensorsModule.InternalSensorsModule.AACChannel.GetSampleRate();
 							//.

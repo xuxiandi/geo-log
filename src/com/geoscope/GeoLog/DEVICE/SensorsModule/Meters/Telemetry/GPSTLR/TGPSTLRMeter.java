@@ -31,7 +31,7 @@ public class TGPSTLRMeter extends TTLRMeter {
 	}
 	
 	@Override
-	protected TStreamChannel[] GetSourceChannels() throws Exception {
+	public TStreamChannel[] GetSourceChannels() throws Exception {
 		if (SensorsModule.InternalSensorsModule.GPSChannel == null)
 			throw new IOException("no origin channel"); //. =>
 		if (!SensorsModule.InternalSensorsModule.GPSChannel.Enabled)

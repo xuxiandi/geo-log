@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -23,6 +24,7 @@ import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
@@ -33,16 +35,18 @@ public class TSensorsMeterPanel extends Activity {
 	//.
 	private String 					MeterID;
 	private String 					MeterName;
+	private TSensorMeter 			Meter;
 	private TSensorMeter.TProfile 	MeterProfile = null;
 	//.
 	private TextView lbName;
 	private CheckBox cbEnabled;
 	private CheckBox cbActive;
+	private CheckBox cbCreateDataFile;
+	private Button btnChannels;
 	private EditText edMeasurementMaxDuration;
 	private EditText edMeasurementLifeTime;
 	private EditText edMeasurementAutosaveInterval;
 	private Button btnApplyChanges;
-	private CheckBox cbCreateDataFile;
 	//.
 	private TUpdating	Updating = null;
 	@SuppressWarnings("unused")
@@ -66,13 +70,26 @@ public class TSensorsMeterPanel extends Activity {
         //.
         cbActive = (CheckBox)findViewById(R.id.cbActive);
         //.
+        cbCreateDataFile = (CheckBox)findViewById(R.id.cbCreateDataFile);
+        //.
+        btnChannels = (Button)findViewById(R.id.btnChannels);
+        btnChannels.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+            	try {
+            		ShowChannels();
+				} catch (Exception E) {
+					Toast.makeText(TSensorsMeterPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
+            }
+        });
+        //.
         edMeasurementMaxDuration = (EditText)findViewById(R.id.edMeasurementMaxDuration);
         //.
         edMeasurementLifeTime = (EditText)findViewById(R.id.edMeasurementLifeTime);
         //.
         edMeasurementAutosaveInterval = (EditText)findViewById(R.id.edMeasurementAutosaveInterval);
-        //.
-        cbCreateDataFile = (CheckBox)findViewById(R.id.cbCreateDataFile);
         //.
         btnApplyChanges = (Button)findViewById(R.id.btnApplyChanges);
         btnApplyChanges.setOnClickListener(new OnClickListener() {
@@ -126,7 +143,8 @@ public class TSensorsMeterPanel extends Activity {
         //.
     	private TDEVICEModule Device;
         //.
-    	private TSensorMeter.TProfile MeterProfile = null;
+    	private TSensorMeter 			Meter;
+    	private TSensorMeter.TProfile 	MeterProfile = null;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
     		super();
@@ -150,8 +168,9 @@ public class TSensorsMeterPanel extends Activity {
     		        		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     		        	Device = Tracker.GeoLog;
 						//.
+    		        	Meter = Device.SensorsModule.Meters.Items_GetItem(MeterID);
 						MeterProfile = new TSensorMeter.TProfile();
-						MeterProfile.FromByteArray(Device.SensorsModule.Meters.Items_GetItem(MeterID).Profile.ToByteArray()); 
+						MeterProfile.FromByteArray(Meter.Profile.ToByteArray()); 
 					}
 					finally {
 						if (flShowProgress)
@@ -194,6 +213,7 @@ public class TSensorsMeterPanel extends Activity {
 		            	//.
 		            	TSensorsMeterPanel.this.Device = Device;
 		            	//.
+		            	TSensorsMeterPanel.this.Meter = Meter;
 		            	TSensorsMeterPanel.this.MeterProfile = MeterProfile;
 	           		 	//.
 		            	TSensorsMeterPanel.this.Update();
@@ -280,6 +300,12 @@ public class TSensorsMeterPanel extends Activity {
     		Updating.Cancel();
     	Updating = new TUpdating(true,true);
     }    
+    
+    private void ShowChannels() throws Exception {
+		Intent intent = new Intent(this, TDataStreamPropsPanel.class);
+		intent.putExtra("ChannelIDs", Meter.GetChannels().ToByteArray());
+        startActivity(intent);
+    }
     
     private void ApplyChangesAndExit() {
     	if ((MeterProfile == null) || (Device == null))

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCanceller;
@@ -217,6 +218,11 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 	@Override
 	public byte[] Sensors_Meter_GetProfile(String MeterID) throws Exception {
 		return SensorsModule_Meter_GetProfile(MeterID);
+	}
+	
+	@Override
+	public TChannelIDs Sensors_Meter_GetChannels(String MeterID) throws Exception {
+		return SensorsModule_Meter_GetChannels(MeterID);
 	}
 	
 	@Override
@@ -925,6 +931,40 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			Value.FromByteArray(Data,(new TIndex(0)));
 			//.
 			return Value.Value; //. ->
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			case TSetSensorsModuleMetersValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetSensorsModuleMetersValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
+			default:
+				throw new OperationException(OE.Code,"error SensorsModule_Meters_GetProfile(MeterID), "+OE.getMessage()); //. =>
+			}
+		}
+	}
+	
+	public TChannelIDs SensorsModule_Meter_GetChannels(String MeterID) throws Exception {
+		int Version = 3;
+		String Params = "1,"+Integer.toString(Version)+","+MeterID;
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,19,1001});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		TComponentTimestampedDataValue Value = new TComponentTimestampedDataValue();
+		try {
+			byte[] Data = ObjectController.Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Value.FromByteArray(Data,(new TIndex(0)));
+			//.
+			TChannelIDs Result = new TChannelIDs();
+			if (Value.Value.length > 0) 
+				Result.FromByteArray(Value.Value); 
+			return Result; //. ->
 		}
 		catch (OperationException OE) {
 			switch (OE.Code) {

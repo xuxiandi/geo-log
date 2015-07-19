@@ -37,7 +37,7 @@ public class TAVMeter extends TSensorMeter {
 	}
 	
 	@Override
-	protected TStreamChannel[] GetSourceChannels() throws Exception {
+	public TStreamChannel[] GetSourceChannels() throws Exception {
 		if (SensorsModule.InternalSensorsModule.AACChannel == null)
 			throw new IOException("no origin audio channel"); //. =>
 		if (!SensorsModule.InternalSensorsModule.AACChannel.Enabled)

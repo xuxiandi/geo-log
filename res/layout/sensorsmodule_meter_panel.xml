@@ -39,6 +39,13 @@
             android:text="@string/SCreateDataFile1"
             android:textSize="16sp" />
 
+        <Button
+            android:id="@+id/btnChannels"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/SChannels"
+            android:textSize="22sp" />
+
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

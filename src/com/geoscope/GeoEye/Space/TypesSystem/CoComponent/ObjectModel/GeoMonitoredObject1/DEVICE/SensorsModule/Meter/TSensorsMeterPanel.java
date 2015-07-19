@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
@@ -39,14 +41,16 @@ public class TSensorsMeterPanel extends Activity {
 	private String 					MeterID;
 	private String 					MeterName;
 	private TSensorMeter.TProfile 	MeterProfile = null;
+	private TChannelIDs				MeterChannels = null;
 	//.
 	private TextView lbName;
 	private CheckBox cbEnabled;
 	private CheckBox cbActive;
+	private CheckBox cbCreateDataFile;
+	private Button btnChannels;
 	private EditText edMeasurementMaxDuration;
 	private EditText edMeasurementLifeTime;
 	private EditText edMeasurementAutosaveInterval;
-	private CheckBox cbCreateDataFile;
 	private Button btnApplyChanges;
 	//.
 	private TUpdating	Updating = null;
@@ -72,13 +76,26 @@ public class TSensorsMeterPanel extends Activity {
         //.
         cbActive = (CheckBox)findViewById(R.id.cbActive);
         //.
+        cbCreateDataFile = (CheckBox)findViewById(R.id.cbCreateDataFile);
+        //.
+        btnChannels = (Button)findViewById(R.id.btnChannels);
+        btnChannels.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+            public void onClick(View v) {
+            	try {
+            		ShowChannels();
+				} catch (Exception E) {
+					Toast.makeText(TSensorsMeterPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+				}
+            }
+        });
+        //.
         edMeasurementMaxDuration = (EditText)findViewById(R.id.edMeasurementMaxDuration);
         //.
         edMeasurementLifeTime = (EditText)findViewById(R.id.edMeasurementLifeTime);
         //.
         edMeasurementAutosaveInterval = (EditText)findViewById(R.id.edMeasurementAutosaveInterval);
-        //.
-        cbCreateDataFile = (CheckBox)findViewById(R.id.cbCreateDataFile);
         //.
         btnApplyChanges = (Button)findViewById(R.id.btnApplyChanges);
         btnApplyChanges.setOnClickListener(new OnClickListener() {
@@ -137,7 +154,8 @@ public class TSensorsMeterPanel extends Activity {
         //.
         private TObjectModel ObjectModel = null;
         //.
-    	private TSensorMeter.TProfile MeterProfile = null;
+    	private TSensorMeter.TProfile 	MeterProfile = null;
+    	private TChannelIDs				MeterChannels;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
     		super();
@@ -178,7 +196,9 @@ public class TSensorsMeterPanel extends Activity {
 										ObjectModel.SetObjectController(GSOC, true);
 		    							//.
 										MeterProfile = new TSensorMeter.TProfile();
-										MeterProfile.FromByteArray(ObjectModel.Sensors_Meter_GetProfile(MeterID)); 
+										MeterProfile.FromByteArray(ObjectModel.Sensors_Meter_GetProfile(MeterID));
+										//.
+										MeterChannels = ObjectModel.Sensors_Meter_GetChannels(MeterID); 
 		    						}
 		    					}
 		    				}
@@ -233,6 +253,7 @@ public class TSensorsMeterPanel extends Activity {
 		            	TSensorsMeterPanel.this.ObjectModel = ObjectModel;
 		            	//.
 		            	TSensorsMeterPanel.this.MeterProfile = MeterProfile;
+		            	TSensorsMeterPanel.this.MeterChannels = MeterChannels;
 	           		 	//.
 		            	TSensorsMeterPanel.this.Update();
 		            	//.
@@ -318,6 +339,14 @@ public class TSensorsMeterPanel extends Activity {
     		Updating.Cancel();
     	Updating = new TUpdating(true,true);
     }    
+    
+    private void ShowChannels() throws Exception {
+        Intent intent = new Intent(this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.class);
+		intent.putExtra("ParametersType", com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.PARAMETERS_TYPE_OID);
+		intent.putExtra("ObjectID", ObjectID);
+		intent.putExtra("ChannelIDs", MeterChannels.ToByteArray());
+        startActivity(intent);
+    }
     
     private void ApplyChangesAndExit() {
     	if ((MeterProfile == null) || (ObjectModel == null))

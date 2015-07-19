@@ -32,7 +32,7 @@ public class TASTLRMeter extends TTLRMeter {
 	}
 	
 	@Override
-	protected TStreamChannel[] GetSourceChannels() throws Exception {
+	public TStreamChannel[] GetSourceChannels() throws Exception {
 		if (SensorsModule.InternalSensorsModule.ASTLRChannel == null)
 			throw new IOException("no origin channel"); //. =>
 		if (!SensorsModule.InternalSensorsModule.ASTLRChannel.Enabled)

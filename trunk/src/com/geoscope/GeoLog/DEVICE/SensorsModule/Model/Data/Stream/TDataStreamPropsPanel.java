@@ -2,6 +2,7 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -39,11 +40,13 @@ public class TDataStreamPropsPanel extends Activity {
 	private TSensorsModule SensorsModule;
 	//.
 	private TStreamDescriptor 	DataStreamDescriptor = null;
+    private ArrayList<TChannel> DataStreamChannels = null;
 	//.
 	private TextView lbStreamName;
 	private TextView lbStreamInfo;
 	private TextView lbStreamChannels;
 	//.
+	private TChannelIDs ChannelIDs = null;
 	private ListView 	lvChannels;
 	private int			lvChannels_SelectedIndex = -1;
 	//.
@@ -57,6 +60,13 @@ public class TDataStreamPropsPanel extends Activity {
         super.onCreate(savedInstanceState);
 		//.
     	try {
+            Bundle extras = getIntent().getExtras();
+            if (extras != null) {
+            	byte[] _ChannelIDs = extras.getByteArray("ChannelIDs");
+            	if (_ChannelIDs != null) 
+            		ChannelIDs = new TChannelIDs(_ChannelIDs);
+            }
+    		//.
         	TTracker Tracker = TTracker.GetTracker();
         	if (Tracker == null)
         		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
@@ -64,7 +74,18 @@ public class TDataStreamPropsPanel extends Activity {
         		throw new Exception("sensors module stream model is not defined"); //. => 
         	SensorsModule = Tracker.GeoLog.SensorsModule;
         	//.
-        	DataStreamDescriptor = SensorsModule.Model.Stream; 
+        	DataStreamDescriptor = SensorsModule.Model.Stream;
+        	if (ChannelIDs == null)
+        		DataStreamChannels = DataStreamDescriptor.Channels;
+        	else {
+        		DataStreamChannels = new ArrayList<TChannel>();
+        		int Cnt = ChannelIDs.Count();
+        		for (int I = 0; I < Cnt; I++) {
+        			TChannel Channel = SensorsModule.Model.StreamChannels_GetOneByID(ChannelIDs.Items.get(I));
+        			if (Channel != null) 
+        				DataStreamChannels.add(Channel);
+        		}
+        	}
     		//.
     		requestWindowFeature(Window.FEATURE_NO_TITLE);
             //.
@@ -105,7 +126,7 @@ public class TDataStreamPropsPanel extends Activity {
             });
             //.
             btnGetStreamDescriptor = (Button)findViewById(R.id.btnGetStreamDescriptor);
-            btnGetStreamDescriptor.setVisibility(TGeoLogApplication.DebugOptions_IsDebugging() ? View.VISIBLE : View.GONE);
+            btnGetStreamDescriptor.setVisibility(((ChannelIDs == null) && TGeoLogApplication.DebugOptions_IsDebugging()) ? View.VISIBLE : View.GONE);
             btnGetStreamDescriptor.setOnClickListener(new OnClickListener() {
             	
             	@Override
@@ -140,7 +161,7 @@ public class TDataStreamPropsPanel extends Activity {
 					byte[] ProfileData = extras.getByteArray("ProfileData");
 					//.
             		if (lvChannels_SelectedIndex >= 0) {
-                    	TStreamChannel Channel = (TStreamChannel)DataStreamDescriptor.Channels.get(lvChannels_SelectedIndex);
+                    	TStreamChannel Channel = (TStreamChannel)DataStreamChannels.get(lvChannels_SelectedIndex);
                     	//.
                     	TSourceStreamChannel SourceChannel = Channel.SourceChannel_Get();
                     	if (SourceChannel != null) {
@@ -171,9 +192,9 @@ public class TDataStreamPropsPanel extends Activity {
     			lbStreamInfo.setText(S+DataStreamDescriptor.Info);
     			//.
     			lbStreamChannels.setText(getString(R.string.SChannels1));
-    			String[] lvChannelsItems = new String[DataStreamDescriptor.Channels.size()];
-    			for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++) {
-    				TStreamChannel Channel = (TStreamChannel)DataStreamDescriptor.Channels.get(I);
+    			String[] lvChannelsItems = new String[DataStreamChannels.size()];
+    			for (int I = 0; I < DataStreamChannels.size(); I++) {
+    				TStreamChannel Channel = (TStreamChannel)DataStreamChannels.get(I);
     				lvChannelsItems[I] = Channel.Name;
     				if (Channel.Info.length() > 0)
     					lvChannelsItems[I] += " "+"/"+Channel.Info+"/"; 
@@ -189,7 +210,7 @@ public class TDataStreamPropsPanel extends Activity {
     			}
     			ArrayAdapter<String> lvChannelsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvChannelsItems);             
     			lvChannels.setAdapter(lvChannelsAdapter);
-    			/* for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
+    			/* for (int I = 0; I < DataStreamChannels.size(); I++)
     				lvChannels.setItemChecked(I,true); */
     		}
     		else {
@@ -208,9 +229,9 @@ public class TDataStreamPropsPanel extends Activity {
     	if (DataStreamDescriptor == null)
     		return; //. ->
     	final TChannelIDs Channels = new TChannelIDs();
-		for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
+		for (int I = 0; I < DataStreamChannels.size(); I++)
 			if (lvChannels.isItemChecked(I))
-				Channels.AddID(DataStreamDescriptor.Channels.get(I).ID);
+				Channels.AddID(DataStreamChannels.get(I).ID);
 		if (Channels.Count() == 0)
 			return; // ->
     	//.
@@ -278,7 +299,7 @@ public class TDataStreamPropsPanel extends Activity {
     }
 
     private boolean OpenChannelProfile(int Idx) throws Exception {
-    	TStreamChannel Channel = (TStreamChannel)DataStreamDescriptor.Channels.get(Idx);
+    	TStreamChannel Channel = (TStreamChannel)DataStreamChannels.get(Idx);
     	//.
     	TSourceStreamChannel SourceChannel = Channel.SourceChannel_Get();
     	if (SourceChannel == null)

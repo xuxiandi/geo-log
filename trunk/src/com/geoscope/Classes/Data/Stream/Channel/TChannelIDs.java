@@ -46,7 +46,8 @@ public class TChannelIDs {
 	public byte[] ToByteArray() throws IOException {
 		ByteArrayOutputStream OS = new ByteArrayOutputStream();
 	    try {
-    		for (int I = 0; I < Items.size(); I++) {
+			int Cnt = Items.size();
+			for (int I = 0; I < Cnt; I++) {
     			byte[] BA = TDataConverter.ConvertInt32ToLEByteArray(Items.get(I));
     			OS.write(BA);
     		}
@@ -55,5 +56,13 @@ public class TChannelIDs {
 	    finally {
 	    	OS.close();	    	
 	    }
+	}
+
+	public int[] ToIDArray() throws IOException {
+		int Cnt = Items.size();
+		int[] Result = new int[Cnt];
+		for (int I = 0; I < Cnt; I++)
+			Result[I] = Items.get(I);
+		return Result;
 	}
 }

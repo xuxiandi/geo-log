@@ -32,7 +32,7 @@ public class TAOSSMeter extends TTLRMeter {
 	}
 	
 	@Override
-	protected TStreamChannel[] GetSourceChannels() throws Exception {
+	public TStreamChannel[] GetSourceChannels() throws Exception {
 		if (SensorsModule.InternalSensorsModule.AOSSChannel == null)
 			throw new IOException("no origin channel"); //. =>
 		if (!SensorsModule.InternalSensorsModule.AOSSChannel.Enabled)

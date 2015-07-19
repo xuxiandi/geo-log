@@ -11,6 +11,7 @@ import org.w3c.dom.Node;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 
 public class TModel {
 
@@ -67,5 +68,9 @@ public class TModel {
 		default:
 			throw new Exception("unknown model data version, version: "+Integer.toString(Version)); //. =>
 		}
+	}
+
+	public TChannel StreamChannels_GetOneByID(int ChannelID) {
+		return Stream.Channels_GetOneByID(ChannelID);
 	}
 }

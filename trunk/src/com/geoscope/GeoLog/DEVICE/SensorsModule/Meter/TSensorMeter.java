@@ -19,6 +19,7 @@ import android.content.Context;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
@@ -373,8 +374,17 @@ public class TSensorMeter extends TCancelableThread {
 		SetStatus(STATUS_NOTRUNNING);
 	}
 	
-	protected TStreamChannel[] GetSourceChannels() throws Exception {
+	public TStreamChannel[] GetSourceChannels() throws Exception {
 		return null;
+	}
+	
+	public TChannelIDs GetChannels() throws Exception {
+		TStreamChannel[] Channels = GetSourceChannels();
+		TChannelIDs Result = new TChannelIDs();
+		int Cnt = Channels.length;
+		for (int I = 0; I < Cnt; I++) 
+			Result.AddID(Channels[I].ID);
+		return Result;
 	}
 	
 	protected void DoProcess() throws Exception {

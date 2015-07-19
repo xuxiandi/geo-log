@@ -3,6 +3,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -62,6 +63,7 @@ public class TDataStreamPropsPanel extends Activity {
 	private int					ObjectIndex = -1;
 	//.
 	private TStreamDescriptor 					DataStreamDescriptor = null;
+    private ArrayList<TChannel>					DataStreamChannels = null;
 	//.
 	private TObjectModel.TSensorChannelStatus[] DataStreamChannelsStatus = null;
 	//.
@@ -69,6 +71,7 @@ public class TDataStreamPropsPanel extends Activity {
 	private TextView lbStreamInfo;
 	private TextView lbStreamChannels;
 	//.
+	private TChannelIDs ChannelIDs = null;
 	private ListView 	lvChannels;
 	private int			lvChannels_SelectedIndex = -1;
 	//.
@@ -82,80 +85,87 @@ public class TDataStreamPropsPanel extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 		//.
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-        	ParametersType = extras.getInt("ParametersType");
-        	switch (ParametersType) {
-        	
-        	case PARAMETERS_TYPE_OID:
-            	ObjectID = extras.getLong("ObjectID");
-        		break; //. >
-        		
-        	case PARAMETERS_TYPE_OIDX:
-            	ObjectIndex = extras.getInt("ObjectIndex");
-            	//.
-        		TReflector Reflector = TReflector.GetReflector();
-            	TCoGeoMonitorObject Object = Reflector.Component.CoGeoMonitorObjects.Items[ObjectIndex];
-            	ObjectID = Object.ID;
-        		break; //. >
-        	}
-        }
-		//.
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //.
-        setContentView(R.layout.sensorsmodule_datastream_props_panel);
-        //.
-        lbStreamName = (TextView)findViewById(R.id.lbStreamName);
-        lbStreamInfo = (TextView)findViewById(R.id.lbStreamInfo);
-        lbStreamChannels = (TextView)findViewById(R.id.lbStreamChannels);
-        //.
-        lvChannels = (ListView)findViewById(R.id.lvChannels);
-        lvChannels.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        lvChannels.setOnItemLongClickListener(new OnItemLongClickListener() {
-        	
-        	@Override
-        	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-            	try {
-            		lvChannels_SelectedIndex = arg2;
-            		return (OpenChannelProfile(lvChannels_SelectedIndex));
-				} catch (Exception E) {
-					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-					//.
-					return false; //. ->
-				}
-        	}
-		});
-        //.
-        btnOpenStream = (Button)findViewById(R.id.btnOpenStream);
-        btnOpenStream.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	try {
-            		OpenStream();
-				} catch (Exception E) {
-					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-				}
+    	try {
+            Bundle extras = getIntent().getExtras();
+            if (extras != null) {
+            	ParametersType = extras.getInt("ParametersType");
+            	switch (ParametersType) {
+            	
+            	case PARAMETERS_TYPE_OID:
+                	ObjectID = extras.getLong("ObjectID");
+            		break; //. >
+            		
+            	case PARAMETERS_TYPE_OIDX:
+                	ObjectIndex = extras.getInt("ObjectIndex");
+                	//.
+            		TReflector Reflector = TReflector.GetReflector();
+                	TCoGeoMonitorObject Object = Reflector.Component.CoGeoMonitorObjects.Items[ObjectIndex];
+                	ObjectID = Object.ID;
+            		break; //. >
+            	}
+            	byte[] _ChannelIDs = extras.getByteArray("ChannelIDs");
+            	if (_ChannelIDs != null) 
+            		ChannelIDs = new TChannelIDs(_ChannelIDs);
             }
-        });
-        //.
-        btnGetStreamDescriptor = (Button)findViewById(R.id.btnGetStreamDescriptor);
-        btnGetStreamDescriptor.setVisibility(TGeoLogApplication.DebugOptions_IsDebugging() ? View.VISIBLE : View.GONE);
-        btnGetStreamDescriptor.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	try {
-            		GetStreamDescriptor();
-				} catch (Exception E) {
-					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-				}
-            }
-        });
-    	//.
-    	Updating = new TUpdating(PanelUpdatinginterval);
-    	//.
-    	Updating.StartUpdate();
+    		//.
+    		requestWindowFeature(Window.FEATURE_NO_TITLE);
+            //.
+            setContentView(R.layout.sensorsmodule_datastream_props_panel);
+            //.
+            lbStreamName = (TextView)findViewById(R.id.lbStreamName);
+            lbStreamInfo = (TextView)findViewById(R.id.lbStreamInfo);
+            lbStreamChannels = (TextView)findViewById(R.id.lbStreamChannels);
+            //.
+            lvChannels = (ListView)findViewById(R.id.lvChannels);
+            lvChannels.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+            lvChannels.setOnItemLongClickListener(new OnItemLongClickListener() {
+            	
+            	@Override
+            	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+                	try {
+                		lvChannels_SelectedIndex = arg2;
+                		return (OpenChannelProfile(lvChannels_SelectedIndex));
+    				} catch (Exception E) {
+    					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    					//.
+    					return false; //. ->
+    				}
+            	}
+    		});
+            //.
+            btnOpenStream = (Button)findViewById(R.id.btnOpenStream);
+            btnOpenStream.setOnClickListener(new OnClickListener() {
+            	
+            	@Override
+                public void onClick(View v) {
+                	try {
+                		OpenStream();
+    				} catch (Exception E) {
+    					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    				}
+                }
+            });
+            //.
+            btnGetStreamDescriptor = (Button)findViewById(R.id.btnGetStreamDescriptor);
+            btnGetStreamDescriptor.setVisibility(((ChannelIDs == null) && TGeoLogApplication.DebugOptions_IsDebugging()) ? View.VISIBLE : View.GONE);
+            btnGetStreamDescriptor.setOnClickListener(new OnClickListener() {
+            	
+            	@Override
+                public void onClick(View v) {
+                	try {
+                		GetStreamDescriptor();
+    				} catch (Exception E) {
+    					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    				}
+                }
+            });
+        	//.
+        	Updating = new TUpdating(PanelUpdatinginterval);
+        	//.
+        	Updating.StartUpdate();
+		} catch (Exception E) {
+			Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		}
     }
     
     @Override
@@ -182,7 +192,7 @@ public class TDataStreamPropsPanel extends Activity {
 					final byte[] ProfileData = extras.getByteArray("ProfileData");
 					//.
             		if (lvChannels_SelectedIndex >= 0) {
-                    	final TChannel Channel = DataStreamDescriptor.Channels.get(lvChannels_SelectedIndex);
+                    	final TChannel Channel = DataStreamChannels.get(lvChannels_SelectedIndex);
                     	//.
                     	final TSourceStreamChannel SourceChannel = com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TSourceChannelsProvider.Instance.GetChannel(Channel.GetTypeID());
                     	if (SourceChannel != null) {
@@ -362,14 +372,25 @@ public class TDataStreamPropsPanel extends Activity {
 					        								byte[] ModelData = DC.SensorsModule.SensorsDataValue.Value;
 					        								com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel Model = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.TModel(ModelData);
 					        								DataStreamDescriptor = Model.Stream;
+					        					        	if (ChannelIDs == null)
+					        					        		DataStreamChannels = DataStreamDescriptor.Channels;
+					        					        	else {
+					        					        		DataStreamChannels = new ArrayList<TChannel>();
+					        					        		int Cnt = ChannelIDs.Count();
+					        					        		for (int I = 0; I < Cnt; I++) {
+					        					        			TChannel Channel = Model.StreamChannels_GetOneByID(ChannelIDs.Items.get(I));
+					        					        			if (Channel != null) 
+					        					        				DataStreamChannels.add(Channel);
+					        					        		}
+					        					        	}
 					        								//.
 					        			    				Canceller.Check();
 					        			    				ProcessingCanceller.Check();
 					        								//.
-					        								int Cnt = DataStreamDescriptor.Channels.size();
+					        								int Cnt = DataStreamChannels.size();
 					        								int[] ChannelIDs = new int[Cnt];
 					        								for (int I = 0; I < Cnt; I++)
-					        									ChannelIDs[I] = DataStreamDescriptor.Channels.get(I).ID;
+					        									ChannelIDs[I] = DataStreamChannels.get(I).ID;
 					    									ObjectModel.ObjectController = GSOC;
 					        								DataStreamChannelsStatus = ObjectModel.Sensors_Channels_GetStatus(ChannelIDs); 
 					    								}
@@ -520,9 +541,9 @@ public class TDataStreamPropsPanel extends Activity {
     			lbStreamInfo.setText(S+DataStreamDescriptor.Info);
     			//.
     			lbStreamChannels.setText(getString(R.string.SChannels1));
-    			String[] lvChannelsItems = new String[DataStreamDescriptor.Channels.size()];
-    			for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++) {
-    				TChannel Channel = DataStreamDescriptor.Channels.get(I);
+    			String[] lvChannelsItems = new String[DataStreamChannels.size()];
+    			for (int I = 0; I < DataStreamChannels.size(); I++) {
+    				TChannel Channel = DataStreamChannels.get(I);
     				lvChannelsItems[I] = Channel.Name;
     				if (Channel.Info.length() > 0)
     					lvChannelsItems[I] += " "+"/"+Channel.Info+"/";
@@ -538,7 +559,7 @@ public class TDataStreamPropsPanel extends Activity {
     			}
     			ArrayAdapter<String> lvChannelsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvChannelsItems);             
     			lvChannels.setAdapter(lvChannelsAdapter);
-    			/* for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
+    			/* for (int I = 0; I < DataStreamChannels.size(); I++)
     				lvChannels.setItemChecked(I,true); */
     		}
     		else {
@@ -557,9 +578,9 @@ public class TDataStreamPropsPanel extends Activity {
     	if (DataStreamDescriptor == null)
     		return; //. ->
     	final TChannelIDs Channels = new TChannelIDs();
-		for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
+		for (int I = 0; I < DataStreamChannels.size(); I++)
 			if (lvChannels.isItemChecked(I))
-				Channels.AddID(DataStreamDescriptor.Channels.get(I).ID);
+				Channels.AddID(DataStreamChannels.get(I).ID);
 		if (Channels.Count() == 0)
 			return; // ->
     	//.
@@ -653,7 +674,7 @@ public class TDataStreamPropsPanel extends Activity {
     }
 
     private boolean OpenChannelProfile(int Idx) throws Exception {
-    	final TChannel Channel = DataStreamDescriptor.Channels.get(Idx);
+    	final TChannel Channel = DataStreamChannels.get(Idx);
     	//.
     	final TSourceStreamChannel SourceChannel = com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.TSourceChannelsProvider.Instance.GetChannel(Channel.GetTypeID());
     	if (SourceChannel == null)

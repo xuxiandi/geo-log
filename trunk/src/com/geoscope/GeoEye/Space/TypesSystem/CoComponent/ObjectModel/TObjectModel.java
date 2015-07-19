@@ -20,6 +20,7 @@ import android.graphics.Color;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
@@ -520,6 +521,10 @@ public class TObjectModel {
 	}
 	
 	public byte[] Sensors_Meter_GetProfile(String MeterID) throws Exception {
+		return null;
+	}
+	
+	public TChannelIDs Sensors_Meter_GetChannels(String MeterID) throws Exception {
 		return null;
 	}
 	

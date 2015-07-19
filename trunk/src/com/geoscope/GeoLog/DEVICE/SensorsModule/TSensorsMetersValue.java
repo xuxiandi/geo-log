@@ -145,7 +145,7 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
         	int Version = Integer.parseInt(SA[1]);
         	switch (Version) {
         	
-        	case 1: //. get profile
+        	case 1: //. get a meter profile
             	String MeterID = SA[2];
             	//.
             	TSensorMeter Meter = SensorsModule.Meters.Items_GetItem(MeterID);
@@ -169,6 +169,18 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
         		//.
                 return ToByteArray(); //. ->
         		
+        	case 3: //. get meter channels
+            	MeterID = SA[2];
+            	//.
+            	Meter = SensorsModule.Meters.Items_GetItem(MeterID);
+        		Timestamp = OleDate.UTCCurrentTimestamp();
+        		if (Meter != null) 
+        			Value = Meter.GetChannels().ToByteArray();
+        		else
+        			Value = null;
+        		//.
+                return ToByteArray(); //. ->
+
         	default:
         		Timestamp = OleDate.UTCCurrentTimestamp();
         		Value = null;

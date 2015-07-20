@@ -34,13 +34,13 @@ public class TModule extends TComponent {
     		return null;
     	}
     	
-    	 protected synchronized void PlayNotification(String FileName) throws Exception {
-			 player.reset();
-    		 //.
-    		 player.setDataSource(GetNotificationFolder()+"/"+FileName);
-    		 player.prepare();
-    		 player.start();
-    	 }
+    	protected synchronized void PlayNotification(String FileName) throws Exception {
+    		player.reset();
+    		//.
+    		player.setDataSource(GetNotificationFolder()+"/"+FileName);
+    		player.prepare();
+    		player.start();
+    	}
     }    
     
 	public TModule Parent = null;

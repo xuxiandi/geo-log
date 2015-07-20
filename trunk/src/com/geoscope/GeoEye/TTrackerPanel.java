@@ -90,6 +90,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOIImageValue;
 import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOITextValue;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleConsole;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsArchive;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMetersPanel;
@@ -132,7 +133,9 @@ public class TTrackerPanel extends Activity {
 	private static final int POI_DATAFILE_TYPE_DRAWING 		= 5;
 	private static final int POI_DATAFILE_TYPE_FILE 		= 6;
     
-	public static final int UpdatingInterval = 5000; //. ms
+	public static final int UpdatingInterval = 1000*5; //. seconds
+	
+	public static final int SensorsModule_ControlMeter_RecordingBeeping_Interval = 1000*5; //. seconds 
 	
 	public static final int 	Lock_Timeout 		= 1000*30; //. seconds
 	public static final int 	Lock_DialogTimeout 	= 1000*5; //. seconds
@@ -183,6 +186,7 @@ public class TTrackerPanel extends Activity {
 			public String	MeterToControl = VideoRecorderModuleMeterID;
 			public int 		MeterControl = CONTROL_2TAPSSTART3TAPSSTOP;
 			public int 		MeterControlNotifications = NOTIFICATIONS_VOICE;
+			public boolean 	MeterRecordingBeeping = false;
 		}
 		
 		
@@ -248,8 +252,14 @@ public class TTrackerPanel extends Activity {
 							Node ControlNode = TMyXML.SearchNode(ModuleNode,"Control");
 							if (ControlNode != null) {
 								SensorsModuleConfiguration.MeterToControl = TMyXML.SearchNode(ControlNode,"Meter").getFirstChild().getNodeValue();
+								//.
 								SensorsModuleConfiguration.MeterControl = Integer.parseInt(TMyXML.SearchNode(ControlNode,"ID").getFirstChild().getNodeValue());
+								//.
 								SensorsModuleConfiguration.MeterControlNotifications = Integer.parseInt(TMyXML.SearchNode(ControlNode,"Notifications").getFirstChild().getNodeValue());
+								//.
+								Node node = TMyXML.SearchNode(ControlNode,"RecordingNotification");
+								if (node != null)
+									SensorsModuleConfiguration.MeterRecordingBeeping = (Integer.parseInt(node.getFirstChild().getNodeValue()) != 0);
 							}
 						}
 					}
@@ -312,6 +322,13 @@ public class TTrackerPanel extends Activity {
                 serializer.startTag("", "Notifications");
                 serializer.text(Integer.toString(SensorsModuleConfiguration.MeterControlNotifications));
                 serializer.endTag("", "Notifications");
+                //.
+                serializer.startTag("", "RecordingNotification");
+                V = 0;
+                if (SensorsModuleConfiguration.MeterRecordingBeeping)
+                	V = 1;
+                serializer.text(Integer.toString(V));
+                serializer.endTag("", "RecordingNotification");
                 //.
                 serializer.endTag("", "Control");
                 //.
@@ -646,6 +663,10 @@ public class TTrackerPanel extends Activity {
 	private Vibrator 							Vibrator;
 	//.
 	private TMovementDetectorModule.THittingDetector HittingDetector = null;
+	//.
+	private TSensorsModule.TAudioNotifier 		SensorsModule_AudioNotifier = null;
+	private boolean 							SensorsModule_ControlMeter_flActive = false;
+	private Timer								SensorsModule_ControlMeter_RecordingBeeping = null;
 	//.
 	private TVideoRecorderModule.TAudioNotifier VideoRecorderModule_AudioNotifier = null;
 	
@@ -1461,6 +1482,8 @@ public class TTrackerPanel extends Activity {
     	//.
     	Finalize();
     	//.
+    	SensorsModule_ControlMeter_RecordingBeeping_Stop();
+    	//.
     	Updating_Finish();
     	//.
     	if ((Configuration != null) && Configuration.flChanged) {
@@ -1551,6 +1574,7 @@ public class TTrackerPanel extends Activity {
 				}
 				//.
 				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.IsAudioNotifications() && ((Configuration.SensorsModuleConfiguration.MeterControlNotifications == TConfiguration.NOTIFICATIONS_VOICE) || (Configuration.SensorsModuleConfiguration.MeterControlNotifications == TConfiguration.NOTIFICATIONS_VIBRATION2BITSANDVOICE))) { 
+			    	SensorsModule_AudioNotifier = new TSensorsModule.TAudioNotifier(this);
 			    	VideoRecorderModule_AudioNotifier = new TVideoRecorderModule.TAudioNotifier();
 			    	//.
         			Toast.makeText(TTrackerPanel.this, R.string.SAudioNotificationsAreOn, Toast.LENGTH_LONG).show();  						
@@ -1562,6 +1586,11 @@ public class TTrackerPanel extends Activity {
     }
     
     private void Finalize() {
+		if (SensorsModule_AudioNotifier != null) {
+			SensorsModule_AudioNotifier.Destroy();
+			SensorsModule_AudioNotifier = null;
+		}
+    	//.
 		if (VideoRecorderModule_AudioNotifier != null) {
 			VideoRecorderModule_AudioNotifier.Destroy();
 			VideoRecorderModule_AudioNotifier = null;
@@ -3153,7 +3182,9 @@ public class TTrackerPanel extends Activity {
     	TTracker.GetTracker().GeoLog.GPIModule.SetValue(V);
     }
     
-    public void SensorsModule_ControlMeter_SetActive(boolean flActive) throws Exception {
+    private void SensorsModule_ControlMeter_SetActive(boolean flActive) throws Exception {
+    	if (SensorsModule_ControlMeter_flActive == flActive)
+    		return; //. ->
     	TTracker Tracker = TTracker.GetTracker(); 
     	if ((Tracker != null) && Tracker.GeoLog.IsEnabled()) {
         	TSensorMeter ControlMeter = Tracker.GeoLog.SensorsModule.Meters.Items_GetItem(Configuration.SensorsModuleConfiguration.MeterToControl);
@@ -3161,6 +3192,30 @@ public class TTrackerPanel extends Activity {
         		ControlMeter.SetActive(flActive);
         	else 
 				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(flActive, false);
+    	}
+    	SensorsModule_ControlMeter_flActive = flActive;
+    	//.
+    	if (SensorsModule_ControlMeter_flActive) {
+    		MessageHandler.obtainMessage(TTrackerPanel.MESSAGE_METER_RECORDING_BEEP).sendToTarget();
+    		//.
+    		if (Configuration.SensorsModuleConfiguration.MeterRecordingBeeping)
+        		SensorsModule_ControlMeter_RecordingBeeping_Start();
+    	}
+    	else
+    		SensorsModule_ControlMeter_RecordingBeeping_Stop();
+    }
+    
+    private void SensorsModule_ControlMeter_RecordingBeeping_Start() {
+    	SensorsModule_ControlMeter_RecordingBeeping_Stop();
+    	//.
+    	SensorsModule_ControlMeter_RecordingBeeping = new Timer();
+    	SensorsModule_ControlMeter_RecordingBeeping.schedule(new TMeterRecordingBeepingTask(this),SensorsModule_ControlMeter_RecordingBeeping_Interval,SensorsModule_ControlMeter_RecordingBeeping_Interval);
+    }
+    
+    private void SensorsModule_ControlMeter_RecordingBeeping_Stop() {
+    	if (SensorsModule_ControlMeter_RecordingBeeping != null) {
+    		SensorsModule_ControlMeter_RecordingBeeping.cancel();
+    		SensorsModule_ControlMeter_RecordingBeeping = null;
     	}
     }
     
@@ -3448,6 +3503,7 @@ public class TTrackerPanel extends Activity {
 	private static final int MESSAGE_UPDATEINFO 				= 1;
 	private static final int MESSAGE_SHOWMESSAGE 				= 2;
 	private static final int MESSAGE_DOONAFTERCONTROLCOMMAND	= 3;
+	private static final int MESSAGE_METER_RECORDING_BEEP		= 4;
 	
     private final Handler MessageHandler = new Handler() {
         @Override
@@ -3471,6 +3527,11 @@ public class TTrackerPanel extends Activity {
             		TControlDescriptor CD = (TControlDescriptor)msg.obj;
             		ControlCommand_DoNotifyOnAfterCommand(CD.Command,CD.Method);
                 	break; //. >
+                	
+                case MESSAGE_METER_RECORDING_BEEP:
+                	if (SensorsModule_ControlMeter_flActive && (SensorsModule_AudioNotifier != null))
+                		SensorsModule_AudioNotifier.Notification_MeterRecordingBeep();
+                	break; //. >
                }
         	}
         	catch (Throwable E) {
@@ -3490,7 +3551,28 @@ public class TTrackerPanel extends Activity {
         @Override
         public void run() {
         	try {
-            	_TrackerPanel.MessageHandler.obtainMessage(TTrackerPanel.MESSAGE_UPDATEINFO).sendToTarget();
+        		if (flVisible)
+        			_TrackerPanel.MessageHandler.obtainMessage(TTrackerPanel.MESSAGE_UPDATEINFO).sendToTarget();
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
+        }
+    }   
+
+    private class TMeterRecordingBeepingTask extends TimerTask {
+    	
+        private TTrackerPanel _TrackerPanel;
+        
+        public TMeterRecordingBeepingTask(TTrackerPanel pTrackerPanel) {
+            _TrackerPanel = pTrackerPanel;
+        }
+        
+        @Override
+        public void run() {
+        	try {
+            	if (SensorsModule_ControlMeter_flActive)
+                	_TrackerPanel.MessageHandler.obtainMessage(TTrackerPanel.MESSAGE_METER_RECORDING_BEEP).sendToTarget();
         	}
         	catch (Throwable E) {
         		TGeoLogApplication.Log_WriteError(E);

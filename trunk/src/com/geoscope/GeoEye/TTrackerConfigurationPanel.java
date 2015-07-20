@@ -6,9 +6,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.Window;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -28,6 +30,7 @@ public class TTrackerConfigurationPanel extends Activity {
 	private Spinner 			spMeterToControl;
 	private Spinner 			spMeterControl;
 	private Spinner 			spControlNotifications;
+	private CheckBox			cbRecordingBeeping;
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,6 +197,24 @@ public class TTrackerConfigurationPanel extends Activity {
     		            Toast.makeText(TTrackerConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
     		    	}
                 }
+            });    
+            //.
+            cbRecordingBeeping = (CheckBox)findViewById(R.id.cbRecordingBeeping);
+            cbRecordingBeeping.setOnClickListener(new OnClickListener() {
+            	
+                @Override
+                public void onClick(View v) {
+                	try {
+                    	boolean checked = ((CheckBox)v).isChecked();
+	                    //.
+    	        		Configuration.SensorsModuleConfiguration.MeterRecordingBeeping = checked;
+        	    		Configuration.Save();
+            	        setResult(Activity.RESULT_OK);
+                	}
+    		    	catch (Exception E) {
+    		            Toast.makeText(TTrackerConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    	}
+                }
             });        
             //.
             Update();
@@ -258,5 +279,7 @@ public class TTrackerConfigurationPanel extends Activity {
             spControlNotifications.setSelection(3);
         	break; //. >
         }
+        //.
+        cbRecordingBeeping.setChecked(Configuration.SensorsModuleConfiguration.MeterRecordingBeeping);
     }
 }

@@ -16,13 +16,12 @@ public class TGPSTLRMeter extends TTLRMeter {
 	public static final String ContainerTypeID = "";
 	//.
 	public static final String Name = "Geo-location track";
-	public static final String Info = "GPS telemetry";
 	
 	public static class TMyProfile extends TProfile {
 	}
 	
-	public TGPSTLRMeter(TSensorsModule pSensorsModule, String pID, String pProfileFolder) throws Exception {
-		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
+	public TGPSTLRMeter(TSensorsModule pSensorsModule, String pID, String pInfo, String pProfileFolder) throws Exception {
+		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,pInfo), TMyProfile.class, pProfileFolder);
 	}
 	
 	@Override
@@ -31,7 +30,7 @@ public class TGPSTLRMeter extends TTLRMeter {
 	}
 	
 	@Override
-	public TStreamChannel[] GetSourceChannels() throws Exception {
+	public TStreamChannel[] GetChannels() throws Exception {
 		if (SensorsModule.InternalSensorsModule.GPSChannel == null)
 			throw new IOException("no origin channel"); //. =>
 		if (!SensorsModule.InternalSensorsModule.GPSChannel.Enabled)

@@ -234,7 +234,7 @@ public class TAACChannel extends TStreamChannel {
 		Kind = TChannel.CHANNEL_KIND_OUT;
 		DataFormat = 0;
 		Name = "Audio";
-		Info = "AAC channel";
+		Info = "";
 		Size = 0;
 		Configuration = "";
 		Parameters = "";

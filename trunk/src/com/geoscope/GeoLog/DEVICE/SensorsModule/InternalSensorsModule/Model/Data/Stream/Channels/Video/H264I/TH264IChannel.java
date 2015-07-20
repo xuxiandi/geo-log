@@ -283,7 +283,7 @@ public class TH264IChannel extends TStreamChannel {
 		Kind = TChannel.CHANNEL_KIND_OUT;
 		DataFormat = 0;
 		Name = "Video";
-		Info = "H264 channel";
+		Info = "";
 		Size = 0;
 		Configuration = "";
 		Parameters = "";

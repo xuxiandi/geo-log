@@ -331,7 +331,7 @@ public class TSensorsMetersPanel extends Activity {
     				lvItems[I] = MetersInfo[I].Descriptor.Name;
     				if (MetersInfo[I].Descriptor.Info.length() > 0)
     					lvItems[I] += " "+"/"+MetersInfo[I].Descriptor.Info+"/"; 
-					lvItems[I] += "  "+TSensorMeter.STATUS_GetString(MetersInfo[I].Status, this); 
+					lvItems[I] += "   "+"["+TSensorMeter.STATUS_GetString(MetersInfo[I].Status, this)+"]"; 
     			}
     			ArrayAdapter<String> lvItemsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvItems);             
     			lvMeters.setAdapter(lvItemsAdapter);

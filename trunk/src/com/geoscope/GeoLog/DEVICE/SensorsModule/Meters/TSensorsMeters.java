@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
@@ -14,6 +15,9 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ASTLR.TASTLRMet
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TECTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.GPSTLR.TGPSTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Video.TVideoMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 
 public class TSensorsMeters {
 
@@ -47,13 +51,197 @@ public class TSensorsMeters {
 	private void CreateMeters() throws Exception {
 		Items_Clear();
 		//.
-		TECTLRMeter 	ECTLRMeter 	= new TECTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(ECTLRMeter);
-		TASTLRMeter 	ASTLRMeter 	= new TASTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(ASTLRMeter);
-		TAOSSMeter 		AOSSMeter 	= new TAOSSMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(AOSSMeter);
-		TGPSTLRMeter	GPSTLRMeter = new TGPSTLRMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(GPSTLRMeter);
-		TAudioMeter		AudioMeter	= new TAudioMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(AudioMeter);
-		TVideoMeter		VideoMeter	= new TVideoMeter(SensorsModule, 	"0", 	ProfileFolder); 	Items_AddItem(VideoMeter);
-		TAVMeter 		AVMeter		= new TAVMeter(SensorsModule, 		"0",	ProfileFolder); 	Items_AddItem(AVMeter);
+		TECTLRMeter ECTLRMeter = new TECTLRMeter(SensorsModule, "0", "", ProfileFolder); 
+		Items_AddItem(ECTLRMeter);
+		//.
+		TASTLRMeter ASTLRMeter = new TASTLRMeter(SensorsModule, "0", "", ProfileFolder); 	
+		Items_AddItem(ASTLRMeter);
+		//.
+		TAOSSMeter AOSSMeter = new TAOSSMeter(SensorsModule, "0", "", ProfileFolder); 
+		Items_AddItem(AOSSMeter);
+		//.
+		TGPSTLRMeter GPSTLRMeter = new TGPSTLRMeter(SensorsModule, "0", "", ProfileFolder); 	
+		Items_AddItem(GPSTLRMeter);
+		//.
+		TAudioMeter	AudioMeter = new TAudioMeter(SensorsModule, "0", "normal quality", ProfileFolder) {
+			
+			@Override
+			public TStreamChannel[] GetChannels() throws Exception {
+				SourceChannel = SensorsModule.InternalSensorsModule.AACChannel; 
+				if (SourceChannel == null)
+					throw new IOException("no source channel"); //. =>
+				if (!SourceChannel.Enabled)
+					throw new IOException("the source channel is disabled"); //. =>
+				Channel = (TAACChannel)SourceChannel.DestinationChannel_Get(); 	
+				if (Channel == null)
+					throw new IOException("no source channel"); //. =>
+				return (new TStreamChannel[] {Channel}); 	
+			}
+		}; 	
+		Items_AddItem(AudioMeter);
+		//.
+		AudioMeter = new TAudioMeter(SensorsModule, "LowQuality", "low quality", ProfileFolder) {
+
+			@Override
+			public TStreamChannel[] GetChannels() throws Exception {
+				SourceChannel = SensorsModule.InternalSensorsModule.AACChannelLowQuality; 
+				if (SourceChannel == null)
+					throw new IOException("no source channel"); //. =>
+				if (!SourceChannel.Enabled)
+					throw new IOException("the source channel is disabled"); //. =>
+				Channel = (TAACChannel)SourceChannel.DestinationChannel_Get(); 	
+				if (Channel == null)
+					throw new IOException("no source channel"); //. =>
+				return (new TStreamChannel[] {Channel}); 	
+			};
+		}; 
+		Items_AddItem(AudioMeter);
+		//.
+		AudioMeter = new TAudioMeter(SensorsModule, "HighQuality", "high quality", ProfileFolder) {
+
+			@Override
+			public TStreamChannel[] GetChannels() throws Exception {
+				SourceChannel = SensorsModule.InternalSensorsModule.AACChannelHighQuality; 
+				if (SourceChannel == null)
+					throw new IOException("no source channel"); //. =>
+				if (!SourceChannel.Enabled)
+					throw new IOException("the source channel is disabled"); //. =>
+				Channel = (TAACChannel)SourceChannel.DestinationChannel_Get(); 	
+				if (Channel == null)
+					throw new IOException("no source channel"); //. =>
+				return (new TStreamChannel[] {Channel}); 	
+			};
+		}; 
+		Items_AddItem(AudioMeter);
+		//.
+		TVideoMeter	 VideoMeter	= new TVideoMeter(SensorsModule, "0", "normal quality", ProfileFolder) {
+			
+			@Override
+			public TStreamChannel[] GetChannels() throws Exception {
+				SourceChannel = SensorsModule.InternalSensorsModule.H264IChannel;
+				if (SourceChannel == null)
+					throw new IOException("no source channel"); //. =>
+				if (!SourceChannel.Enabled)
+					throw new IOException("the source channel is disabled"); //. =>
+				Channel = (TH264IChannel)SourceChannel.DestinationChannel_Get(); 	
+				if (Channel == null)
+					throw new IOException("no source channel"); //. =>
+				return (new TStreamChannel[] {Channel}); 	
+			};
+		};
+		Items_AddItem(VideoMeter);
+		//.
+		VideoMeter	= new TVideoMeter(SensorsModule, "LowQuality", "low quality", ProfileFolder) {
+			
+			@Override
+			public TStreamChannel[] GetChannels() throws Exception {
+				SourceChannel = SensorsModule.InternalSensorsModule.H264IChannelLowQuality;
+				if (SourceChannel == null)
+					throw new IOException("no source channel"); //. =>
+				if (!SourceChannel.Enabled)
+					throw new IOException("the source channel is disabled"); //. =>
+				Channel = (TH264IChannel)SourceChannel.DestinationChannel_Get(); 	
+				if (Channel == null)
+					throw new IOException("no source channel"); //. =>
+				return (new TStreamChannel[] {Channel}); 	
+			};
+		};
+		Items_AddItem(VideoMeter);
+		//.
+		VideoMeter	= new TVideoMeter(SensorsModule, "HighQuality", "high quality", ProfileFolder) {
+			
+			@Override
+			public TStreamChannel[] GetChannels() throws Exception {
+				SourceChannel = SensorsModule.InternalSensorsModule.H264IChannelHighQuality;
+				if (SourceChannel == null)
+					throw new IOException("no source channel"); //. =>
+				if (!SourceChannel.Enabled)
+					throw new IOException("the source channel is disabled"); //. =>
+				Channel = (TH264IChannel)SourceChannel.DestinationChannel_Get(); 	
+				if (Channel == null)
+					throw new IOException("no source channel"); //. =>
+				return (new TStreamChannel[] {Channel}); 	
+			};
+		};
+		Items_AddItem(VideoMeter);
+		//.
+		TAVMeter AVMeter = new TAVMeter(SensorsModule, "0", "normal quality", ProfileFolder) {
+			
+			@Override
+			public TStreamChannel[] GetChannels() throws Exception {
+				AudioSourceChannel = SensorsModule.InternalSensorsModule.AACChannel; 
+				if (AudioSourceChannel == null)
+					throw new IOException("no source audio channel"); //. =>
+				if (!AudioSourceChannel.Enabled)
+					throw new IOException("the source audio channel is disabled"); //. =>
+				AudioChannel = (TAACChannel)AudioSourceChannel.DestinationChannel_Get(); 	
+				if (AudioChannel == null)
+					throw new IOException("no source audio channel"); //. =>
+				//.
+				VideoSourceChannel = SensorsModule.InternalSensorsModule.H264IChannel;
+				if (VideoSourceChannel == null)
+					throw new IOException("no source video channel"); //. =>
+				if (!VideoSourceChannel.Enabled)
+					throw new IOException("the source video channel is disabled"); //. =>
+				VideoChannel = (TH264IChannel)VideoSourceChannel.DestinationChannel_Get(); 	
+				if (VideoChannel == null)
+					throw new IOException("no source video channel"); //. =>
+				return (new TStreamChannel[] {AudioChannel,VideoChannel}); 	
+			}
+		}; 	
+		Items_AddItem(AVMeter);
+		//.
+		AVMeter = new TAVMeter(SensorsModule, "LowQuality", "low quality", ProfileFolder) {
+			
+			@Override
+			public TStreamChannel[] GetChannels() throws Exception {
+				AudioSourceChannel = SensorsModule.InternalSensorsModule.AACChannelLowQuality; 
+				if (AudioSourceChannel == null)
+					throw new IOException("no source audio channel"); //. =>
+				if (!AudioSourceChannel.Enabled)
+					throw new IOException("the source audio channel is disabled"); //. =>
+				AudioChannel = (TAACChannel)AudioSourceChannel.DestinationChannel_Get(); 	
+				if (AudioChannel == null)
+					throw new IOException("no source audio channel"); //. =>
+				//.
+				VideoSourceChannel = SensorsModule.InternalSensorsModule.H264IChannelLowQuality;
+				if (VideoSourceChannel == null)
+					throw new IOException("no source video channel"); //. =>
+				if (!VideoSourceChannel.Enabled)
+					throw new IOException("the source video channel is disabled"); //. =>
+				VideoChannel = (TH264IChannel)VideoSourceChannel.DestinationChannel_Get(); 	
+				if (VideoChannel == null)
+					throw new IOException("no source video channel"); //. =>
+				return (new TStreamChannel[] {AudioChannel,VideoChannel}); 	
+			}
+		};
+		Items_AddItem(AVMeter);
+		//.
+		AVMeter = new TAVMeter(SensorsModule, "HighQuality", "high quality", ProfileFolder) {
+			
+			@Override
+			public TStreamChannel[] GetChannels() throws Exception {
+				AudioSourceChannel = SensorsModule.InternalSensorsModule.AACChannelHighQuality; 
+				if (AudioSourceChannel == null)
+					throw new IOException("no source audio channel"); //. =>
+				if (!AudioSourceChannel.Enabled)
+					throw new IOException("the source audio channel is disabled"); //. =>
+				AudioChannel = (TAACChannel)AudioSourceChannel.DestinationChannel_Get(); 	
+				if (AudioChannel == null)
+					throw new IOException("no source audio channel"); //. =>
+				//.
+				VideoSourceChannel = SensorsModule.InternalSensorsModule.H264IChannelHighQuality;
+				if (VideoSourceChannel == null)
+					throw new IOException("no source video channel"); //. =>
+				if (!VideoSourceChannel.Enabled)
+					throw new IOException("the source video channel is disabled"); //. =>
+				VideoChannel = (TH264IChannel)VideoSourceChannel.DestinationChannel_Get(); 	
+				if (VideoChannel == null)
+					throw new IOException("no source video channel"); //. =>
+				return (new TStreamChannel[] {AudioChannel,VideoChannel}); 	
+			}
+		};
+		Items_AddItem(AVMeter);
 	}
 	
 	private void Items_AddItem(TSensorMeter Meter) {

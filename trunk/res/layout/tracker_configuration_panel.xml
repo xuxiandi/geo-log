@@ -41,10 +41,30 @@
             android:layout_height="wrap_content"
             android:background="#ff999999"
             android:gravity="center"
-            android:text="@string/SVideoRecorder1"
+            android:text="@string/SRecorders"
             android:textColor="#ff000000"
             android:textSize="18sp" >
         </TextView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="left|center_vertical"
+                android:text="@string/SMeterToControl"
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/spMeterToControl"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
@@ -53,7 +73,7 @@
             android:textSize="18sp" />
 
         <Spinner
-            android:id="@+id/spVideoRecorderModuleControl"
+            android:id="@+id/spMeterControl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -64,7 +84,7 @@
             android:textSize="18sp" />
 
         <Spinner
-            android:id="@+id/spVideoRecorderModuleNotifications"
+            android:id="@+id/spControlNotifications"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>

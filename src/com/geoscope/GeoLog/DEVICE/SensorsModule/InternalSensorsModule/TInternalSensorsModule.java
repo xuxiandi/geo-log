@@ -727,8 +727,12 @@ public class TInternalSensorsModule extends TModule {
 	public TGPSChannel 	GPSChannel = null;
 	//.
 	public TAACChannel 	AACChannel = null;
+	public TAACChannel 	AACChannelLowQuality = null;
+	public TAACChannel 	AACChannelHighQuality = null;
 	//.
 	public TH264IChannel H264IChannel = null;
+	public TH264IChannel H264IChannelLowQuality = null;
+	public TH264IChannel H264IChannelHighQuality = null;
 	
     public TInternalSensorsModule(TSensorsModule pSensorsModule) throws Exception {
     	super(pSensorsModule);
@@ -936,10 +940,28 @@ public class TInternalSensorsModule extends TModule {
 		Model.Stream.Channels.add(GPSChannel);
 		//.
 		AACChannel = new TAACChannel(this, 6/*ID*/);
+		AACChannel.Info = "normal quality";
 		Model.Stream.Channels.add(AACChannel);
 		//.
+		AACChannelLowQuality = new TAACChannel(this, 11/*ID*/);
+		AACChannelLowQuality.Info = "low quality";
+		Model.Stream.Channels.add(AACChannelLowQuality);
+		//.
+		AACChannelHighQuality = new TAACChannel(this, 12/*ID*/);
+		AACChannelHighQuality.Info = "high quality";
+		Model.Stream.Channels.add(AACChannelHighQuality);
+		//.
 		H264IChannel = new TH264IChannel(this, 7/*ID*/);
+		H264IChannel.Info = "normal quality";
 		Model.Stream.Channels.add(H264IChannel);
+		//.
+		H264IChannelLowQuality = new TH264IChannel(this, 13/*ID*/);
+		H264IChannelLowQuality.Info = "low quality";
+		Model.Stream.Channels.add(H264IChannelLowQuality);
+		//.
+		H264IChannelHighQuality = new TH264IChannel(this, 14/*ID*/);
+		H264IChannelHighQuality.Info = "high quality";
+		Model.Stream.Channels.add(H264IChannelHighQuality);
     }
     
     private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel GetDestinationADSChannel() {

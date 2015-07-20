@@ -91,6 +91,7 @@ import com.geoscope.GeoLog.DEVICE.GPSModule.TMapPOITextValue;
 import com.geoscope.GeoLog.DEVICE.MovementDetectorModule.TMovementDetectorModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.USBPluginModule.TUSBPluginModuleConsole;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsArchive;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMetersPanel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
@@ -106,8 +107,8 @@ public class TTrackerPanel extends Activity {
 	private static final int CONTROL_METHOD_VOICE	= 1;
 	private static final int CONTROL_METHOD_TAP		= 2;
 	
-	private static final int CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_START	= 1;
-	private static final int CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH 	= 2;
+	private static final int CONTROL_COMMAND_SENSORSMODULE_METER_START	= 1;
+	private static final int CONTROL_COMMAND_SENSORSMODULE_METER_FINISH = 2;
 	
 	private static final int UPDATE_CONFIGURATION			= 1;
 	private static final int SHOW_NEWPOIPANEL				= 2;
@@ -157,6 +158,16 @@ public class TTrackerPanel extends Activity {
 	
 		public static String FileName = "TrackerConfiguration.xml";
 		
+		
+		public static final int CONTROL_NONE 					= 0;
+		public static final int CONTROL_2TAPSSTARTMANUALSTOP 	= 1;
+		public static final int CONTROL_2TAPSSTART3TAPSSTOP 	= 2;
+		
+		public static final int NOTIFICATIONS_NONE 						= 0;
+		public static final int NOTIFICATIONS_VIBRATION2BITS 			= 1;
+		public static final int NOTIFICATIONS_VOICE 					= 2;
+		public static final int NOTIFICATIONS_VIBRATION2BITSANDVOICE	= 3;
+		
 		public static class TGPSModuleConfiguration {
 			
 			public static final int MapPOI_DataNameMaxSize = 100;
@@ -165,26 +176,20 @@ public class TTrackerPanel extends Activity {
 			public boolean MapPOI_flDataName = false;
 		}
 		
-		public static class TVideoRecorderModuleConfiguration {
+		public static class TSensorsModuleConfiguration {
 			
-			public static final int CONTROL_NONE 					= 0;
-			public static final int CONTROL_2TAPSSTARTMANUALSTOP 	= 1;
-			public static final int CONTROL_2TAPSSTART3TAPSSTOP 	= 2;
+			public static final String VideoRecorderModuleMeterID = "VideoRecorderModule";
 			
-			public static final int NOTIFICATIONS_NONE 						= 0;
-			public static final int NOTIFICATIONS_VIBRATION2BITS 			= 1;
-			public static final int NOTIFICATIONS_VOICE 					= 2;
-			public static final int NOTIFICATIONS_VIBRATION2BITSANDVOICE	= 3;
-			
-			public int Control = CONTROL_2TAPSSTART3TAPSSTOP;
-			public int Notifications = NOTIFICATIONS_VOICE;
+			public String	MeterToControl = VideoRecorderModuleMeterID;
+			public int 		MeterControl = CONTROL_2TAPSSTART3TAPSSTOP;
+			public int 		MeterControlNotifications = NOTIFICATIONS_VOICE;
 		}
 		
 		
 		public String ConfigurationFileName;
 		//.
-		public TGPSModuleConfiguration				GPSModuleConfiguration = new TGPSModuleConfiguration();
-		public TVideoRecorderModuleConfiguration 	VideoRecorderModuleConfiguration = new TVideoRecorderModuleConfiguration();
+		public TGPSModuleConfiguration		GPSModuleConfiguration = new TGPSModuleConfiguration();
+		public TSensorsModuleConfiguration 	SensorsModuleConfiguration = new TSensorsModuleConfiguration();
 		//.
 		public boolean flChanged = false;
 		
@@ -196,8 +201,8 @@ public class TTrackerPanel extends Activity {
 			//. defaults
 			GPSModuleConfiguration.MapPOI_flDataName = false;
 			//.
-			VideoRecorderModuleConfiguration.Control = TVideoRecorderModuleConfiguration.CONTROL_2TAPSSTART3TAPSSTOP;
-			VideoRecorderModuleConfiguration.Notifications = TVideoRecorderModuleConfiguration.NOTIFICATIONS_VOICE;
+			SensorsModuleConfiguration.MeterControl = TConfiguration.CONTROL_2TAPSSTART3TAPSSTOP;
+			SensorsModuleConfiguration.MeterControlNotifications = TConfiguration.NOTIFICATIONS_VOICE;
 			//.
 			File F = new File(ConfigurationFileName);
 			if (F.exists()) {
@@ -238,10 +243,14 @@ public class TTrackerPanel extends Activity {
 							GPSModuleConfiguration.MapPOI_flDataName = (Integer.parseInt(TMyXML.SearchNode(Node,"DataName").getFirstChild().getNodeValue()) != 0);
 						}
 						//.
-						ModuleNode = TMyXML.SearchNode(DeviceNode,"VideoRecorderModule");
+						ModuleNode = TMyXML.SearchNode(DeviceNode,"SensorsModule");
 						if (ModuleNode != null) {
-							VideoRecorderModuleConfiguration.Control = Integer.parseInt(TMyXML.SearchNode(ModuleNode,"Control").getFirstChild().getNodeValue());
-							VideoRecorderModuleConfiguration.Notifications = Integer.parseInt(TMyXML.SearchNode(ModuleNode,"Notifications").getFirstChild().getNodeValue());
+							Node ControlNode = TMyXML.SearchNode(ModuleNode,"Control");
+							if (ControlNode != null) {
+								SensorsModuleConfiguration.MeterToControl = TMyXML.SearchNode(ControlNode,"Meter").getFirstChild().getNodeValue();
+								SensorsModuleConfiguration.MeterControl = Integer.parseInt(TMyXML.SearchNode(ControlNode,"ID").getFirstChild().getNodeValue());
+								SensorsModuleConfiguration.MeterControlNotifications = Integer.parseInt(TMyXML.SearchNode(ControlNode,"Notifications").getFirstChild().getNodeValue());
+							}
 						}
 					}
 					catch (Exception E) {
@@ -287,18 +296,26 @@ public class TTrackerPanel extends Activity {
                 serializer.endTag("", "MapPOI");
                 //.
                 serializer.endTag("", "GPSModule");
-    	        //. VideoRecorderModule
-                serializer.startTag("", "VideoRecorderModule");
+    	        //. 
+                serializer.startTag("", "SensorsModule");
     	        //.
                 serializer.startTag("", "Control");
-                serializer.text(Integer.toString(VideoRecorderModuleConfiguration.Control));
-                serializer.endTag("", "Control");
+    	        //.
+                serializer.startTag("", "Meter");
+                serializer.text(SensorsModuleConfiguration.MeterToControl);
+                serializer.endTag("", "Meter");
+    	        //.
+                serializer.startTag("", "ID");
+                serializer.text(Integer.toString(SensorsModuleConfiguration.MeterControl));
+                serializer.endTag("", "ID");
     	        //.
                 serializer.startTag("", "Notifications");
-                serializer.text(Integer.toString(VideoRecorderModuleConfiguration.Notifications));
+                serializer.text(Integer.toString(SensorsModuleConfiguration.MeterControlNotifications));
                 serializer.endTag("", "Notifications");
                 //.
-                serializer.endTag("", "VideoRecorderModule");
+                serializer.endTag("", "Control");
+                //.
+                serializer.endTag("", "SensorsModule");
                 //.
                 serializer.endTag("", "DEVICE");
                 //.
@@ -1048,9 +1065,9 @@ public class TTrackerPanel extends Activity {
 					Tracker.GeoLog.VideoRecorderModule.SetRecorderState(flSet, true);
 					//.
 					if (flSet)
-						ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_START,CONTROL_METHOD_DEFAULT);
+						ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_SENSORSMODULE_METER_START,CONTROL_METHOD_DEFAULT);
 					else
-						ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH,CONTROL_METHOD_DEFAULT);
+						ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_SENSORSMODULE_METER_FINISH,CONTROL_METHOD_DEFAULT);
 				}
 				catch (Exception E) {
 					String S = E.getMessage();
@@ -1466,7 +1483,7 @@ public class TTrackerPanel extends Activity {
 				if (Tracker.GeoLog.IsEnabled() && TVoiceCommandModule.TRecognizer.Available() && Tracker.GeoLog.AudioModule.VoiceCommandModule.flEnabled)
 					VoiceCommandHandler_StartInitializing();
 				//.
-				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.MovementDetectorModule.HitDetector_flEnabled && ((Configuration.VideoRecorderModuleConfiguration.Control == TConfiguration.TVideoRecorderModuleConfiguration.CONTROL_2TAPSSTARTMANUALSTOP) || (Configuration.VideoRecorderModuleConfiguration.Control == TConfiguration.TVideoRecorderModuleConfiguration.CONTROL_2TAPSSTART3TAPSSTOP))) {
+				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.MovementDetectorModule.HitDetector_flEnabled && ((Configuration.SensorsModuleConfiguration.MeterControl == TConfiguration.CONTROL_2TAPSSTARTMANUALSTOP) || (Configuration.SensorsModuleConfiguration.MeterControl == TConfiguration.CONTROL_2TAPSSTART3TAPSSTOP))) {
 			    	HittingDetector = new TMovementDetectorModule.THittingDetector(Tracker.GeoLog.MovementDetectorModule, new TMovementDetectorModule.THittingDetector.TDoOnHitHandler() {
 
 			    		@Override
@@ -1481,13 +1498,9 @@ public class TTrackerPanel extends Activity {
 			    				
 			    				@Override
 			    				public void Process() throws Exception {
-				            		TTracker Tracker = TTracker.GetTracker();
-				    		    	if (Tracker == null)
-				    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
-				    		    	//.
-				    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true, false);
+				    		    	SensorsModule_ControlMeter_SetActive(true);
 									//.
-				    				ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_START,CONTROL_METHOD_TAP);
+				    				ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_SENSORSMODULE_METER_START,CONTROL_METHOD_TAP);
 			    				}
 			    				
 			    				@Override
@@ -1507,18 +1520,14 @@ public class TTrackerPanel extends Activity {
 			    		
 			    		@Override
 			    		public void DoOn3Hit() {
-			    			if (Configuration.VideoRecorderModuleConfiguration.Control == TConfiguration.TVideoRecorderModuleConfiguration.CONTROL_2TAPSSTART3TAPSSTOP) {
+			    			if (Configuration.SensorsModuleConfiguration.MeterControl == TConfiguration.CONTROL_2TAPSSTART3TAPSSTOP) {
 				    			TAsyncProcessing Processing = new TAsyncProcessing() {
 				    				
 				    				@Override
 				    				public void Process() throws Exception {
-					            		TTracker Tracker = TTracker.GetTracker();
-					    		    	if (Tracker == null)
-					    		    		throw new Exception(TTrackerPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
-					    		    	//.
-					    				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false, false);
+				    					SensorsModule_ControlMeter_SetActive(false);
 										//.
-										ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH,CONTROL_METHOD_TAP);
+										ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_SENSORSMODULE_METER_FINISH,CONTROL_METHOD_TAP);
 				    				}
 				    				
 				    				@Override
@@ -1541,7 +1550,7 @@ public class TTrackerPanel extends Activity {
         			Toast.makeText(TTrackerPanel.this, R.string.STapControlIsOn, Toast.LENGTH_LONG).show();  						
 				}
 				//.
-				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.IsAudioNotifications() && ((Configuration.VideoRecorderModuleConfiguration.Notifications == TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VOICE) || (Configuration.VideoRecorderModuleConfiguration.Notifications == TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VIBRATION2BITSANDVOICE))) { 
+				if (Tracker.GeoLog.IsEnabled() && Tracker.GeoLog.IsAudioNotifications() && ((Configuration.SensorsModuleConfiguration.MeterControlNotifications == TConfiguration.NOTIFICATIONS_VOICE) || (Configuration.SensorsModuleConfiguration.MeterControlNotifications == TConfiguration.NOTIFICATIONS_VIBRATION2BITSANDVOICE))) { 
 			    	VideoRecorderModule_AudioNotifier = new TVideoRecorderModule.TAudioNotifier();
 			    	//.
         			Toast.makeText(TTrackerPanel.this, R.string.SAudioNotificationsAreOn, Toast.LENGTH_LONG).show();  						
@@ -2453,18 +2462,18 @@ public class TTrackerPanel extends Activity {
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_ON)) {
 			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
 			//.
-			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(true, false);
+			SensorsModule_ControlMeter_SetActive(true);
 			//.
-			ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_START,CONTROL_METHOD_VOICE);
+			ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_SENSORSMODULE_METER_START,CONTROL_METHOD_VOICE);
 			return; //. ->
 		}
 		//.
 		if (Command.equals(TTrackerPanelVoiceCommands.COMMAND_VIDEORECORDERMODULE_RECORDING_OFF)) {
 			VoiceCommandHandler_NotifyOnBeforeCommand(Command);
 			//.
-			Tracker.GeoLog.VideoRecorderModule.SetRecorderState(false, false);
+			SensorsModule_ControlMeter_SetActive(false);
 			//.
-			ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH,CONTROL_METHOD_VOICE);
+			ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_SENSORSMODULE_METER_FINISH,CONTROL_METHOD_VOICE);
 			return; //. ->
 		}
     	//.
@@ -2497,10 +2506,10 @@ public class TTrackerPanel extends Activity {
     private void ControlCommand_DoNotifyOnAfterCommand(int Command, int Method) {
     	switch (Command) {
     	
-    	case CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_START:
-    		switch (Configuration.VideoRecorderModuleConfiguration.Notifications) {
+    	case CONTROL_COMMAND_SENSORSMODULE_METER_START:
+    		switch (Configuration.SensorsModuleConfiguration.MeterControlNotifications) {
     		
-    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VIBRATION2BITS:
+    		case TConfiguration.NOTIFICATIONS_VIBRATION2BITS:
     			TAsyncProcessing Processing = new TAsyncProcessing() {
     				
     				@Override
@@ -2527,7 +2536,7 @@ public class TTrackerPanel extends Activity {
     			Processing.Start();
     			break;
 
-    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VOICE:
+    		case TConfiguration.NOTIFICATIONS_VOICE:
     			if (VideoRecorderModule_AudioNotifier != null)
 					try {
 						switch (Method) {
@@ -2552,7 +2561,7 @@ public class TTrackerPanel extends Activity {
 					}
     			break;
     			
-    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VIBRATION2BITSANDVOICE:
+    		case TConfiguration.NOTIFICATIONS_VIBRATION2BITSANDVOICE:
     			Processing = new TAsyncProcessing() {
     				
     				@Override
@@ -2604,10 +2613,10 @@ public class TTrackerPanel extends Activity {
     		}
     		break; //. >
     		
-    	case CONTROL_COMMAND_VIDEORECORDERMODULE_RECORDING_FINISH:
-    		switch (Configuration.VideoRecorderModuleConfiguration.Notifications) {
+    	case CONTROL_COMMAND_SENSORSMODULE_METER_FINISH:
+    		switch (Configuration.SensorsModuleConfiguration.MeterControlNotifications) {
     		
-    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VIBRATION2BITS:
+    		case TConfiguration.NOTIFICATIONS_VIBRATION2BITS:
     			TAsyncProcessing Processing = new TAsyncProcessing() {
     				
     				@Override
@@ -2636,7 +2645,7 @@ public class TTrackerPanel extends Activity {
     			Processing.Start();
     			break;
 
-    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VOICE:
+    		case TConfiguration.NOTIFICATIONS_VOICE:
     			if (VideoRecorderModule_AudioNotifier != null)
 					try {
 						switch (Method) {
@@ -2661,7 +2670,7 @@ public class TTrackerPanel extends Activity {
 					}
     			break;
     			
-    		case TConfiguration.TVideoRecorderModuleConfiguration.NOTIFICATIONS_VIBRATION2BITSANDVOICE:
+    		case TConfiguration.NOTIFICATIONS_VIBRATION2BITSANDVOICE:
     			Processing = new TAsyncProcessing() {
     				
     				@Override
@@ -3142,6 +3151,17 @@ public class TTrackerPanel extends Activity {
     	else 
     		V = 0; //. no alert
     	TTracker.GetTracker().GeoLog.GPIModule.SetValue(V);
+    }
+    
+    public void SensorsModule_ControlMeter_SetActive(boolean flActive) throws Exception {
+    	TTracker Tracker = TTracker.GetTracker(); 
+    	if ((Tracker != null) && Tracker.GeoLog.IsEnabled()) {
+        	TSensorMeter ControlMeter = Tracker.GeoLog.SensorsModule.Meters.Items_GetItem(Configuration.SensorsModuleConfiguration.MeterToControl);
+        	if (ControlMeter != null) 
+        		ControlMeter.SetActive(flActive);
+        	else 
+				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(flActive, false);
+    	}
     }
     
     private void EnableDisablePanelItems(boolean flEnabled) {

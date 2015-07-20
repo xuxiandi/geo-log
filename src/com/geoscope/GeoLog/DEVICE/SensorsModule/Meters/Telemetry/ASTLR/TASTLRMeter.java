@@ -16,14 +16,13 @@ public class TASTLRMeter extends TTLRMeter {
 	public static final String ContainerTypeID = "";
 	//.
 	public static final String Name = "Android state";
-	public static final String Info = "Telemetry";
 	
 	public static class TMyProfile extends TProfile {
 	}
 	
 	
-	public TASTLRMeter(TSensorsModule pSensorsModule, String pID, String pProfileFolder) throws Exception {
-		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,Info), TMyProfile.class, pProfileFolder);
+	public TASTLRMeter(TSensorsModule pSensorsModule, String pID, String pInfo, String pProfileFolder) throws Exception {
+		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,pInfo), TMyProfile.class, pProfileFolder);
 	}
 	
 	@Override
@@ -32,7 +31,7 @@ public class TASTLRMeter extends TTLRMeter {
 	}
 	
 	@Override
-	public TStreamChannel[] GetSourceChannels() throws Exception {
+	public TStreamChannel[] GetChannels() throws Exception {
 		if (SensorsModule.InternalSensorsModule.ASTLRChannel == null)
 			throw new IOException("no origin channel"); //. =>
 		if (!SensorsModule.InternalSensorsModule.ASTLRChannel.Enabled)

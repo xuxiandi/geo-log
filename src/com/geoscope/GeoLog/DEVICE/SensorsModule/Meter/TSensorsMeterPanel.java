@@ -303,7 +303,7 @@ public class TSensorsMeterPanel extends Activity {
     
     private void ShowChannels() throws Exception {
 		Intent intent = new Intent(this, TDataStreamPropsPanel.class);
-		intent.putExtra("ChannelIDs", Meter.GetChannels().ToByteArray());
+		intent.putExtra("ChannelIDs", Meter.GetChannelIDs().ToByteArray());
         startActivity(intent);
     }
     

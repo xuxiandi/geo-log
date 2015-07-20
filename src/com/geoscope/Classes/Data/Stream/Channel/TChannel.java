@@ -26,7 +26,7 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 
 public class TChannel {
 	
-	public static final int NextID = 11; //. a next unique channel ID
+	public static final int NextID = 15; //. a next unique channel ID
 	
 	public static boolean TypeIsTypeOfChannel(String TypeID, String ChannelTypeID) {
 		return (TypeID.startsWith(ChannelTypeID));

@@ -374,12 +374,12 @@ public class TSensorMeter extends TCancelableThread {
 		SetStatus(STATUS_NOTRUNNING);
 	}
 	
-	public TStreamChannel[] GetSourceChannels() throws Exception {
+	public TStreamChannel[] GetChannels() throws Exception {
 		return null;
 	}
 	
-	public TChannelIDs GetChannels() throws Exception {
-		TStreamChannel[] Channels = GetSourceChannels();
+	public TChannelIDs GetChannelIDs() throws Exception {
+		TStreamChannel[] Channels = GetChannels();
 		TChannelIDs Result = new TChannelIDs();
 		int Cnt = Channels.length;
 		for (int I = 0; I < Cnt; I++) 

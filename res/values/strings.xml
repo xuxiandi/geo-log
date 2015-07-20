@@ -1119,5 +1119,6 @@
     <string name="SSendURLLinkToUser">Send URL-link to user &#8230;</string>
     <string name="SDataTransferHasBeenStopped">Data transfer has been stopped</string>
     <string name="SSampleInterval">Sample interval, ms</string>
+    <string name="SMeterToControl">"A recorder to control: "</string>
     
 </resources>

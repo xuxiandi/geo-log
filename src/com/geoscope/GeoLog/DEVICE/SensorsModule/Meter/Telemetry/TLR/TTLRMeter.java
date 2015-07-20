@@ -20,7 +20,7 @@ public class TTLRMeter extends TSensorMeter {
 	
 	@Override
 	protected void DoProcess() throws Exception {
-		GetSourceChannels();
+		GetChannels();
 		//.
 		SourceChannel.Suspend();
 		try {

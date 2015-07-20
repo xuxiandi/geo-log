@@ -175,7 +175,7 @@ public class TSensorsMetersValue extends TComponentTimestampedDataValue {
             	Meter = SensorsModule.Meters.Items_GetItem(MeterID);
         		Timestamp = OleDate.UTCCurrentTimestamp();
         		if (Meter != null) 
-        			Value = Meter.GetChannels().ToByteArray();
+        			Value = Meter.GetChannelIDs().ToByteArray();
         		else
         			Value = null;
         		//.

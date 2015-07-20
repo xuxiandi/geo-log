@@ -1119,6 +1119,7 @@
     <string name="SSendURLLinkToUser">Послать URL-ссылку пользователю &#8230;</string>
     <string name="SDataTransferHasBeenStopped">Передача данных прекращена</string>
     <string name="SSampleInterval">Интервал выборок, мс</string>
-    <string name="SMeterToControl">"Регистратор для управления: "</string>
+    <string name="SMeterToControl">Регистратор для управления: </string>
+    <string name="SBeepingOnRecording">Подзвучка записи</string>
     
 </resources>

@@ -9,12 +9,15 @@ import java.util.TimerTask;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.GeoEye.R;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.TConnectorModule;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetSensorsDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
@@ -33,8 +36,10 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 public class TSensorsModule extends TModule {
 
+	public static final String FolderName = "SensorsModule";
+	
 	public static String Folder() {
-		return TDEVICEModule.DeviceFolder()+"/"+"SensorsModule";
+		return TDEVICEModule.DeviceFolder()+"/"+FolderName;
 	}
 	
 	public static String Channels_Folder() {
@@ -70,6 +75,33 @@ public class TSensorsModule extends TModule {
         }
     }
 
+    public static class TAudioNotifier extends TModule.TAudioNotifier {
+        
+    	private MediaPlayer beep_player;
+    	
+    	public TAudioNotifier(Context context) {
+    		super();
+    		//.
+    		beep_player = MediaPlayer.create(context, R.raw.beep);
+    	}
+    	
+    	@Override
+    	public void Destroy() {
+    		beep_player.release();
+    		//.
+    		super.Destroy();
+    	}
+    	
+    	@Override
+    	protected String GetNotificationFolder() {
+    		return TGeoLogApplication.Resources_GetCurrentFolder()+"/"+TGeoLogApplication.Resource_AudiosFolder+"/"+TDEVICEModule.DeviceFolderName+"/"+TSensorsModule.FolderName; 
+    	}
+    	
+    	public synchronized void Notification_MeterRecordingBeep() throws Exception {
+    		beep_player.start();
+    	}
+    }
+    
 	
 	public TInternalSensorsModule InternalSensorsModule;
 	//.

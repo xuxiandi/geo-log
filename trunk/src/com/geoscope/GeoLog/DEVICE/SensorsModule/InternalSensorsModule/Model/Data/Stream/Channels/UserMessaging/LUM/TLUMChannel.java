@@ -58,4 +58,10 @@ public class TLUMChannel extends TStreamChannel {
 	@Override
 	public void StopSource() {
 	}
+
+
+	@Override
+	public boolean IsActive() {
+		return true;
+	}
 }

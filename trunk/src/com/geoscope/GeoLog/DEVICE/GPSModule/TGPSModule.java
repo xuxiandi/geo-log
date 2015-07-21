@@ -1325,11 +1325,11 @@ public class TGPSModule extends TModule implements Runnable
     	Process();
     }
     
-    private synchronized TGPSChannel DestinationChannel_Get() {
+    public synchronized TGPSChannel DestinationChannel_Get() {
     	return DestinationChannel;
     }
     
-    private synchronized boolean DestinationChannel_Active() {
+    public synchronized boolean DestinationChannel_Active() {
     	return ((DestinationChannel != null) && DestinationChannel.DestinationChannel_IsConnected());
     }
     

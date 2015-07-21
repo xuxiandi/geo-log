@@ -90,12 +90,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <CheckBox
-            android:id="@+id/cbRecordingBeeping"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/SBeepingOnRecording" />
+            android:gravity="center_horizontal"
+            android:text="@string/SNotifyingOnRecording"
+            android:textSize="18sp" />
 
-    </LinearLayout>
+        <Spinner
+            android:id="@+id/spRecordingNotification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        </LinearLayout>
 
 </ScrollView>

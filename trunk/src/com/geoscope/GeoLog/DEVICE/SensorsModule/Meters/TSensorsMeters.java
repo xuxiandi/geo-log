@@ -244,18 +244,18 @@ public class TSensorsMeters {
 		Items_AddItem(AVMeter);
 	}
 	
-	private void Items_AddItem(TSensorMeter Meter) {
+	private synchronized void Items_AddItem(TSensorMeter Meter) {
 		Items.add(Meter);
 	}
 	
-	private void Items_Clear() throws Exception {
+	private synchronized void Items_Clear() throws Exception {
 		int Cnt = Items.size();
 		for (int I = 0; I < Cnt; I++)
 			Items.get(I).Destroy();
 		Items.clear();
 	}
 	
-	public TSensorMeter Items_GetItem(String MeterID) {
+	public synchronized TSensorMeter Items_GetItem(String MeterID) {
 		int Cnt = Items.size();
 		for (int I = 0; I < Cnt; I++) {
 			TSensorMeter Meter = Items.get(I);
@@ -265,7 +265,7 @@ public class TSensorsMeters {
 		return null;
 	}
 	
-	public String Items_GetList(int Version) {
+	public synchronized String Items_GetList(int Version) {
 		switch (Version) {
 		
 		case 1:
@@ -293,7 +293,7 @@ public class TSensorsMeters {
 		}
 	}
 
-	public TSensorMeterInfo[] Items_GetList() {
+	public synchronized TSensorMeterInfo[] Items_GetList() {
 		int Cnt = Items.size();
 		TSensorMeterInfo[] Result = new TSensorMeterInfo[Cnt];
 		for (int I = 0; I < Cnt; I++) {
@@ -317,7 +317,7 @@ public class TSensorsMeters {
 		return Result;
 	}
 	
-	public void Items_ValidateActivity(String[] MeterIDs) throws Exception {
+	public synchronized void Items_ValidateActivity(String[] MeterIDs) throws Exception {
 		int Cnt = Items.size();
 		for (int I = 0; I < Cnt; I++) {
 			TSensorMeter Meter = Items.get(I);

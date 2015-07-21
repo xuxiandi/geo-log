@@ -6,11 +6,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.Window;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -30,7 +28,7 @@ public class TTrackerConfigurationPanel extends Activity {
 	private Spinner 			spMeterToControl;
 	private Spinner 			spMeterControl;
 	private Spinner 			spControlNotifications;
-	private CheckBox			cbRecordingBeeping;
+	private Spinner 			spRecordingNotification;
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,17 +197,51 @@ public class TTrackerConfigurationPanel extends Activity {
                 }
             });    
             //.
-            cbRecordingBeeping = (CheckBox)findViewById(R.id.cbRecordingBeeping);
-            cbRecordingBeeping.setOnClickListener(new OnClickListener() {
+            spRecordingNotification = (Spinner)findViewById(R.id.spRecordingNotification);
+            String[] RecordingNotificationItems = new String[3]; 
+            RecordingNotificationItems[TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_NONE] = getString(R.string.SNone);
+            RecordingNotificationItems[TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_BEEPING] = getString(R.string.SBeeping);
+            RecordingNotificationItems[TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_VIBRATING] = getString(R.string.SVibrating);
+            ArrayAdapter<String> saRecordingNotification = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, RecordingNotificationItems);
+            saRecordingNotification.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spRecordingNotification.setAdapter(saRecordingNotification);
+            spRecordingNotification.setOnItemSelectedListener(new OnItemSelectedListener() {
             	
                 @Override
-                public void onClick(View v) {
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 	try {
-                    	boolean checked = ((CheckBox)v).isChecked();
-	                    //.
-    	        		Configuration.SensorsModuleConfiguration.MeterRecordingBeeping = checked;
-        	    		Configuration.Save();
-            	        setResult(Activity.RESULT_OK);
+                    	switch (position) {
+                    	
+                    	case TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_NONE:
+        	        		Configuration.SensorsModuleConfiguration.MeterRecordingNotification = TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_NONE;
+                    		Configuration.Save();
+                            setResult(Activity.RESULT_OK);
+                    		break; //. >
+                    		
+                    	case TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_BEEPING: 
+        	        		Configuration.SensorsModuleConfiguration.MeterRecordingNotification = TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_BEEPING;
+                    		Configuration.Save();
+                            setResult(Activity.RESULT_OK);
+                    		break; //. >
+                    		
+                    	case TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_VIBRATING: 
+        	        		Configuration.SensorsModuleConfiguration.MeterRecordingNotification = TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_VIBRATING;
+                    		Configuration.Save();
+                            setResult(Activity.RESULT_OK);
+                    		break; //. >
+                    	}
+                	}
+    		    	catch (Exception E) {
+    		            Toast.makeText(TTrackerConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+    		    	}
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parentView) {
+                	try {
+    	        		Configuration.SensorsModuleConfiguration.MeterRecordingNotification = TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_NONE;
+                		Configuration.Save();
+                        setResult(Activity.RESULT_OK);
                 	}
     		    	catch (Exception E) {
     		            Toast.makeText(TTrackerConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -280,6 +312,19 @@ public class TTrackerConfigurationPanel extends Activity {
         	break; //. >
         }
         //.
-        cbRecordingBeeping.setChecked(Configuration.SensorsModuleConfiguration.MeterRecordingBeeping);
+        switch (Configuration.SensorsModuleConfiguration.MeterRecordingNotification) {
+        
+        case TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_NONE:
+            spRecordingNotification.setSelection(TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_NONE);
+        	break; //. >
+            
+        case TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_BEEPING:
+            spRecordingNotification.setSelection(TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_BEEPING);
+        	break; //. >
+            
+        case TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_VIBRATING:
+            spRecordingNotification.setSelection(TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_VIBRATING);
+        	break; //. >
+        }
     }
 }

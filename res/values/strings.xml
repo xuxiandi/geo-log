@@ -1123,5 +1123,6 @@
     <string name="SNotifyingOnRecording">Notifying on recording</string>
     <string name="SBeeping">Beeping</string>
     <string name="SVibrating">Vibrating</string>
+    <string name="SRecordingIsntFinished">Recording is not finished</string>
     
 </resources>

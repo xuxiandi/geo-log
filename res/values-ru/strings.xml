@@ -1123,5 +1123,6 @@
     <string name="SNotifyingOnRecording">Извещение о записи</string>
     <string name="SBeeping">Звук</string>
     <string name="SVibrating">Вибрация</string>
+    <string name="SRecordingIsntFinished">Запись не завершена</string>
     
 </resources>

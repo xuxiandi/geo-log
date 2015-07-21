@@ -680,6 +680,7 @@ public class TTrackerPanel extends Activity {
 		//.
     	Tracker = TTracker.GetTracker();
     	if (Tracker == null) {
+			Toast.makeText(this, R.string.STrackerIsNotInitialized, Toast.LENGTH_LONG).show();  						
     		finish();
     		return; //. ->
     	}
@@ -1752,6 +1753,13 @@ public class TTrackerPanel extends Activity {
 	public void onBackPressed() {
     	if (flLocked)
     		return; //. ->
+    	if (SensorsModule_ControlMeter_flActive) {
+        	TSensorMeter ControlMeter = Tracker.GeoLog.SensorsModule.Meters.Items_GetItem(Configuration.SensorsModuleConfiguration.MeterToControl);
+        	if ((ControlMeter != null) && ControlMeter.IsActive()) {
+    			Toast.makeText(this, R.string.SRecordingIsntFinished, Toast.LENGTH_LONG).show();  						
+        		return; //. ->
+        	}
+    	}
     	//.
 		/*if (VoiceCommandHandler_IsExist() || (HittingDetector != null)) {
 		    new AlertDialog.Builder(this)
@@ -3154,7 +3162,7 @@ public class TTrackerPanel extends Activity {
     	SensorsModule_ControlMeter_RecordingNotifying_Stop();
     	//.
     	SensorsModule_ControlMeter_RecordingBeeping = new Timer();
-    	SensorsModule_ControlMeter_RecordingBeeping.schedule(new TMeterRecordingBeepingTask(this, NotificationType),SensorsModule_ControlMeter_RecordingNotifying_Interval,SensorsModule_ControlMeter_RecordingNotifying_Interval);
+    	SensorsModule_ControlMeter_RecordingBeeping.schedule(new TMeterRecordingNotifyingTask(this, NotificationType),SensorsModule_ControlMeter_RecordingNotifying_Interval,SensorsModule_ControlMeter_RecordingNotifying_Interval);
     }
     
     private void SensorsModule_ControlMeter_RecordingNotifying_Stop() {
@@ -3504,13 +3512,13 @@ public class TTrackerPanel extends Activity {
         }
     }   
 
-    private class TMeterRecordingBeepingTask extends TimerTask {
+    private class TMeterRecordingNotifyingTask extends TimerTask {
     	
         private TTrackerPanel _TrackerPanel;
         //.
         private int NotificationType;
         
-        public TMeterRecordingBeepingTask(TTrackerPanel pTrackerPanel, int pNotificationType) {
+        public TMeterRecordingNotifyingTask(TTrackerPanel pTrackerPanel, int pNotificationType) {
             _TrackerPanel = pTrackerPanel;
             NotificationType = pNotificationType;
         }
@@ -3528,7 +3536,7 @@ public class TTrackerPanel extends Activity {
 							break; //. ->
 							
 						case TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_VIBRATING:
-					    	int Duration = 100; //. ms
+					    	int Duration = 50; //. ms
 							Vibrator.vibrate(Duration);
 							break; //. ->
 						}

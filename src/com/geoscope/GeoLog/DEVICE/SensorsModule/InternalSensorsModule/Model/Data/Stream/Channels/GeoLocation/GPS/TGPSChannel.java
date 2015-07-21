@@ -55,4 +55,9 @@ public class TGPSChannel extends TTLRChannel {
 	public void StopSource() {
 		InternalSensorsModule.Device.GPSModule.DestinationChannel_Clear();
 	}
+
+	@Override
+	public boolean IsActive() {
+		return (InternalSensorsModule.Device.GPSModule.DestinationChannel_Get() == this);
+	}
 }

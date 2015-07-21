@@ -1120,6 +1120,8 @@
     <string name="SDataTransferHasBeenStopped">Передача данных прекращена</string>
     <string name="SSampleInterval">Интервал выборок, мс</string>
     <string name="SMeterToControl">Регистратор для управления: </string>
-    <string name="SBeepingOnRecording">Подзвучка записи</string>
+    <string name="SNotifyingOnRecording">Извещение о записи</string>
+    <string name="SBeeping">Звук</string>
+    <string name="SVibrating">Вибрация</string>
     
 </resources>

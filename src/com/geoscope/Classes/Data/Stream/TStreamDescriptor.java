@@ -19,6 +19,7 @@ import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 
@@ -50,6 +51,10 @@ public class TStreamDescriptor {
 	
 	public TStreamDescriptor(String Base64String, TChannelProvider pChannelProvider) throws Exception {
 		FromBase64String(Base64String, pChannelProvider);
+	}
+	
+	public TStreamDescriptor(String Base64String) throws Exception {
+		FromBase64String(Base64String);
 	}
 	
 	public void Close() throws Exception {
@@ -110,7 +115,7 @@ public class TStreamDescriptor {
 						if (pChannelProvider != null)
 							Channel = pChannelProvider.GetChannel(TypeID);
 						if (Channel == null) 
-							Channel = new TChannel();
+							Channel = new TChannelDescriptor(TypeID);
 						//.
 						if (Channel != null) {
 							Channel.FromXMLNode(ChannelNode);
@@ -203,6 +208,10 @@ public class TStreamDescriptor {
     
 	
 	public void FromBase64String(String S, TChannelProvider pChannelProvider) throws Exception {
+		FromByteArray(Base64.decode(S, Base64.NO_WRAP), pChannelProvider);
+	}
+	
+	public void FromBase64String(String S) throws Exception {
 		FromByteArray(Base64.decode(S, Base64.NO_WRAP));
 	}
 	

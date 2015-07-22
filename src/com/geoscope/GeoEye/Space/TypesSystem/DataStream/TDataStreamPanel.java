@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.MultiThreading.TCanceller;
@@ -152,7 +153,7 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 	private void StreamChannelProcessors_Initialize(SurfaceHolder SH, int Width, int Height) throws Exception {
 		StreamChannelProcessors_Finalize();
 		//.
-		TDataStreamDescriptor SD = new TDataStreamDescriptor(StreamDescriptor);
+		TStreamDescriptor SD = new TStreamDescriptor(StreamDescriptor);
 		StringBuilder SB = new StringBuilder();
 		for (int I = 0; I < SD.Channels.size(); I++) {
 			TChannel Channel = SD.Channels.get(I);

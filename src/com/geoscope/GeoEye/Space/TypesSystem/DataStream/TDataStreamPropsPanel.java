@@ -25,6 +25,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
@@ -41,7 +42,7 @@ public class TDataStreamPropsPanel extends Activity {
 	private int 	idTComponent;
 	private long	idComponent;
 	//.
-	private TDataStreamDescriptor DataStreamDescriptor = null;
+	private TStreamDescriptor DataStreamDescriptor = null;
 	//.
 	private TextView lbStreamName;
 	private TextView lbStreamInfo;
@@ -148,7 +149,7 @@ public class TDataStreamPropsPanel extends Activity {
     	
         private ProgressDialog progressDialog;
         //.
-    	private TDataStreamDescriptor DataStreamDescriptor = null;
+    	private TStreamDescriptor DataStreamDescriptor = null;
     	
     	public TUpdating(boolean pflShowProgress, boolean pflClosePanelOnCancel) {
     		super();

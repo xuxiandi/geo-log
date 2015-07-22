@@ -22,12 +22,12 @@ import android.util.Xml;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetDataStreamerActiveFlagSO;
@@ -101,7 +101,7 @@ public class TDataStreamerModule extends TModule {
 		    		Channels.add(StreamDescriptor.Channels.get(I).ID);
 			}
 			//.
-			public TDataStreamDescriptor StreamDescriptor = null;
+			public TStreamDescriptor StreamDescriptor = null;
 
 			public void SupplyWithStreamDescriptor(TGeoScopeServerUser User) throws Exception {
 				if (idTComponent == SpaceDefines.idTDataStream) {
@@ -186,7 +186,7 @@ public class TDataStreamerModule extends TModule {
 							if (ValueNode != null)
 								_Descriptor = ValueNode.getFirstChild().getNodeValue();
 							if ((_Descriptor != null) && (_Descriptor.length() > 0))
-								Component.StreamDescriptor = new TDataStreamDescriptor(_Descriptor);
+								Component.StreamDescriptor = new TStreamDescriptor(_Descriptor);
 							else
 								Component.StreamDescriptor = null;
 							//.

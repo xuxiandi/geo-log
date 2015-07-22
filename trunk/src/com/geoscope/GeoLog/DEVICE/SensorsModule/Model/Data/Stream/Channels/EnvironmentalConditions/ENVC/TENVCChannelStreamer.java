@@ -45,8 +45,8 @@ public class TENVCChannelStreamer extends TComponentDataStreaming.TStreamer {
 	//.
 	private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 	
-	public TENVCChannelStreamer(TENVCChannel pChannel, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
-		super(pChannel.SensorsModule.Device, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, TENVCChannel.DescriptorSize, 1024);
+	public TENVCChannelStreamer(TENVCChannel pChannel, int pidTComponent, long pidComponent, String pConfiguration, String pParameters) throws Exception {
+		super(pChannel.SensorsModule.Device, pidTComponent,pidComponent, pChannel.ID, pConfiguration, pParameters, TENVCChannel.DescriptorSize, 1024);
 		//.
 		Channel = pChannel;
 		//.

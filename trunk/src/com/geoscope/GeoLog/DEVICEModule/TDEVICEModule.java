@@ -2231,9 +2231,9 @@ public class TDEVICEModule extends TModule
 							@Override
 							public void DoOnBuffer(byte[] Buffer, int BufferSize) {
 								try {
-							        Connection.setSendBufferSize(BufferSize);
+									//. Connection.setSendBufferSize(BufferSize);
 									ConnectionOutputStream.write(Buffer, 0,BufferSize);
-									ConnectionOutputStream.flush();
+									//. ConnectionOutputStream.flush();
 								}
 								catch (Exception E) {
 									synchronized (TComponentDataStreaming.this) {

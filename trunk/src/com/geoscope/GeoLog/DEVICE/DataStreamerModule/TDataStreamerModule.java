@@ -366,19 +366,18 @@ public class TDataStreamerModule extends TModule {
 								//. suppress not stream-able-via-component channels
 								int Cnt = StreamDescriptor.Channels.size();
 								for (int J = 0; J < Cnt; J++) {
-									com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)Model.Stream.Channels.get(J); 
-		            				TChannel SourceChannel = Channel.SourceChannel_Get();
-		            				//.
 									TChannel StreamChannel = StreamDescriptor.Channels.get(J);
-									if (SourceChannel != null) {
-										StreamChannel.Enabled = SourceChannel.Profile.StreamableViaComponent;
-										if (StreamChannel.Enabled) {
+									//.
+									com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)Model.Stream.Channels.get(J); 
+		            				//.
+									StreamChannel.Enabled = Channel.StreamableViaComponent();
+									if (StreamChannel.Enabled) {
+			            				TChannel SourceChannel = Channel.SourceChannel_Get();
+			            				if (SourceChannel != null) {
 											StreamChannel.ProfilesFolder = SourceChannel.ProfilesFolder; 
 											StreamChannel.Configuration_LoadFromConfigurationFile(); //. supply the channel with configuration
-										}
+			            				}
 									}
-									else
-										StreamChannel.Enabled = false;
 								}
 								StreamDescriptor.Channels_RemoveDisabledItems();
 								//. update the DataStream component with descriptor 

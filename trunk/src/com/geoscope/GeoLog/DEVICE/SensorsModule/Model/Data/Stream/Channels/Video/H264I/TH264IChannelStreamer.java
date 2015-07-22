@@ -45,8 +45,8 @@ public class TH264IChannelStreamer extends TComponentDataStreaming.TStreamer {
 	//.
 	private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 	
-	public TH264IChannelStreamer(TH264IChannel pChannel, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
-		super(pChannel.SensorsModule.Device, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, TH264IChannel.DescriptorSize, 1024);
+	public TH264IChannelStreamer(TH264IChannel pChannel, int pidTComponent, long pidComponent, String pConfiguration, String pParameters) throws Exception {
+		super(pChannel.SensorsModule.Device, pidTComponent,pidComponent, pChannel.ID, pConfiguration, pParameters, TH264IChannel.DescriptorSize, 1024);
 		//.
 		Channel = pChannel;
 		//.

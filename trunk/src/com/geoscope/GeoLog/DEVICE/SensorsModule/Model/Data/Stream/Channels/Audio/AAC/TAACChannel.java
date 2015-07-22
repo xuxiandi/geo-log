@@ -85,7 +85,7 @@ public class TAACChannel extends TStreamChannel {
 
 	@Override
 	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
-		return (new TAACChannelStreamer(this, pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters));
+		return (new TAACChannelStreamer(this, pidTComponent,pidComponent, pConfiguration,pParameters));
 	}
 	
 	private byte[] Packet = new byte[1024];

@@ -86,7 +86,7 @@ public class TTLRChannel extends TStreamChannel {
 
 	@Override
 	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
-		return (new TTLRChannelStreamer(this, pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters));
+		return (new TTLRChannelStreamer(this, pidTComponent,pidComponent, pConfiguration,pParameters));
 	}
 	
 	protected byte[] DataType_ToByteArray(TDataType DataType) throws IOException {

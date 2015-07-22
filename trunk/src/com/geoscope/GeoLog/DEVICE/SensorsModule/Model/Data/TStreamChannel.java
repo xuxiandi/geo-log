@@ -266,6 +266,10 @@ public class TStreamChannel extends TChannel {
 		SensorsModule = pSensorsModule;
 	}
 
+	public synchronized boolean StreamableViaComponent() {
+		return ((SourceChannel != null) && SourceChannel.Profile.StreamableViaComponent);
+	}
+	
 	@Override
 	public void Profile_FromByteArray(byte[] BA) throws Exception {
 		SourceChannel_Profile_FromByteArray(BA);

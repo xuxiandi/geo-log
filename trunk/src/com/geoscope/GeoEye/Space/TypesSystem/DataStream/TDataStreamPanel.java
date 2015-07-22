@@ -4,20 +4,30 @@ import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.TypedValue;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +39,7 @@ import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.DataTypes.GeoLoca
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.TReflectorTrack;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Defines.TXYCoord;
@@ -38,6 +49,8 @@ import com.geoscope.GeoEye.Space.TypesSystem.DataStream.Model.Data.Stream.TStrea
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.Model.Data.Stream.ChannelProcessors.Audio.AAC.TAACChannelProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.Model.Data.Stream.ChannelProcessors.Video.H264I.TH264IChannelProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
@@ -424,7 +437,7 @@ public class TDataStreamPanel extends Activity {
 			llEnvironmentConditionsXENVC.setVisibility(View.VISIBLE);
 			//.
 			return; //. ->
-		};
+		}; */
 		if (Channel instanceof TTLRChannel) {
 			TTLRChannel TLRChannel = (TTLRChannel)Channel;
 			//.
@@ -584,6 +597,7 @@ public class TDataStreamPanel extends Activity {
 				btnMonitor.setTextSize(TypedValue.COMPLEX_UNIT_SP,TableTextSize);
 				btnMonitor.setTextColor(Color.BLACK);
 				btnMonitor.setOnClickListener(new OnClickListener() {
+					
 		        	@Override
 		            public void onClick(View v) {
 		        		LinkedReflectorID = TReflector.GetNextID();
@@ -602,6 +616,7 @@ public class TDataStreamPanel extends Activity {
 			llTelemetryTLR.addView(tlTelemetryTLR, TLP);
 			//.			
 			TLRChannel.OnDataHandler = new TTLRChannel.TDoOnDataHandler() {
+				
 				@Override
 				public void DoOnData(TDataType DataType) {
 					PostDataType(DataType.Clone());
@@ -611,7 +626,7 @@ public class TDataStreamPanel extends Activity {
 			llTelemetryTLR.setVisibility(View.VISIBLE);
 			//.
 			return; //. ->
-		}; */
+		}; 
 		if (Channel instanceof TAACChannel) {
 			TAACChannel AACChannel = (TAACChannel)Channel;
 			//.

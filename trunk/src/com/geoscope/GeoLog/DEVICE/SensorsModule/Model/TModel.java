@@ -139,12 +139,10 @@ public class TModel {
 	public TComponentDataStreamingAbstract.TStreamer GetStreamer(String pTypeID, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
 		if (Stream == null)
 			return null; //. ->
-		int Cnt = Stream.Channels.size();
-		for (int I = 0; I < Cnt; I++) {
-			TStreamChannel Channel = (TStreamChannel)Stream.Channels.get(I);
-			if (Channel.GetTypeID().equals(pTypeID))
-				return Channel.GetStreamer(pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters); //. ->
-		}
-		return null;
+		TStreamChannel Channel = (TStreamChannel)StreamChannels_GetOneByID(pChannelID);
+		if (Channel != null) 
+			return Channel.GetStreamer(pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters); //. ->
+		else
+			return null; //. ->
 	}
 }

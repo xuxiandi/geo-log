@@ -80,7 +80,7 @@ public class TTLRChannel extends TStreamChannel {
 	
 	@Override
 	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx, int Size) throws Exception {
-		short ID = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += DescriptorSize;
+		short ID = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += 2; //. SizeOf(DataType.ID)
 		if (DataTypes != null) {
 			TDataType DataType = DataTypes.GetItemByID(ID);
 			if (DataType != null) {

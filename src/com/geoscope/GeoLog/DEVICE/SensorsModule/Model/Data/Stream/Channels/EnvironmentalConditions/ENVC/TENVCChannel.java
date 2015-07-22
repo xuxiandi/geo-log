@@ -62,7 +62,7 @@ public class TENVCChannel extends TStreamChannel {
 
 	@Override
 	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
-		return (new TENVCChannelStreamer(this, pidTComponent,pidComponent, pChannelID, pConfiguration,pParameters));
+		return (new TENVCChannelStreamer(this, pidTComponent,pidComponent, pConfiguration,pParameters));
 	}
 	
 	private byte[] Timestamp_ToByteArray(double Timestamp) throws IOException {

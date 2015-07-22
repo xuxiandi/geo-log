@@ -1146,6 +1146,7 @@ public class TTrackerPanel extends Activity {
 			}
 		});
         btnDataStreamerModulePanel = (Button)findViewById(R.id.btnDataStreamerModulePanel);
+        btnDataStreamerModulePanel.setVisibility((Tracker.GeoLog.DataStreamerModule.StreamingComponentsCount() > 0) ? View.VISIBLE : View.GONE);
         btnDataStreamerModulePanel.setOnClickListener(new OnClickListener() {
         	
         	@Override

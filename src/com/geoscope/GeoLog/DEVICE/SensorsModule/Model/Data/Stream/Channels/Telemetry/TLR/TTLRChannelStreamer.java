@@ -45,8 +45,8 @@ public class TTLRChannelStreamer extends TComponentDataStreaming.TStreamer {
 	//.
 	private TDEVICEModule.TComponentDataStreamingAbstract DataStreaming = null;
 	
-	public TTLRChannelStreamer(TTLRChannel pChannel, int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {
-		super(pChannel.SensorsModule.Device, pidTComponent,pidComponent, pChannelID, pConfiguration, pParameters, TTLRChannel.DescriptorSize, 1024);
+	public TTLRChannelStreamer(TTLRChannel pChannel, int pidTComponent, long pidComponent, String pConfiguration, String pParameters) throws Exception {
+		super(pChannel.SensorsModule.Device, pidTComponent,pidComponent, pChannel.ID, pConfiguration, pParameters, TTLRChannel.DescriptorSize, 1024);
 		//.
 		Channel = pChannel;
 		//.

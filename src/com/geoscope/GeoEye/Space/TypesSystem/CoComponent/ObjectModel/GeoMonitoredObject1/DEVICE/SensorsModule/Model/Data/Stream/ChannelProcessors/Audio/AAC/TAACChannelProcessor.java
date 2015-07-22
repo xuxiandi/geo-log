@@ -144,7 +144,7 @@ public class TAACChannelProcessor extends TChannelProcessor {
 	private TAACChannel AACChannel;
 	//.
 	private AudioTrack 	AudioPlayer = null;
-	private TAudioBufferPlaying AudioBufferPlaying;
+	private TAudioBufferPlaying AudioBufferPlaying = null;
 	//.
 	private int AudioBuffersCount = 0;
 	//.

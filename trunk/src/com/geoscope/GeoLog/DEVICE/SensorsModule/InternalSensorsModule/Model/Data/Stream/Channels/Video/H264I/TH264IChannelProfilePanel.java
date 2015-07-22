@@ -23,6 +23,7 @@ public class TH264IChannelProfilePanel extends Activity {
 	@SuppressWarnings("unused")
 	private TextView lbName;
 	private CheckBox cbEnabled;
+	private CheckBox cbStreamableViaComponent;
 	private EditText edWidth;
 	private EditText edHeight;
 	private EditText edFrameRate;
@@ -45,6 +46,8 @@ public class TH264IChannelProfilePanel extends Activity {
             lbName = (TextView)findViewById(R.id.lbName);
             //.
             cbEnabled = (CheckBox)findViewById(R.id.cbEnabled);
+            //.
+            cbStreamableViaComponent = (CheckBox)findViewById(R.id.cbStreamableViaComponent);
             //.
             edWidth = (EditText)findViewById(R.id.edWidth);
             //.
@@ -96,6 +99,8 @@ public class TH264IChannelProfilePanel extends Activity {
     private void Update() {
     	cbEnabled.setChecked(Profile.Enabled);
     	//.
+    	cbStreamableViaComponent.setChecked(Profile.StreamableViaComponent);
+    	//.
 		edWidth.setText(Integer.toString(Profile.Width));
 		//.
 		edHeight.setText(Integer.toString(Profile.Height));
@@ -107,6 +112,8 @@ public class TH264IChannelProfilePanel extends Activity {
 
     private void ApplyChangesAndExit() throws Exception {
     	Profile.Enabled = cbEnabled.isChecked(); 
+    	//.
+    	Profile.StreamableViaComponent = cbStreamableViaComponent.isChecked(); 
     	//.
     	Profile.Width = Integer.parseInt(edWidth.getText().toString());
     	//.

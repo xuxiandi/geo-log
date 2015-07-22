@@ -26,6 +26,14 @@
             android:text="@string/SEnabled1"
             android:textSize="16sp" />
 
+        <CheckBox
+            android:id="@+id/cbStreamableViaComponent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:text="@string/SStreamableViaDataStreamComponent"
+            android:textSize="16sp" />
+
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" >

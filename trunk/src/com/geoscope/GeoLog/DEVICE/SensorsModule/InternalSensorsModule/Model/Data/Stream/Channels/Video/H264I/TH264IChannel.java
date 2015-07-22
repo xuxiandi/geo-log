@@ -1,5 +1,8 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.w3c.dom.Node;
@@ -10,6 +13,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Base64;
+import android.util.Base64OutputStream;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
@@ -149,6 +154,8 @@ public class TH264IChannel extends TStreamChannel {
 
 			@Override
 			public void DoOnConfiguration(byte[] Buffer, int BufferSize) throws Exception {
+				//. save a configuration for a Channel.Configuration value
+				SaveChannelConfiguration(Buffer, BufferSize);
 				//. start a new stream session and fill the channel configuration with data
 				int StreamSession = ChannelStreamConfiguration.Set(Buffer, BufferSize);
 				//. send new session packet
@@ -284,7 +291,7 @@ public class TH264IChannel extends TStreamChannel {
 		DataFormat = 0;
 		Name = "Video";
 		Info = "";
-		Size = 0;
+		Size = 1024*1024*10;
 		Configuration = "";
 		Parameters = "";
 		//.
@@ -308,6 +315,40 @@ public class TH264IChannel extends TStreamChannel {
 	
 	public int GetFrameRate() {
 		return MyProfile.FrameRate;
+	}
+	
+	private void SaveChannelConfiguration(byte[] Data, int DataSize) throws IOException {
+		String TCFN = Folder()+"/"+TChannel.ConfigurationFileName+".tmp";
+		File TCF = new File(TCFN);
+		FileOutputStream FOS = new FileOutputStream(TCF);
+		try {
+			ByteArrayOutputStream BOS = new ByteArrayOutputStream();
+			try {
+				Base64OutputStream B64S = new Base64OutputStream(BOS,Base64.NO_WRAP);
+				try {
+					B64S.write(Data, 0,DataSize);
+				}
+				finally {
+					B64S.close();
+				}
+				String DataString = new String(BOS.toByteArray(), "utf-8");
+				//.
+				String ConfigurationString = "1:;1,"+DataString;
+				//.
+				FOS.write(ConfigurationString.getBytes("utf-8"));
+			}
+			finally {
+				BOS.close();
+			}
+		}
+		finally {
+			FOS.close();
+		}
+		String CFN = Folder()+"/"+TChannel.ConfigurationFileName;
+		File CF = new File(CFN);
+		if (CF.exists())
+			CF.delete();
+		TCF.renameTo(CF);
 	}
 	
 	@Override

@@ -35,7 +35,7 @@ public class TLUMChannel extends TStreamChannel {
 		DataFormat = 0;
 		Name = "user messaging";
 		Info = "live user messaging";
-		Size = 0;
+		Size = 8192;
 		Configuration = "";
 		Parameters = "";
 		//.

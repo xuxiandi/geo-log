@@ -868,7 +868,7 @@ public class TInternalSensorsModule extends TModule {
 			ASTLRChannel.DataFormat = 0;
 			ASTLRChannel.Name = "Android state";
 			ASTLRChannel.Info = "battery, cellular phone";
-			ASTLRChannel.Size = 0;
+			ASTLRChannel.Size = 8192;
 			ASTLRChannel.Configuration = "";
 			ASTLRChannel.Parameters = "";
 			ASTLRChannel.DataTypes = new TDataTypes();
@@ -888,7 +888,7 @@ public class TInternalSensorsModule extends TModule {
     		ADSChannel.DataFormat = 0;
     		ADSChannel.Name = "Android device state";
     		ADSChannel.Info = "battery state, cellular phone state and other";
-    		ADSChannel.Size = 0;
+    		ADSChannel.Size = 8192;
     		ADSChannel.Configuration = "";
     		ADSChannel.Parameters = ""; 
     		//.
@@ -904,7 +904,7 @@ public class TInternalSensorsModule extends TModule {
 			ECTLRChannel.DataFormat = 0;
 			ECTLRChannel.Name = "Device telemetry";
 			ECTLRChannel.Info = "internal sensors";
-			ECTLRChannel.Size = 0;
+			ECTLRChannel.Size = 8192;
 			ECTLRChannel.Configuration = "";
 			ECTLRChannel.Parameters = "";
 			ECTLRChannel.DataTypes = new TDataTypes();
@@ -929,7 +929,7 @@ public class TInternalSensorsModule extends TModule {
 			XENVCChannel.DataFormat = 0;
 			XENVCChannel.Name = "Environment conditions (Extended)";
 			XENVCChannel.Info = "temperature, pressure, relative humidity, light etc";
-			XENVCChannel.Size = 0;
+			XENVCChannel.Size = 8192;
 			XENVCChannel.Configuration = "";
 			XENVCChannel.Parameters = "";
 			//.

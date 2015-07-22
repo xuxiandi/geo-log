@@ -1,4 +1,4 @@
-package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessors.Audio.AAC;
+package com.geoscope.GeoEye.Space.TypesSystem.DataStream.Model.Data.Stream.ChannelProcessors.Audio.AAC;
 
 import java.io.IOException;
 
@@ -9,9 +9,9 @@ import android.media.AudioTrack;
 
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessor.TChannelProcessor;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.Model.Data.TStreamChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.Model.Data.Stream.ChannelProcessor.TChannelProcessor;
+import com.geoscope.GeoEye.Space.TypesSystem.DataStream.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 
 public class TAACChannelProcessor extends TChannelProcessor {
 

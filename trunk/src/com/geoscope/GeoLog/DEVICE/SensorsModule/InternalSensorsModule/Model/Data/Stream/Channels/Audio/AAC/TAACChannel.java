@@ -235,7 +235,7 @@ public class TAACChannel extends TStreamChannel {
 		DataFormat = 0;
 		Name = "Audio";
 		Info = "";
-		Size = 0;
+		Size = 1024*1024*1;
 		Configuration = "";
 		Parameters = "";
 		//.

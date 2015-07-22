@@ -21,7 +21,7 @@ public class TAACChannel extends TStreamChannel {
 	//.
 	private static final int DefaultSampleRate = 16000;
 	
-	public static class TH264Channel {
+	public static class TDoOnAACSamplesHandler {
 		
 		public void DoOnConfiguration(int SampleRate, int ChannelCount) throws IOException {
 		}	
@@ -33,7 +33,7 @@ public class TAACChannel extends TStreamChannel {
 	
 	private TAACADTSDecoder AACADTSDecoder;
 	//.
-	public volatile TH264Channel OnSamplesHandler = null;
+	public volatile TDoOnAACSamplesHandler OnSamplesHandler = null;
 	
 	public TAACChannel() throws IOException {
 		super();

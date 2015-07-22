@@ -169,6 +169,8 @@ public class TDataStreamPropsPanel extends Activity {
                     		//.
                     		SensorsModule.Model_BuildAndPublish();
                     		//.
+                    		SensorsModule.Device.DataStreamerModule.ValidateStreaming();
+                    		//.
                     		Update();
                     	}
             		}

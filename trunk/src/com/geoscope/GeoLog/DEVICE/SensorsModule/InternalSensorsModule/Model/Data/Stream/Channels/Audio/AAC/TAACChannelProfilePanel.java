@@ -23,6 +23,7 @@ public class TAACChannelProfilePanel extends Activity {
 	@SuppressWarnings("unused")
 	private TextView lbName;
 	private CheckBox cbEnabled;
+	private CheckBox cbStreamableViaComponent;
 	private EditText edSampleRate;
 	private EditText edBitRate;
 	private Button btnApplyChanges;
@@ -43,6 +44,8 @@ public class TAACChannelProfilePanel extends Activity {
             lbName = (TextView)findViewById(R.id.lbName);
             //.
             cbEnabled = (CheckBox)findViewById(R.id.cbEnabled);
+            //.
+            cbStreamableViaComponent = (CheckBox)findViewById(R.id.cbStreamableViaComponent);
             //.
             edSampleRate = (EditText)findViewById(R.id.edSampleRate);
             //.
@@ -90,6 +93,8 @@ public class TAACChannelProfilePanel extends Activity {
     private void Update() {
     	cbEnabled.setChecked(Profile.Enabled);
     	//.
+    	cbStreamableViaComponent.setChecked(Profile.StreamableViaComponent);
+    	//.
 		edSampleRate.setText(Integer.toString(Profile.SampleRate));
 		//.
 		edBitRate.setText(Integer.toString(Profile.BitRate));
@@ -97,6 +102,8 @@ public class TAACChannelProfilePanel extends Activity {
 
     private void ApplyChangesAndExit() throws Exception {
     	Profile.Enabled = cbEnabled.isChecked(); 
+    	//.
+    	Profile.StreamableViaComponent = cbStreamableViaComponent.isChecked(); 
     	//.
     	Profile.SampleRate = Integer.parseInt(edSampleRate.getText().toString());
     	//.

@@ -361,11 +361,11 @@ public class TDEVICEModule extends TModule
         }
         //.
         ModuleState = MODULE_STATE_FINALIZED;
+        //.
         if (Log != null) {
     		Log.WriteInfo("Device", "finalized.");
             //.
         	Log.Destroy();
-        	Log = null;
         }
     }
     

@@ -31,7 +31,7 @@ public class TGPSChannel extends TTLRChannel {
 		DataFormat = 0;
 		Name = "Geo-location";
 		Info = "GPS data";
-		Size = 0;
+		Size = 8192;
 		Configuration = "";
 		Parameters = "";
 		//.

@@ -1,28 +1,28 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/svSpace"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:background="@android:color/white"
+    android:scrollbars="vertical"
+    tools:ignore="all" >
 
-    <SurfaceView
-        android:id="@+id/svSurface"
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
-
-    <RelativeLayout
-        android:id="@+id/RelativeLayout1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/fulltransparent"
+        android:layout_height="fill_parent"
+        android:background="@android:color/black"
         android:orientation="vertical" >
 
         <TextView
             android:id="@+id/lbTitle"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
+            android:background="#ffffffff"
+            android:gravity="center"
+            android:text="@string/SChannelsView"
+            android:textColor="#ff000000"
             android:textSize="18sp"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/lbStatus"
@@ -33,16 +33,631 @@
             android:layout_alignParentRight="true"
             android:textColor="@android:color/holo_red_dark"
             android:textSize="18sp"
-            android:visibility="visible" />
-
-        <ImageView
-            android:id="@+id/ivAudioOnly"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/SAudio"
-            android:scaleType="center"
-            android:src="@drawable/audio"
             android:visibility="gone" />
-    </RelativeLayout>
 
-</FrameLayout>
+        <LinearLayout
+            android:id="@+id/llAndroidStateADS"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:gravity="center"
+                android:text="@string/SAndroidStateADS"
+                android:textColor="#ff000000"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SBatteryVoltage"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edAndroidStateADSBatteryVoltage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SBatteryTemperature"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edAndroidStateADSBatteryTemperature"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SBatteryLevel"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edAndroidStateADSBatteryLevel"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SBatteryHealth"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edAndroidStateADSBatteryHealth"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SBatteryStatus"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edAndroidStateADSBatteryStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SBatteryPlugType"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edAndroidStateADSBatteryPlugType"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SCellularConnectorSignalStrength"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edAndroidStateADSCellularConnectorSignalStrength"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llEnvironmentConditionsXENVC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:gravity="center"
+                android:text="@string/SEnvironmentConditionsXENVC"
+                android:textColor="#ff000000"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/STemperature"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edEnvironmentConditionsXENVCTemperature"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SPressure"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edEnvironmentConditionsXENVCPressure"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SRelativeHumidity"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edEnvironmentConditionsXENVCRelativeHumidity"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" >
+
+                    <requestFocus />
+                </EditText>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SLight"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edEnvironmentConditionsXENVCLight"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SAcceleration"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edEnvironmentConditionsXENVCAcceleration"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SMagneticField"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edEnvironmentConditionsXENVCMagneticField"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SGyroscope"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edEnvironmentConditionsXENVCGyroscope"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llEnvironmentConditionsENVC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:gravity="center"
+                android:text="@string/SEnvironmentConditionsENVC"
+                android:textColor="#ff000000"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/STemperature"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edEnvironmentConditionsENVCTemperature"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SPressure"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edEnvironmentConditionsENVCPressure"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SHumidity"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edEnvironmentConditionsENVCHumidity"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llTelemetryTLR"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llAudioAAC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:gravity="center"
+                android:text="@string/SAudioAAC"
+                android:textColor="#ff000000"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SAudioBuffersProcessed"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edAudioAACBuffersProcessed"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llVideoH264"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:gravity="center"
+                android:text="@string/SVideoH264"
+                android:textColor="#ff000000"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SVideoBuffersProcessed"
+                    android:textColor="#ff555555"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/edVideoH264BuffersProcessed"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left"
+                    android:inputType="none"
+                    android:text="@string/SQuestionMark"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white" >
+
+                <SurfaceView
+                    android:id="@+id/svVideoH264"
+                    android:layout_width="512dp"
+                    android:layout_height="512dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true" />
+
+            </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

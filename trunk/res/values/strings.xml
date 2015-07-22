@@ -1124,5 +1124,6 @@
     <string name="SBeeping">Beeping</string>
     <string name="SVibrating">Vibrating</string>
     <string name="SRecordingIsntFinished">Recording is not finished</string>
+    <string name="SStreamableViaDataStreamComponent">Stream-able via a data-stream component</string>
     
 </resources>

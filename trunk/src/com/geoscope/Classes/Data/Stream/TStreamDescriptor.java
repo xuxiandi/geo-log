@@ -63,6 +63,14 @@ public class TStreamDescriptor {
 			Channels.get(I).Close();
 	}
 	
+	public TStreamDescriptor Clone(TChannelProvider pChannelProvider) throws Exception {
+		return (new TStreamDescriptor(ToByteArray(), pChannelProvider));
+	}
+	
+	public TStreamDescriptor Clone() throws Exception {
+		return (new TStreamDescriptor(ToByteArray()));
+	}
+	
 	public void Initialize(Object Parameters) throws Exception {
 		int Cnt = Channels.size();
 		for (int I = 0; I < Cnt; I++) 
@@ -253,5 +261,16 @@ public class TStreamDescriptor {
 				return Channel; //. ->
 		}
 		return null;
+	}
+	
+	public void Channels_RemoveDisabledItems() {
+		int I = 0; 
+		while (I < Channels.size()) {
+			TChannel Channel = Channels.get(I);
+			if (!Channel.Enabled)
+				Channels.remove(I);
+			else
+				I++;
+		}
 	}
 }

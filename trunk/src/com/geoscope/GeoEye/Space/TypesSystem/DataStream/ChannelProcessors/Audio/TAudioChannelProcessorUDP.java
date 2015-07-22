@@ -13,13 +13,13 @@ import android.media.MediaFormat;
 import android.os.SystemClock;
 import android.util.Base64;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.IO.Abstract.TStream;
 import com.geoscope.Classes.IO.Protocols.RTP.TRTPDecoder;
 import com.geoscope.Classes.IO.Protocols.RTP.TRTPPacket;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.Classes.MultiThreading.Synchronization.Event.TAutoResetEvent;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor.TChannel.TConfigurationParser;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessorUDP;
 
 public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
@@ -424,7 +424,7 @@ public class TAudioChannelProcessorUDP extends TStreamChannelProcessorUDP {
 	
 	@Override
 	public void ParseConfiguration() throws Exception {
-		TConfigurationParser CP = new TConfigurationParser(Configuration);
+		TChannel.TConfigurationParser CP = new TChannel.TConfigurationParser(Configuration);
 		int Version = Integer.parseInt(CP.DecoderConfiguration[0]);
 		if (Version != 1)
 			throw new Exception("unknown configuration version"); //. =>

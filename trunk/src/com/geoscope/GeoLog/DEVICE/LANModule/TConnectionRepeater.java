@@ -245,19 +245,37 @@ public class TConnectionRepeater extends TCancelableThread {
 			DestinationConnectionInputStream.read(DecriptorBA);
 			int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 			if (Descriptor < 0)
-				throw new Exception("destination login error, RC: "+Integer.toString(Descriptor)); //. =>
+				switch (Descriptor) {
+				
+				case TGeographProxyServerClient.MESSAGE_AUTHENTICATIONFAILED:
+				case TGeographProxyServerClient.MESSAGE_ACCESSISDENIED:
+					throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceAccessIsDenied,"access is denied"); //. =>
+					
+				case TGeographProxyServerClient.MESSAGE_LANCONNECTIONISNOTFOUND:
+					throw new OperationException(TGetControlDataValueSO.OperationErrorCode_LANConnectionIsNotFound,"LANConnection is not found"); //. =>
+					
+				default:
+					throw new Exception("destination login error, RC: "+Integer.toString(Descriptor)); //. =>
+				}
 			//. send ConnectionID
 			DecriptorBA = TDataConverter.ConvertInt32ToLEByteArray(ConnectionID);
 			DestinationConnectionOutputStream.write(DecriptorBA);
 			//. check ConnectionID
 			DestinationConnectionInputStream.read(DecriptorBA);
 			Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
-			if (Descriptor < 0) {
-				if (Descriptor == TGeographProxyServerClient.MESSAGE_LANCONNECTIONISNOTFOUND)
+			if (Descriptor < 0) 
+				switch (Descriptor) {
+				
+				case TGeographProxyServerClient.MESSAGE_AUTHENTICATIONFAILED:
+				case TGeographProxyServerClient.MESSAGE_ACCESSISDENIED:
+					throw new OperationException(TGetControlDataValueSO.OperationErrorCode_SourceAccessIsDenied,"access is denied"); //. =>
+					
+				case TGeographProxyServerClient.MESSAGE_LANCONNECTIONISNOTFOUND:
 					throw new OperationException(TGetControlDataValueSO.OperationErrorCode_LANConnectionIsNotFound,"LANConnection is not found"); //. =>
-				else
+					
+				default:
 					throw new Exception("destination login error, RC: "+Integer.toString(Descriptor)); //. =>
-			}
+				}
 		}
 		catch (Exception E) {
 			ConnectionResult = E;

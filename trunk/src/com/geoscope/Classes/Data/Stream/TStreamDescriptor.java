@@ -2,6 +2,7 @@ package com.geoscope.Classes.Data.Stream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -13,6 +14,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.util.Base64;
 import android.util.Xml;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
@@ -23,6 +25,8 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 public class TStreamDescriptor {
 
 	public String Folder = null;
+	//.
+	private byte[] SourceByteArray = null;
 	//.
     public String Name = "";
     public String Info = "";
@@ -42,6 +46,10 @@ public class TStreamDescriptor {
 	
 	public TStreamDescriptor(byte[] BA) throws Exception {
 		FromByteArray(BA);
+	}
+	
+	public TStreamDescriptor(String Base64String, TChannelProvider pChannelProvider) throws Exception {
+		FromBase64String(Base64String, pChannelProvider);
 	}
 	
 	public void Close() throws Exception {
@@ -163,7 +171,10 @@ public class TStreamDescriptor {
 			BIS.close();
 		}
 		Element RootNode = XmlDoc.getDocumentElement();
+		//.
 		FromXMLNode(RootNode, pChannelProvider);
+		//.
+		SourceByteArray = BA;
 	}
 	
 	public void FromByteArray(byte[] ByteArray) throws Exception {
@@ -190,6 +201,17 @@ public class TStreamDescriptor {
 	    }
     }
     
+	
+	public void FromBase64String(String S, TChannelProvider pChannelProvider) throws Exception {
+		FromByteArray(Base64.decode(S, Base64.NO_WRAP));
+	}
+	
+	public String ToBase64String() throws IOException {
+		if (SourceByteArray == null)
+			return null; //. ->
+		return Base64.encodeToString(SourceByteArray, 0,SourceByteArray.length, Base64.NO_WRAP);
+	}
+	
 	public TChannel Channels_GetOneByID(int ChannelID) {
 		int Cnt = Channels.size();
 		for (int I = 0; I < Cnt; I++) {

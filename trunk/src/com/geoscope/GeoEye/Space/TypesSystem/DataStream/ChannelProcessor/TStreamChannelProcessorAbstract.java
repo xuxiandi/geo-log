@@ -3,10 +3,10 @@ package com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor;
 import android.content.Context;
 import android.view.SurfaceHolder;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.IO.Abstract.TStream;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessors.Audio.TAudioChannelProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessors.Audio.TAudioChannelProcessorUDP;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessors.Video.TVideoChannelProcessor;
@@ -38,9 +38,9 @@ public abstract class TStreamChannelProcessorAbstract {
     
     public static abstract class TOnProgressHandler {
     	
-    	protected TDataStreamDescriptor.TChannel Channel;
+    	protected TChannel Channel;
     	
-    	public TOnProgressHandler(TDataStreamDescriptor.TChannel pChannel) {
+    	public TOnProgressHandler(TChannel pChannel) {
     		Channel = pChannel;
     	}
     	
@@ -49,9 +49,9 @@ public abstract class TStreamChannelProcessorAbstract {
     
     public static abstract class TOnIdleHandler {
     	
-    	protected TDataStreamDescriptor.TChannel Channel;
+    	protected TChannel Channel;
     	
-    	public TOnIdleHandler(TDataStreamDescriptor.TChannel pChannel) {
+    	public TOnIdleHandler(TChannel pChannel) {
     		Channel = pChannel;
     	}
     	
@@ -60,9 +60,9 @@ public abstract class TStreamChannelProcessorAbstract {
     
     public static abstract class TOnExceptionHandler {
     	
-    	protected TDataStreamDescriptor.TChannel Channel;
+    	protected TChannel Channel;
     	
-    	public TOnExceptionHandler(TDataStreamDescriptor.TChannel pChannel) {
+    	public TOnExceptionHandler(TChannel pChannel) {
     		Channel = pChannel;
     	}
     	

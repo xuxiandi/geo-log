@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 
+import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.GeoEye.R;
@@ -155,8 +156,8 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 		}
 	}
 	
-	public TDataStreamDescriptor GetStreamDescriptor() throws Exception {
-		return (new TDataStreamDescriptor(GetDescriptorData())); //. ->
+	public TStreamDescriptor GetStreamDescriptor() throws Exception {
+		return (new TStreamDescriptor(GetDescriptorData())); //. ->
 	}
 	
 	@Override

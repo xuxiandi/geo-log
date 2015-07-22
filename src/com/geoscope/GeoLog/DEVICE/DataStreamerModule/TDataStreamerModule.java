@@ -22,6 +22,7 @@ import android.util.Xml;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
@@ -127,6 +128,10 @@ public class TDataStreamerModule extends TModule {
 		
 		public void Clear() {
 			Components.clear();
+		}
+		
+		public void Add(TComponent Component) {
+			Components.add(Component);
 		}
 		
 		public void FromByteArray(byte[] BA) throws Exception {
@@ -357,16 +362,16 @@ public class TDataStreamerModule extends TModule {
 					//.
 					if (Component.StreamDescriptor != null)
 						for (int J = 0; J < Component.StreamDescriptor.Channels.size(); J++) {
-							TDataStreamDescriptor.TChannel Chanel = Component.StreamDescriptor.Channels.get(J); 
+							TChannel Chanel = Component.StreamDescriptor.Channels.get(J); 
 							if (Component.Channels_ChannelExists(Chanel.ID)) {
-								TComponentDataStreaming.TStreamer Streamer = GetStreamer(Chanel.TypeID, DataStreamerModule.Device, Component.idTComponent,Component.idComponent, Chanel.ID, Chanel.Configuration, Chanel.Parameters);
+								TComponentDataStreaming.TStreamer Streamer = GetStreamer(Chanel.GetTypeID(), DataStreamerModule.Device, Component.idTComponent,Component.idComponent, Chanel.ID, Chanel.Configuration, Chanel.Parameters);
 								if (Streamer != null) {
 									Streamers.add(Streamer);
 									//.
 									Streamer.Start();
 								}
 								else 
-									DataStreamerModule.Device.Log.WriteWarning("DataStreamerModule.Streaming","Streamer not found for TypeID: "+Chanel.TypeID);
+									DataStreamerModule.Device.Log.WriteWarning("DataStreamerModule.Streaming","Streamer not found for TypeID: "+Chanel.GetTypeID());
 							}
 						}
 				}

@@ -176,9 +176,20 @@ public class TDeviceConnectionClient extends TCancelableThread {
 		ServerSocketInputStream.read(DecriptorBA);
 		int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(DecriptorBA,0);
 		if (Descriptor < 0)
-			throw new Exception("destination login error, RC: "+Integer.toString(Descriptor)); //. =>
+			switch (Descriptor) {
+			
+			case LANConnectionRepeaterDefines.MESSAGE_AUTHENTICATIONFAILED:
+			case LANConnectionRepeaterDefines.MESSAGE_ACCESSISDENIED:
+				throw new Exception("access is denied"); //. =>
+				
+			case LANConnectionRepeaterDefines.MESSAGE_LANCONNECTIONISNOTFOUND:
+				throw new Exception("LANConnection is not found"); //. =>
+				
+			default:
+				throw new Exception("destination login error, RC: "+Integer.toString(Descriptor)); //. =>
+			}
 		if (Descriptor == 0) 
-			throw new Exception("Wrong LANConnection, CID: "+Integer.toString(Descriptor)); //. =>
+			throw new Exception("wrong LANConnection, CID: "+Integer.toString(Descriptor)); //. =>
 		ConnectionID = Descriptor;
 		//. make connection from device side
 		Repeater.StartHandler.DoStartDeviceConnection(Repeater.CUAL, Repeater.ServerAddress,Repeater.ServerPort, ConnectionID);

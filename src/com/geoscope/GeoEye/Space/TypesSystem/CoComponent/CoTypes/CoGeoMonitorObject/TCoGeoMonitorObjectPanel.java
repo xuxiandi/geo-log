@@ -321,7 +321,10 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		            	progressDialog.dismiss(); 
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} //. TODO
 		            	//.
 		            	break; //. >
 		            

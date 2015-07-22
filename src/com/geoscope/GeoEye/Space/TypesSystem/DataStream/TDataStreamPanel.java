@@ -16,10 +16,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor.TChannelIDs;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessorAbstract;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessorAbstract.TOnExceptionHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.ChannelProcessor.TStreamChannelProcessorAbstract.TOnIdleHandler;
@@ -154,9 +155,9 @@ public class TDataStreamPanel extends Activity implements SurfaceHolder.Callback
 		TDataStreamDescriptor SD = new TDataStreamDescriptor(StreamDescriptor);
 		StringBuilder SB = new StringBuilder();
 		for (int I = 0; I < SD.Channels.size(); I++) {
-			TDataStreamDescriptor.TChannel Channel = SD.Channels.get(I);
+			TChannel Channel = SD.Channels.get(I);
 			if ((StreamChannels == null) || StreamChannels.IDExists(Channel.ID)) {
-				TStreamChannelProcessorAbstract ChannelProcessor = TStreamChannelProcessorAbstract.GetProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, SpaceDefines.idTDataStream,idComponent, Channel.ID, Channel.TypeID, Channel.DataFormat, Channel.Name,Channel.Info, Channel.Configuration, Channel.Parameters, new TOnProgressHandler(Channel) {
+				TStreamChannelProcessorAbstract ChannelProcessor = TStreamChannelProcessorAbstract.GetProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, SpaceDefines.idTDataStream,idComponent, Channel.ID, Channel.GetTypeID(), Channel.DataFormat, Channel.Name,Channel.Info, Channel.Configuration, Channel.Parameters, new TOnProgressHandler(Channel) {
 					@Override
 					public void DoOnProgress(int ReadSize, TCanceller Canceller) {
 						TDataStreamPanel.this.DoOnStatusMessage("");

@@ -25,6 +25,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
@@ -295,7 +297,7 @@ public class TDataStreamPropsPanel extends Activity {
     			lbStreamChannels.setText(getString(R.string.SChannels1));
     			String[] lvChannelsItems = new String[DataStreamDescriptor.Channels.size()];
     			for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++) {
-    				TDataStreamDescriptor.TChannel Channel = DataStreamDescriptor.Channels.get(I);
+    				TChannel Channel = DataStreamDescriptor.Channels.get(I);
     				lvChannelsItems[I] = Channel.Name;
     				if (Channel.Info.length() > 0)
     					lvChannelsItems[I] += " "+"/"+Channel.Info+"/"; 
@@ -326,7 +328,7 @@ public class TDataStreamPropsPanel extends Activity {
     private void OpenStream() {
     	if (DataStreamDescriptor == null)
     		return; //. ->
-    	final TDataStreamDescriptor.TChannelIDs Channels = new TDataStreamDescriptor.TChannelIDs();
+    	final TChannelIDs Channels = new TChannelIDs();
 		for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
 			if (lvChannels.isItemChecked(I))
 				Channels.AddID(DataStreamDescriptor.Channels.get(I).ID);

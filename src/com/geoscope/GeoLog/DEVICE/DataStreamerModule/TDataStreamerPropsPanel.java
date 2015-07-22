@@ -5,8 +5,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -15,8 +15,8 @@ import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.GeoEye.R;
-import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamDescriptor;
 import com.geoscope.GeoLog.TrackerService.TTracker;
 
 public class TDataStreamerPropsPanel extends Activity {
@@ -141,10 +141,10 @@ public class TDataStreamerPropsPanel extends Activity {
     	final CharSequence[] Channels = new CharSequence[CC];
     	final boolean[] ChannelsMask = new boolean[CC];
     	for (int I = 0; I < CC; I++) {
-    		TDataStreamDescriptor.TChannel Channel = Component.StreamDescriptor.Channels.get(I);
+    		TChannel Channel = Component.StreamDescriptor.Channels.get(I);
     		//.
 			StringBuilder SB = new StringBuilder();
-			SB.append("["+Channel.TypeID+"] ");
+			SB.append("["+Channel.GetTypeID()+"] ");
 			if (!Channel.Name.equals(""))
 				SB.append(Channel.Name+" ");
 			if (!Channel.Info.equals(""))
@@ -159,7 +159,7 @@ public class TDataStreamerPropsPanel extends Activity {
     	builder.setMultiChoiceItems(Channels, ChannelsMask, new DialogInterface.OnMultiChoiceClickListener() {
 			@Override
 			public void onClick(DialogInterface arg0, int arg1, boolean arg2) {
-	    		TDataStreamDescriptor.TChannel Channel = Component.StreamDescriptor.Channels.get(arg1);
+	    		TChannel Channel = Component.StreamDescriptor.Channels.get(arg1);
 	    		//.
 	    		if (arg2)
 	    			Component.Channels_AddChannel(Channel.ID);

@@ -1124,5 +1124,6 @@
     <string name="SBeeping">Звук</string>
     <string name="SVibrating">Вибрация</string>
     <string name="SRecordingIsntFinished">Запись не завершена</string>
+    <string name="SStreamableViaDataStreamComponent">Потоковая передача через стрим-компонент</string>
     
 </resources>

@@ -27,11 +27,13 @@ import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
+import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetDataStreamerActiveFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreaming;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -352,30 +354,88 @@ public class TDataStreamerModule extends TModule {
 		private void StartStreamers() throws Exception {
 			TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
 			//.
-			for (int I = 0; I < StreamingComponents.Components.size(); I++) {
-				TStreamingComponents.TComponent Component = StreamingComponents.Components.get(I);
-				//.
-				if (Component.Enabled) {
-					//. supply component with its stream descriptor
-					if (User != null)
-						Component.SupplyWithStreamDescriptor(User);
-					//.
-					if (Component.StreamDescriptor != null)
-						for (int J = 0; J < Component.StreamDescriptor.Channels.size(); J++) {
-							TChannel Chanel = Component.StreamDescriptor.Channels.get(J); 
-							if (Component.Channels_ChannelExists(Chanel.ID)) {
-								TComponentDataStreaming.TStreamer Streamer = GetStreamer(Chanel.GetTypeID(), DataStreamerModule.Device, Component.idTComponent,Component.idComponent, Chanel.ID, Chanel.Configuration, Chanel.Parameters);
-								if (Streamer != null) {
-									Streamers.add(Streamer);
-									//.
-									Streamer.Start();
+			if (StreamingComponents.Components.size() == 0) { //. fetch a DataStream component from the device object 
+				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(SpaceDefines.idTCoComponent,DataStreamerModule.Device.idOwnerComponent);
+				if (CF != null)
+					try {
+						long idDataStream = CF.GetComponent(SpaceDefines.idTDataStream);
+						if (idDataStream != 0) {
+							TModel Model = DataStreamerModule.Device.SensorsModule.Model;
+							if (Model != null) {
+								TStreamDescriptor StreamDescriptor = Model.Stream.Clone();
+								//. suppress not stream-able-via-component channels
+								int Cnt = StreamDescriptor.Channels.size();
+								for (int J = 0; J < Cnt; J++) {
+									com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)Model.Stream.Channels.get(J); 
+		            				TChannel SourceChannel = Channel.SourceChannel_Get();
+		            				//.
+									TChannel StreamChannel = StreamDescriptor.Channels.get(J);
+									if (SourceChannel != null) {
+										StreamChannel.Enabled = SourceChannel.Profile.StreamableViaComponent;
+										if (StreamChannel.Enabled) {
+											StreamChannel.ProfilesFolder = SourceChannel.ProfilesFolder; 
+											StreamChannel.Configuration_LoadFromConfigurationFile(); //. supply the channel with configuration
+										}
+									}
+									else
+										StreamChannel.Enabled = false;
 								}
-								else 
-									DataStreamerModule.Device.Log.WriteWarning("DataStreamerModule.Streaming","Streamer not found for TypeID: "+Chanel.GetTypeID());
+								StreamDescriptor.Channels_RemoveDisabledItems();
+								//. update the DataStream component with descriptor 
+								TDataStreamFunctionality DSF = (TDataStreamFunctionality)User.Space.TypesSystem.SystemTDataStream.TComponentFunctionality_Create(idDataStream);
+								try {
+									DSF.SetStreamDescriptor(StreamDescriptor);
+									//.
+									Cnt = StreamDescriptor.Channels.size();
+									for (int J = 0; J < Cnt; J++) {
+										TChannel StreamChannel = StreamDescriptor.Channels.get(J);
+										if (StreamChannel.Enabled) {
+											TComponentDataStreaming.TStreamer Streamer = GetStreamer(StreamChannel.GetTypeID(), DataStreamerModule.Device, DSF.idTComponent(),DSF.idComponent, StreamChannel.ID, StreamChannel.Configuration, StreamChannel.Parameters);
+											if (Streamer != null) {
+												Streamers.add(Streamer);
+												//.
+												Streamer.Start();
+											}
+											else 
+												DataStreamerModule.Device.Log.WriteWarning("DataStreamerModule.Streaming","Streamer not found for TypeID: "+StreamChannel.GetTypeID());
+										}
+									}
+								}
+								finally {
+									DSF.Release();
+								}
 							}
 						}
-				}
+					}
+					finally {
+						CF.Release();
+					}
 			}
+			else
+				for (int I = 0; I < StreamingComponents.Components.size(); I++) {
+					TStreamingComponents.TComponent Component = StreamingComponents.Components.get(I);
+					//.
+					if (Component.Enabled) {
+						//. supply component with its stream descriptor
+						if (User != null)
+							Component.SupplyWithStreamDescriptor(User);
+						//.
+						if (Component.StreamDescriptor != null)
+							for (int J = 0; J < Component.StreamDescriptor.Channels.size(); J++) {
+								TChannel Channel = Component.StreamDescriptor.Channels.get(J); 
+								if (Component.Channels_ChannelExists(Channel.ID)) {
+									TComponentDataStreaming.TStreamer Streamer = GetStreamer(Channel.GetTypeID(), DataStreamerModule.Device, Component.idTComponent,Component.idComponent, Channel.ID, Channel.Configuration, Channel.Parameters);
+									if (Streamer != null) {
+										Streamers.add(Streamer);
+										//.
+										Streamer.Start();
+									}
+									else 
+										DataStreamerModule.Device.Log.WriteWarning("DataStreamerModule.Streaming","Streamer not found for TypeID: "+Channel.GetTypeID());
+								}
+							}
+					}
+				}
 		}
 		
 		private void StopStreamers() throws Exception {
@@ -524,10 +584,7 @@ public class TDataStreamerModule extends TModule {
     		FOS.close();
     	}
     	//. validation
-    	if (ActiveValue.BooleanValue())
-    		ReStartStreaming();
-    	else
-    		StopStreaming();
+		ValidateStreaming();
     }
     
     public synchronized TStreamingComponents GetStreamingComponents() {
@@ -549,9 +606,10 @@ public class TDataStreamerModule extends TModule {
     	}
     }
     
-    public synchronized void ReStartStreaming() throws InterruptedException {
+    public synchronized void ValidateStreaming() throws InterruptedException {
     	StopStreaming();
-    	Streaming = new TStreaming(this, StreamingComponents);
+    	if (ActiveValue.BooleanValue())
+    		Streaming = new TStreaming(this, StreamingComponents);
     }
 
     public synchronized boolean StreamingIsActive() throws InterruptedException {
@@ -566,10 +624,7 @@ public class TDataStreamerModule extends TModule {
     	//.
     	SaveProfile();
     	//. validation
-    	if (ActiveValue.BooleanValue())
-    		ReStartStreaming();
-    	else
-    		StopStreaming();
+		ValidateStreaming();
     }
 
     public void SetActiveValue(boolean flTrue, boolean flPostProcess) throws Exception

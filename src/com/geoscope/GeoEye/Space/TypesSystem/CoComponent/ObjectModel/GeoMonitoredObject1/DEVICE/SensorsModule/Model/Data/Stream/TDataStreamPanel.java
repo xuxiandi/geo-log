@@ -163,6 +163,7 @@ public class TDataStreamPanel extends Activity {
 		flExists = true;
     }
 	
+    @Override
     public void onDestroy() {
     	flExists = false;
 		//.
@@ -191,7 +192,7 @@ public class TDataStreamPanel extends Activity {
 		IsInFront = true;
 	}
 
-	private void StreamChannelConnectors_Initialize(SurfaceHolder SH, int Width, int Height) throws Exception {
+	private void StreamChannelConnectors_Initialize() throws Exception {
 		StreamChannelConnectors_Finalize();
 		//.
 		for (int I = 0; I < StreamDescriptor.Channels.size(); I++) {
@@ -209,10 +210,6 @@ public class TDataStreamPanel extends Activity {
 				}			  
 			}
 		}
-	}
-	
-	private void StreamChannelConnectors_Initialize() throws Exception {
-		StreamChannelConnectors_Initialize(null,0,0);
 	}
 	
 	private void StreamChannelConnectors_Finalize() throws Exception {

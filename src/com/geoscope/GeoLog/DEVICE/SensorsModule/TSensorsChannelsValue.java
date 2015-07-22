@@ -61,6 +61,8 @@ public class TSensorsChannelsValue extends TComponentTimestampedDataValue {
             		}
             		//.
             		SensorsModule.Model_BuildAndPublish();
+            		//.
+            		SensorsModule.Device.DataStreamerModule.ValidateStreaming();
             	}
         		break; //. >
         		

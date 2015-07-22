@@ -75,6 +75,8 @@ public class TChannel {
 	public static final int CHANNEL_KIND_OUT	= 1;
 	public static final int CHANNEL_KIND_INOUT	= 2; 
 	
+	public static final String ConfigurationFileName = "Configuration";
+	
 	public static class TConfigurationParser {
 		
 		private static final String VersionDelimiter = ":";
@@ -101,6 +103,8 @@ public class TChannel {
 			}
 		}
 	}
+	
+	public static final String ParametersFileName = "Parameters";
 	
 	public static class TParametersParser {
 		
@@ -135,6 +139,7 @@ public class TChannel {
 		
 		
 		public boolean Enabled = true;
+		public boolean StreamableViaComponent = false;
 		
 		public TProfile() {
 		}
@@ -151,6 +156,13 @@ public class TChannel {
 				if (ValueNode != null)
 					Enabled = (Integer.parseInt(ValueNode.getNodeValue()) != 0);
 			}
+			//. StreamableViaComponent
+			_Node = TMyXML.SearchNode(ANode,"StreamableViaComponent");
+			if (_Node != null) {
+				Node ValueNode = _Node.getFirstChild();
+				if (ValueNode != null)
+					StreamableViaComponent = (Integer.parseInt(ValueNode.getNodeValue()) != 0);
+			}
 		}
 		
 		public synchronized void ToXMLSerializer(XmlSerializer Serializer) throws Exception {
@@ -158,6 +170,10 @@ public class TChannel {
 	        Serializer.startTag("", "Enabled");
 	        Serializer.text(Enabled ? "1" : "0");
 	        Serializer.endTag("", "Enabled");
+	    	//. StreamableViaComponent
+	        Serializer.startTag("", "StreamableViaComponent");
+	        Serializer.text(StreamableViaComponent ? "1" : "0");
+	        Serializer.endTag("", "StreamableViaComponent");
 		}
 		
 		public void FromByteArray(byte[] BA) throws Exception {
@@ -219,7 +235,7 @@ public class TChannel {
 	}
 	
 	
-	private String ProfilesFolder;
+	public String ProfilesFolder;
 	//.
 	public TProfile Profile;
 	//.
@@ -229,7 +245,7 @@ public class TChannel {
 	public int 	DataFormat = 0;
 	public String Name = "";
 	public String Info = "";
-	public int 	Size = 0;
+	public int 	Size = 8192;
 	public String Configuration = "";
 	public String Parameters = "";
 	//.
@@ -268,7 +284,10 @@ public class TChannel {
 	public String Folder() {
 		if (ProfilesFolder == null)
 			return null; //. ->
-		return (ProfilesFolder+"/"+GetTypeID()+"."+Integer.toString(ID));
+		String Result = ProfilesFolder+"/"+GetTypeID()+"."+Integer.toString(ID);
+		File RF = new File(Result);
+		RF.mkdirs();
+		return Result;
 	}
 	
 	public void Profile_Load() throws Exception {
@@ -363,9 +382,59 @@ public class TChannel {
 		Configuration = AChannel.Configuration;
 		Parameters = AChannel.Parameters;
 		DataTypes = AChannel.DataTypes;
+		//.
+		ProfilesFolder = AChannel.ProfilesFolder;
 	}
 	
 	public void Parse() throws Exception {
+	}
+
+	public boolean Configuration_LoadFromConfigurationFile() throws IOException {
+		String CFN = Folder()+"/"+ConfigurationFileName;
+		File CF = new File(CFN);
+		if (CF.exists()) { 
+	    	FileInputStream FIS = new FileInputStream(CF);
+	    	try {
+	    			byte[] BA = new byte[(int)CF.length()];
+	    			FIS.read(BA);
+	    			//.
+	    			String ConfigurationString = new String(BA, "utf-8");
+	    			//.
+	    			Configuration = ConfigurationString;
+	    			//.
+	    			return true; //. ->
+	    	}
+			finally
+			{
+				FIS.close(); 
+			}
+		}
+		else
+			return false; //. ->
+	}
+	
+	public boolean Parameters_LoadFromParametersFile() throws IOException {
+		String PFN = Folder()+"/"+ParametersFileName;
+		File PF = new File(PFN);
+		if (PF.exists()) { 
+	    	FileInputStream FIS = new FileInputStream(PF);
+	    	try {
+	    			byte[] BA = new byte[(int)PF.length()];
+	    			FIS.read(BA);
+	    			//.
+	    			String ParametersString = new String(BA, "utf-8");
+	    			//.
+	    			Parameters = ParametersString;
+	    			//.
+	    			return true; //. ->
+	    	}
+			finally
+			{
+				FIS.close(); 
+			}
+		}
+		else
+			return false; //. ->
 	}
 	
 	public void Start() throws Exception {

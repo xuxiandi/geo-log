@@ -23,6 +23,7 @@ public class TAOSSChannelProfilePanel extends Activity {
 	@SuppressWarnings("unused")
 	private TextView lbName;
 	private CheckBox cbEnabled;
+	private CheckBox cbStreamableViaComponent;
 	private EditText edSampleInterval;
 	private Button btnApplyChanges;
 	
@@ -42,6 +43,8 @@ public class TAOSSChannelProfilePanel extends Activity {
             lbName = (TextView)findViewById(R.id.lbName);
             //.
             cbEnabled = (CheckBox)findViewById(R.id.cbEnabled);
+            //.
+            cbStreamableViaComponent = (CheckBox)findViewById(R.id.cbStreamableViaComponent);
             //.
             edSampleInterval = (EditText)findViewById(R.id.edSampleInterval);
             //.
@@ -87,11 +90,15 @@ public class TAOSSChannelProfilePanel extends Activity {
     private void Update() {
     	cbEnabled.setChecked(Profile.Enabled);
     	//.
+    	cbStreamableViaComponent.setChecked(Profile.StreamableViaComponent);
+    	//.
 		edSampleInterval.setText(Integer.toString(Profile.SampleInterval));
     }
 
     private void ApplyChangesAndExit() throws Exception {
     	Profile.Enabled = cbEnabled.isChecked(); 
+    	//.
+    	Profile.StreamableViaComponent = cbStreamableViaComponent.isChecked(); 
     	//.
     	Profile.SampleInterval = Integer.parseInt(edSampleInterval.getText().toString());
     	//.

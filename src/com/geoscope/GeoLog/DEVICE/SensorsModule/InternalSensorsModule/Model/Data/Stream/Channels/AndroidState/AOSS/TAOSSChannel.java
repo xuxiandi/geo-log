@@ -222,7 +222,7 @@ public class TAOSSChannel extends TTLRChannel {
 		DataFormat = 0;
 		Name = "OS state";
 		Info = "Android operational system state";
-		Size = 0;
+		Size = 8192;
 		Configuration = "";
 		Parameters = "";
 		//.

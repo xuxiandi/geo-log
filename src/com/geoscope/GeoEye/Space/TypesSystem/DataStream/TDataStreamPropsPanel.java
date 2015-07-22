@@ -305,8 +305,8 @@ public class TDataStreamPropsPanel extends Activity {
     			}
     			ArrayAdapter<String> lvChannelsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvChannelsItems);             
     			lvChannels.setAdapter(lvChannelsAdapter);
-    			for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
-    				lvChannels.setItemChecked(I,true);
+    			/* for (int I = 0; I < DataStreamDescriptor.Channels.size(); I++)
+    				lvChannels.setItemChecked(I,true); */
     		}
     		else {
     			lbStreamName.setText("?");

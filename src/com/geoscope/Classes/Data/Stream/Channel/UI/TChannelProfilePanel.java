@@ -23,6 +23,7 @@ public class TChannelProfilePanel extends Activity {
 	@SuppressWarnings("unused")
 	private TextView lbName;
 	private CheckBox cbEnabled;
+	private CheckBox cbStreamableViaComponent;
 	private Button btnApplyChanges;
 	
     public void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,8 @@ public class TChannelProfilePanel extends Activity {
             lbName = (TextView)findViewById(R.id.lbName);
             //.
             cbEnabled = (CheckBox)findViewById(R.id.cbEnabled);
+            //.
+            cbStreamableViaComponent = (CheckBox)findViewById(R.id.cbStreamableViaComponent);
             //.
             btnApplyChanges = (Button)findViewById(R.id.btnApplyChanges);
             btnApplyChanges.setOnClickListener(new OnClickListener() {
@@ -83,10 +86,14 @@ public class TChannelProfilePanel extends Activity {
     
     private void Update() {
     	cbEnabled.setChecked(Profile.Enabled);
+    	//.
+    	cbStreamableViaComponent.setChecked(Profile.StreamableViaComponent);
     }
 
     private void ApplyChangesAndExit() throws Exception {
     	Profile.Enabled = cbEnabled.isChecked(); 
+    	//.
+    	Profile.StreamableViaComponent = cbStreamableViaComponent.isChecked(); 
     	//.
     	Intent intent = getIntent();
     	intent.putExtra("ProfileData",Profile.ToByteArray());

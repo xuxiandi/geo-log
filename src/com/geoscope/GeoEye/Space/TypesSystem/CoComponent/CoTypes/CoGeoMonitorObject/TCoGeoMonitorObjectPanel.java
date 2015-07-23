@@ -42,6 +42,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.Data.Types.Image.Color.ColorPicker;
 import com.geoscope.Classes.Exception.CancelException;
@@ -87,11 +89,13 @@ import com.geoscope.GeoEye.Space.URL.TURL;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
+import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFileMessageValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFilesValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetDataStreamerActiveValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TGeographServerServiceOperation;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -719,6 +723,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						Button btnSendAudioFileMessage = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnSendAudioFileMessage);
 						Button btnImportAudioFiles = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles);
 						CheckBox cbDataStreamerActive = (CheckBox)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_cbDataStreamerActive);
+						Button btnDataStreamerStreamDescriptor = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnDataStreamerStreamDescriptor);
 						LinearLayout llAlarmModule = (LinearLayout)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_llAlarmModule);
 						Button btnShowUserMessagingModuleMessagingPanel = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowUserMessagingModuleMessagingPanel);
 						//.
@@ -1284,6 +1289,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 								}
 							}
 						});
+						btnShowControlsModuleStream.setEnabled((DC.ControlsModule.ControlsDataValue.Value != null) && (DC.ControlsModule.ControlsDataValue.Value.length > 0));
 						btnSendAudioFileMessage.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
@@ -1396,7 +1402,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 							}
 						});
 						cbDataStreamerActive.setChecked(DC.DataStreamerModule.ActiveValue.BooleanValue());
-						cbDataStreamerActive.setOnClickListener(new OnClickListener(){
+						cbDataStreamerActive.setOnClickListener(new OnClickListener() {
+							
 				            @Override
 				            public void onClick(View v) {
 								if (flUpdatingObjectModelPanel)
@@ -1444,6 +1451,72 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 								Processing.Start();
 				            }
 				        });  
+						btnDataStreamerStreamDescriptor.setEnabled(cbDataStreamerActive.isChecked());
+						btnDataStreamerStreamDescriptor.setOnClickListener(new OnClickListener() {
+							
+							@Override
+							public void onClick(View v) {
+								TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this) {
+
+									private TComponentTimestampedDataValue Value;
+									
+									@Override
+									public void Process() throws Exception {
+						        		String Params = "1"; //. get an own streaming component stream descriptor
+						        		//.
+						        		byte[] _AddressData = Params.getBytes("US-ASCII");
+						        		Value = new TComponentTimestampedDataValue();
+						        		try {
+						        			byte[] Data = Object.GeographServerObjectController().Component_ReadDeviceByAddressDataCUAC(DC.DataStreamerModule.StreamingComponentsValue.GetAddressArray(),_AddressData);
+						        			Value.FromByteArray(Data,(new TIndex(0)));
+						        		}
+						        		catch (OperationException OE) {
+						        			switch (OE.Code) {
+
+						        			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+						        				throw new Exception(context.getString(R.string.SUserAccessIsDenied)); //. =>
+						        				
+						        			default:
+						        				throw new OperationException(OE.Code,"error of reading the device, "+OE.getMessage()); //. =>
+						        			}
+						        		}
+									}
+									
+									@Override 
+									public void DoOnCompleted() throws Exception {
+										TStreamDescriptor StreamDescriptor = new TStreamDescriptor(Value.Value);
+										if (StreamDescriptor.Channels_Count() > 0) {
+											TChannelIDs Channels = StreamDescriptor.Channels_IDs(); 
+											Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.class);
+								        	switch (ParametersType) {
+								        	
+								        	case PARAMETERS_TYPE_OID:
+												intent.putExtra("ParametersType", com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.PARAMETERS_TYPE_OID);
+												intent.putExtra("ObjectID", ObjectID);
+								        		break; //. >
+								        		
+								        	case PARAMETERS_TYPE_OIDX:
+												intent.putExtra("ParametersType", com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.PARAMETERS_TYPE_OIDX);
+												intent.putExtra("ObjectIndex", ObjectIndex);
+								        		break; //. >
+								        	}
+											intent.putExtra("ChannelIDs", Channels.ToByteArray());
+											intent.putExtra("DenyOpening", true);
+											//.
+									        startActivity(intent);
+										}
+										else
+				                			Toast.makeText(TCoGeoMonitorObjectPanel.this, R.string.SNoChannels, Toast.LENGTH_LONG).show();
+									}
+									
+									@Override
+									public void DoOnException(Exception E) {
+			                			Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								};
+								Processing.Start();
+							}
+						});
 						boolean flAlarms = ((DC.AlarmModule.AlarmDataValue.Value != null) && (DC.AlarmModule.AlarmDataValue.Value.length > 0));
 						if (flAlarms) {
 							TAlarmModule.TAlarms Alarms = new TAlarms(DC.AlarmModule.AlarmDataValue.Value);

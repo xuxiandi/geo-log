@@ -282,14 +282,16 @@ public class TDataStreamerModule extends TModule {
 		}
 	}
 	
-	private static class TStreaming extends TCancelableThread {
+	public static class TStreaming extends TCancelableThread {
 		
 		public static final int RestartInterval = 1000*60; //. seconds
 		
 		private TDataStreamerModule DataStreamerModule;
 		private TStreamingComponents StreamingComponents;
 		//.
-		private ArrayList<TComponentDataStreaming.TStreamer> Streamers = new ArrayList<TComponentDataStreaming.TStreamer>(); 
+		private ArrayList<TComponentDataStreaming.TStreamer> Streamers = new ArrayList<TComponentDataStreaming.TStreamer>();
+		//.
+		public volatile TStreamDescriptor ComponentStreamDescriptor = null; 
 		                                          
 		public TStreaming(TDataStreamerModule pDataStreamerModule, TStreamingComponents pStreamingComponents) throws Exception {
     		super();
@@ -298,10 +300,13 @@ public class TDataStreamerModule extends TModule {
 			StreamingComponents = pStreamingComponents;
 			//.
 			try {
-				CheckStreamChannelConfigurations();
+				CheckStreamChannels();
 			}
 			catch (TChannel.ConfigurationErrorException CEE) {
 				throw new TChannel.ConfigurationErrorException("COULD NOT START A DATA STREAMING, REASON: "+CEE.getMessage()); //. =>
+			}
+			catch (TChannel.ParametersErrorException PEE) {
+				throw new TChannel.ConfigurationErrorException("COULD NOT START A DATA STREAMING, REASON: "+PEE.getMessage()); //. =>
 			}
 			//.
 			Start();
@@ -387,6 +392,40 @@ public class TDataStreamerModule extends TModule {
 				}
 		}
 		
+		private void CheckStreamChannelParameters() throws Exception {
+			if (StreamingComponents.Components.size() == 0) { //. process for own DataStream component of the device object 
+				TModel Model = DataStreamerModule.Device.SensorsModule.Model;
+				if (Model != null) {
+					TStreamDescriptor StreamDescriptor = Model.Stream;
+					int Cnt = StreamDescriptor.Channels.size();
+					for (int J = 0; J < Cnt; J++) { 
+						com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)StreamDescriptor.Channels.get(J);
+						if (Channel.StreamableViaComponent()) {
+	        				TChannel SourceChannel = Channel.SourceChannel_Get();
+	        				if (SourceChannel != null)
+	        					SourceChannel.Parameters_Check();
+						}
+					}
+				}
+			}
+			else
+				for (int I = 0; I < StreamingComponents.Components.size(); I++) {
+					TStreamingComponents.TComponent Component = StreamingComponents.Components.get(I);
+					//.
+					if (Component.Enabled && (Component.StreamDescriptor != null)) 
+						for (int J = 0; J < Component.StreamDescriptor.Channels.size(); J++) {
+							TChannel Channel = Component.StreamDescriptor.Channels.get(J);
+							if (Channel.Enabled)
+								Channel.Parameters_Check();
+						}
+				}
+		}
+		
+		private void CheckStreamChannels() throws Exception {
+			CheckStreamChannelConfigurations();
+			CheckStreamChannelParameters();
+		}
+		
 		private void StartStreamers() throws Exception {
 			TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
 			//.
@@ -439,6 +478,8 @@ public class TDataStreamerModule extends TModule {
 								finally {
 									DSF.Release();
 								}
+								//.
+								ComponentStreamDescriptor = StreamDescriptor;
 							}
 						}
 					}
@@ -639,6 +680,10 @@ public class TDataStreamerModule extends TModule {
     		Streaming.Destroy();
     		Streaming = null;
     	}
+    }
+    
+    public synchronized TStreaming GetStreaming() {
+    	return Streaming;
     }
     
     public synchronized void ValidateStreaming() throws Exception {

@@ -20,6 +20,7 @@ import android.util.Xml;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelDescriptor;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelProvider;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 
@@ -227,6 +228,18 @@ public class TStreamDescriptor {
 		if (SourceByteArray == null)
 			return null; //. ->
 		return Base64.encodeToString(SourceByteArray, 0,SourceByteArray.length, Base64.NO_WRAP);
+	}
+	
+	public int Channels_Count() {
+		return Channels.size();
+	}
+	
+	public TChannelIDs Channels_IDs() {
+		TChannelIDs Result = new TChannelIDs();
+		int Cnt = Channels.size();
+		for (int I = 0; I < Cnt; I++) 
+			Result.AddID(Channels.get(I).ID);
+		return Result;
 	}
 	
 	public TChannel Channels_GetOneByID(int ChannelID) {

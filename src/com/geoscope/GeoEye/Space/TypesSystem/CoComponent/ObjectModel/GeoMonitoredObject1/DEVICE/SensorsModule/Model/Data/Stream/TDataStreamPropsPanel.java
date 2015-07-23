@@ -67,6 +67,8 @@ public class TDataStreamPropsPanel extends Activity {
 	//.
 	private TObjectModel.TSensorChannelStatus[] DataStreamChannelsStatus = null;
 	//.
+	private boolean flDenyOpening = false;
+	//.
 	private TextView lbStreamName;
 	private TextView lbStreamInfo;
 	private TextView lbStreamChannels;
@@ -106,6 +108,7 @@ public class TDataStreamPropsPanel extends Activity {
             	byte[] _ChannelIDs = extras.getByteArray("ChannelIDs");
             	if (_ChannelIDs != null) 
             		ChannelIDs = new TChannelIDs(_ChannelIDs);
+            	flDenyOpening = extras.getBoolean("DenyOpening");
             }
     		//.
     		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -145,6 +148,7 @@ public class TDataStreamPropsPanel extends Activity {
     				}
                 }
             });
+            btnOpenStream.setVisibility(flDenyOpening ? View.GONE : View.VISIBLE);
             //.
             btnGetStreamDescriptor = (Button)findViewById(R.id.btnGetStreamDescriptor);
             btnGetStreamDescriptor.setVisibility(((ChannelIDs == null) && TGeoLogApplication.DebugOptions_IsDebugging()) ? View.VISIBLE : View.GONE);
@@ -551,13 +555,16 @@ public class TDataStreamPropsPanel extends Activity {
     				if ((DataStreamChannelsStatus != null) && (I < DataStreamChannelsStatus.length)) {
         				if (DataStreamChannelsStatus[I].Enabled) {
         					if (DataStreamChannelsStatus[I].Active)
-            					lvChannelsItems[I] += "  "+getString(R.string.SActive3);
+            					lvChannelsItems[I] += "   "+"["+getString(R.string.SActive3)+"]";
         				}
         				else
         					lvChannelsItems[I] += "  "+"("+getString(R.string.SDisabled2)+")";
     				}
     			}
-    			ArrayAdapter<String> lvChannelsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvChannelsItems);             
+    			int ListType = android.R.layout.simple_list_item_multiple_choice; 
+    			if (flDenyOpening)
+    				ListType = android.R.layout.simple_list_item_single_choice;
+    			ArrayAdapter<String> lvChannelsAdapter = new ArrayAdapter<String>(this,ListType,lvChannelsItems);             
     			lvChannels.setAdapter(lvChannelsAdapter);
     			/* for (int I = 0; I < DataStreamChannels.size(); I++)
     				lvChannels.setItemChecked(I,true); */

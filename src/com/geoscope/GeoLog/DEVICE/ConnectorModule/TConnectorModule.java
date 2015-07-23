@@ -57,6 +57,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TGeographP
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetAudioModuleAudioFilesValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetConnectorConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetDataStreamerStreamingComponentsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetFileSystemDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPIValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPSFixSO;
@@ -2001,8 +2002,6 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TSetAudioModuleAudioFilesValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
         if (TSetAudioModuleAudioFileMessageValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TSetAudioModuleAudioFileMessageValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
-        if (TSetDataStreamerStreamingComponentsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
-            return new TSetDataStreamerStreamingComponentsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
         if (TSetDataStreamerActiveValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TSetDataStreamerActiveValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value); //. =>
         if (TSetAlarmModuleProfileDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
@@ -2026,6 +2025,8 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TSetTaskModuleTaskResultSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData); //. =>
         if (TSetTaskModuleTaskStatusSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TSetTaskModuleTaskStatusSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData); //. =>
+        if (TSetDataStreamerStreamingComponentsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TSetDataStreamerStreamingComponentsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData); //. =>
         if (TSetSensorsModuleChannelsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TSetSensorsModuleChannelsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData); //. =>
         if (TSetSensorsModuleMetersValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
@@ -2070,6 +2071,8 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TGetControlDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetSensorDataValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TGetSensorDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
+        if (TGetDataStreamerStreamingComponentsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TGetDataStreamerStreamingComponentsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetSensorsModuleChannelsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TGetSensorsModuleChannelsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetSensorsModuleMetersValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))

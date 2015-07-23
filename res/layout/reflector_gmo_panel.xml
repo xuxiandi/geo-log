@@ -667,11 +667,20 @@
 
                 <CheckBox
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbDataStreamerActive"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
                     android:text="@string/SActive"
                     android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnDataStreamerStreamDescriptor"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/SChannels"
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:typeface="monospace" />
             </LinearLayout>
 
             <TextView
@@ -725,15 +734,23 @@
                     <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderRecording"
                         android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="0.5"
                         android:text="@string/SRecording"
                         android:textSize="18sp" />
 
                     <CheckBox
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderSaving"
+                        android:layout_width="fill_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5"
+                        android:text="@string/SSavingToDisk"
+                        android:textSize="18sp" />
+
+                    <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderActive"
                         android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="0.5"
                         android:clickable="false"
                         android:text="@string/SModuleIsActive"
@@ -741,42 +758,34 @@
                         android:visibility="gone" />
 
                     <CheckBox
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderAudio"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/SAudioChannel"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <CheckBox
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderSaving"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/SSavingToDisk"
-                        android:textSize="18sp" />
-
-                    <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderTransmitting"
                         android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="0.5"
                         android:text="@string/STransmitting"
                         android:textSize="18sp"
                         android:visibility="gone" />
 
                     <CheckBox
+                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderAudio"
+                        android:layout_width="fill_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5"
+                        android:text="@string/SAudio"
+                        android:textSize="18sp" />
+
+                    <CheckBox
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbVideoRecorderVideo"
                         android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="0.5"
-                        android:text="@string/SVideoChannel"
+                        android:text="@string/SVideo"
                         android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
                 </LinearLayout>
 
                 <LinearLayout

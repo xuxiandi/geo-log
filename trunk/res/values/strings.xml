@@ -1127,5 +1127,6 @@
     <string name="SStreamableViaDataStreamComponent">Streaming via a data-stream component</string>
     <string name="SDataStreamerIsDisabled">Data streamer is disabled</string>
     <string name="SDataStreamerConfigurationError">Data streamer has a configuration error</string>
+    <string name="SNoChannels">there are no channels</string>
     
 </resources>

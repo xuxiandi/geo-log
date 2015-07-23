@@ -51,18 +51,6 @@ public class TSensorsMeters {
 	private void CreateMeters() throws Exception {
 		Items_Clear();
 		//.
-		TECTLRMeter ECTLRMeter = new TECTLRMeter(SensorsModule, "0", "", ProfileFolder); 
-		Items_AddItem(ECTLRMeter);
-		//.
-		TASTLRMeter ASTLRMeter = new TASTLRMeter(SensorsModule, "0", "", ProfileFolder); 	
-		Items_AddItem(ASTLRMeter);
-		//.
-		TAOSSMeter AOSSMeter = new TAOSSMeter(SensorsModule, "0", "", ProfileFolder); 
-		Items_AddItem(AOSSMeter);
-		//.
-		TGPSTLRMeter GPSTLRMeter = new TGPSTLRMeter(SensorsModule, "0", "", ProfileFolder); 	
-		Items_AddItem(GPSTLRMeter);
-		//.
 		TAudioMeter	AudioMeter = new TAudioMeter(SensorsModule, "0", "normal quality", ProfileFolder) {
 			
 			@Override
@@ -242,6 +230,18 @@ public class TSensorsMeters {
 			}
 		};
 		Items_AddItem(AVMeter);
+		//.
+		TGPSTLRMeter GPSTLRMeter = new TGPSTLRMeter(SensorsModule, "0", "", ProfileFolder); 	
+		Items_AddItem(GPSTLRMeter);
+		//.
+		TECTLRMeter ECTLRMeter = new TECTLRMeter(SensorsModule, "0", "", ProfileFolder); 
+		Items_AddItem(ECTLRMeter);
+		//.
+		TASTLRMeter ASTLRMeter = new TASTLRMeter(SensorsModule, "0", "", ProfileFolder); 	
+		Items_AddItem(ASTLRMeter);
+		//.
+		TAOSSMeter AOSSMeter = new TAOSSMeter(SensorsModule, "0", "", ProfileFolder); 
+		Items_AddItem(AOSSMeter);
 	}
 	
 	private synchronized void Items_AddItem(TSensorMeter Meter) {

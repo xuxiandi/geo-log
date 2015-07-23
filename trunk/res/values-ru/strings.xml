@@ -1127,5 +1127,6 @@
     <string name="SStreamableViaDataStreamComponent">Потоковая передача через стрим-компонент</string>
     <string name="SDataStreamerIsDisabled">Модуль потоковой передачи заблокирован</string>
     <string name="SDataStreamerConfigurationError">Ошибка конфигурации потоковой передачи</string>
+    <string name="SNoChannels">нет каналов</string>
     
 </resources>

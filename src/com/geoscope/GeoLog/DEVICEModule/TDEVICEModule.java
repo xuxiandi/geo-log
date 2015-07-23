@@ -231,7 +231,7 @@ public class TDEVICEModule extends TModule
 					if (ComponentFileStreaming.flEnabledStreaming && !ComponentFileStreaming.IsStarted())
 						ComponentFileStreaming.Start();
 				} catch (Exception E) {
-					Device.Log.WriteError("DEVICEModule.ComponentFileStreaming",E.getMessage());
+					Log.WriteError("DEVICEModule.ConnectorConfigurationSubscriber",E.getMessage());
 				}
 			};
 		};
@@ -2231,9 +2231,8 @@ public class TDEVICEModule extends TModule
 							@Override
 							public void DoOnBuffer(byte[] Buffer, int BufferSize) {
 								try {
-									//. Connection.setSendBufferSize(BufferSize);
 									ConnectionOutputStream.write(Buffer, 0,BufferSize);
-									//. ConnectionOutputStream.flush();
+									ConnectionOutputStream.flush();
 								}
 								catch (Exception E) {
 									synchronized (TComponentDataStreaming.this) {

@@ -266,6 +266,7 @@ public class TStreamChannel extends TChannel {
 		SensorsModule = pSensorsModule;
 	}
 
+	@Override
 	public synchronized boolean StreamableViaComponent() {
 		return ((SourceChannel != null) && SourceChannel.Profile.StreamableViaComponent);
 	}

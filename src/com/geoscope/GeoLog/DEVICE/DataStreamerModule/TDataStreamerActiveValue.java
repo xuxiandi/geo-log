@@ -2,6 +2,7 @@ package com.geoscope.GeoLog.DEVICE.DataStreamerModule;
 
 import java.io.IOException;
 
+import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetDataStreamerActiveValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
@@ -26,6 +27,8 @@ public class TDataStreamerActiveValue extends TComponentTimestampedBooleanValue 
     	//.
     	try {
 			DataStreamerModule.SetActive(Value != 0);
+		} catch (TChannel.ConfigurationErrorException CEE) {
+    		throw new OperationException(TSetDataStreamerActiveValueSO.OperationErrorCode_DataStreamerConfigurationError); //. =>
 		} catch (Exception E) {
 			throw new IOException(E.getMessage()); //. =>
 		}

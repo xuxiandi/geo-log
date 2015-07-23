@@ -155,7 +155,7 @@ public class TH264IChannel extends TStreamChannel {
 			@Override
 			public void DoOnConfiguration(byte[] Buffer, int BufferSize) throws Exception {
 				//. save a configuration for a Channel.Configuration value
-				SaveChannelConfiguration(Buffer, BufferSize);
+				Configuration_SaveToFile(Buffer, BufferSize);
 				//. start a new stream session and fill the channel configuration with data
 				int StreamSession = ChannelStreamConfiguration.Set(Buffer, BufferSize);
 				//. send new session packet
@@ -317,7 +317,22 @@ public class TH264IChannel extends TStreamChannel {
 		return MyProfile.FrameRate;
 	}
 	
-	private void SaveChannelConfiguration(byte[] Data, int DataSize) throws IOException {
+	@Override
+	public void Configuration_Check() throws Exception {
+		if (Configuration.length() == 0) {
+			String CFN = Folder()+"/"+TChannel.ConfigurationFileName;
+			File CF = new File(CFN);
+			if (!CF.exists())
+				throw new ConfigurationErrorException("Video.H264I channel has no configuration. Please start that channel to create a configuration automatically."); //. =>
+		}
+	}
+	
+	private void Configuration_SaveToFile(byte[] Data, int DataSize) throws IOException {
+		String CFN = Folder()+"/"+TChannel.ConfigurationFileName;
+		File CF = new File(CFN);
+		if (CF.exists())
+			return; //. ->
+		CF.getParentFile().mkdirs();
 		String TCFN = Folder()+"/"+TChannel.ConfigurationFileName+".tmp";
 		File TCF = new File(TCFN);
 		FileOutputStream FOS = new FileOutputStream(TCF);
@@ -344,11 +359,12 @@ public class TH264IChannel extends TStreamChannel {
 		finally {
 			FOS.close();
 		}
-		String CFN = Folder()+"/"+TChannel.ConfigurationFileName;
-		File CF = new File(CFN);
-		if (CF.exists())
-			CF.delete();
 		TCF.renameTo(CF);
+	}
+	
+	@Override
+	public synchronized boolean StreamableViaComponent() {
+		return Profile.StreamableViaComponent;
 	}
 	
 	@Override

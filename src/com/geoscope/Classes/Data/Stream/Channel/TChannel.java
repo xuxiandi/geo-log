@@ -77,6 +77,15 @@ public class TChannel {
 	
 	public static final String ConfigurationFileName = "Configuration";
 	
+	public static final class ConfigurationErrorException extends Exception {
+		
+		private static final long serialVersionUID = 1L;
+
+		public ConfigurationErrorException(String Message) {
+			super(Message);
+		}
+	}
+	
 	public static class TConfigurationParser {
 		
 		private static final String VersionDelimiter = ":";
@@ -105,6 +114,15 @@ public class TChannel {
 	}
 	
 	public static final String ParametersFileName = "Parameters";
+	
+	public static final class ParametersErrorException extends Exception {
+		
+		private static final long serialVersionUID = 1L;
+
+		public ParametersErrorException(String Message) {
+			super(Message);
+		}
+	}
 	
 	public static class TParametersParser {
 		
@@ -284,10 +302,7 @@ public class TChannel {
 	public String Folder() {
 		if (ProfilesFolder == null)
 			return null; //. ->
-		String Result = ProfilesFolder+"/"+GetTypeID()+"."+Integer.toString(ID);
-		File RF = new File(Result);
-		RF.mkdirs();
-		return Result;
+		return (ProfilesFolder+"/"+GetTypeID()+"."+Integer.toString(ID));
 	}
 	
 	public void Profile_Load() throws Exception {
@@ -324,6 +339,11 @@ public class TChannel {
         {
         	FOS.close();
         }
+        //. remove Configuration,Parameters files
+		F = new File(Folder()+"/"+ConfigurationFileName);
+		F.delete();
+		F = new File(Folder()+"/"+ParametersFileName);
+		F.delete();
 	}
 
 	public void Profile_FromByteArray(byte[] BA) throws Exception {
@@ -389,6 +409,9 @@ public class TChannel {
 	public void Parse() throws Exception {
 	}
 
+	public void Configuration_Check() throws Exception {
+	}
+	
 	public boolean Configuration_LoadFromConfigurationFile() throws IOException {
 		String CFN = Folder()+"/"+ConfigurationFileName;
 		File CF = new File(CFN);
@@ -413,6 +436,9 @@ public class TChannel {
 			return false; //. ->
 	}
 	
+	public void Parameters_Check() throws Exception {
+	}
+	
 	public boolean Parameters_LoadFromParametersFile() throws IOException {
 		String PFN = Folder()+"/"+ParametersFileName;
 		File PF = new File(PFN);
@@ -435,6 +461,10 @@ public class TChannel {
 		}
 		else
 			return false; //. ->
+	}
+	
+	public synchronized boolean StreamableViaComponent() {
+		return false;
 	}
 	
 	public void Start() throws Exception {

@@ -1125,5 +1125,7 @@
     <string name="SVibrating">Вибрация</string>
     <string name="SRecordingIsntFinished">Запись не завершена</string>
     <string name="SStreamableViaDataStreamComponent">Потоковая передача через стрим-компонент</string>
+    <string name="SDataStreamerIsDisabled">Модуль потоковой передачи заблокирован</string>
+    <string name="SDataStreamerConfigurationError">Ошибка конфигурации потоковой передачи</string>
     
 </resources>

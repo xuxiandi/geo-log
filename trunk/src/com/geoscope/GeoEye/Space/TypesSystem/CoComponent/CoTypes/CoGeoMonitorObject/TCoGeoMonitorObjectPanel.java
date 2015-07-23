@@ -90,6 +90,8 @@ import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedBooleanValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedInt16Value;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFileMessageValue;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFilesValue;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetDataStreamerActiveValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.OperationException;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -1411,7 +1413,22 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 									public void Process() throws Exception {
 										TComponentTimestampedBooleanValue Value = new TComponentTimestampedBooleanValue();
 										Value.SetValue(OleDate.UTCCurrentTimestamp(), V);
-										Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.DataStreamerModule.ActiveValue.GetAddressArray(), Value.ToByteArray());
+										try {
+											Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.DataStreamerModule.ActiveValue.GetAddressArray(), Value.ToByteArray());
+										}
+										catch (OperationException OE) {
+											switch (OE.Code) {
+											
+											case TSetDataStreamerActiveValueSO.OperationErrorCode_DataStreamerIsDisabled:
+												throw new Exception(context.getString(R.string.SDataStreamerIsDisabled)); //. =>
+											
+											case TSetDataStreamerActiveValueSO.OperationErrorCode_DataStreamerConfigurationError:
+												throw new Exception(context.getString(R.string.SDataStreamerConfigurationError)); //. =>
+											
+											default:
+												throw OE; //. =>
+											}
+										}
 									}
 									
 									@Override 

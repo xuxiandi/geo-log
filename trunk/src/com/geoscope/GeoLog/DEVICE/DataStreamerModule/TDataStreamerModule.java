@@ -291,11 +291,18 @@ public class TDataStreamerModule extends TModule {
 		//.
 		private ArrayList<TComponentDataStreaming.TStreamer> Streamers = new ArrayList<TComponentDataStreaming.TStreamer>(); 
 		                                          
-		public TStreaming(TDataStreamerModule pDataStreamerModule, TStreamingComponents pStreamingComponents) {
+		public TStreaming(TDataStreamerModule pDataStreamerModule, TStreamingComponents pStreamingComponents) throws Exception {
     		super();
     		//.
 			DataStreamerModule = pDataStreamerModule;
 			StreamingComponents = pStreamingComponents;
+			//.
+			try {
+				CheckStreamChannelConfigurations();
+			}
+			catch (TChannel.ConfigurationErrorException CEE) {
+				throw new TChannel.ConfigurationErrorException("COULD NOT START A DATA STREAMING, REASON: "+CEE.getMessage()); //. =>
+			}
 			//.
 			Start();
 		}
@@ -351,6 +358,35 @@ public class TDataStreamerModule extends TModule {
         	}
 		}
 
+		private void CheckStreamChannelConfigurations() throws Exception {
+			if (StreamingComponents.Components.size() == 0) { //. process for own DataStream component of the device object 
+				TModel Model = DataStreamerModule.Device.SensorsModule.Model;
+				if (Model != null) {
+					TStreamDescriptor StreamDescriptor = Model.Stream;
+					int Cnt = StreamDescriptor.Channels.size();
+					for (int J = 0; J < Cnt; J++) { 
+						com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)StreamDescriptor.Channels.get(J);
+						if (Channel.StreamableViaComponent()) {
+	        				TChannel SourceChannel = Channel.SourceChannel_Get();
+	        				if (SourceChannel != null)
+	        					SourceChannel.Configuration_Check();
+						}
+					}
+				}
+			}
+			else
+				for (int I = 0; I < StreamingComponents.Components.size(); I++) {
+					TStreamingComponents.TComponent Component = StreamingComponents.Components.get(I);
+					//.
+					if (Component.Enabled && (Component.StreamDescriptor != null)) 
+						for (int J = 0; J < Component.StreamDescriptor.Channels.size(); J++) {
+							TChannel Channel = Component.StreamDescriptor.Channels.get(J);
+							if (Channel.Enabled)
+								Channel.Configuration_Check();
+						}
+				}
+		}
+		
 		private void StartStreamers() throws Exception {
 			TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
 			//.
@@ -594,7 +630,7 @@ public class TDataStreamerModule extends TModule {
     	return StreamingComponents.Components.size();
     }
     
-    public synchronized void StartStreaming() throws InterruptedException {
+    public synchronized void StartStreaming() throws Exception {
     	Streaming = new TStreaming(this, StreamingComponents);
     }
 
@@ -605,7 +641,7 @@ public class TDataStreamerModule extends TModule {
     	}
     }
     
-    public synchronized void ValidateStreaming() throws InterruptedException {
+    public synchronized void ValidateStreaming() throws Exception {
     	StopStreaming();
     	if (ActiveValue.BooleanValue())
     		Streaming = new TStreaming(this, StreamingComponents);

@@ -612,6 +612,96 @@
                 android:layout_height="wrap_content"
                 android:background="#ff555555"
                 android:gravity="center"
+                android:text="@string/SSensorsModule"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleStream"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.3"
+                    android:text="@string/SSensors"
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:typeface="monospace" />
+
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleMeters"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.3"
+                    android:text="@string/SMeters"
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:typeface="monospace" />
+
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleMeasurementsArchive"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.3"
+                    android:text="@string/SArchive"
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:typeface="monospace" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="@string/SDataStreamerModule"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <CheckBox
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbDataStreamerActive"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="@string/SActive"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="@string/SControlsModule"
+                android:textColor="#ff000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowControlsModuleStream"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SControls"
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:typeface="monospace" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
                 android:text="@string/SVideoRecorderModule"
                 android:textColor="#ff000000" />
 
@@ -692,11 +782,6 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" >
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
 
                     <Button
                         android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowVideoRecorderViewer"
@@ -716,128 +801,37 @@
                         android:text="@string/SArchive"
                         android:textSize="18sp" />
                 </LinearLayout>
+            </LinearLayout>
 
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff555555"
-                    android:gravity="center"
-                    android:text="@string/SDataStreamerModule"
-                    android:textColor="#ff000000" />
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff555555"
+                android:gravity="center"
+                android:text="@string/SAudioModule"
+                android:textColor="#ff000000" />
 
-                <LinearLayout
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnSendAudioFileMessage"
+                    style="android:attr/buttonBarButtonStyle"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:text="@string/SSendAudioMessage"
+                    android:textSize="18sp" />
 
-                    <CheckBox
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbDataStreamerActive"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/SActive"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-                <TextView
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles"
+                    style="android:attr/buttonBarButtonStyle"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff555555"
-                    android:gravity="center"
-                    android:text="@string/SAudioModule"
-                    android:textColor="#ff000000" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <Button
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnSendAudioFileMessage"
-                        style="android:attr/buttonBarButtonStyle"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.5"
-                        android:text="@string/SSendAudioMessage"
-                        android:textSize="18sp" />
-
-                    <Button
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnImportAudioFiles"
-                        style="android:attr/buttonBarButtonStyle"
-                        android:layout_width="fill_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.5"
-                        android:text="@string/SImportAudioFiles"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff555555"
-                    android:gravity="center"
-                    android:text="@string/SSensorsModule"
-                    android:textColor="#ff000000" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <Button
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleStream"
-                        style="android:attr/buttonBarButtonStyle"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.3"
-                        android:text="@string/SSensors"
-                        android:textSize="18sp"
-                        android:textStyle="bold|italic"
-                        android:typeface="monospace" />
-
-                    <Button
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleMeters"
-                        style="android:attr/buttonBarButtonStyle"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.3"
-                        android:text="@string/SMeters"
-                        android:textSize="18sp"
-                        android:textStyle="bold|italic"
-                        android:typeface="monospace" />
-
-                    <Button
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowSensorsModuleMeasurementsArchive"
-                        style="android:attr/buttonBarButtonStyle"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.3"
-                        android:text="@string/SArchive"
-                        android:textSize="18sp"
-                        android:textStyle="bold|italic"
-                        android:typeface="monospace" />
-
-                    </LinearLayout>
-
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#ff555555"
-                    android:gravity="center"
-                    android:text="@string/SControlsModule"
-                    android:textColor="#ff000000" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <Button
-                        android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnShowControlsModuleStream"
-                        style="android:attr/buttonBarButtonStyle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/SControls"
-                        android:textSize="18sp"
-                        android:textStyle="bold|italic"
-                        android:typeface="monospace" />
-                </LinearLayout>
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:text="@string/SImportAudioFiles"
+                    android:textSize="18sp" />
             </LinearLayout>
         </LinearLayout>
 

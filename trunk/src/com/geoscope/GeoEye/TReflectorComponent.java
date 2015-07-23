@@ -2057,7 +2057,8 @@ public class TReflectorComponent extends TUIComponent {
 					// .
 					Arrows.WorkSpace.Update();
 					//.
-					Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
+					if (Arrows.WorkSpace.Reflector._SpaceImageCaching != null)
+						Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
 				}
 			}
 
@@ -2145,7 +2146,8 @@ public class TReflectorComponent extends TUIComponent {
 					// .
 					Arrows.WorkSpace.Update();
 					//.
-					Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
+					if (Arrows.WorkSpace.Reflector._SpaceImageCaching != null)
+						Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
 				}
 			}
 
@@ -2229,7 +2231,8 @@ public class TReflectorComponent extends TUIComponent {
 					// .
 					Arrows.WorkSpace.Update();
 					//.
-					Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
+					if (Arrows.WorkSpace.Reflector._SpaceImageCaching != null)
+						Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
 				}
 			}
 
@@ -2313,7 +2316,8 @@ public class TReflectorComponent extends TUIComponent {
 					// .
 					Arrows.WorkSpace.Update();
 					//.
-					Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
+					if (Arrows.WorkSpace.Reflector._SpaceImageCaching != null)
+						Arrows.WorkSpace.Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
 				}
 			}
 
@@ -3507,7 +3511,8 @@ public class TReflectorComponent extends TUIComponent {
 					case NAVIGATION_MODE_NATIVE:
 					case NAVIGATION_MODE_MULTITOUCHING:
 					case NAVIGATION_MODE_MULTITOUCHING1:
-						Reflector._SpaceImageCaching.Stop();
+						if (Reflector._SpaceImageCaching != null)
+							Reflector._SpaceImageCaching.Stop();
 						break; // . >
 					}
 					// .
@@ -3673,7 +3678,8 @@ public class TReflectorComponent extends TUIComponent {
 					case NAVIGATION_MODE_NATIVE:
 					case NAVIGATION_MODE_MULTITOUCHING:
 					case NAVIGATION_MODE_MULTITOUCHING1:
-						Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
+						if (Reflector._SpaceImageCaching != null)
+							Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
 						break; // . >
 					}
 				}
@@ -3714,7 +3720,8 @@ public class TReflectorComponent extends TUIComponent {
 				if (Reflector.NavigationType != NAVIGATION_TYPE_NONE) {
 					Reflector.NavigationType = NAVIGATION_TYPE_NONE;
 					// .
-					Reflector._SpaceImageCaching.Stop();
+					if (Reflector._SpaceImageCaching != null)
+						Reflector._SpaceImageCaching.Stop();
 				}
 				break; // . >
 
@@ -3722,7 +3729,8 @@ public class TReflectorComponent extends TUIComponent {
 				if (Reflector.NavigationType != NAVIGATION_TYPE_NONE) {
 					Reflector.NavigationType = NAVIGATION_TYPE_NONE;
 					// .
-					Reflector._SpaceImageCaching.Stop();
+					if (Reflector._SpaceImageCaching != null)
+						Reflector._SpaceImageCaching.Stop();
 				}
 				break; // . >
 			}
@@ -3770,7 +3778,8 @@ public class TReflectorComponent extends TUIComponent {
 			}
 			if (Reflector.NavigationType != NAVIGATION_TYPE_NONE) {
 				Draw();
-				Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
+				if (Reflector._SpaceImageCaching != null)
+					Reflector._SpaceImageCaching.TryToCacheCurrentWindow();
 			}
 			// .
 			Pointer1_LastPos.X = X;

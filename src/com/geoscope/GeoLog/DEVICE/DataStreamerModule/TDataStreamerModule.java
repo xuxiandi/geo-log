@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -24,8 +25,10 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
+import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentFunctionality;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
@@ -34,6 +37,7 @@ import com.geoscope.GeoEye.UserAgentService.TUserAgent;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetDataStreamerActiveFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.TModel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreaming;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
@@ -363,8 +367,12 @@ public class TDataStreamerModule extends TModule {
         	}
 		}
 
+		private boolean StreamingComponents_Exist() {
+			return (StreamingComponents.Components.size() > 0);
+		}
+		
 		private void CheckStreamChannelConfigurations() throws Exception {
-			if (StreamingComponents.Components.size() == 0) { //. process for own DataStream component of the device object 
+			if (!StreamingComponents_Exist()) { //. process for own DataStream component of the device object 
 				TModel Model = DataStreamerModule.Device.SensorsModule.Model;
 				if (Model != null) {
 					TStreamDescriptor StreamDescriptor = Model.Stream;
@@ -393,7 +401,7 @@ public class TDataStreamerModule extends TModule {
 		}
 		
 		private void CheckStreamChannelParameters() throws Exception {
-			if (StreamingComponents.Components.size() == 0) { //. process for own DataStream component of the device object 
+			if (!StreamingComponents_Exist()) { //. process for own DataStream component of the device object 
 				TModel Model = DataStreamerModule.Device.SensorsModule.Model;
 				if (Model != null) {
 					TStreamDescriptor StreamDescriptor = Model.Stream;
@@ -429,7 +437,7 @@ public class TDataStreamerModule extends TModule {
 		private void StartStreamers() throws Exception {
 			TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
 			//.
-			if (StreamingComponents.Components.size() == 0) { //. fetch a DataStream component from the device object 
+			if (!StreamingComponents_Exist()) { //. fetch a DataStream component from the device object 
 				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(SpaceDefines.idTCoComponent,DataStreamerModule.Device.idOwnerComponent);
 				if (CF != null)
 					try {
@@ -458,8 +466,9 @@ public class TDataStreamerModule extends TModule {
 								//. update the DataStream component with descriptor 
 								TDataStreamFunctionality DSF = (TDataStreamFunctionality)User.Space.TypesSystem.SystemTDataStream.TComponentFunctionality_Create(idDataStream);
 								try {
+									//. setup the DataStream component
 									DSF.SetStreamDescriptor(StreamDescriptor);
-									//.
+									//. starting the streamers ...
 									Cnt = StreamDescriptor.Channels.size();
 									for (int J = 0; J < Cnt; J++) {
 										TChannel StreamChannel = StreamDescriptor.Channels.get(J);
@@ -467,7 +476,7 @@ public class TDataStreamerModule extends TModule {
 											TComponentDataStreaming.TStreamer Streamer = GetStreamer(StreamChannel.GetTypeID(), DataStreamerModule.Device, DSF.idTComponent(),DSF.idComponent, StreamChannel.ID, StreamChannel.Configuration, StreamChannel.Parameters);
 											if (Streamer != null) {
 												Streamers.add(Streamer);
-												//.
+												//. 
 												Streamer.Start();
 											}
 											else 
@@ -495,7 +504,7 @@ public class TDataStreamerModule extends TModule {
 						//. supply component with its stream descriptor
 						if (User != null)
 							Component.SupplyWithStreamDescriptor(User);
-						//.
+						//. starting the streamers ...
 						if (Component.StreamDescriptor != null)
 							for (int J = 0; J < Component.StreamDescriptor.Channels.size(); J++) {
 								TChannel Channel = Component.StreamDescriptor.Channels.get(J); 
@@ -515,9 +524,34 @@ public class TDataStreamerModule extends TModule {
 		}
 		
 		private void StopStreamers() throws Exception {
+			//. stopping the streamers ...
 			for (int I = 0; I < Streamers.size(); I++) 
 				Streamers.get(I).Destroy();
 			Streamers.clear();
+			//.
+			if (!StreamingComponents_Exist()) { //. //. empty the DataStream component 
+				ComponentStreamDescriptor = null;
+				//.
+				TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
+				//.
+				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(SpaceDefines.idTCoComponent,DataStreamerModule.Device.idOwnerComponent);
+				if (CF != null)
+					try {
+						long idDataStream = CF.GetComponent(SpaceDefines.idTDataStream);
+						if (idDataStream != 0) {
+							TDataStreamFunctionality DSF = (TDataStreamFunctionality)User.Space.TypesSystem.SystemTDataStream.TComponentFunctionality_Create(idDataStream);
+							try {
+								DSF.SetStreamDescriptor(null);
+							}
+							finally {
+								DSF.Release();
+							}
+						}
+					}
+					finally {
+						CF.Release();
+					}
+			}
 		}
 	}
 	
@@ -731,6 +765,30 @@ public class TDataStreamerModule extends TModule {
     	SetActiveValue(flActive,true);
     }    
 
+    public void ShowStreamChannelsPanel(Context context) throws IOException {
+    	TChannelIDs Channels = new TChannelIDs();
+		TModel Model = Device.SensorsModule.Model;
+		if (Model != null) {
+			TStreamDescriptor StreamDescriptor = Model.Stream;
+			//. suppress not stream-able-via-component channels
+			int Cnt = StreamDescriptor.Channels.size();
+			if (Cnt > 0) {
+				for (int J = 0; J < Cnt; J++) { 
+					TChannel StreamChannel = StreamDescriptor.Channels.get(J);
+					if (StreamChannel.StreamableViaComponent())
+						Channels.AddID(StreamChannel.ID);
+				}
+			}
+		}
+		if (Channels.Count() > 0) {
+			Intent intent = new Intent(context, TDataStreamPropsPanel.class);
+			intent.putExtra("ChannelIDs", Channels.ToByteArray());
+	        context.startActivity(intent);
+		}				
+		else
+			Toast.makeText(context, R.string.SNoChannels, Toast.LENGTH_LONG).show();
+    }
+    
     public void ShowPropsPanel(Context context) {
     	Intent intent = new Intent(Device.context,TDataStreamerPropsPanel.class);
     	context.startActivity(intent);

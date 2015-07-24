@@ -19,6 +19,7 @@ import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Canvas;
+import android.util.Base64;
 import android.util.Xml;
 import android.widget.Toast;
 
@@ -134,7 +135,7 @@ public class TCoGeoMonitorObjects {
 		URL1 = "http://"+URL1+"/"+"Space"+"/"+"2"/*URLProtocolVersion*/+"/"+Long.toString(Server.User.UserID);
 		String URL2 = "TypesSystem"+"/"+Integer.toString(SpaceDefines.idTCoComponent)+"/"+"CoGeoMonitorObjectsData.dat";
 		//. add command parameters
-		URL2 = URL2+"?"+"1"/*command version*/+","+"1"/*parameters version*/+','+Domains+","+Params;
+		URL2 = URL2+"?"+"1"/*command version*/+","+"1"/*parameters version*/+','+Base64.encodeToString(Domains.getBytes("windows-1251"), Base64.NO_WRAP)+","+Base64.encodeToString(Params.getBytes("windows-1251"), Base64.NO_WRAP);
 		//.
 		byte[] URL2_Buffer;
 		try {

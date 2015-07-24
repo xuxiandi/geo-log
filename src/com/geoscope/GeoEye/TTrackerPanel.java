@@ -1146,13 +1146,15 @@ public class TTrackerPanel extends Activity {
 			}
 		});
         btnDataStreamerModulePanel = (Button)findViewById(R.id.btnDataStreamerModulePanel);
-        btnDataStreamerModulePanel.setVisibility((Tracker.GeoLog.DataStreamerModule.StreamingComponentsCount() > 0) ? View.VISIBLE : View.GONE);
         btnDataStreamerModulePanel.setOnClickListener(new OnClickListener() {
         	
         	@Override
             public void onClick(View v) {
             	try {
-        			Tracker.GeoLog.DataStreamerModule.ShowPropsPanel(TTrackerPanel.this);
+            		if (Tracker.GeoLog.DataStreamerModule.StreamingComponentsCount() == 0) 
+            			Tracker.GeoLog.DataStreamerModule.ShowStreamChannelsPanel(TTrackerPanel.this);
+            		else
+            			Tracker.GeoLog.DataStreamerModule.ShowPropsPanel(TTrackerPanel.this);
             	}
             	catch (Exception E) {
 					String S = E.getMessage();

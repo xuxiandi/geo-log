@@ -1484,26 +1484,30 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override 
 									public void DoOnCompleted() throws Exception {
-										TStreamDescriptor StreamDescriptor = new TStreamDescriptor(Value.Value);
-										if (StreamDescriptor.Channels_Count() > 0) {
-											TChannelIDs Channels = StreamDescriptor.Channels_IDs(); 
-											Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.class);
-								        	switch (ParametersType) {
-								        	
-								        	case PARAMETERS_TYPE_OID:
-												intent.putExtra("ParametersType", com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.PARAMETERS_TYPE_OID);
-												intent.putExtra("ObjectID", ObjectID);
-								        		break; //. >
-								        		
-								        	case PARAMETERS_TYPE_OIDX:
-												intent.putExtra("ParametersType", com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.PARAMETERS_TYPE_OIDX);
-												intent.putExtra("ObjectIndex", ObjectIndex);
-								        		break; //. >
-								        	}
-											intent.putExtra("ChannelIDs", Channels.ToByteArray());
-											intent.putExtra("DenyOpening", true);
-											//.
-									        startActivity(intent);
+										if (Value.Value != null) {
+											TStreamDescriptor StreamDescriptor = new TStreamDescriptor(Value.Value);
+											if (StreamDescriptor.Channels_Count() > 0) {
+												TChannelIDs Channels = StreamDescriptor.Channels_IDs(); 
+												Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.class);
+									        	switch (ParametersType) {
+									        	
+									        	case PARAMETERS_TYPE_OID:
+													intent.putExtra("ParametersType", com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.PARAMETERS_TYPE_OID);
+													intent.putExtra("ObjectID", ObjectID);
+									        		break; //. >
+									        		
+									        	case PARAMETERS_TYPE_OIDX:
+													intent.putExtra("ParametersType", com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel.PARAMETERS_TYPE_OIDX);
+													intent.putExtra("ObjectIndex", ObjectIndex);
+									        		break; //. >
+									        	}
+												intent.putExtra("ChannelIDs", Channels.ToByteArray());
+												intent.putExtra("DenyOpening", true);
+												//.
+										        startActivity(intent);
+											}
+											else
+					                			Toast.makeText(TCoGeoMonitorObjectPanel.this, R.string.SNoChannels, Toast.LENGTH_LONG).show();
 										}
 										else
 				                			Toast.makeText(TCoGeoMonitorObjectPanel.this, R.string.SNoChannels, Toast.LENGTH_LONG).show();

@@ -157,11 +157,20 @@ public class TDataStreamFunctionality extends TComponentFunctionality {
 	}
 	
 	public void SetStreamDescriptor(TStreamDescriptor StreamDescriptor) throws Exception {
-		SetDescriptorData(StreamDescriptor.ToByteArray());
+		byte[] Data;
+		if (StreamDescriptor != null)
+			Data = StreamDescriptor.ToByteArray();
+		else
+			Data = new byte[0];
+		SetDescriptorData(Data);
 	}
 	
 	public TStreamDescriptor GetStreamDescriptor() throws Exception {
-		return (new TStreamDescriptor(GetDescriptorData())); //. ->
+		byte[] Data = GetDescriptorData();
+		if (Data.length != 0)
+			return (new TStreamDescriptor(Data)); //. ->
+		else
+			return null; //. ->
 	}
 	
 	@Override

@@ -667,8 +667,9 @@
 
                 <CheckBox
                     android:id="@+id/GMO1GeoLogAndroidBusinessModel_cbDataStreamerActive"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_weight="1.0"
                     android:text="@string/SActive"
                     android:textSize="18sp" />
 
@@ -677,10 +678,22 @@
                     style="android:attr/buttonBarButtonStyle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_weight="1.0"
                     android:text="@string/SChannels"
                     android:textSize="18sp"
                     android:textStyle="bold|italic"
                     android:typeface="monospace" />
+
+                <Button
+                    android:id="@+id/GMO1GeoLogAndroidBusinessModel_btnDataStreamerStreamStatistics"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.0"
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:typeface="monospace"
+                    android:visibility="invisible" />
             </LinearLayout>
 
             <TextView

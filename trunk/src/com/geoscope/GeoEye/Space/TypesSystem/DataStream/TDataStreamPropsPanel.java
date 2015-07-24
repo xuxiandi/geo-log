@@ -313,6 +313,8 @@ public class TDataStreamPropsPanel extends Activity {
     			lbStreamInfo.setText(getString(R.string.SInfo1)+"?");
     			lbStreamChannels.setText(getString(R.string.SChannels1)+"?");
     			lvChannels.setAdapter(null);
+    			//.
+				Toast.makeText(TDataStreamPropsPanel.this, R.string.SNoChannels, Toast.LENGTH_LONG).show();
     		}
     	}
     	finally {
@@ -357,7 +359,10 @@ public class TDataStreamPropsPanel extends Activity {
 				finally {
 					DSF.Release();
 				}
+				if (DescriptorData.length == 0)
+					throw new Exception(context.getString(R.string.SNoChannels)); //. =>
 			}
+			
 			@Override 
 			public void DoOnCompleted() throws Exception {
 				Intent intent = new Intent(TDataStreamPropsPanel.this, TDataStreamPanel.class);
@@ -407,6 +412,8 @@ public class TDataStreamPropsPanel extends Activity {
 				finally {
 					DSF.Release();
 				}
+				if (DescriptorData.length == 0)
+					throw new Exception(context.getString(R.string.SNoChannels)); //. =>
 				//.
 				DescriptorFile = new File(TGeoLogApplication.GetTempFolder()+"/"+"DataStreamDescriptor.xml");
 				FileOutputStream fos = new FileOutputStream(DescriptorFile);

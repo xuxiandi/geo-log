@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.ControlsModule;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,6 +26,10 @@ public class TControlsModule extends TModule {
 		return TDEVICEModule.DeviceFolder()+"/"+FolderName;
 	}
 
+	public static String Channels_Folder() {
+		return Folder()+"/"+"Channels";
+	}
+	
 	
 	public TInternalControlsModule InternalControlsModule;
 	//.
@@ -36,6 +41,13 @@ public class TControlsModule extends TModule {
     	super(pDevice);
     	//.
         Device = pDevice;
+    	//. 
+		File F = new File(Folder());
+		if (!F.exists()) 
+			F.mkdirs();
+		F = new File(Channels_Folder());
+		if (!F.exists()) 
+			F.mkdirs();
         //.
         InternalControlsModule = new TInternalControlsModule(this);
         //.

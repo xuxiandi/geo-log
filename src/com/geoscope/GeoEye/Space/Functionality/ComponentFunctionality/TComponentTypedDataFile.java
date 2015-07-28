@@ -267,7 +267,7 @@ public class TComponentTypedDataFile {
 							ReadSize = Data.length - SummarySize;
 							Size = in.read(Data, SummarySize, ReadSize);
 							if (Size <= 0)
-								throw new Exception(TypedDataFiles.context.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
+								throw new Exception(TypedDataFiles.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 							SummarySize += Size;
 							//.
 							if (Canceller.flCancel)

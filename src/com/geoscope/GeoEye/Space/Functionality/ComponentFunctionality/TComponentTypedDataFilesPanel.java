@@ -1285,7 +1285,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 										ReadSize = Data.length - SummarySize;
 										Size = in.read(Data, SummarySize, ReadSize);
 										if (Size <= 0)
-											throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
+											throw new Exception(TComponentTypedDataFilesPanel.this.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 										SummarySize += Size;
 										// .
 										if (Canceller.flCancel)

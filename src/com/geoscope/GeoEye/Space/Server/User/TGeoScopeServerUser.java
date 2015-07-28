@@ -3660,7 +3660,7 @@ public class TGeoScopeServerUser {
 						String ErrorMessage = HttpConnection.getResponseMessage();
 						byte[] ErrorMessageBA = ErrorMessage.getBytes("ISO-8859-1");
 						ErrorMessage = new String(ErrorMessageBA,"windows-1251");
-		            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); // =>
+		            	throw new IOException(Server.context.getString(R.string.SServerError)+ErrorMessage); //. =>
 		            }
 		            //.
 					InputStream in = HttpConnection.getInputStream();

@@ -1798,7 +1798,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 										ReadSize = Data.length - SummarySize;
 										Size = in.read(Data, SummarySize, ReadSize);
 										if (Size <= 0)
-											throw new Exception(ParentActivity.getString(R.string.SConnectionIsClosedUnexpectedly)); // =>
+											throw new Exception(ParentActivity.getString(R.string.SConnectionIsClosedUnexpectedly)); //. =>
 										SummarySize += Size;
 										// .
 										if (Canceller.flCancel)

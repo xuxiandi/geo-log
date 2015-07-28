@@ -249,7 +249,7 @@ public class TComponentFunctionality extends TFunctionality {
 					ReadSize = DataDocument.length-SummarySize;
 					Size = in.read(DataDocument, SummarySize, ReadSize);
 					if (Size <= 0)
-						throw new Exception(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); // => 
+						throw new Exception(Server.context.getString(R.string.SConnectionIsClosedUnexpectedly)); //. => 
 					//.
 					SummarySize += Size;
 				}

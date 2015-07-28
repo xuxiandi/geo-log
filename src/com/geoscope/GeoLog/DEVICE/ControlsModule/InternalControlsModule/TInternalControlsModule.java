@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.TModel;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Audio.VC.TVCChannel;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 @SuppressLint("HandlerLeak")
@@ -30,6 +31,8 @@ public class TInternalControlsModule extends TModule {
 	public boolean flInitialized = false;
 	//.
 	public TModel Model = null; 
+	//.
+	public TVCChannel VCChannel = null;
 	
     public TInternalControlsModule(TControlsModule pControlsModule) throws Exception {
     	super(pControlsModule);
@@ -98,6 +101,12 @@ public class TInternalControlsModule extends TModule {
     }
     
     private void Model_Build() throws Exception {
+    	Model = new TModel();
+    	//. set model stream folder
+    	Model.Stream.Folder = TControlsModule.Folder();
+    	//.
+    	VCChannel = new TVCChannel(this, 2/*ID*/);
+    	Model.Stream.Channels.add(VCChannel);
     }
     
 	public final Handler MessageHandler = new Handler() {

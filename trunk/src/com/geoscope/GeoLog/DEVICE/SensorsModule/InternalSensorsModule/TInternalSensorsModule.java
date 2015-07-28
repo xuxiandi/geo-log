@@ -51,6 +51,7 @@ public class TInternalSensorsModule extends TModule {
 		
 	public static final int MESSAGE_START 	= 1;
 	public static final int MESSAGE_STOP 	= 2;
+
 	
 	private class TBatterySensor {
 		

@@ -10,6 +10,7 @@ import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetControlsDataSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.TInternalControlsModule;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.TChannelsProvider;
@@ -18,6 +19,15 @@ import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 public class TControlsModule extends TModule {
 
+	public static final String FolderName = "ControlsModule";
+	
+	public static String Folder() {
+		return TDEVICEModule.DeviceFolder()+"/"+FolderName;
+	}
+
+	
+	public TInternalControlsModule InternalControlsModule;
+	//.
 	public TControlsDataValue Data;
 	//.
 	public TModel Model;
@@ -27,9 +37,11 @@ public class TControlsModule extends TModule {
     	//.
         Device = pDevice;
         //.
-        Model = new TModel(this);
+        InternalControlsModule = new TInternalControlsModule(this);
         //.
         Data = new TControlsDataValue(this);
+        //.
+        Model = null;
     }
     
     public void Destroy() {
@@ -40,6 +52,17 @@ public class TControlsModule extends TModule {
     	NewModel.ControlStream.Name = "Controls";
     	NewModel.ControlStream.Info = "Controls of the device";
     	TChannelsProvider ChannelsProvider = new TChannelsProvider(this);
+    	//. build InternalControlsModule
+    	if ((InternalControlsModule.Model != null) && (InternalControlsModule.Model.Stream != null))
+        	for (int I = 0; I < InternalControlsModule.Model.Stream.Channels.size(); I++) {
+        		com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.TStreamChannel DestinationChannel = (com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.TStreamChannel)InternalControlsModule.Model.Stream.Channels.get(I); 
+        		TStreamChannel NewChannel = ChannelsProvider.GetChannel(DestinationChannel.GetTypeID());
+        		NewChannel.Assign(DestinationChannel);
+        		//. attaching the channel to the destination channel
+        		NewChannel.DestinationChannel = DestinationChannel;
+        		//.
+        		NewModel.ControlStream.Channels.add(NewChannel);
+        	}
     	//. build PluginModule modules
     	/* USBPluginModule */
     	if ((Device.PluginsModule.USBPluginModule.PIOModel != null) && (Device.PluginsModule.USBPluginModule.PIOModel.ControlStream != null))
@@ -47,7 +70,7 @@ public class TControlsModule extends TModule {
         		com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel DestinationChannel = (com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel)Device.PluginsModule.USBPluginModule.PIOModel.ControlStream.Channels.get(I); 
         		TStreamChannel NewChannel = ChannelsProvider.GetChannel(DestinationChannel.GetTypeID());
         		NewChannel.Assign(DestinationChannel);
-        		//. attaching the channel to the source channel
+        		//. attaching the channel to the destination channel
         		NewChannel.DestinationChannel = DestinationChannel;
         		//.
         		NewModel.ControlStream.Channels.add(NewChannel);

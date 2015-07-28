@@ -6,7 +6,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.TSourceModel;
 public class TModel extends TSourceModel {
 
     public String Name = "Internal Sensors";
-    public String Info = "Sensors onboards of android device";
+    public String Info = "Sensors onboard of android device";
     //.
     public TStreamDescriptor Stream;
     

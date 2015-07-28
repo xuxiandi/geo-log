@@ -1229,7 +1229,7 @@ public class TGPSModule extends TModule implements Runnable
     
     public void SetStatus(short pStatus) 
     {
-    	if (!(Device.ConnectorModule.flServerConnectionEnabled || Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue_flEnabled))
+    	if ((Device.ConnectorModule == null) || (!(Device.ConnectorModule.flServerConnectionEnabled || Device.ConnectorModule.OutgoingSetComponentDataOperationsQueue_flEnabled)))
     		return; //. ->
     	if (pStatus == Status.GetValue())
     		return; //. ->

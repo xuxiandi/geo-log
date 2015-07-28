@@ -19,22 +19,22 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 	@Override
 	public TStreamChannel GetChannel(String pTypeID) throws Exception {
 		if (TADSChannel.TypeID.equals(pTypeID))
-			return (new TADSChannel()); // =>
+			return (new TADSChannel()); //. ->
 		if (TENVCChannel.TypeID.equals(pTypeID))
-			return (new TENVCChannel()); // =>
+			return (new TENVCChannel()); //. ->
 		if (TXENVCChannel.TypeID.equals(pTypeID))
-			return (new TXENVCChannel()); // =>
+			return (new TXENVCChannel()); //. ->
 		if (TChannel.TypeIsTypeOfChannel(pTypeID, TTLRChannel.TypeID))
-			return (new TTLRChannel()); // =>
+			return (new TTLRChannel()); //. ->
 		if (TLUMChannel.TypeID.equals(pTypeID))
-			return (new TLUMChannel()); // =>
+			return (new TLUMChannel()); //. ->
 		if (TGPSChannel.TypeID.equals(pTypeID))
-			return (new TGPSChannel()); // =>
+			return (new TGPSChannel()); //. ->
 		if (TAACChannel.TypeID.equals(pTypeID))
-			return (new TAACChannel()); // =>
+			return (new TAACChannel()); //. ->
 		if (TH264IChannel.TypeID.equals(pTypeID))
-			return (new TH264IChannel()); // =>
+			return (new TH264IChannel()); //. ->
 		else
-			return null;
+			return null; //. ->
 	}	
 }

@@ -30,22 +30,22 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 	@Override
 	public TSourceStreamChannel GetChannel(String pTypeID) throws Exception {
 		if (TADSChannel.TypeID.equals(pTypeID))
-			return (new TADSChannel(InternalSensorsModule, -1/*NoID*/)); // =>
+			return (new TADSChannel(InternalSensorsModule, -1/*NoID*/)); //. ->
 		if (TAOSSChannel.TypeID.equals(pTypeID))
-			return (new TAOSSChannel(InternalSensorsModule, -1/*NoID*/)); // =>
+			return (new TAOSSChannel(InternalSensorsModule, -1/*NoID*/)); //. ->
 		if (TXENVCChannel.TypeID.equals(pTypeID))
-			return (new TXENVCChannel(InternalSensorsModule, -1/*NoID*/)); // =>
+			return (new TXENVCChannel(InternalSensorsModule, -1/*NoID*/)); //. ->
 		if (TChannel.TypeIsTypeOfChannel(pTypeID, TTLRChannel.TypeID))
-			return (new TTLRChannel(InternalSensorsModule, -1/*NoID*/)); // =>
+			return (new TTLRChannel(InternalSensorsModule, -1/*NoID*/)); //. ->
 		if (TLUMChannel.TypeID.equals(pTypeID))
-			return (new TLUMChannel(InternalSensorsModule, -1/*NoID*/)); // =>
+			return (new TLUMChannel(InternalSensorsModule, -1/*NoID*/)); //. ->
 		if (TGPSChannel.TypeID.equals(pTypeID))
-			return (new TGPSChannel(InternalSensorsModule, -1/*NoID*/)); // =>
+			return (new TGPSChannel(InternalSensorsModule, -1/*NoID*/)); //. ->
 		if (TAACChannel.TypeID.equals(pTypeID))
-			return (new TAACChannel(InternalSensorsModule, -1/*NoID*/)); // =>
+			return (new TAACChannel(InternalSensorsModule, -1/*NoID*/)); //. ->
 		if (TH264IChannel.TypeID.equals(pTypeID))
-			return (new TH264IChannel(InternalSensorsModule, -1/*NoID*/)); // =>
+			return (new TH264IChannel(InternalSensorsModule, -1/*NoID*/)); //. ->
 		else
-			return null;
+			return null; //. ->
 	}	
 }

@@ -1,6 +1,7 @@
 package com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels;
 
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.TInternalControlsModule;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Audio.VC.TVCChannel;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.TDestinationStreamChannel;
 
 public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.TChannelProvider {
@@ -20,6 +21,9 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 	
 	@Override
 	public TDestinationStreamChannel GetChannel(String pTypeID) throws Exception {
-		return null;
+		if (TVCChannel.TypeID.equals(pTypeID))
+			return (new TVCChannel(InternalControlsModule, -1/*NoID*/)); //. ->
+		else
+			return null; //. ->
 	}	
 }

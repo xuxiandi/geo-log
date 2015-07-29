@@ -1,7 +1,7 @@
 package com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels;
 
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TControlStreamChannel;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.Telecontrol.TLC.TTLCChannel;
 
@@ -21,7 +21,7 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 	}
 	
 	@Override
-	public TStreamChannel GetChannel(String pTypeID) throws Exception {
+	public TControlStreamChannel GetChannel(String pTypeID) throws Exception {
 		if (TDVRTChannel.TypeID.equals(pTypeID))
 			return (new TDVRTChannel(PluginModule)); //. ->
 		if (TTLCChannel.TypeID.equals(pTypeID))

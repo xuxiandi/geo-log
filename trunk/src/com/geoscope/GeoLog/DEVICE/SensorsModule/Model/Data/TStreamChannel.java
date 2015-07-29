@@ -38,7 +38,7 @@ public class TStreamChannel extends TChannel {
 	}
 	
 	public static class TPacketSubscribers {
-	
+
 		public static class TItemsNotifier {
 			
 			protected void DoOnSubscribe(TPacketSubscriber Subscriber) throws Exception {			
@@ -53,6 +53,14 @@ public class TStreamChannel extends TChannel {
 			protected void DoOnUnsubscribed(TPacketSubscriber Subscriber) throws Exception {			
 			}
 		}
+		
+		public static volatile int 				SubscribersSummary_Count = 0; 
+		private static volatile TItemsNotifier 	SubscribersSummary_ItemsNotifier = null;
+		public static void						SubscribersSummary_Init(TItemsNotifier pItemsNotifier) {
+			SubscribersSummary_Count = 0;
+			SubscribersSummary_ItemsNotifier = pItemsNotifier;
+		}
+		
 		
 		private TStreamChannel Channel;
 		//.
@@ -96,6 +104,7 @@ public class TStreamChannel extends TChannel {
 				if (ItemsNotifier != null)
 					ItemsNotifier.DoOnSubscribe(Subscriber);
 			}
+			SubscribersSummary_ItemsNotifier.DoOnSubscribe(Subscriber);
 			//.
 			boolean flStartSource;
 			Lock.lock();
@@ -116,9 +125,15 @@ public class TStreamChannel extends TChannel {
 				if (ItemsNotifier != null)
 					ItemsNotifier.DoOnSubscribed(Subscriber);
 			}
+			SubscribersSummary_ItemsNotifier.DoOnSubscribed(Subscriber);
+			//.
+			SubscribersSummary_Count++;
 		}
 
 		public void Unsubscribe(TPacketSubscriber Subscriber) throws Exception {
+			SubscribersSummary_Count--;
+			//.
+			SubscribersSummary_ItemsNotifier.DoOnUnsubscribe(Subscriber);
 			synchronized (Items) {
 				if (ItemsNotifier != null)
 					ItemsNotifier.DoOnUnsubscribe(Subscriber);
@@ -140,6 +155,7 @@ public class TStreamChannel extends TChannel {
 			if (flStopSources)
 				Channel.SourceChannel_Stop();
 			//.
+			SubscribersSummary_ItemsNotifier.DoOnUnsubscribed(Subscriber);
 			synchronized (Items) {
 				if (ItemsNotifier != null)
 					ItemsNotifier.DoOnUnsubscribed(Subscriber);

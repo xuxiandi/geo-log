@@ -5,11 +5,11 @@ import java.util.ArrayList;
 
 public class TCancelableThread implements Runnable {
 	
-	public TCancelableThread ParentThread;
+	public volatile TCancelableThread ParentThread;
 	//.
-	protected Thread _Thread;
+	protected volatile Thread _Thread;
 	//.
-	public TCanceller Canceller;
+	public volatile TCanceller Canceller;
 	//.
 	private ArrayList<TCancelableThread> ChildThreads = null;
 	

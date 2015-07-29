@@ -127,7 +127,7 @@ public class TDataStreamPropsPanel extends Activity {
             	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                 	try {
                 		lvChannels_SelectedIndex = arg2;
-                		return (OpenChannelProfile(lvChannels_SelectedIndex));
+                		return OpenChannelProfile(lvChannels_SelectedIndex);
     				} catch (Exception E) {
     					Toast.makeText(TDataStreamPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
     					//.

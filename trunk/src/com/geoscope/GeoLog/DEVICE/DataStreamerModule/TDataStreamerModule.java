@@ -17,8 +17,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Xml;
 import android.widget.Toast;
 
@@ -34,6 +37,7 @@ import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponent
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.DataStream.TDataStreamFunctionality;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
+import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TObjectSetDataStreamerActiveFlagSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.TObjectSetComponentDataServiceOperation;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.TModel;
@@ -42,6 +46,7 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreaming;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
+@SuppressLint("HandlerLeak")
 public class TDataStreamerModule extends TModule {
 
 	public static final String FolderName = "DataStreamerModule"; 
@@ -327,6 +332,11 @@ public class TDataStreamerModule extends TModule {
     	
     	public void Stop() throws InterruptedException {
     		CancelAndWait();
+    		_Thread = null;
+    	}
+    	
+    	public boolean IsStarted() {
+    		return (_Thread != null);
     	}
     	
 		@Override
@@ -464,28 +474,21 @@ public class TDataStreamerModule extends TModule {
 								}
 								StreamDescriptor.Channels_RemoveDisabledItems();
 								//. update the DataStream component with descriptor 
-								TDataStreamFunctionality DSF = (TDataStreamFunctionality)User.Space.TypesSystem.SystemTDataStream.TComponentFunctionality_Create(idDataStream);
-								try {
-									//. setup the DataStream component
-									DSF.SetStreamDescriptor(StreamDescriptor);
-									//. starting the streamers ...
-									Cnt = StreamDescriptor.Channels.size();
-									for (int J = 0; J < Cnt; J++) {
-										TChannel StreamChannel = StreamDescriptor.Channels.get(J);
-										if (StreamChannel.Enabled) {
-											TComponentDataStreaming.TStreamer Streamer = GetStreamer(StreamChannel.GetTypeID(), DataStreamerModule.Device, DSF.idTComponent(),DSF.idComponent, StreamChannel.ID, StreamChannel.Configuration, StreamChannel.Parameters);
-											if (Streamer != null) {
-												Streamers.add(Streamer);
-												//. 
-												Streamer.Start();
-											}
-											else 
-												DataStreamerModule.Device.Log.WriteWarning("DataStreamerModule.Streaming","Streamer not found for TypeID: "+StreamChannel.GetTypeID());
+								DataStreamerModule.DataStreamComponent_SetStreamDescriptor(idDataStream, StreamDescriptor); 
+								//. starting the streamers ...
+								Cnt = StreamDescriptor.Channels.size();
+								for (int J = 0; J < Cnt; J++) {
+									TChannel StreamChannel = StreamDescriptor.Channels.get(J);
+									if (StreamChannel.Enabled) {
+										TComponentDataStreaming.TStreamer Streamer = GetStreamer(StreamChannel.GetTypeID(), DataStreamerModule.Device, SpaceDefines.idTDataStream,idDataStream, StreamChannel.ID, StreamChannel.Configuration, StreamChannel.Parameters);
+										if (Streamer != null) {
+											Streamers.add(Streamer);
+											//. 
+											Streamer.Start();
 										}
+										else 
+											DataStreamerModule.Device.Log.WriteWarning("DataStreamerModule.Streaming","Streamer not found for TypeID: "+StreamChannel.GetTypeID());
 									}
-								}
-								finally {
-									DSF.Release();
 								}
 								//.
 								ComponentStreamDescriptor = StreamDescriptor;
@@ -538,15 +541,8 @@ public class TDataStreamerModule extends TModule {
 				if (CF != null)
 					try {
 						long idDataStream = CF.GetComponent(SpaceDefines.idTDataStream);
-						if (idDataStream != 0) {
-							TDataStreamFunctionality DSF = (TDataStreamFunctionality)User.Space.TypesSystem.SystemTDataStream.TComponentFunctionality_Create(idDataStream);
-							try {
-								DSF.SetStreamDescriptor(null);
-							}
-							finally {
-								DSF.Release();
-							}
-						}
+						if (idDataStream != 0) 
+							DataStreamerModule.DataStreamComponent_EmptyStreamDescriptor(idDataStream);
 					}
 					finally {
 						CF.Release();
@@ -557,7 +553,7 @@ public class TDataStreamerModule extends TModule {
 	
 	
 	private TStreamingComponents	StreamingComponents;
-	private TStreaming 				Streaming = null;
+	private volatile TStreaming 	Streaming = null;
 	//
 	public TDataStreamerStreamingComponentsValue 	StreamingComponentsValue;
 	public TDataStreamerActiveValue 				ActiveValue;
@@ -694,7 +690,7 @@ public class TDataStreamerModule extends TModule {
     		FOS.close();
     	}
     	//. validation
-		ValidateStreaming();
+    	PostValidateStreaming();
     }
     
     public synchronized TStreamingComponents GetStreamingComponents() {
@@ -705,27 +701,74 @@ public class TDataStreamerModule extends TModule {
     	return StreamingComponents.Components.size();
     }
     
-    public synchronized void StartStreaming() throws Exception {
+    protected void DataStreamComponent_SetStreamDescriptor(long idDataStream, TStreamDescriptor StreamDescriptor) throws Exception {
+		TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
+		TDataStreamFunctionality DSF = (TDataStreamFunctionality)User.Space.TypesSystem.SystemTDataStream.TComponentFunctionality_Create(idDataStream);
+		try {
+			DSF.SetStreamDescriptor(StreamDescriptor);
+		}
+		finally {
+			DSF.Release();
+		}
+	}
+
+	protected void DataStreamComponent_EmptyStreamDescriptor(long idDataStream) throws Exception {
+		DataStreamComponent_SetStreamDescriptor(idDataStream, null);
+	}
+
+	public void DataStreamComponent_SetStreamDescriptor(TStreamDescriptor StreamDescriptor) throws Exception {
+		TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
+		//.
+		TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(SpaceDefines.idTCoComponent,Device.idOwnerComponent);
+		if (CF != null)
+			try {
+				long idDataStream = CF.GetComponent(SpaceDefines.idTDataStream);
+				if (idDataStream != 0) 
+					DataStreamComponent_SetStreamDescriptor(idDataStream, StreamDescriptor);
+			}
+			finally {
+				CF.Release();
+			}
+	}
+	
+	//. indicates that some sensor channels are active
+	public void DataStreamComponent_SetNullStreamDescriptor(String pInfo) throws Exception {
+		TStreamDescriptor StreamDescriptor = new TStreamDescriptor();
+		StreamDescriptor.Name = "Direct streaming";
+		StreamDescriptor.Info = pInfo;
+		//.
+		DataStreamComponent_SetStreamDescriptor(StreamDescriptor);
+	}
+	
+	public void DataStreamComponent_EmptyStreamDescriptor() throws Exception {
+		DataStreamComponent_SetStreamDescriptor(null);
+	}
+	
+    protected void StartStreaming() throws Exception {
     	Streaming = new TStreaming(this, StreamingComponents);
     }
 
-    public synchronized void StopStreaming() throws InterruptedException {
+    protected void StopStreaming() throws InterruptedException {
     	if (Streaming != null) {
     		Streaming.Destroy();
     		Streaming = null;
     	}
     }
     
-    public synchronized TStreaming GetStreaming() {
+    public TStreaming GetStreaming() {
     	return Streaming;
     }
     
-    public synchronized void ValidateStreaming() throws Exception {
+    private void ValidateStreaming() throws Exception {
     	StopStreaming();
     	if (ActiveValue.BooleanValue())
     		Streaming = new TStreaming(this, StreamingComponents);
     }
 
+    public void PostValidateStreaming() {
+		MessageHandler.obtainMessage(MESSAGE_VALIDATE).sendToTarget();
+    }
+    
     public synchronized boolean StreamingIsActive() throws InterruptedException {
     	return (ActiveValue.BooleanValue());
     }
@@ -738,7 +781,7 @@ public class TDataStreamerModule extends TModule {
     	//.
     	SaveProfile();
     	//. validation
-		ValidateStreaming();
+		PostValidateStreaming();
     }
 
     public void SetActiveValue(boolean flTrue, boolean flPostProcess) throws Exception
@@ -793,4 +836,29 @@ public class TDataStreamerModule extends TModule {
     	Intent intent = new Intent(Device.context,TDataStreamerPropsPanel.class);
     	context.startActivity(intent);
     }
+    
+    private static final int MESSAGE_VALIDATE = 1;
+    
+	public Handler MessageHandler = new Handler() {
+		
+        @Override
+        public void handleMessage(Message msg) {
+        	try {
+                switch (msg.what) {
+
+                case MESSAGE_VALIDATE: 
+                	try {
+                		ValidateStreaming();
+                	}
+                	catch (Exception E) {
+                		Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+                	}
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
+        }
+    };
 }

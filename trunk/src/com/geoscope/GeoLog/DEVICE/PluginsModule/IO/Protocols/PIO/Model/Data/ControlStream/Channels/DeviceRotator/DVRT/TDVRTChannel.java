@@ -2,9 +2,9 @@ package com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Con
 
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TControlStreamChannel;
 
-public class TDVRTChannel extends TStreamChannel {
+public class TDVRTChannel extends TControlStreamChannel {
 
 	public static final String TypeID = "DeviceRotator.DVRT";
 

@@ -14,4 +14,9 @@ public class TDestinationStreamChannel extends TChannel {
 	public TDestinationStreamChannel(int pID, String pProfilesFolder, Class<?> ProfileClass) throws Exception {
 		super(pID, pProfilesFolder, ProfileClass);
 	}
+	
+	@Override
+	public boolean IsActive() { 
+		return false;
+	}
 }

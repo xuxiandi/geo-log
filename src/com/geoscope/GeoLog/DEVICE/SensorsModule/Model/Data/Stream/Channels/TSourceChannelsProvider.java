@@ -25,7 +25,7 @@ public class TSourceChannelsProvider extends com.geoscope.Classes.Data.Stream.Ch
 		if (Result != null)
 			return Result; //. ->
 		//.
-		Result = com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.TChannelsProvider.Instance.GetChannel(pTypeID);
+		Result = com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.Stream.Channels.TChannelsProvider.Instance.GetChannel(pTypeID);
 		return Result;
 	}	
 }

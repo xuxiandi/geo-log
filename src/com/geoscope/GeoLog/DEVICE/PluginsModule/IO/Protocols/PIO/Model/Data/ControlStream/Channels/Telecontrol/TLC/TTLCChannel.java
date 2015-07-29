@@ -6,9 +6,9 @@ import android.annotation.SuppressLint;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.TPluginModule;
 import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.PIO;
-import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.TControlStreamChannel;
 
-public class TTLCChannel extends TStreamChannel {
+public class TTLCChannel extends TControlStreamChannel {
 
 	public static final String TypeID = "Telecontrol.TLC";
 

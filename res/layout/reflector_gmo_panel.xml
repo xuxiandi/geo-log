@@ -693,7 +693,7 @@
                     android:textSize="18sp"
                     android:textStyle="bold|italic"
                     android:typeface="monospace"
-                    android:visibility="invisible" />
+                    android:visibility="gone" />
             </LinearLayout>
 
             <TextView

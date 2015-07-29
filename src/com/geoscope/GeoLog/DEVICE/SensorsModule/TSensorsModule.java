@@ -7,14 +7,19 @@ import java.io.OutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Handler;
+import android.os.Message;
+import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
+import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
@@ -34,6 +39,7 @@ import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
+@SuppressLint("HandlerLeak")
 public class TSensorsModule extends TModule {
 
 	public static final String FolderName = "SensorsModule";
@@ -106,6 +112,8 @@ public class TSensorsModule extends TModule {
 	public TInternalSensorsModule InternalSensorsModule;
 	//.
 	public TSensorsDataValue Data;
+	//.
+	public boolean Active = false;
 	//.
 	public volatile TModel Model;
 	//.
@@ -225,6 +233,29 @@ public class TSensorsModule extends TModule {
         	}
     	//.
     	Model = NewModel;
+    	//.
+    	TStreamChannel.TPacketSubscribers.SubscribersSummary_Init(new TStreamChannel.TPacketSubscribers.TItemsNotifier() {
+    		
+    		@Override
+    		protected void DoOnSubscribed(com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber Subscriber) throws Exception {
+    			if (TStreamChannel.TPacketSubscribers.SubscribersSummary_Count == 0) {
+        			Active = true;
+        			//.
+        			MessageHandler.obtainMessage(MESSAGE_ACTIVE).sendToTarget();
+    			}
+    		}
+    		
+    		@Override
+    		protected void DoOnUnsubscribe(com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber Subscriber) throws Exception {
+    			if (TStreamChannel.TPacketSubscribers.SubscribersSummary_Count == 0) {
+        			Active = false;
+        			//.
+        			MessageHandler.obtainMessage(MESSAGE_INACTIVE).sendToTarget();
+    			}
+    		}
+    	});
+    	Active = false;
+		MessageHandler.obtainMessage(MESSAGE_INACTIVE).sendToTarget();
     	//.
     	Meters.Initialize();
     }
@@ -476,4 +507,75 @@ public class TSensorsModule extends TModule {
     	Intent intent = new Intent(Device.context,TSensorsModuleMeasurementsTransferProcessPanel.class);
     	context.startActivity(intent);
     }
+
+    public static final int MESSAGE_INACTIVE 	= 0;
+    public static final int MESSAGE_ACTIVE 		= 1;
+    
+	public Handler MessageHandler = new Handler() {
+		
+        @Override
+        public void handleMessage(Message msg) {
+        	try {
+                switch (msg.what) {
+
+                case MESSAGE_INACTIVE: 
+                	try {
+                		if (!Device.DataStreamerModule.StreamingIsActive()) {
+                			TAsyncProcessing Processing = new TAsyncProcessing() {
+                				
+                				@Override
+                				public void Process() throws Exception {
+                					Device.DataStreamerModule.DataStreamComponent_EmptyStreamDescriptor();
+                				}
+                				
+                				@Override
+                				public void DoOnCompleted() throws Exception {
+                				}
+                				
+                				@Override
+                				public void DoOnException(Exception E) {
+                					Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+                				}
+                			};
+                			Processing.Start();
+                		}
+                	}
+                	catch (Exception E) {
+                		Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+                	}
+                	break; //. >
+
+                case MESSAGE_ACTIVE: 
+                	try {
+                		if (!Device.DataStreamerModule.StreamingIsActive()) {
+                			TAsyncProcessing Processing = new TAsyncProcessing() {
+                				
+                				@Override
+                				public void Process() throws Exception {
+                					Device.DataStreamerModule.DataStreamComponent_SetNullStreamDescriptor("Active sensor channels");
+                				}
+                				
+                				@Override
+                				public void DoOnCompleted() throws Exception {
+                				}
+                				
+                				@Override
+                				public void DoOnException(Exception E) {
+                					Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+                				}
+                			};
+                			Processing.Start();
+                		}
+                	}
+                	catch (Exception E) {
+                		Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+                	}
+                	break; //. >
+                }
+        	}
+        	catch (Throwable E) {
+        		TGeoLogApplication.Log_WriteError(E);
+        	}
+        }
+    };
 }

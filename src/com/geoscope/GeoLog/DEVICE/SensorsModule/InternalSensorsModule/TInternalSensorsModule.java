@@ -993,7 +993,8 @@ public class TInternalSensorsModule extends TModule {
     		return null;  //. -> 
     }
     
-	public final Handler MessageHandler = new Handler() {
+	private Handler MessageHandler = new Handler() {
+		
         @Override
         public void handleMessage(Message msg) {
         	try {

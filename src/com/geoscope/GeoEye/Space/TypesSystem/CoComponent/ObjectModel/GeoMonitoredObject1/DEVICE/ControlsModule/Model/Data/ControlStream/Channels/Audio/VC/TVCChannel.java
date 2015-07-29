@@ -75,19 +75,23 @@ public class TVCChannel extends TStreamChannel {
 		ProcessCommand(BA);
 	}
 	
-	public synchronized void SetVoiceCommands(byte[] BA) throws Exception {
-		TTimestampedDataContainerType CT = (TTimestampedDataContainerType)SetVoiceCommands.ContainerType; 
-		CT.Value.Timestamp = OleDate.UTCCurrentTimestamp();
-		CT.Value.Value = BA;
-		//.
-		DoOnData(SetVoiceCommands);
+	public void SetVoiceCommands(byte[] BA) throws Exception {
+		synchronized (SetVoiceCommands) {
+			TTimestampedDataContainerType CT = (TTimestampedDataContainerType)SetVoiceCommands.ContainerType; 
+			CT.Value.Timestamp = OleDate.UTCCurrentTimestamp();
+			CT.Value.Value = BA;
+			//.
+			DoOnData(SetVoiceCommands);
+		}
 	}
 	
-	public synchronized void DoVoiceCommand(byte[] BA) throws Exception {
-		TTimestampedDataContainerType CT = (TTimestampedDataContainerType)DoVoiceCommand.ContainerType; 
-		CT.Value.Timestamp = OleDate.UTCCurrentTimestamp();
-		CT.Value.Value = BA;
-		//.
-		DoOnData(DoVoiceCommand);
+	public void DoVoiceCommand(byte[] BA) throws Exception {
+		synchronized (DoVoiceCommand) {
+			TTimestampedDataContainerType CT = (TTimestampedDataContainerType)DoVoiceCommand.ContainerType; 
+			CT.Value.Timestamp = OleDate.UTCCurrentTimestamp();
+			CT.Value.Value = BA;
+			//.
+			DoOnData(DoVoiceCommand);
+		}
 	}
 }

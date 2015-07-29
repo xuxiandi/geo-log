@@ -57,6 +57,7 @@ import com.geoscope.GeoLog.DEVICE.ConnectorModule.GeographProxyServer.TGeographP
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetAudioModuleAudioFilesValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetConnectorConfigurationDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlDataValueSO;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetControlsModuleChannelsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetDataStreamerStreamingComponentsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetFileSystemDataValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TGetGPIValueSO;
@@ -2076,6 +2077,8 @@ public class TConnectorModule extends TModule implements Runnable{
             return new TGetSensorDataValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetDataStreamerStreamingComponentsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TGetDataStreamerStreamingComponentsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
+        if (TGetControlsModuleChannelsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
+            return new TGetControlsModuleChannelsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetSensorsModuleChannelsValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))
             return new TGetSensorsModuleChannelsValueSO(this,Device.UserID,Device.UserPassword,ObjectID,Session,SubAddress.Value,AddressData);  //. =>
         if (TGetSensorsModuleMetersValueSO._Address.IsAddressTheSame(Address,/*out*/ SubAddress))

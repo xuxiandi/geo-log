@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraRegistrator;
@@ -85,6 +86,8 @@ public class TVideoRecorder {
 	}	
 	
 	
+	private boolean flExists = false;
+	//.
 	private Context context;
 	//.
 	private TVideoRecorderModule VideoRecorderModule;
@@ -125,6 +128,11 @@ public class TVideoRecorder {
 		wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "DVRWakeLock");
 		//.
 		SetVideoRecorder(this);
+		//.
+		flExists = true;
+		//. indicate that recording is active
+		if (!VideoRecorderModule.Device.SensorsModule.Active) 
+			VideoRecorderModule.Device.SensorsModule.MessageHandler.obtainMessage(TSensorsModule.MESSAGE_ACTIVE).sendToTarget();
     }
     
 	public TVideoRecorder(Context pcontext, TVideoRecorderModule pVideoRecorderModule) {
@@ -132,6 +140,13 @@ public class TVideoRecorder {
 	}
 	
     public void Destroy() {
+    	if (flExists) { //. indicate that recording is inactive
+    		if (!VideoRecorderModule.Device.SensorsModule.Active) 
+    			VideoRecorderModule.Device.SensorsModule.MessageHandler.obtainMessage(TSensorsModule.MESSAGE_INACTIVE).sendToTarget();
+    	}
+    	//.
+    	flExists = false;
+    	//.
     	ClearVideoRecorder(this);
     	//.
 		FinalizeRecorder();

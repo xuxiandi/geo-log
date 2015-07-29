@@ -735,7 +735,7 @@ public class TVideoRecorderModule extends TModule {
     
     public void FinishRecorder() {
     	TVideoRecorder VideoRecorder = TVideoRecorder.GetVideoRecorder();
-    	if (VideoRecorder != null)
+    	if (VideoRecorder != null) 
     		VideoRecorder.StopRecording();
 		//.
 		/*///??? synchronized (this) {

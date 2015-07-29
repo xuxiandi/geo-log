@@ -225,8 +225,7 @@ public class TDEVICEModule extends TModule
 			@Override
 			protected void DoOnConfigurationReceived() {
 				try {
-					if (DataStreamerModule.StreamingIsActive())
-						DataStreamerModule.StartStreaming();
+					DataStreamerModule.PostValidateStreaming();
 					//.
 					if (ComponentFileStreaming.flEnabledStreaming && !ComponentFileStreaming.IsStarted())
 						ComponentFileStreaming.Start();

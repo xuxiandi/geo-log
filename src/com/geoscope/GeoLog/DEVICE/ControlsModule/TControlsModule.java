@@ -92,14 +92,9 @@ public class TControlsModule extends TModule {
     }
     
     public void Model_BuildAndPublish() throws Exception {
-    	byte[] ModelBA;
-    	if (Device.PluginsModule.USBPluginModule.PIOModel != null) {
-        	Model_Build();
-        	//.
-        	ModelBA = Model.ToByteArray();
-    	}
-    	else
-    		ModelBA = null;
+    	Model_Build();
+    	//.
+    	byte[] ModelBA = Model.ToByteArray();
     	//.
         Data.SetValue(OleDate.UTCCurrentTimestamp(),ModelBA);
         //.

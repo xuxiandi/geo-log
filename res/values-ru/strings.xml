@@ -1128,5 +1128,8 @@
     <string name="SDataStreamerIsDisabled">Модуль потоковой передачи заблокирован</string>
     <string name="SDataStreamerConfigurationError">Ошибка конфигурации потоковой передачи</string>
     <string name="SNoChannels">нет каналов</string>
+    <string name="SAudioVoiceCommands">Аудио команды (VC)</string>
+    <string name="SDoVoiceCommand">Послать команду</string>
+    <string name="SSetVoiceCommands">Установить набор команд</string>
     
 </resources>

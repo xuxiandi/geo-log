@@ -1,9 +1,13 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -11,9 +15,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -25,15 +31,21 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Stream.TStreamDescriptor;
 import com.geoscope.Classes.Data.Stream.Channel.TChannelIDs;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
+import com.geoscope.Classes.IO.File.TFileSystem;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemFileSelector;
+import com.geoscope.Classes.IO.File.FileSelector.TFileSystemPreviewFileSelector;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.TReflector;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Audio.VC.TVCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Telecontrol.TLC.TTLCChannel;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.AudioModule.TAudioFileMessageValue;
 
 @SuppressLint("HandlerLeak")
 public class TDataStreamPanel extends Activity {
@@ -55,7 +67,7 @@ public class TDataStreamPanel extends Activity {
 	private TStreamDescriptor 	StreamDescriptor;
 	private TChannelIDs			StreamChannels = null;
 	//.
-	private ArrayList<TStreamChannelProcessorAbstract> StreamChannelProcessors = new ArrayList<TStreamChannelProcessorAbstract>();
+	private ArrayList<TStreamChannelConnectorAbstract> StreamChannelConnectors = new ArrayList<TStreamChannelConnectorAbstract>();
 	//.
 	private boolean IsInFront = false;
 	//.
@@ -63,6 +75,7 @@ public class TDataStreamPanel extends Activity {
 	//.
 	private LinearLayout llDeviceRotatorDVRT;
 	private LinearLayout llTelecontrolTLC;
+	private LinearLayout llAudioVC;
 	
     public void onCreate(Bundle savedInstanceState) {
     	try {
@@ -109,6 +122,7 @@ public class TDataStreamPanel extends Activity {
             lbStatus = (TextView)findViewById(R.id.lbStatus);
             llDeviceRotatorDVRT = (LinearLayout)findViewById(R.id.llDeviceRotatorDVRT);
             llTelecontrolTLC = (LinearLayout)findViewById(R.id.llTelecontrolTLC);
+            llAudioVC = (LinearLayout)findViewById(R.id.llAudioVC);
 		} catch (Exception E) {
 			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
@@ -129,7 +143,7 @@ public class TDataStreamPanel extends Activity {
 		IsInFront = false;
 		//.
     	try {
-    		StreamChannelProcessors_Finalize();
+    		StreamChannelConnectors_Finalize();
 		} catch (Exception E) {
 			DoOnException(E);
 		}
@@ -140,57 +154,68 @@ public class TDataStreamPanel extends Activity {
 		IsInFront = true;
     	//.
     	try {
-    		StreamChannelProcessors_Initialize();
+    		StreamChannelConnectors_Initialize();
 		} catch (Exception E) {
 			DoOnException(E);
 		}
 	}
 
-	private void StreamChannelProcessors_Initialize(SurfaceHolder SH, int Width, int Height) throws Exception {
-		StreamChannelProcessors_Finalize();
+	private void StreamChannelConnectors_Initialize() throws Exception {
+		StreamChannelConnectors_Finalize();
 		//.
 		Layout_Reset();
 		for (int I = 0; I < StreamDescriptor.Channels.size(); I++) {
 			TStreamChannel Channel = (TStreamChannel)StreamDescriptor.Channels.get(I);
 			if ((StreamChannels == null) || StreamChannels.IDExists(Channel.ID)) {
-				TStreamChannelProcessorAbstract ChannelProcessor = new TStreamChannelProcessor(this, ServerAddress,ServerPort, UserID,UserPassword, Object, Channel, new TStreamChannelProcessorAbstract.TOnProgressHandler(Channel) {
+				TStreamChannelConnectorAbstract ChannelConnector = new TStreamChannelConnector(this, ServerAddress,ServerPort, UserID,UserPassword, Object, Channel, new TStreamChannelConnectorAbstract.TOnProgressHandler(Channel) {
+					
 					@Override
 					public void DoOnProgress(int ReadSize, TCanceller Canceller) {
 						TDataStreamPanel.this.DoOnStatusMessage("");
 					}
-				}, new TStreamChannelProcessorAbstract.TOnIdleHandler(Channel) {
+				}, new TStreamChannelConnectorAbstract.TOnIdleHandler(Channel) {
+					
 					@Override
 					public void DoOnIdle(TCanceller Canceller) {
 						TDataStreamPanel.this.DoOnStatusMessage(TDataStreamPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
 					}
-				}, new TStreamChannelProcessorAbstract.TOnExceptionHandler(Channel) {
+				}, new TStreamChannelConnectorAbstract.TOnExceptionHandler(Channel) {
+					
 					@Override
 					public void DoOnException(Exception E) {
 						TDataStreamPanel.this.DoOnException(E);
 					}
 				});
-				if (ChannelProcessor != null) {
-					StreamChannelProcessors.add(ChannelProcessor);
+				if (ChannelConnector != null) {
+					StreamChannelConnectors.add(ChannelConnector);
 					//.
 					Layout_UpdateForChannel(Channel);
 					//.
-					ChannelProcessor.Start();
+					Channel.Start();
+					//.
+					ChannelConnector.Start();
 				}			  
 			}
 		}
 	}
 	
-	private void StreamChannelProcessors_Initialize() throws Exception {
-		StreamChannelProcessors_Initialize(null,0,0);
-	}
-	
-	private void StreamChannelProcessors_Finalize() throws Exception {
-		for (int I = 0; I < StreamChannelProcessors.size(); I++) 
-			StreamChannelProcessors.get(I).Destroy();
-		StreamChannelProcessors.clear();
+	private void StreamChannelConnectors_Finalize() throws Exception {
+		for (int I = 0; I < StreamChannelConnectors.size(); I++) {
+			TStreamChannelConnectorAbstract ChannelConnector = StreamChannelConnectors.get(I);
+			//.
+			ChannelConnector.Stop(false);
+			//.
+			ChannelConnector.Channel.Close();
+			//.
+			ChannelConnector.Destroy(false);
+		}
+		StreamChannelConnectors.clear();
+		//.
+		Layout_Reset();
 	}
 	
 	private void Layout_Reset() {
+		llAudioVC.setVisibility(View.GONE);
 		llDeviceRotatorDVRT.setVisibility(View.GONE);
 		llTelecontrolTLC.setVisibility(View.GONE);
 	}
@@ -387,6 +412,133 @@ public class TDataStreamPanel extends Activity {
 			}
 			//.
 			llTelecontrolTLC.setVisibility(View.VISIBLE);
+			//.
+			return; //. ->
+		}
+		if (Channel instanceof TVCChannel) {
+			final TVCChannel VCChannel = (TVCChannel)Channel;
+			//.
+			Button btnAudioVCDoVoiceCommand = (Button)findViewById(R.id.btnAudioVCDoVoiceCommand);
+			btnAudioVCDoVoiceCommand.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+			    	AlertDialog.Builder alert = new AlertDialog.Builder(TDataStreamPanel.this);
+			    	//.
+			    	alert.setTitle(R.string.SPlayAudioMessage);
+			    	alert.setMessage(R.string.SEnterIDOfTheMessage);
+			    	//.
+			    	final EditText input = new EditText(TDataStreamPanel.this);
+			    	alert.setView(input);
+			    	//.
+			    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+			    		
+			    		@Override
+			        	public void onClick(DialogInterface dialog, int whichButton) {
+			    			//. hide keyboard
+			        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+			        		//.
+			        		final String FileMessageID = input.getText().toString();
+			        		try {
+					    		TAsyncProcessing Processing = new TAsyncProcessing(TDataStreamPanel.this,getString(R.string.SWaitAMoment)) {
+					    			
+					    			@Override
+					    			public void Process() throws Exception {
+										TAudioFileMessageValue Value = new TAudioFileMessageValue();
+										Value.TimeStamp = OleDate.UTCCurrentTimestamp();
+										try {
+											Value.FileID = Integer.parseInt(FileMessageID);
+											Value.FileName = null;
+										}
+										catch (NumberFormatException NFE) {
+											Value.FileID = 0;
+											Value.FileName = FileMessageID;
+										}
+										Value.DestinationID = 1;
+										Value.Volume = 100; //. %
+										Value.RepeatCount = -1; //. minus means that there is no waiting for play finish
+										Value.RepeatInterval = 0;
+										//.
+										VCChannel.DoVoiceCommand(Value.ToByteArray());
+					    			}
+					    			
+					    			@Override 
+					    			public void DoOnCompleted() throws Exception {
+					    			}
+					    			
+					    			@Override
+					    			public void DoOnException(Exception E) {
+					    				Toast.makeText(TDataStreamPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					    			}
+					    		};
+					    		Processing.Start();
+			        		}
+			        		catch (Exception E) {
+			        			Toast.makeText(TDataStreamPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			        			return; //. ->
+			    		    }
+			          	}
+			    	});
+			    	//.
+			    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+			    		@Override
+			    		public void onClick(DialogInterface dialog, int whichButton) {
+			    		}
+			    	});
+			    	//.
+			    	alert.show();    
+				}
+			});
+			//.
+			Button btnAudioVCSetVoiceCommands = (Button)findViewById(R.id.btnAudioVCSetVoiceCommands);
+			btnAudioVCSetVoiceCommands.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TDataStreamPanel.this, ".ZIP", new TFileSystemFileSelector.OpenDialogListener() {
+			        	
+			            @Override
+			            public void OnSelectedFile(String fileName) {
+		                    final File ChosenFile = new File(fileName);
+		                    //.
+							try {
+					    		TAsyncProcessing Processing = new TAsyncProcessing(TDataStreamPanel.this,getString(R.string.SWaitAMoment)) {
+					    			
+					    			@Override
+					    			public void Process() throws Exception {
+										VCChannel.SetVoiceCommands(TFileSystem.File_ToByteArray(ChosenFile.getAbsolutePath()));
+					    			}
+					    			
+					    			@Override 
+					    			public void DoOnCompleted() throws Exception {
+					        			Toast.makeText(TDataStreamPanel.this, R.string.SAudioFilesHaveBeenImportedToTheDevice, Toast.LENGTH_LONG).show();  						
+					    			}
+					    			
+					    			@Override
+					    			public void DoOnException(Exception E) {
+					    				Toast.makeText(TDataStreamPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					    			}
+					    		};
+					    		Processing.Start();
+							}
+							catch (Throwable E) {
+								String S = E.getMessage();
+								if (S == null)
+									S = E.getClass().getName();
+			        			Toast.makeText(TDataStreamPanel.this, S, Toast.LENGTH_LONG).show();  						
+							}
+			            }
+
+						@Override
+						public void OnCancel() {
+						}
+			        });
+			    	FileSelector.show();    	
+				}
+			});
+			//.
+			llAudioVC.setVisibility(View.VISIBLE);
 			//.
 			return; //. ->
 		}

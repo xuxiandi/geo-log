@@ -486,6 +486,37 @@ public class TObjectModel {
 		return new TObjectHistoryRecords(ObjectModelRecords,BusinessModelRecords);
 	}
 	
+	public void Controls_Channel_SetProfile(int ChannelID, byte[] Profile) throws IOException, Exception {
+	}
+	
+	public byte[] Controls_Channel_GetProfile(int ChannelID) throws Exception {
+		return null;
+	}
+	
+	public void Controls_Channels_SetProfile(byte[] Profile) throws IOException, Exception {
+	}
+	
+	public byte[] Controls_Channels_GetProfile() throws Exception {
+		return null;
+	}
+	
+	public static class TControlChannelStatus {
+		
+		public boolean Enabled;
+		public boolean Active;
+		
+		public int FromByteArray(byte[] BA, int Idx) {
+			Enabled = (BA[Idx] != 0); Idx++;
+			Active = (BA[Idx] != 0); Idx++;
+			//.
+			return Idx;
+		}
+	}
+	
+	public TControlChannelStatus[] Controls_Channels_GetStatus(int[] ChannelIDs) throws Exception {
+		return null;
+	}
+	
 	public void Sensors_Channel_SetProfile(int ChannelID, byte[] Profile) throws IOException, Exception {
 	}
 	

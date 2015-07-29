@@ -52,7 +52,8 @@ public class TTLCChannel extends TStreamChannel {
 	public void DoOnData(TDataType DataType) throws Exception {
 		byte[] BA = DataType_ToByteArray(DataType);
 		//.
-		if (ConnectionIsEstablished())
-			ProcessCommand(BA);
+		WaitForConnection();
+		//.
+		ProcessCommand(BA);
 	}
 }

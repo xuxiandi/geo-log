@@ -75,11 +75,15 @@ public class TDVRTChannel extends TStreamChannel {
 	public void DoOnLatitude(double Latitude) throws Exception {
 		byte[] BA = Latitude_ToByteArray(Latitude);
 		//.
+		WaitForConnection();
+		//.
 		ProcessCommand(BA);
 	}
 
 	public void DoOnLongitude(double Longitude) throws Exception {
 		byte[] BA = Longitude_ToByteArray(Longitude);
+		//.
+		WaitForConnection();
 		//.
 		ProcessCommand(BA);
 	}

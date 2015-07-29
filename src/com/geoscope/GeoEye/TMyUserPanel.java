@@ -1909,7 +1909,7 @@ public class TMyUserPanel extends Activity {
         		edUserFullName.setText(UserInfo.UserFullName);
         		edUserContactInfo.setText(UserInfo.UserContactInfo);
         		edUserDomains.setText(UserInfo.UserDomains);
-        		cbUserTaskEnabled.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
+        		//. cbUserTaskEnabled.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
         		cbUserTaskEnabled.setChecked(UserInfo.UserIsTaskEnabled);
         		boolean flTMSOption = UserInfo.UserDomainsAreSpecified();
         		if (flTMSOption) {

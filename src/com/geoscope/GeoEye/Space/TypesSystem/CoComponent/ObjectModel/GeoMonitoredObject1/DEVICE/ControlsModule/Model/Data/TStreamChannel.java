@@ -11,6 +11,9 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 
 public class TStreamChannel extends TChannel {
 
+	private static final int WaitForConnectionCounter = 600;
+	
+	
 	protected OutputStream ConnectionOutputStream = null;
 	protected InputStream ConnectionInputStream = null;
 	
@@ -33,6 +36,18 @@ public class TStreamChannel extends TChannel {
 	
 	public synchronized boolean ConnectionIsEstablished() {
 		return (ConnectionOutputStream != null);
+	}
+
+	public void WaitForConnection() throws Exception {
+		if (!ConnectionIsEstablished()) {
+			for (int I = 0; I < WaitForConnectionCounter; I++) {
+				Thread.sleep(100);
+				if (ConnectionIsEstablished())
+					break; //. >
+			}
+			if (!ConnectionIsEstablished())
+				throw new IOException("channel connection does not established"); //. =>
+		}
 	}
 	
 	private void CheckCommandResult(int Descriptor) throws Exception {

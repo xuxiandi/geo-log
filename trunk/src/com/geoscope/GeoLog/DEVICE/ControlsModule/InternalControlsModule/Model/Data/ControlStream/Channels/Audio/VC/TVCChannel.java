@@ -1,11 +1,10 @@
 package com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Audio.VC;
 
-import java.util.HashMap;
-
-import android.annotation.SuppressLint;
-
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedDataContainerType;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Protocol.TIndex;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.TInternalControlsModule;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.TStreamChannel;
 
@@ -17,15 +16,28 @@ public class TVCChannel extends TStreamChannel {
 		
 	}
 	
+	public static final int SET_VOICECOMMANDS_ID 	= 1;
+	public static final int DO_VOICECOMMAND_ID 		= 2;
 	
-	public HashMap<Integer, Integer> DataIndexes = null;
-	
-	public TVCChannel(TInternalControlsModule pInternalControlsModule, int pID, Class<?> ChannelProfile) throws Exception {
-		super(pInternalControlsModule, pID, ChannelProfile);
-	}
+
+	protected TDataType SetVoiceCommands;
+	protected TDataType DoVoiceCommand;
 	
 	public TVCChannel(TInternalControlsModule pInternalControlsModule, int pID) throws Exception {
 		super(pInternalControlsModule, pID, TMyProfile.class);
+		//.
+		Kind = TChannel.CHANNEL_KIND_INOUT;
+		DataFormat = 0;
+		Name = "Audio voice commands";
+		Info = "";
+		Size = 1024*1024*1;
+		Configuration = "";
+		Parameters = "";
+		//.
+		DataTypes = new TDataTypes();
+		//.
+		SetVoiceCommands 	= DataTypes.AddItem(new TDataType(new TTimestampedDataContainerType(),	"SetVoiceCommands",	this, SET_VOICECOMMANDS_ID, "","", ""));
+		DoVoiceCommand 		= DataTypes.AddItem(new TDataType(new TTimestampedDataContainerType(), 	"DoVoiceCommand", 	this, DO_VOICECOMMAND_ID, 	"","", ""));
 	}
 	
 	@Override
@@ -33,31 +45,23 @@ public class TVCChannel extends TStreamChannel {
 		return TypeID;
 	}
 
-	@SuppressLint("UseSparseArrays")
-	@Override
-	public void Parse() throws Exception {
-		DataIndexes = null;
-		//.
-		TConfigurationParser CP = new TConfigurationParser(Configuration);
-		if (CP.CoderConfiguration != null) { 
-			if (CP.CoderConfiguration.length > 1) {
-				DataIndexes = new HashMap<Integer, Integer>();
-				for (int I = 1; I < CP.CoderConfiguration.length; I++) {
-					int Index = Integer.parseInt(CP.CoderConfiguration[I]);
-					DataIndexes.put(I, (Index-1));
-				}
-			}
-		}
-	}
-
 	public void DataType_SetValue(TDataType DataType) throws Exception {
-		Integer I;
-		if (DataIndexes != null)
-			I = DataIndexes.get(DataType.Index);
-		else
-			I = DataType.Index;
-		if (I == null)
-			return; //. ->
-		int V = ((Double)DataType.ContainerType.GetValue()).intValue();
+		switch (DataType.ID) {
+		
+		case SET_VOICECOMMANDS_ID:
+			TTimestampedDataContainerType TimestampedData = (TTimestampedDataContainerType)DataType.ContainerType;
+			if (TimestampedData.Value.Value.length > 0) 
+				InternalControlsModule.ControlsModule.Device.AudioModule.AudioFiles_FromByteArray(TimestampedData.Value.Value);
+			break; //. >
+
+		case DO_VOICECOMMAND_ID:
+			TimestampedData = (TTimestampedDataContainerType)DataType.ContainerType;
+			if (TimestampedData.Value.Value.length > 0) 
+				InternalControlsModule.ControlsModule.Device.AudioModule.AudioFileMessageValue.FromByteArray(TimestampedData.Value.Value, new TIndex());
+			break; //. >
+			
+		default:
+			throw new Exception("unknown action ID"); //. =>
+		}
 	}
 }

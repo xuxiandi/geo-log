@@ -32,6 +32,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.GeographServer.TGeographServerClien
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedANSIStringValue;
 import com.geoscope.GeoLog.COMPONENT.Values.TComponentTimestampedDataValue;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetControlsModuleChannelsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleChannelsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleMeasurementsValueSO;
 import com.geoscope.GeoLog.DEVICE.ConnectorModule.Operations.TSetSensorsModuleMetersValueSO;
@@ -185,6 +186,30 @@ public class TGeoMonitoredObject1Model extends TObjectModel
     public int ObjectDatumID() {
     	return ((TGeoMonitoredObject1DeviceComponent)ObjectDeviceSchema.RootComponent).GPSModule.DatumID.Value;
     }
+	
+	@Override
+	public void Controls_Channel_SetProfile(int ChannelID, byte[] Profile) throws IOException, Exception {
+		ControlsModule_Channel_SetProfile(ChannelID, Profile);
+	}
+	
+	@Override
+	public byte[] Controls_Channel_GetProfile(int ChannelID) throws Exception {
+		return ControlsModule_Channel_GetProfile(ChannelID);
+	}
+	
+	@Override
+	public void Controls_Channels_SetProfile(byte[] Profile) throws IOException, Exception {
+		ControlsModule_Channels_SetProfile(Profile);
+	}
+	
+	@Override
+	public byte[] Controls_Channels_GetProfile() throws Exception {
+		return ControlsModule_Channels_GetProfile();
+	}
+	
+	public TControlChannelStatus[] Controls_Channels_GetStatus(int[] ChannelIDs) throws Exception {
+		return ControlsModule_Channels_GetStatus(ChannelIDs);
+	}
 	
 	@Override
 	public void Sensors_Channel_SetProfile(int ChannelID, byte[] Profile) throws IOException, Exception {
@@ -717,6 +742,178 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 		return new TLANConnectionUDPStopper(Object);
 	}
 
+	public void ControlsModule_Channel_SetProfile(int ChannelID, byte[] Profile) throws IOException, Exception {
+		int Version = 1;
+		String Params = "1,"+Integer.toString(Version)+","+Integer.toString(ChannelID);
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,18,1000});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		try {
+			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
+			V.Timestamp = OleDate.UTCCurrentTimestamp();
+			V.Value = Profile;
+			ObjectController.Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			case TSetControlsModuleChannelsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetControlsModuleChannelsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
+			case TSetControlsModuleChannelsValueSO.OperationErrorCode_ChannelIsActive:
+				throw new Exception(ObjectController.context.getString(R.string.SCouldNotSetProfileChannelIsActive)); //. =>
+
+			default:
+				throw new OperationException(OE.Code,"error ControlsModule_Channels_SetProfile(ChannelID,Profile), "+OE.getMessage()); //. =>
+			}
+		}
+	}
+	
+	public byte[] ControlsModule_Channel_GetProfile(int ChannelID) throws Exception {
+		int Version = 1;
+		String Params = "1,"+Integer.toString(Version)+","+Integer.toString(ChannelID);
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,18,1000});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		TComponentTimestampedDataValue Value = new TComponentTimestampedDataValue();
+		try {
+			byte[] Data = ObjectController.Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Value.FromByteArray(Data,(new TIndex(0)));
+			//.
+			return Value.Value; //. ->
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			case TSetControlsModuleChannelsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetControlsModuleChannelsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
+			default:
+				throw new OperationException(OE.Code,"error ControlsModule_Channels_GetProfile(ChannelID), "+OE.getMessage()); //. =>
+			}
+		}
+	}
+	
+	public void ControlsModule_Channels_SetProfile(byte[] Profile) throws IOException, Exception {
+		int Version = 2;
+		String Params = "1,"+Integer.toString(Version);
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,18,1000});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		try {
+			TComponentTimestampedDataValue V = new TComponentTimestampedDataValue();
+			V.Timestamp = OleDate.UTCCurrentTimestamp();
+			V.Value = Profile;
+			ObjectController.Component_WriteDeviceByAddressDataCUAC(_Address,_AddressData, V.ToByteArray());
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			case TSetControlsModuleChannelsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetControlsModuleChannelsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
+			default:
+				throw new OperationException(OE.Code,"error ControlsModule_Channels_SetProfile(Profile), "+OE.getMessage()); //. =>
+			}
+		}
+	}
+	
+	public byte[] ControlsModule_Channels_GetProfile() throws Exception {
+		int Version = 2;
+		String Params = "1,"+Integer.toString(Version);
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,18,1000});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		TComponentTimestampedDataValue Value = new TComponentTimestampedDataValue();
+		try {
+			byte[] Data = ObjectController.Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Value.FromByteArray(Data,(new TIndex(0)));
+			//.
+			return Value.Value; //. ->
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			case TSetControlsModuleChannelsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetControlsModuleChannelsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
+			default:
+				throw new OperationException(OE.Code,"error ControlsModule_Channels_GetProfile(), "+OE.getMessage()); //. =>
+			}
+		}
+	}
+	
+	public TControlChannelStatus[] ControlsModule_Channels_GetStatus(int[] ChannelIDs) throws Exception {
+		int Cnt = ChannelIDs.length;
+		TControlChannelStatus[] Result = new TControlChannelStatus[Cnt]; 
+		int Version = 3;
+		int SubVersion = 3;
+		StringBuilder SB = new StringBuilder();
+		for (int I = 0; I < Cnt; I++) 
+			if (I == 0)
+				SB.append(Integer.toString(ChannelIDs[I]));
+			else
+				SB.append(","+Integer.toString(ChannelIDs[I]));
+		String Params = "1,"+Integer.toString(Version)+","+Integer.toString(SubVersion)+","+SB.toString();
+		//.
+		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,18,1000});
+		byte[] _AddressData = Params.getBytes("US-ASCII");
+		TComponentTimestampedDataValue Value = new TComponentTimestampedDataValue();
+		try {
+			byte[] Data = ObjectController.Component_ReadDeviceByAddressDataCUAC(_Address,_AddressData);
+			Value.FromByteArray(Data,(new TIndex(0)));
+			//.
+			int Idx = 0;
+			for (int I =0; I < Cnt; I++) {
+				TControlChannelStatus Item = new TControlChannelStatus();
+				Idx = Item.FromByteArray(Value.Value, Idx);
+				//.
+				Result[I] = Item;
+			}
+			return Result; //. ->
+		}
+		catch (OperationException OE) {
+			switch (OE.Code) {
+
+			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
+				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
+
+			case TSetControlsModuleChannelsValueSO.OperationErrorCode_DataIsNotFound:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
+
+			case TSetControlsModuleChannelsValueSO.OperationErrorCode_DataIsLocked:
+				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
+
+			default:
+				throw new OperationException(OE.Code,"error ControlsModule_Channels_GetStatus(), "+OE.getMessage()); //. =>
+			}
+		}
+	}
+	
 	public void SensorsModule_Channel_SetProfile(int ChannelID, byte[] Profile) throws IOException, Exception {
 		int Version = 1;
 		String Params = "1,"+Integer.toString(Version)+","+Integer.toString(ChannelID);
@@ -769,10 +966,10 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			case TGeographServerServiceOperation.ErrorCode_OperationUserAccessIsDenied:
 				throw new Exception(ObjectController.context.getString(R.string.SUserAccessIsDenied)); //. =>
 
-			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsNotFound:
+			case TSetSensorsModuleChannelsValueSO.OperationErrorCode_DataIsNotFound:
 				throw new Exception(ObjectController.context.getString(R.string.SDataIsNotFound)); //. =>
 
-			case TSetSensorsModuleMeasurementsValueSO.OperationErrorCode_DataIsLocked:
+			case TSetSensorsModuleChannelsValueSO.OperationErrorCode_DataIsLocked:
 				throw new Exception(ObjectController.context.getString(R.string.SDataIsLocked)); //. =>
 
 			default:

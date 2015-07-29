@@ -980,7 +980,7 @@ public class TUserPanel extends Activity {
         		edUserDomains.setText(UserInfo.UserDomains);
         		cbUserTaskEnabled.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
         		cbUserTaskEnabled.setChecked(UserInfo.UserIsTaskEnabled);
-        		llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
+        		//. llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
         	}
         	else {
         		edUserName.setText(""); 

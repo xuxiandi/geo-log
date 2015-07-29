@@ -1128,5 +1128,8 @@
     <string name="SDataStreamerIsDisabled">Data streamer is disabled</string>
     <string name="SDataStreamerConfigurationError">Data streamer has a configuration error</string>
     <string name="SNoChannels">there are no channels</string>
+    <string name="SAudioVoiceCommands">Audio voice commands (VC)</string>
+    <string name="SDoVoiceCommand">Do a voice command</string>
+    <string name="SSetVoiceCommands">Set voice commands</string>
     
 </resources>

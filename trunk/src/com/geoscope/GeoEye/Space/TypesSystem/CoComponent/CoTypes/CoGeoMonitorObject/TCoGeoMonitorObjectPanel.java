@@ -1291,6 +1291,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						});
 						btnShowControlsModuleStream.setEnabled((DC.ControlsModule.ControlsDataValue.Value != null) && (DC.ControlsModule.ControlsDataValue.Value.length > 0));
 						btnSendAudioFileMessage.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 						    	AlertDialog.Builder alert = new AlertDialog.Builder(TCoGeoMonitorObjectPanel.this);
@@ -1330,9 +1331,11 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 													Value.RepeatInterval = 0;
 													Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.AudioModule.AudioFileMessageValue.GetAddressArray(), Value.ToByteArray());
 								    			}
+								    			
 								    			@Override 
 								    			public void DoOnCompleted() throws Exception {
 								    			}
+								    			
 								    			@Override
 								    			public void DoOnException(Exception E) {
 								    				Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
@@ -1357,6 +1360,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 							}
 						});
 						btnImportAudioFiles.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 								TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TCoGeoMonitorObjectPanel.this, ".ZIP", new TFileSystemFileSelector.OpenDialogListener() {
@@ -1375,10 +1379,12 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 													Value.Value = TFileSystem.File_ToByteArray(ChosenFile.getAbsolutePath());
 													Object.GeographServerObjectController().Component_WriteDeviceCUAC(DC.AudioModule.AudioFilesValue.GetAddressArray(), Value.ToByteArray());
 								    			}
+								    			
 								    			@Override 
 								    			public void DoOnCompleted() throws Exception {
 								        			Toast.makeText(TCoGeoMonitorObjectPanel.this, R.string.SAudioFilesHaveBeenImportedToTheDevice, Toast.LENGTH_LONG).show();  						
 								    			}
+								    			
 								    			@Override
 								    			public void DoOnException(Exception E) {
 								    				Toast.makeText(TCoGeoMonitorObjectPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();

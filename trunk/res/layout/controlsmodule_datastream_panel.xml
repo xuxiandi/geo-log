@@ -113,6 +113,46 @@
                 android:layout_height="wrap_content" >
             </TableLayout>
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llAudioVC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#ff999999"
+                android:gravity="center"
+                android:text="@string/SAudioVoiceCommands"
+                android:textColor="#ff000000"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/btnAudioVCDoVoiceCommand"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.0"
+                    android:text="@string/SDoVoiceCommand"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/btnAudioVCSetVoiceCommands"
+                    style="android:attr/buttonBarButtonStyle"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.0"
+                    android:text="@string/SSetVoiceCommands"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
 </ScrollView>

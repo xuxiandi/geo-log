@@ -11,10 +11,12 @@ import org.xmlpull.v1.XmlSerializer;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Base64;
 import android.util.Base64OutputStream;
+import android.view.Surface;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
@@ -231,34 +233,40 @@ public class TH264IChannel extends TStreamChannel {
 				        if (!InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) 
 				        	throw new IOException("Video server is not available"); //. ->
 				        android.hardware.Camera camera = android.hardware.Camera.open();
-				        InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, MyProfile.Width,MyProfile.Height, MyProfile.BitRate, MyProfile.FrameRate, null,null);
+				        if (camera == null)
+				        	return; //. ->
 				        try {
-				        	TVideoFrameEncoderServerClient VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient();
-				        	try {
-					        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(VideoFrameEncoderServerClient);
+					        InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, MyProfile.Width,MyProfile.Height, MyProfile.BitRate, MyProfile.FrameRate, Preview,PreviewFrame);
+					        try {
+					        	TVideoFrameEncoderServerClient VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient();
 					        	try {
-					    	        camera.startPreview();
-					    	        try {
-										while (!Canceller.flCancel) 
-											Thread.sleep(1000*60);
-					    	        }
-					        		finally {
-					        			camera.stopPreview();
-					        			camera.setPreviewDisplay(null);
-					        			camera.setPreviewCallback(null);
-					        			camera.release();
-					        		}
+						        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(VideoFrameEncoderServerClient);
+						        	try {
+						    	        camera.startPreview();
+						    	        try {
+											while (!Canceller.flCancel) 
+												Thread.sleep(1000*60);
+						    	        }
+						        		finally {
+						        			camera.stopPreview();
+						        			camera.setPreviewDisplay(null);
+						        			camera.setPreviewCallback(null);
+						        		}
+						        	}
+						        	finally {
+						        		InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(VideoFrameEncoderServerClient);
+						        	}
 					        	}
 					        	finally {
-					        		InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Unregister(VideoFrameEncoderServerClient);
+									VideoFrameEncoderServerClient.Destroy();
 					        	}
-				        	}
-				        	finally {
-								VideoFrameEncoderServerClient.Destroy();
-				        	}
+					        }
+					        finally {
+					        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Stop();
+					        }
 				        }
 				        finally {
-				        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Stop();
+		        			camera.release();
 				        }
 					}
 					finally {
@@ -282,9 +290,12 @@ public class TH264IChannel extends TStreamChannel {
 	private TVideoFrameSource VideoFrameSource;
 	//.
 	private TChannelStreamConfiguration ChannelStreamConfiguration = new TChannelStreamConfiguration();
+	//.
+	public volatile Surface Preview = null;
+	public volatile Rect 	PreviewFrame = null;
 	
 	public TH264IChannel(TInternalSensorsModule pInternalSensorsModule, int pID) throws Exception {
-		super(pInternalSensorsModule, pID, TMyProfile.class);
+		super(pInternalSensorsModule, pID, "DefaultCamera", TMyProfile.class);
 		MyProfile = (TMyProfile)Profile;
 		//.
 		Kind = TChannel.CHANNEL_KIND_OUT;
@@ -311,6 +322,10 @@ public class TH264IChannel extends TStreamChannel {
 	@Override
 	public String GetTypeID() {
 		return TypeID;
+	}
+	
+	public Rect GetFrameSize() {
+		return (new Rect(0,0, MyProfile.Width,MyProfile.Height));
 	}
 	
 	public int GetFrameRate() {

@@ -35,6 +35,7 @@ import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -365,6 +366,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 
 	public boolean 	flVisible = false;
 	
+	private ScrollView svRoot;
+	//.
 	private EditText edGMOName;
 	private EditText edGMOConnectionState;
 	private EditText edGMOLocationState;
@@ -420,6 +423,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 	        //.
 	        setContentView(R.layout.reflector_gmo_panel);
+	        //.
+	        svRoot = (ScrollView)findViewById(R.id.svRoot);
 	        //.
 	        edGMOName = (EditText)findViewById(R.id.edGMOName);
 	        edGMOName.setOnLongClickListener(new OnLongClickListener() {
@@ -726,6 +731,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						Button btnDataStreamerStreamDescriptor = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnDataStreamerStreamDescriptor);
 						LinearLayout llAlarmModule = (LinearLayout)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_llAlarmModule);
 						Button btnShowUserMessagingModuleMessagingPanel = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowUserMessagingModuleMessagingPanel);
+						final Button btnShowHideAdditive = (Button)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_btnShowHideAdditive);
+						final LinearLayout llAdditive = (LinearLayout)findViewById(R.id.GMO1GeoLogAndroidBusinessModel_llAdditive);
 						//.
 						final TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent DC = (TGeoMonitoredObject1DeviceSchema.TGeoMonitoredObject1DeviceComponent)ObjectModel.BusinessModel.ObjectModel.ObjectDeviceSchema.RootComponent;
 						//.
@@ -734,6 +741,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						edConnectorSignal.setText(Short.toString(DC.ConnectorModule.ServiceProvider.Signal.GetValue())+" %");
 						edConnectorAccount.setText(Short.toString(DC.ConnectorModule.ServiceProvider.Account.GetValue()));
 						switch (DC.GPSModule.Mode.GetValue()) {
+						
 						case com.geoscope.GeoLog.DEVICE.GPSModule.TGPSModule.GPSMODULEMODE_DISABLED:
 							edGPSModuleMode.setText(R.string.SDisabled);
 							edGPSModuleMode.setTextColor(Color.RED);
@@ -779,6 +787,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 				        saMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 				        spVideoRecorderMode.setAdapter(saMode);
 				        spVideoRecorderMode.setOnItemSelectedListener(new OnItemSelectedListener() {
+				        	
 				            @Override
 				            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 								if (flUpdatingObjectModelPanel)
@@ -872,7 +881,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 				            spVideoRecorderMode.setSelection(0);
 				        }
 						cbVideoRecorderRecording.setChecked(DC.VideoRecorderModule.Recording.BooleanValue());
-						cbVideoRecorderRecording.setOnClickListener(new OnClickListener(){
+						cbVideoRecorderRecording.setOnClickListener(new OnClickListener() {
+							
 				            @Override
 				            public void onClick(View v) {
 								if (flUpdatingObjectModelPanel)
@@ -921,7 +931,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 				        });        
 						cbVideoRecorderActive.setChecked(DC.VideoRecorderModule.Active.BooleanValue());
 						cbVideoRecorderSaving.setChecked(DC.VideoRecorderModule.Saving.BooleanValue());
-						cbVideoRecorderSaving.setOnClickListener(new OnClickListener(){
+						cbVideoRecorderSaving.setOnClickListener(new OnClickListener() {
+							
 				            @Override
 				            public void onClick(View v) {
 								if (flUpdatingObjectModelPanel)
@@ -962,7 +973,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 				            }
 				        });        
 						cbVideoRecorderTransmitting.setChecked(DC.VideoRecorderModule.Transmitting.BooleanValue());
-						cbVideoRecorderTransmitting.setOnClickListener(new OnClickListener(){
+						cbVideoRecorderTransmitting.setOnClickListener(new OnClickListener() {
+							
 				            @Override
 				            public void onClick(View v) {
 								if (flUpdatingObjectModelPanel)
@@ -1003,7 +1015,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 				            }
 				        });        
 						cbVideoRecorderAudio.setChecked(DC.VideoRecorderModule.Audio.BooleanValue());
-						cbVideoRecorderAudio.setOnClickListener(new OnClickListener(){
+						cbVideoRecorderAudio.setOnClickListener(new OnClickListener() {
+							
 				            @Override
 				            public void onClick(View v) {
 								if (flUpdatingObjectModelPanel)
@@ -1044,7 +1057,8 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 				            }
 				        });        
 						cbVideoRecorderVideo.setChecked(DC.VideoRecorderModule.Video.BooleanValue());
-						cbVideoRecorderVideo.setOnClickListener(new OnClickListener(){
+						cbVideoRecorderVideo.setOnClickListener(new OnClickListener() {
+							
 				            @Override
 				            public void onClick(View v) {
 								if (flUpdatingObjectModelPanel)
@@ -1085,6 +1099,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 				            }
 				        });        
 						btnShowVideoRecorderVideoPhone.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 					            Intent intent = new Intent(TCoGeoMonitorObjectPanel.this, TVideoRecorderServerVideoPhoneCallPanel.class);
@@ -1096,6 +1111,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 							}
 						});
 						btnShowVideoRecorderViewer.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 								TGeoScopeServerInfo.TInfo ServersInfo;
@@ -1134,6 +1150,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						});
 						btnShowVideoRecorderViewer.setEnabled((DC.VideoRecorderModule.Mode.GetValue() == TVideoRecorderModule.MODE_FRAMESTREAM) && DC.VideoRecorderModule.Active.BooleanValue());
 						btnShowVideoRecorderArchive.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 					    		try {
@@ -1167,6 +1184,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						});
 						btnShowSensorsModuleStream.setEnabled(DC.SensorsModule.SensorsDataValue.Value != null);
 						btnShowSensorsModuleStream.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 					            try {
@@ -1200,6 +1218,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						});
 						btnShowSensorsModuleMeasurementsArchive.setEnabled(true);
 						btnShowSensorsModuleMeasurementsArchive.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 					    		try {
@@ -1232,6 +1251,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						});
 						btnShowSensorsModuleMeters.setEnabled(DC.SensorsModule.SensorsDataValue.Value != null);
 						btnShowSensorsModuleMeters.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 					            try {
@@ -1257,6 +1277,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 						});
 						btnShowControlsModuleStream.setEnabled(DC.SensorsModule.SensorsDataValue.Value != null);
 						btnShowControlsModuleStream.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 					            try {
@@ -1438,6 +1459,9 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 											case TSetDataStreamerActiveValueSO.OperationErrorCode_DataStreamerConfigurationError:
 												throw new Exception(context.getString(R.string.SDataStreamerConfigurationError)); //. =>
 											
+											case TSetDataStreamerActiveValueSO.OperationErrorCode_DataStreamerChannelsConflictError:
+												throw new Exception(context.getString(R.string.SDataStreamerChannelsConflictError)); //. =>
+											
 											default:
 												throw OE; //. =>
 											}
@@ -1600,6 +1624,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 							llAlarmModule.removeAllViews();
 						}
 						btnShowUserMessagingModuleMessagingPanel.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 								TAsyncProcessing Processing = new TAsyncProcessing(TCoGeoMonitorObjectPanel.this,getString(R.string.SWaitAMoment)) {
@@ -1622,6 +1647,28 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 									}
 								};
 								Processing.Start();
+							}
+						});
+						btnShowHideAdditive.setOnClickListener(new OnClickListener() {
+							
+							@Override
+							public void onClick(View v) {
+								llAdditive.setVisibility((llAdditive.getVisibility() == View.GONE) ? View.VISIBLE : View.GONE);
+								if (llAdditive.getVisibility() == View.VISIBLE) {
+							    	svRoot.postDelayed(new Runnable() {
+							    	    @Override
+							    	    public void run() {
+							            	try {
+												svRoot.fullScroll(View.FOCUS_DOWN);
+							            	}
+							            	catch (Throwable E) {
+							            		TGeoLogApplication.Log_WriteError(E);
+							            	}
+							    	    }
+									},100);
+								}
+								//.
+								btnShowHideAdditive.setVisibility(View.GONE);
 							}
 						});
 						//.

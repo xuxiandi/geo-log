@@ -7,6 +7,8 @@ public class TSensorMeterDescriptor {
 	public String TypeID;
 	public String ContainerTypeID;
 	//.
+	public String LocationID;
+	//.
 	public String Name;
 	public String Info;
 	//.
@@ -19,15 +21,19 @@ public class TSensorMeterDescriptor {
 		TypeID = "";
 		ContainerTypeID = "";
 		//.
+		LocationID = "";
+		//.
 		Name = "";
 		Info = "";
 	}
 	
-	public TSensorMeterDescriptor(String pID, String pTypeID, String pContainerTypeID, String pName, String pInfo) {
+	public TSensorMeterDescriptor(String pID, String pTypeID, String pContainerTypeID, String pLocationID, String pName, String pInfo) {
 		ID = pID;
 		//.
 		TypeID = pTypeID;
 		ContainerTypeID = pContainerTypeID;
+		//.
+		LocationID = pLocationID;
 		//.
 		Name = pName;
 		Info = pInfo;

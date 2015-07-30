@@ -20,8 +20,9 @@ public class TSetDataStreamerActiveValueSO extends TDeviceSetComponentDataServic
 {
     public static TElementAddress _Address = new TElementAddress(2,17,2);
     
-	public static final int OperationErrorCode_DataStreamerIsDisabled 			= TGeographServerServiceOperation.ErrorCode_CustomOperationError-1;
-	public static final int OperationErrorCode_DataStreamerConfigurationError 	= TGeographServerServiceOperation.ErrorCode_CustomOperationError-2;
+	public static final int OperationErrorCode_DataStreamerIsDisabled 				= TGeographServerServiceOperation.ErrorCode_CustomOperationError-1;
+	public static final int OperationErrorCode_DataStreamerConfigurationError 		= TGeographServerServiceOperation.ErrorCode_CustomOperationError-2;
+	public static final int OperationErrorCode_DataStreamerChannelsConflictError 	= TGeographServerServiceOperation.ErrorCode_CustomOperationError-3;
 	
     public TSetDataStreamerActiveValueSO(TConnectorModule pConnector, int pUserID, String pUserPassword, int pObjectID, short pSession, short[] pSubAddress)
     {

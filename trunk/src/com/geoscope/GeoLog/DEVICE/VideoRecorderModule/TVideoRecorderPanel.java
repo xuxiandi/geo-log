@@ -48,6 +48,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 	
 	
 	public class TSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
+		
 		@Override
 		public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 			Surface = holder;
@@ -68,9 +69,11 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 	}
 	
 	public class TVideoRecorderSurfaceHolderCallbackHandler implements SurfaceHolder.Callback {
+		
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
 		}
+		
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
 			if (VideoRecorder != null) {
@@ -79,6 +82,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
 				VideoRecorder.camera_Surface_Clear(holder);
 			}
 		}
+		
 		@Override
 		public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 			if (VideoRecorder.camera_Surface_Get() != holder) {

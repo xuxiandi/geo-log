@@ -11,8 +11,8 @@ public class TDestinationStreamChannel extends TChannel {
 		super();
 	}
 	
-	public TDestinationStreamChannel(int pID, String pProfilesFolder, Class<?> ProfileClass) throws Exception {
-		super(pID, pProfilesFolder, ProfileClass);
+	public TDestinationStreamChannel(int pID, String pLocationID, String pProfilesFolder, Class<?> ProfileClass) throws Exception {
+		super(pID, pLocationID, pProfilesFolder, ProfileClass);
 	}
 	
 	@Override

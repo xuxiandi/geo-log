@@ -25,7 +25,7 @@ public class TGPSChannel extends TTLRChannel {
 	public TDataType	GPSFix;
 	
 	public TGPSChannel(TInternalSensorsModule pInternalSensorsModule, int pID) throws Exception {
-		super(pInternalSensorsModule, pID, TMyProfile.class);
+		super(pInternalSensorsModule, pID, "DefaultReceiver", TMyProfile.class);
 		//.
 		Kind = TChannel.CHANNEL_KIND_OUT;
 		DataFormat = 0;

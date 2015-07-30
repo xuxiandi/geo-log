@@ -29,6 +29,8 @@ public class TDataStreamerActiveValue extends TComponentTimestampedBooleanValue 
 			DataStreamerModule.SetActive(Value != 0);
 		} catch (TChannel.ConfigurationErrorException CEE) {
     		throw new OperationException(TSetDataStreamerActiveValueSO.OperationErrorCode_DataStreamerConfigurationError); //. =>
+		} catch (TDataStreamerModule.TStreaming.ChannelsConflictError CCE) {
+    		throw new OperationException(TSetDataStreamerActiveValueSO.OperationErrorCode_DataStreamerChannelsConflictError); //. =>
 		} catch (Exception E) {
 			throw new IOException(E.getMessage()); //. =>
 		}

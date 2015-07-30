@@ -15,13 +15,15 @@ public class TECTLRMeter extends TTLRMeter {
 	public static final String TypeID = "Telemetry.ECTLR";
 	public static final String ContainerTypeID = "";
 	//.
+	public static final String LocationID = "DefaultSensor";
+	//.
 	public static final String Name = "Environmental conditions";
 	
 	public static class TMyProfile extends TProfile {
 	}
 	
 	public TECTLRMeter(TSensorsModule pSensorsModule, String pID, String pInfo, String pProfileFolder) throws Exception {
-		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,pInfo), TMyProfile.class, pProfileFolder);
+		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, LocationID, Name,pInfo), TMyProfile.class, pProfileFolder);
 	}
 	
 	@Override

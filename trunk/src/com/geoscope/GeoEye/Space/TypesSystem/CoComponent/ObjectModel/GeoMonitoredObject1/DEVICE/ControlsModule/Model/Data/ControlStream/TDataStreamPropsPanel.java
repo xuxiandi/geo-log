@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
@@ -115,6 +116,25 @@ public class TDataStreamPropsPanel extends Activity {
             //.
             lvChannels = (ListView)findViewById(R.id.lvChannels);
             lvChannels.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+            lvChannels.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+					boolean flChecked = lvChannels.isItemChecked(arg2);
+					if (flChecked) { //. clear checking for all items with the same LocationID
+				    	TChannel CheckedChannel = DataStreamChannels.get(arg2);
+				    	if (CheckedChannel.LocationID.length() > 0) {
+							int Cnt = DataStreamChannels.size();
+							for (int I =0; I < Cnt; I++)
+								if (I != arg2) {
+							    	TChannel Channel = DataStreamChannels.get(I);
+							    	if (Channel.LocationID.equals(CheckedChannel.LocationID))
+							    		lvChannels.setItemChecked(I, false);
+								}
+				    	}
+					}
+				}
+			});
             lvChannels.setOnItemLongClickListener(new OnItemLongClickListener() {
             	
             	@Override
@@ -525,6 +545,10 @@ public class TDataStreamPropsPanel extends Activity {
     			String S = getString(R.string.SInfo1);
     			lbStreamInfo.setText(S+DataStreamDescriptor.Info);
     			//.
+    			int SaveIndex = lvChannels.getFirstVisiblePosition();
+    			View V = lvChannels.getChildAt(0);
+    			int SaveTop = (V == null) ? 0 : V.getTop();    			
+    			//.
     			lbStreamChannels.setText(getString(R.string.SChannels1));
     			String[] lvChannelsItems = new String[DataStreamChannels.size()];
     			for (int I = 0; I < DataStreamChannels.size(); I++) {
@@ -547,6 +571,8 @@ public class TDataStreamPropsPanel extends Activity {
     			lvChannels.setAdapter(lvChannelsAdapter);
     			/* for (int I = 0; I < DataStreamChannels.size(); I++)
     				lvChannels.setItemChecked(I,true); */
+    			//.
+    			lvChannels.setSelectionFromTop(SaveIndex, SaveTop);
     		}
     		else {
     			lbStreamName.setText("?");

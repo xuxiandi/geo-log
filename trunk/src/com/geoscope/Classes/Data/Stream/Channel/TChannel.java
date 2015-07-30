@@ -256,11 +256,16 @@ public class TChannel {
 	public TProfile Profile;
 	//.
 	public int 	ID;
+	//.
+	public String LocationID = "";
+	//.
+	public String Name = "";
+	//.
+	public String Info = "";
+	//.
 	public boolean Enabled = true;
 	public int Kind = CHANNEL_KIND_OUT;
 	public int 	DataFormat = 0;
-	public String Name = "";
-	public String Info = "";
 	public int 	Size = 8192;
 	public String Configuration = "";
 	public String Parameters = "";
@@ -276,8 +281,10 @@ public class TChannel {
 		Profile = null;
 	}
 
-	public TChannel(int pID, String pProfilesFolder, Class<?> ProfileClass) throws Exception {
+	public TChannel(int pID, String pLocationID, String pProfilesFolder, Class<?> ProfileClass) throws Exception {
 		ID = pID;
+		//.
+		LocationID = GetTypeID()+"."+pLocationID;
 		//.
 		ProfilesFolder = pProfilesFolder;
 		//.
@@ -391,11 +398,12 @@ public class TChannel {
 	
 	public void Assign(TChannel AChannel) {
 		ID = AChannel.ID;
+		LocationID = AChannel.LocationID;
+		Name = AChannel.Name;
+		Info = AChannel.Info;
 		Enabled = AChannel.Enabled;
 		Kind = AChannel.Kind;
 		DataFormat = AChannel.DataFormat;
-		Name = AChannel.Name;
-		Info = AChannel.Info;
 		Size = AChannel.Size;
 		Configuration = AChannel.Configuration;
 		Parameters = AChannel.Parameters;
@@ -482,23 +490,12 @@ public class TChannel {
 	public synchronized void FromXMLNode(Node ANode) throws Exception {
 		ID = Integer.parseInt(TMyXML.SearchNode(ANode,"ID").getFirstChild().getNodeValue());
 		//.
-		Enabled = true;
-		Node _Node = TMyXML.SearchNode(ANode,"Enabled");
+		Node _Node = TMyXML.SearchNode(ANode,"LocationID");
 		if (_Node != null) {
-			Node ValueNode = _Node.getFirstChild();
-			if (ValueNode != null)
-				Enabled = (Integer.parseInt(ValueNode.getNodeValue()) != 0);
+			Node _ValueNode = _Node.getFirstChild();
+			if (_ValueNode != null)
+				LocationID = _ValueNode.getNodeValue();
 		}
-		//.
-		Kind = TChannel.CHANNEL_KIND_IN;
-		_Node = TMyXML.SearchNode(ANode,"Kind");
-		if (_Node != null) {
-			Node ValueNode = _Node.getFirstChild();
-			if (ValueNode != null)
-				Kind = Integer.parseInt(ValueNode.getNodeValue());
-		}
-		//.
-		DataFormat = Integer.parseInt(TMyXML.SearchNode(ANode,"DataFormat").getFirstChild().getNodeValue());
 		//.
 		Name = "";
 		Node ValueNode = TMyXML.SearchNode(ANode,"Name").getFirstChild();
@@ -509,6 +506,24 @@ public class TChannel {
 		ValueNode = TMyXML.SearchNode(ANode,"Info").getFirstChild();
 		if (ValueNode != null)
 			Info = ValueNode.getNodeValue();
+		//.
+		Enabled = true;
+		_Node = TMyXML.SearchNode(ANode,"Enabled");
+		if (_Node != null) {
+			Node _ValueNode = _Node.getFirstChild();
+			if (_ValueNode != null)
+				Enabled = (Integer.parseInt(_ValueNode.getNodeValue()) != 0);
+		}
+		//.
+		Kind = TChannel.CHANNEL_KIND_IN;
+		_Node = TMyXML.SearchNode(ANode,"Kind");
+		if (_Node != null) {
+			Node _ValueNode = _Node.getFirstChild();
+			if (_ValueNode != null)
+				Kind = Integer.parseInt(_ValueNode.getNodeValue());
+		}
+		//.
+		DataFormat = Integer.parseInt(TMyXML.SearchNode(ANode,"DataFormat").getFirstChild().getNodeValue());
 		//.
 		Size = Integer.parseInt(TMyXML.SearchNode(ANode,"Size").getFirstChild().getNodeValue());
 		//.
@@ -542,6 +557,18 @@ public class TChannel {
         Serializer.startTag("", "ID");
         Serializer.text(Integer.toString(ID));
         Serializer.endTag("", "ID");
+    	//. LocationID
+        Serializer.startTag("", "LocationID");
+        Serializer.text(LocationID);
+        Serializer.endTag("", "LocationID");
+    	//. Name
+        Serializer.startTag("", "Name");
+        Serializer.text(Name);
+        Serializer.endTag("", "Name");
+    	//. Info
+        Serializer.startTag("", "Info");
+        Serializer.text(Info);
+        Serializer.endTag("", "Info");
     	//. Enabled
         Serializer.startTag("", "Enabled");
         int V = 0;
@@ -557,14 +584,6 @@ public class TChannel {
         Serializer.startTag("", "DataFormat");
         Serializer.text(Integer.toString(DataFormat));
         Serializer.endTag("", "DataFormat");
-    	//. Name
-        Serializer.startTag("", "Name");
-        Serializer.text(Name);
-        Serializer.endTag("", "Name");
-    	//. Info
-        Serializer.startTag("", "Info");
-        Serializer.text(Info);
-        Serializer.endTag("", "Info");
     	//. Size
         Serializer.startTag("", "Size");
         Serializer.text(Integer.toString(Size));

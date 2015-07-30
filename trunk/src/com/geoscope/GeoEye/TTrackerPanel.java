@@ -96,7 +96,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMetersPanel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.TDataStreamPropsPanel;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.TVideoRecorderModule;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME0;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentFileStreaming;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -1685,8 +1685,8 @@ public class TTrackerPanel extends Activity {
     		    			break; //. >
 
     		    		case 3: //. VideoRecorderModuleCamera0CodecsConfig
-    		    			CameraStreamerFRAME.flSaveAudioCodecConfig = true;
-    		    			CameraStreamerFRAME.flSaveVideoCodecConfig = true;
+    		    			CameraStreamerFRAME0.flSaveAudioCodecConfig = true;
+    		    			CameraStreamerFRAME0.flSaveVideoCodecConfig = true;
         		    		Toast.makeText(TTrackerPanel.this, "Start the video-recorder in \"FRAME\" mode with \"Saving\" option checked. Result config files will be placed in a new measurement folder.", Toast.LENGTH_LONG).show();
         		    		//.
         		    		arg0.dismiss();

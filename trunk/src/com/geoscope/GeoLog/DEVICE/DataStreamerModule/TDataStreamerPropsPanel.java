@@ -45,7 +45,8 @@ public class TDataStreamerPropsPanel extends Activity {
 		DataStreamerModule = Tracker.GeoLog.DataStreamerModule;
         //.
         cbDataStreamingActive = (CheckBox)findViewById(R.id.cbDataStreamingActive);
-        cbDataStreamingActive.setOnClickListener(new OnClickListener(){
+        cbDataStreamingActive.setOnClickListener(new OnClickListener() {
+        	
             @Override
             public void onClick(View v) {
 				if (flUpdating)
@@ -64,6 +65,7 @@ public class TDataStreamerPropsPanel extends Activity {
         //.
         lvStreamingComponents = (ListView)findViewById(R.id.lvStreamingComponents);
         lvStreamingComponents.setOnItemClickListener(new OnItemClickListener() {
+        	
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				TDataStreamerModule.TStreamingComponents.TComponent Component = StreamingComponents.Components.get(arg2);
@@ -78,6 +80,7 @@ public class TDataStreamerPropsPanel extends Activity {
 			}
 		});
         lvStreamingComponents.setOnItemLongClickListener(new OnItemLongClickListener() {
+        	
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				AlertDialog ChannelsSelector = CreateChannelsSelectorPanel(TDataStreamerPropsPanel.this, arg2);

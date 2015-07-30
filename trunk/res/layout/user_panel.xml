@@ -178,9 +178,9 @@
                         android:id="@+id/edUserDomains"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
                         android:layout_alignParentTop="true"
                         android:layout_centerVertical="true"
-                        android:layout_toLeftOf="@+id/cbUserTaskEnabled"
                         android:layout_toRightOf="@+id/TextView1"
                         android:background="#ff999999"
                         android:ems="10"
@@ -204,7 +204,7 @@
                         android:scaleY="0.8"
                         android:text="@string/STaskEnabled"
                         android:textSize="16sp"
-                        android:visibility="visible" />
+                        android:visibility="gone" />
                 </RelativeLayout>
             </LinearLayout>
         </RelativeLayout>

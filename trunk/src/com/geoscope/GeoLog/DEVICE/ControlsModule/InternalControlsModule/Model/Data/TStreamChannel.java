@@ -8,8 +8,8 @@ public class TStreamChannel extends TDestinationStreamChannel {
 
 	protected TInternalControlsModule InternalControlsModule;
 	
-	public TStreamChannel(TInternalControlsModule pInternalControlsModule, int pID, Class<?> ChannelProfile) throws Exception {
-		super(pID, TControlsModule.Channels_Folder(), ChannelProfile);
+	public TStreamChannel(TInternalControlsModule pInternalControlsModule, int pID, String pLocationID, Class<?> ChannelProfile) throws Exception {
+		super(pID, pLocationID, TControlsModule.Channels_Folder(), ChannelProfile);
 		//.
 		InternalControlsModule = pInternalControlsModule;
 	}

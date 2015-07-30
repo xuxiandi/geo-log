@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import android.graphics.Rect;
-import android.hardware.Camera.Size;
 import android.view.Surface;
 
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
@@ -105,7 +104,7 @@ public class TMediaFrameServer {
 	
 	//. video frame output
 	public boolean 	flVideoActive = false;
-	public Size 	FrameSize = null;
+	public Rect 	FrameSize = null;
 	public int 		FrameRate = 0;
 	public int 		FrameInterval = 0;
 	public int 		FrameBitRate = 0;

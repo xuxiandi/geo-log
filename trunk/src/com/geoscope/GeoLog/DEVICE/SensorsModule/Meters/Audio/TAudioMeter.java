@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Audio;
 
+import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedReadWriteLock;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.TMeasurement;
@@ -22,8 +23,8 @@ public class TAudioMeter extends TSensorMeter {
 	//.
 	protected TAACChannel Channel;
 	
-	public TAudioMeter(TSensorsModule pSensorsModule, String pID, String pInfo, String pProfileFolder) throws Exception {
-		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,pInfo), TMyProfile.class, pProfileFolder);
+	public TAudioMeter(TSensorsModule pSensorsModule, String pID, String pLocationID, String pInfo, String pProfileFolder) throws Exception {
+		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, pLocationID, Name,pInfo), TMyProfile.class, pProfileFolder);
 	}
 	
 	@Override
@@ -42,15 +43,23 @@ public class TAudioMeter extends TSensorMeter {
 				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 				while (!Canceller.flCancel) {
 					TMeasurement Measurement = new TMeasurement(SensorsModule.Device.idGeographServerObject, TSensorsModuleMeasurements.DataBaseFolder, TSensorsModuleMeasurements.Domain, TSensorsModuleMeasurements.CreateNewMeasurement(), com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Model.Data.Stream.Channels.TChannelsProvider.Instance);
-					Measurement.AACChannel.Assign(Channel);
-					Measurement.AACChannel.SampleRate = SourceChannel.GetSampleRate();
 					//.
-					Measurement.Start();
+					TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.WriteLock(Measurement.Domain, Measurement.Descriptor.ID); //. lock new measurement
 					try {
-						Channel.DoStreaming(Measurement.AACChannel.DestinationStream, Canceller, MeasurementMaxDuration);
+						//. setup measurement
+						Measurement.AACChannel.Assign(Channel);
+						Measurement.AACChannel.SampleRate = SourceChannel.GetSampleRate();
+						//.
+						Measurement.Start();
+						try {
+							Channel.DoStreaming(Measurement.AACChannel.DestinationStream, Canceller, MeasurementMaxDuration);
+						}
+						finally {
+							Measurement.Finish();
+						}
 					}
 					finally {
-						Measurement.Finish();
+						MeasurementLock.WriteUnLock();
 					}
 					//.
 					DoOnMeasurementFinish(Measurement);

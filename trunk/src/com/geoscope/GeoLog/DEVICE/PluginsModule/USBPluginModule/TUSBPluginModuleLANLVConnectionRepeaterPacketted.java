@@ -17,6 +17,8 @@ public class TUSBPluginModuleLANLVConnectionRepeaterPacketted extends TLANLocalV
 	
 	public static final int PROTOCOL_ECHO 			= 0;
 	public static final int PROTOCOL_SIMPLESTRING 	= 1;
+	//.
+	public static final int RepeatersLimit = 100;
 	
 	public static boolean CheckUserAccessKey(TLANModule LANModule, String UserAccessKey) {
 		return (UserAccessKey == null);
@@ -39,7 +41,7 @@ public class TUSBPluginModuleLANLVConnectionRepeaterPacketted extends TLANLocalV
         			RepeatersToCancel.add(((TUSBPluginModuleLANLVConnectionRepeaterPacketted)CR));
         	}
 		}
-    	for (int I = 0; I < RepeatersToCancel.size(); I++)
+    	for (int I = RepeatersLimit; I < RepeatersToCancel.size(); I++)
     		RepeatersToCancel.get(I).CancelAndWait();
 		//.
 		Start();

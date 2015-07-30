@@ -9,6 +9,8 @@ import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 public class TVideoFrameServerLANLVConnectionRepeater extends TLANLocalVirtualConnectionRepeater {
 
 	public static final int Port = TLANModule.LocalVirtualConnection_PortBase+2;
+	//.
+	public static final int RepeatersLimit = 100;
 	
 	public static boolean CheckUserAccessKey(TLANModule LANModule, String UserAccessKey) {
 		return ((UserAccessKey == null) || LANModule.Device.VideoModule.UserAccessKey.Check(UserAccessKey));
@@ -25,7 +27,7 @@ public class TVideoFrameServerLANLVConnectionRepeater extends TLANLocalVirtualCo
         			RepeatersToCancel.add(((TVideoFrameServerLANLVConnectionRepeater)CR));
         	}
 		}
-    	for (int I = 0; I < RepeatersToCancel.size(); I++)
+    	for (int I = RepeatersLimit; I < RepeatersToCancel.size(); I++)
     		RepeatersToCancel.get(I).CancelAndWait();
 		//.
 		Start();

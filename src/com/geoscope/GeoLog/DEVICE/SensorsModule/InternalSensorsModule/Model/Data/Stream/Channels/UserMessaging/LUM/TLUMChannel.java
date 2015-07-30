@@ -29,7 +29,7 @@ public class TLUMChannel extends TStreamChannel {
 	public TDataType	UserMessageDelivery;
 	
 	public TLUMChannel(TInternalSensorsModule pInternalSensorsModule, int pID) throws Exception {
-		super(pInternalSensorsModule, pID, TMyProfile.class);
+		super(pInternalSensorsModule, pID, "Default", TMyProfile.class);
 		//.
 		Kind = TChannel.CHANNEL_KIND_OUT;
 		DataFormat = 0;

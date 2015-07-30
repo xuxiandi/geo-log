@@ -14,11 +14,12 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera.TCameraMeasurementInfo;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraRegistrator;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME;
+import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerFRAME0;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerH263;
 import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.CameraStreamerH264;
-import com.geoscope.GeoLog.DEVICE.VideoRecorderModule.SpyDroid.Camera.TCameraMeasurementInfo;
 
 @SuppressLint("HandlerLeak")
 public class TVideoRecorder {
@@ -154,6 +155,9 @@ public class TVideoRecorder {
 	
 	private void DoStartRecording() {
 		synchronized (Lock) {
+			if (camera_flStarted)
+				return; //. ->
+			//.
 			try {
 				try {
 					switch (Mode) {
@@ -172,7 +176,10 @@ public class TVideoRecorder {
 						break; //. >
 						
 					case TVideoRecorderModule.MODE_FRAMESTREAM:
-						camera = new CameraStreamerFRAME(VideoRecorderModule);
+						if (VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable() && (VideoRecorderModule.CameraConfiguration.Camera_Video_Source == 0))
+							camera = new CameraStreamerFRAME(VideoRecorderModule);
+						else
+							camera = new CameraStreamerFRAME0(VideoRecorderModule);
 						break; //. >
 						
 					default:
@@ -241,8 +248,6 @@ public class TVideoRecorder {
 	        	//.
 	        	return Result; //. ->
 			}
-			//.
-			camera_flStarted = true;
 			//.
 			Status_Update();
 		}

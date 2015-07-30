@@ -891,7 +891,7 @@ public class TInternalSensorsModule extends TModule {
 		Model.Stream.Channels.add(GPSChannel);
     	//.
     	if (ASTLRChannel_flUse) {
-			ASTLRChannel = new TTLRChannel(this, 1/*ID*/); 
+			ASTLRChannel = new TTLRChannel(this, 1/*ID*/, "DefaultSensor"); 
 			ASTLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			ASTLRChannel.DataFormat = 0;
 			ASTLRChannel.Name = "Android state";
@@ -911,7 +911,7 @@ public class TInternalSensorsModule extends TModule {
     		Model.Stream.Channels.add(ASTLRChannel);
     	}
     	else {
-    		ADSChannel = new TADSChannel(this, 2/*ID*/); 
+    		ADSChannel = new TADSChannel(this, 2/*ID*/, "DefaultSensor"); 
     		ADSChannel.Kind = TChannel.CHANNEL_KIND_OUT;
     		ADSChannel.DataFormat = 0;
     		ADSChannel.Name = "Android device state";
@@ -927,7 +927,7 @@ public class TInternalSensorsModule extends TModule {
 		Model.Stream.Channels.add(AOSSChannel);
     	//.
 		if (ECTLRChannel_flUse) {
-			ECTLRChannel = new TTLRChannel(this, 3/*ID*/); 
+			ECTLRChannel = new TTLRChannel(this, 3/*ID*/, "DefaultSensor"); 
 			ECTLRChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			ECTLRChannel.DataFormat = 0;
 			ECTLRChannel.Name = "Device telemetry";
@@ -952,7 +952,7 @@ public class TInternalSensorsModule extends TModule {
 			Model.Stream.Channels.add(ECTLRChannel);
 		}
 		else {
-			XENVCChannel = new TXENVCChannel(this, 4/*ID*/); 
+			XENVCChannel = new TXENVCChannel(this, 4/*ID*/, "DefaultSensor"); 
 			XENVCChannel.Kind = TChannel.CHANNEL_KIND_OUT;
 			XENVCChannel.DataFormat = 0;
 			XENVCChannel.Name = "Environment conditions (Extended)";

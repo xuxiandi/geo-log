@@ -51,7 +51,7 @@ public class TSensorsMeters {
 	private void CreateMeters() throws Exception {
 		Items_Clear();
 		//.
-		TAudioMeter	AudioMeter = new TAudioMeter(SensorsModule, "0", "normal quality", ProfileFolder) {
+		TAudioMeter	AudioMeter = new TAudioMeter(SensorsModule, "0", "DefaultMicrophone", "normal quality", ProfileFolder) {
 			
 			@Override
 			public TStreamChannel[] GetChannels() throws Exception {
@@ -68,7 +68,7 @@ public class TSensorsMeters {
 		}; 	
 		Items_AddItem(AudioMeter);
 		//.
-		AudioMeter = new TAudioMeter(SensorsModule, "LowQuality", "low quality", ProfileFolder) {
+		AudioMeter = new TAudioMeter(SensorsModule, "LowQuality", "DefaultMicrophone", "low quality", ProfileFolder) {
 
 			@Override
 			public TStreamChannel[] GetChannels() throws Exception {
@@ -85,7 +85,7 @@ public class TSensorsMeters {
 		}; 
 		Items_AddItem(AudioMeter);
 		//.
-		AudioMeter = new TAudioMeter(SensorsModule, "HighQuality", "high quality", ProfileFolder) {
+		AudioMeter = new TAudioMeter(SensorsModule, "HighQuality", "DefaultMicrophone", "high quality", ProfileFolder) {
 
 			@Override
 			public TStreamChannel[] GetChannels() throws Exception {
@@ -102,7 +102,7 @@ public class TSensorsMeters {
 		}; 
 		Items_AddItem(AudioMeter);
 		//.
-		TVideoMeter	 VideoMeter	= new TVideoMeter(SensorsModule, "0", "normal quality", ProfileFolder) {
+		TVideoMeter	 VideoMeter	= new TVideoMeter(SensorsModule, "0", "DefaultCamera", "normal quality", ProfileFolder) {
 			
 			@Override
 			public TStreamChannel[] GetChannels() throws Exception {
@@ -119,7 +119,7 @@ public class TSensorsMeters {
 		};
 		Items_AddItem(VideoMeter);
 		//.
-		VideoMeter	= new TVideoMeter(SensorsModule, "LowQuality", "low quality", ProfileFolder) {
+		VideoMeter	= new TVideoMeter(SensorsModule, "LowQuality", "DefaultCamera", "low quality", ProfileFolder) {
 			
 			@Override
 			public TStreamChannel[] GetChannels() throws Exception {
@@ -136,7 +136,7 @@ public class TSensorsMeters {
 		};
 		Items_AddItem(VideoMeter);
 		//.
-		VideoMeter	= new TVideoMeter(SensorsModule, "HighQuality", "high quality", ProfileFolder) {
+		VideoMeter	= new TVideoMeter(SensorsModule, "HighQuality", "DefaultCamera", "high quality", ProfileFolder) {
 			
 			@Override
 			public TStreamChannel[] GetChannels() throws Exception {
@@ -153,7 +153,7 @@ public class TSensorsMeters {
 		};
 		Items_AddItem(VideoMeter);
 		//.
-		TAVMeter AVMeter = new TAVMeter(SensorsModule, "0", "normal quality", ProfileFolder) {
+		TAVMeter AVMeter = new TAVMeter(SensorsModule, "0", "DefaultCamera", "normal quality", ProfileFolder) {
 			
 			@Override
 			public TStreamChannel[] GetChannels() throws Exception {
@@ -179,7 +179,7 @@ public class TSensorsMeters {
 		}; 	
 		Items_AddItem(AVMeter);
 		//.
-		AVMeter = new TAVMeter(SensorsModule, "LowQuality", "low quality", ProfileFolder) {
+		AVMeter = new TAVMeter(SensorsModule, "LowQuality", "DefaultCamera", "low quality", ProfileFolder) {
 			
 			@Override
 			public TStreamChannel[] GetChannels() throws Exception {
@@ -205,7 +205,7 @@ public class TSensorsMeters {
 		};
 		Items_AddItem(AVMeter);
 		//.
-		AVMeter = new TAVMeter(SensorsModule, "HighQuality", "high quality", ProfileFolder) {
+		AVMeter = new TAVMeter(SensorsModule, "HighQuality", "DefaultCamera", "high quality", ProfileFolder) {
 			
 			@Override
 			public TStreamChannel[] GetChannels() throws Exception {
@@ -288,6 +288,27 @@ public class TSensorsMeters {
 			}
 			return SB.toString(); //. >
 			
+		case 2:
+			SB = new StringBuilder();
+			Cnt = Items.size();
+			for (int I = 0; I < Cnt; I++) {
+				TSensorMeter Meter = Items.get(I);
+				SB.append(Meter.Descriptor.ID);
+				SB.append(","+Meter.Descriptor.TypeID);
+				SB.append(","+Meter.Descriptor.ContainerTypeID);
+				SB.append(","+Meter.Descriptor.LocationID);
+				SB.append(","+Meter.Descriptor.Name);
+				SB.append(","+Meter.Descriptor.Info);
+				SB.append(","+Meter.Descriptor.Configuration);
+				SB.append(","+Meter.Descriptor.Parameters);
+				SB.append(","+(Meter.IsEnabled() ? "1" : "0"));
+				SB.append(","+(Meter.IsActive() ? "1" : "0"));
+				SB.append(","+Integer.toString(Meter.GetStatus()));
+				if (I < (Cnt-1))
+					SB.append(";");
+			}
+			return SB.toString(); //. >
+			
 		default:
 			return null; //. ->
 		}
@@ -305,6 +326,8 @@ public class TSensorsMeters {
 			//.
 			Descriptor.TypeID = Meter.Descriptor.TypeID;
 			Descriptor.ContainerTypeID = Meter.Descriptor.ContainerTypeID;
+			//.
+			Descriptor.LocationID = Meter.Descriptor.LocationID;
 			//.
 			Descriptor.Name = Meter.Descriptor.Name;
 			Descriptor.Info = Meter.Descriptor.Info;

@@ -1183,7 +1183,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 	
 	public TSensorMeterInfo[] SensorsModule_Meters_GetList() throws Exception {
 		int Version = 2;
-		int SubVersion = 1;
+		int SubVersion = 2;
 		String Params = "1,"+Integer.toString(Version)+","+Integer.toString(SubVersion);
 		//.
 		byte[] _Address = TGeographServerClient.GetAddressArray(new int[] {2,19,1001});
@@ -1223,17 +1223,19 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				Descriptor.TypeID = Properties[1];
 				Descriptor.ContainerTypeID = Properties[2];
 				//.
-				Descriptor.Name = Properties[3];
-				Descriptor.Info = Properties[4];
+				Descriptor.LocationID = Properties[3];
 				//.
-				Descriptor.Configuration = Properties[5];
-				Descriptor.Parameters = Properties[6];
+				Descriptor.Name = Properties[4];
+				Descriptor.Info = Properties[5];
 				//.
-				boolean flEnabled = (Integer.parseInt(Properties[7]) != 0);
+				Descriptor.Configuration = Properties[6];
+				Descriptor.Parameters = Properties[7];
 				//.
-				boolean flActive = (Integer.parseInt(Properties[8]) != 0);
+				boolean flEnabled = (Integer.parseInt(Properties[8]) != 0);
 				//.
-				int Status = Integer.parseInt(Properties[9]);
+				boolean flActive = (Integer.parseInt(Properties[9]) != 0);
+				//.
+				int Status = Integer.parseInt(Properties[10]);
 				//.
 				Result[I] = new TSensorMeterInfo(Descriptor, flEnabled, flActive, Status);
 			}

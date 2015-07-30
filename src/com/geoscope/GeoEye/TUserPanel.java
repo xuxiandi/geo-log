@@ -978,9 +978,9 @@ public class TUserPanel extends Activity {
         		edUserFullName.setText(UserInfo.UserFullName);
         		edUserContactInfo.setText(UserInfo.UserContactInfo);
         		edUserDomains.setText(UserInfo.UserDomains);
-        		cbUserTaskEnabled.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
+        		//. cbUserTaskEnabled.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
         		cbUserTaskEnabled.setChecked(UserInfo.UserIsTaskEnabled);
-        		//. llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
+        		llUserTasks.setVisibility(UserInfo.UserDomainsAreSpecified() ? View.VISIBLE : View.GONE);
         	}
         	else {
         		edUserName.setText(""); 

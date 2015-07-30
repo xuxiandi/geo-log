@@ -1131,5 +1131,7 @@
     <string name="SAudioVoiceCommands">Аудио команды (VC)</string>
     <string name="SDoVoiceCommand">Послать команду</string>
     <string name="SSetVoiceCommands">Установить набор команд</string>
+    <string name="SChannelsOfStreaming">Каналы потоковой передачи</string>
+    <string name="SDataStreamerChannelsConflictError">Конфликт каналов потоковой передачи</string>
     
 </resources>

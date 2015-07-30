@@ -295,6 +295,20 @@ public class TDataStreamerModule extends TModule {
 		
 		public static final int RestartInterval = 1000*60; //. seconds
 		
+		public static final class ChannelsConflictError extends IOException {
+			
+			private static final long serialVersionUID = 1L;
+
+			public ChannelsConflictError(String Message) {
+				super(Message);
+			}
+			
+			public ChannelsConflictError() {
+				this("channels conflict");
+			}
+		}
+
+		
 		private TDataStreamerModule DataStreamerModule;
 		private TStreamingComponents StreamingComponents;
 		//.
@@ -316,6 +330,9 @@ public class TDataStreamerModule extends TModule {
 			}
 			catch (TChannel.ParametersErrorException PEE) {
 				throw new TChannel.ConfigurationErrorException("COULD NOT START A DATA STREAMING, REASON: "+PEE.getMessage()); //. =>
+			}
+			catch (TDataStreamerModule.TStreaming.ChannelsConflictError CCE) {
+				throw new TChannel.ConfigurationErrorException("COULD NOT START A DATA STREAMING, REASON: "+CCE.getMessage()); //. =>
 			}
 			//.
 			Start();
@@ -439,9 +456,35 @@ public class TDataStreamerModule extends TModule {
 				}
 		}
 		
+		private void CheckStreamChannelsForConflicts() throws Exception {
+			if (!StreamingComponents_Exist()) { //. process for own DataStream component of the device object 
+				TModel Model = DataStreamerModule.Device.SensorsModule.Model;
+				if (Model != null) {
+					TStreamDescriptor StreamDescriptor = Model.Stream;
+					int CntJ = StreamDescriptor.Channels.size();
+					for (int J = 0; J < CntJ; J++) { 
+						com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)StreamDescriptor.Channels.get(J);
+						if (Channel.StreamableViaComponent()) 
+							if (Channel.LocationID.length() > 0) {
+								int CntK = StreamDescriptor.Channels.size();
+								for (int K = 0; K < CntK; K++) 
+									if (K != J) {
+										com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel AChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)StreamDescriptor.Channels.get(K);
+										if (AChannel.StreamableViaComponent() && AChannel.LocationID.equals(Channel.LocationID))
+											throw new ChannelsConflictError(); //. =>
+									}
+							}
+					}
+				}
+			}
+		}
+		
 		private void CheckStreamChannels() throws Exception {
 			CheckStreamChannelConfigurations();
+			//.
 			CheckStreamChannelParameters();
+			//.
+			CheckStreamChannelsForConflicts();
 		}
 		
 		private void StartStreamers() throws Exception {

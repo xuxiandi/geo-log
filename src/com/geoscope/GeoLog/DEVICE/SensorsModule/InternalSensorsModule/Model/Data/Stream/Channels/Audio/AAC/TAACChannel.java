@@ -82,6 +82,12 @@ public class TAACChannel extends TStreamChannel {
 		}
 	}
 	
+	public static class TOnAudiaPacketHandler {
+	
+		protected void DoOnAudioPacket(byte[] Packet, int PacketSize) {
+		}
+	}
+	
 	
 	public class TAudioSampleSource extends TCancelableThread {
 		
@@ -94,6 +100,8 @@ public class TAACChannel extends TStreamChannel {
         private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel DestinationChannel;
 		//.
 		public boolean flStarted = false;
+        //.
+        public volatile TOnAudiaPacketHandler OnAudiaPacketHandler = null;
 
 		public TAudioSampleSource() {
     		super();
@@ -215,6 +223,10 @@ public class TAACChannel extends TStreamChannel {
 		private void DoOnAudioPacket(byte[] Packet, int PacketSize) throws IOException {
 			try {
 				AACADTSEncoder.EncodeInputBuffer(Packet, PacketSize, (System.nanoTime()/1000)/1000);
+				//.
+				TOnAudiaPacketHandler _OnAudiaPacketHandler	= OnAudiaPacketHandler;
+				if (_OnAudiaPacketHandler != null)
+					_OnAudiaPacketHandler.DoOnAudioPacket(Packet, PacketSize);
 			} 
 			catch (IOException IOE) {
 			}
@@ -225,10 +237,10 @@ public class TAACChannel extends TStreamChannel {
 	
 	private TMyProfile MyProfile;
 	//.
-	private TAudioSampleSource AudioSampleSource;
+	public TAudioSampleSource AudioSampleSource;
 	
 	public TAACChannel(TInternalSensorsModule pInternalSensorsModule, int pID) throws Exception {
-		super(pInternalSensorsModule, pID, TMyProfile.class);
+		super(pInternalSensorsModule, pID, "DefaultMicrophone", TMyProfile.class);
 		MyProfile = (TMyProfile)Profile;
 		//.
 		Kind = TChannel.CHANNEL_KIND_OUT;

@@ -24,7 +24,7 @@ public class TVCChannel extends TStreamChannel {
 	protected TDataType DoVoiceCommand;
 	
 	public TVCChannel(TInternalControlsModule pInternalControlsModule, int pID) throws Exception {
-		super(pInternalControlsModule, pID, TMyProfile.class);
+		super(pInternalControlsModule, pID, "DefaultSpeaker", TMyProfile.class);
 		//.
 		Kind = TChannel.CHANNEL_KIND_INOUT;
 		DataFormat = 0;

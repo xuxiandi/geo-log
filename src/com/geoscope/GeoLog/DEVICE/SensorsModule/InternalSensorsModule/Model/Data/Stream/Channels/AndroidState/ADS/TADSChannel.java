@@ -13,8 +13,8 @@ public class TADSChannel extends TStreamChannel {
 	}
 	
 
-	public TADSChannel(TInternalSensorsModule pInternalSensorsModule, int pID) throws Exception {
-		super(pInternalSensorsModule, pID, TMyProfile.class);
+	public TADSChannel(TInternalSensorsModule pInternalSensorsModule, int pID, String pLocationID) throws Exception {
+		super(pInternalSensorsModule, pID, pLocationID, TMyProfile.class);
 	}
 	
 	@Override

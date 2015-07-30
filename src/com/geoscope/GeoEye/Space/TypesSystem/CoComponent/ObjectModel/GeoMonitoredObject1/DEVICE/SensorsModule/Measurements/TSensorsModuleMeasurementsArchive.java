@@ -649,6 +649,11 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 			lvVideoRecorderServerArchive.setAdapter(null);
     		return; //. ->
 		}
+		//.
+		int SaveIndex = lvVideoRecorderServerArchive.getFirstVisiblePosition();
+		View V = lvVideoRecorderServerArchive.getChildAt(0);
+		int SaveTop = (V == null) ? 0 : V.getTop();
+		//.
 		int SelectedIdx = -1;
 		final String[] lvItems = new String[Items.length];
 		for (int I = 0; I < Items.length; I++) {
@@ -690,6 +695,8 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 			lvVideoRecorderServerArchive.setItemChecked(SelectedIdx,true);
 			lvVideoRecorderServerArchive.setSelection(SelectedIdx);
 		}
+		//.
+		lvVideoRecorderServerArchive.setSelectionFromTop(SaveIndex, SaveTop);
 	}
 	
 	private void Items_UpdateItemLocation(String MeasurementID, int Location) {

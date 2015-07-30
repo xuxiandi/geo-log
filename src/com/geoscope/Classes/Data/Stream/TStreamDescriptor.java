@@ -276,6 +276,10 @@ public class TStreamDescriptor {
 		return null;
 	}
 	
+	public void Channels_Remove(TChannel Channel) {
+		Channels.remove(Channel);
+	}
+	
 	public void Channels_RemoveDisabledItems() {
 		int I = 0; 
 		while (I < Channels.size()) {

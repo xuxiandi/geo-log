@@ -15,13 +15,15 @@ public class TGPSTLRMeter extends TTLRMeter {
 	public static final String TypeID = "Telemetry.GPSTLR";
 	public static final String ContainerTypeID = "";
 	//.
+	public static final String LocationID = "DefaultSensor";
+	//.
 	public static final String Name = "Geo-location track";
 	
 	public static class TMyProfile extends TProfile {
 	}
 	
 	public TGPSTLRMeter(TSensorsModule pSensorsModule, String pID, String pInfo, String pProfileFolder) throws Exception {
-		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, Name,pInfo), TMyProfile.class, pProfileFolder);
+		super(pSensorsModule, new TSensorMeterDescriptor(TypeID+"."+pID, TypeID,ContainerTypeID, LocationID, Name,pInfo), TMyProfile.class, pProfileFolder);
 	}
 	
 	@Override

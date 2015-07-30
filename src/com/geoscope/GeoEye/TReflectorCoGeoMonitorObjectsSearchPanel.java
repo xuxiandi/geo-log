@@ -130,7 +130,7 @@ public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
 		ArrayAdapter<String> lvObjectsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvObjectsItems);             
 		lvObjects.setAdapter(lvObjectsAdapter);
 		for (int I = 0; I < Cnt; I++)
-			lvObjects.setItemChecked(I,false);
+			lvObjects.setItemChecked(I,true);
 	}	
 	
 	private void AddCheckedObjects() {

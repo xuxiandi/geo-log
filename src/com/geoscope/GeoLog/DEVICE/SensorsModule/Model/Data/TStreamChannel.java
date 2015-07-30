@@ -162,6 +162,16 @@ public class TStreamChannel extends TChannel {
 			}
 		}
 
+		public boolean SubscriberExists(TPacketSubscriber Subscriber) {
+			Lock.lock();
+			try {
+				return (Items.indexOf(Subscriber) >= 0);
+			}
+			finally {
+				Lock.unlock();
+			}
+		}
+		
 		public int Count() {
 			Lock.lock();
 			try {
@@ -279,6 +289,8 @@ public class TStreamChannel extends TChannel {
 	public TPacketSubscribers PacketSubscribers = new TPacketSubscribers(this);
 	
 	public TStreamChannel(TSensorsModule pSensorsModule) {
+		super();
+		//.
 		SensorsModule = pSensorsModule;
 	}
 

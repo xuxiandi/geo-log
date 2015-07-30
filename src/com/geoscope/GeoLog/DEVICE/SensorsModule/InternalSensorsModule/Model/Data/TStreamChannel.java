@@ -15,8 +15,8 @@ public class TStreamChannel extends TSourceStreamChannel {
 	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel 										DestinationChannel = null;
 	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscribers.TItemsNotifier 	DestinationChannel_PacketSubscribersItemsNotifier = null;  
 	
-	public TStreamChannel(TInternalSensorsModule pInternalSensorsModule, int pID, Class<?> ChannelProfile) throws Exception {
-		super(pID, TSensorsModule.Channels_Folder(), ChannelProfile);
+	public TStreamChannel(TInternalSensorsModule pInternalSensorsModule, int pID, String pLocationID, Class<?> ChannelProfile) throws Exception {
+		super(pID, pLocationID, TSensorsModule.Channels_Folder(), ChannelProfile);
 		//.
 		InternalSensorsModule = pInternalSensorsModule;
 	}

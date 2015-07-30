@@ -1,5 +1,6 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.Telemetry.TLR;
 
+import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedReadWriteLock;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Telemetry.TLR.TMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
@@ -29,15 +30,22 @@ public class TTLRMeter extends TSensorMeter {
 				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 				while (!Canceller.flCancel) {
 					TMeasurement Measurement = CreateMeasurement();
-					//. setup measurement
-					Measurement.TLRChannel.Assign(SourceChannel);
 					//.
-					Measurement.Start();
+					TNamedReadWriteLock MeasurementLock = TNamedReadWriteLock.WriteLock(Measurement.Domain, Measurement.Descriptor.ID); //. lock new measurement
 					try {
-						SourceChannel.DoStreaming(Measurement.TLRChannel.DestinationStream, Canceller, MeasurementMaxDuration);
+						//. setup measurement
+						Measurement.TLRChannel.Assign(SourceChannel);
+						//.
+						Measurement.Start();
+						try {
+							SourceChannel.DoStreaming(Measurement.TLRChannel.DestinationStream, Canceller, MeasurementMaxDuration);
+						}
+						finally {
+							Measurement.Finish();
+						}
 					}
 					finally {
-						Measurement.Finish();
+						MeasurementLock.WriteUnLock();
 					}
 					//.
 					DoOnMeasurementFinish(Measurement);

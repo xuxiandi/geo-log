@@ -1398,7 +1398,7 @@ public class TVideoModule extends TModule
 			
 		case VideoFrameServer_Service_H264Frames:
 			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-				TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, DestinationConnectionOutputStream, true, VideoStream_DefaultFlashInterval);
+				TMyH264EncoderServerClient EncoderServerClient = new TMyH264EncoderServerClient(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, DestinationConnectionOutputStream, true, VideoStream_DefaultFlashInterval);
 				try {
 					try {
 						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -1425,7 +1425,7 @@ public class TVideoModule extends TModule
 				}
 			}
 			else {
-				final TMyH264Encoder Encoder = new TMyH264Encoder(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream, false, VideoStream_DefaultFlashInterval);
+				final TMyH264Encoder Encoder = new TMyH264Encoder(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream, false, VideoStream_DefaultFlashInterval);
 				try {
 					try {
 			        	TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
@@ -1467,7 +1467,7 @@ public class TVideoModule extends TModule
 
 		case VideoFrameServer_Service_H264Frames1:
 			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-				TMyH264EncoderServerClient1 EncoderServerClient = new TMyH264EncoderServerClient1(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, DestinationConnectionOutputStream, true, VideoStream_DefaultFlashInterval);
+				TMyH264EncoderServerClient1 EncoderServerClient = new TMyH264EncoderServerClient1(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, DestinationConnectionOutputStream, true, VideoStream_DefaultFlashInterval);
 				try {
 					try {
 						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -1488,7 +1488,7 @@ public class TVideoModule extends TModule
 				}
 			}
 			else {
-				final TMyH264Encoder1 Encoder = new TMyH264Encoder1(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream, VideoStream_DefaultFlashInterval);
+				final TMyH264Encoder1 Encoder = new TMyH264Encoder1(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, DestinationConnectionOutputStream, VideoStream_DefaultFlashInterval);
 				try {
 					try {
 			        	TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
@@ -1532,7 +1532,7 @@ public class TVideoModule extends TModule
 		
 		case TUDPEchoServerClient.PROXY_TYPE_NATIVE: {
 			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-				TMyH264EncoderServerClientProxyUDPRTP EncoderServerClient = new TMyH264EncoderServerClientProxyUDPRTP(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort, true);
+				TMyH264EncoderServerClientProxyUDPRTP EncoderServerClient = new TMyH264EncoderServerClientProxyUDPRTP(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort, true);
 				try {
 					try {
 						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -1553,7 +1553,7 @@ public class TVideoModule extends TModule
 				}
 			}
 			else {
-				final TMyH264EncoderProxyUDPRTP Encoder = new TMyH264EncoderProxyUDPRTP(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
+				final TMyH264EncoderProxyUDPRTP Encoder = new TMyH264EncoderProxyUDPRTP(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, IOSocket, ProxyServerAddress,ProxyServerPort, OutputAddress,OutputPort);
 				try {
 					try {
 						TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {
@@ -1590,7 +1590,7 @@ public class TVideoModule extends TModule
 			
 		default: {
 			if (Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) {
-				TMyH264EncoderServerClientUDPRTP EncoderServerClient = new TMyH264EncoderServerClientUDPRTP(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, IOSocket, OutputAddress,OutputPort, true);
+				TMyH264EncoderServerClientUDPRTP EncoderServerClient = new TMyH264EncoderServerClientUDPRTP(Device, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, IOSocket, OutputAddress,OutputPort, true);
 				try {
 					try {
 						Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Clients_Register(EncoderServerClient);
@@ -1611,7 +1611,7 @@ public class TVideoModule extends TModule
 				}
 			}
 			else {
-				final TMyH264EncoderUDPRTP Encoder = new TMyH264EncoderUDPRTP(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width,Device.VideoRecorderModule.MediaFrameServer.FrameSize.height, Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, IOSocket, OutputAddress,OutputPort);
+				final TMyH264EncoderUDPRTP Encoder = new TMyH264EncoderUDPRTP(Device.VideoRecorderModule.MediaFrameServer.FrameSize.width(),Device.VideoRecorderModule.MediaFrameServer.FrameSize.height(), Device.VideoRecorderModule.MediaFrameServer.FrameBitRate, Device.VideoRecorderModule.MediaFrameServer.FrameRate, Device.VideoRecorderModule.MediaFrameServer.FramePixelFormat, IOSocket, OutputAddress,OutputPort);
 				try {
 					try {
 						TMediaFrameServer.TPacketSubscriber PacketSubscriber = new TMediaFrameServer.TPacketSubscriber() {

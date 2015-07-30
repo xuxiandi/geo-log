@@ -17,6 +17,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -58,6 +59,25 @@ public class TSensorsMetersPanel extends Activity {
         //.
         lvMeters = (ListView)findViewById(R.id.lvMeters);
         lvMeters.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        lvMeters.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				boolean flChecked = lvMeters.isItemChecked(arg2);
+				if (flChecked) { //. clear checking for all items with the same LocationID
+					TSensorMeterInfo CheckedMeter = MetersInfo[arg2];
+					if (CheckedMeter.Descriptor.LocationID.length() > 0) {
+						int Cnt = MetersInfo.length;
+						for (int I =0; I < Cnt; I++)
+							if (I != arg2) {
+								TSensorMeterInfo Meter = MetersInfo[I];
+						    	if (Meter.Descriptor.LocationID.equals(CheckedMeter.Descriptor.LocationID))
+						    		lvMeters.setItemChecked(I, false);
+							}
+					}
+				}
+			}
+		});
         lvMeters.setOnItemLongClickListener(new OnItemLongClickListener() {
         	
 			@Override
@@ -286,17 +306,24 @@ public class TSensorsMetersPanel extends Activity {
     	flUpdate = true; 
     	try {
     		if (MetersInfo != null) {
+    			int SaveIndex = lvMeters.getFirstVisiblePosition();
+    			View V = lvMeters.getChildAt(0);
+    			int SaveTop = (V == null) ? 0 : V.getTop();    			
+    			//.
     			String[] lvItems = new String[MetersInfo.length];
     			for (int I = 0; I < MetersInfo.length; I++) {
     				lvItems[I] = MetersInfo[I].Descriptor.Name;
     				if (MetersInfo[I].Descriptor.Info.length() > 0)
     					lvItems[I] += " "+"/"+MetersInfo[I].Descriptor.Info+"/"; 
-					lvItems[I] += "   "+"["+TSensorMeter.STATUS_GetString(MetersInfo[I].Status, this)+"]"; 
+    				if (MetersInfo[I].Status != TSensorMeter.STATUS_NOTRUNNING)
+    					lvItems[I] += "   "+"["+TSensorMeter.STATUS_GetString(MetersInfo[I].Status, this)+"]"; 
     			}
     			ArrayAdapter<String> lvItemsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvItems);             
     			lvMeters.setAdapter(lvItemsAdapter);
     			for (int I = 0; I < MetersInfo.length; I++)
     				lvMeters.setItemChecked(I,MetersInfo[I].flActive);
+    			//.
+    			lvMeters.setSelectionFromTop(SaveIndex, SaveTop);
     		}
     		else {
     			lvMeters.setAdapter(null);

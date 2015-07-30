@@ -11,7 +11,9 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
 
 	public static final int SourceConnectionTimeout = 1000*30; //. seconds
 	public static final int MaxTransferPacketSize = 1024*1024; 
-
+	//.
+	public static final int RepeatersLimit = 100;
+	
 	private int ReceivingPort;
 	private int ReceivingPacketSize;
 	//.
@@ -37,7 +39,7 @@ public class TLANUDPConnectionRepeater extends TUDPConnectionRepeater {
         			RepeatersToCancel.add(((TLANUDPConnectionRepeater)CR));
         	}
 		}
-    	for (int I = 0; I < RepeatersToCancel.size(); I++)
+    	for (int I = RepeatersLimit; I < RepeatersToCancel.size(); I++)
     		RepeatersToCancel.get(I).CancelAndWait();
 		//.
 		Start();

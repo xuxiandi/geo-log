@@ -10,6 +10,8 @@ import com.geoscope.GeoLog.DEVICE.LANModule.TLANModule;
 public class TMicrophoneLANLVConnectionRepeater extends TLANLocalVirtualConnectionRepeater {
 
 	public static final int Port = TLANModule.LocalVirtualConnection_PortBase+3;
+	//.
+	public static final int RepeatersLimit = 100;
 	
 	public static boolean CheckUserAccessKey(TLANModule LANModule, String UserAccessKey) {
 		return ((UserAccessKey == null) || LANModule.Device.AudioModule.UserAccessKey.Check(UserAccessKey));
@@ -29,7 +31,7 @@ public class TMicrophoneLANLVConnectionRepeater extends TLANLocalVirtualConnecti
         			RepeatersToCancel.add(((TMicrophoneLANLVConnectionRepeater)CR));
         	}
 		}
-    	for (int I = 0; I < RepeatersToCancel.size(); I++)
+    	for (int I = RepeatersLimit; I < RepeatersToCancel.size(); I++)
     		RepeatersToCancel.get(I).CancelAndWait();
 		//.
 		Start();

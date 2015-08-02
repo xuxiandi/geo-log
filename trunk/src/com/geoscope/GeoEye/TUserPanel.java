@@ -537,7 +537,8 @@ public class TUserPanel extends Activity {
         		if ((UserInfo == null) || (UserCurrentActivity == null))
         			return; //. ->
             	Intent intent = new Intent(TUserPanel.this, TUserActivityComponentListPanel.class);
-				intent.putExtra("ComponentID", Component.ID);
+            	if (Component != null)
+            		intent.putExtra("ComponentID", Component.ID);
             	intent.putExtra("UserID",UserInfo.UserID);
             	intent.putExtra("ActivityID",UserCurrentActivity.ID);
             	intent.putExtra("ActivityInfo",UserCurrentActivity.GetInfo(TUserPanel.this));

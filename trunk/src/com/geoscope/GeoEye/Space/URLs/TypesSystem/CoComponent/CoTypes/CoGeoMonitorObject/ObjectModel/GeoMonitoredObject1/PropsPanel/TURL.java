@@ -14,6 +14,7 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Server.User.TGeoScopeServerUser;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObjectPanel;
@@ -109,7 +110,9 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.CoComponent
 	@Override
 	public void Open(Context context, Object Params) throws Exception {
     	Intent intent = new Intent(context, TCoGeoMonitorObjectPanel.class);
-		intent.putExtra("ComponentID", 0);
+    	TReflectorComponent Reflector = TReflectorComponent.GetAComponent();
+    	if (Reflector != null)
+    		intent.putExtra("ComponentID", Reflector.ID);
     	intent.putExtra("ParametersType", TCoGeoMonitorObjectPanel.PARAMETERS_TYPE_OID);
     	intent.putExtra("ObjectID", idComponent);
     	intent.putExtra("ObjectName", ObjectName);

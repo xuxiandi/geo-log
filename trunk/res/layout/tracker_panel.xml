@@ -398,7 +398,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1.0"
                         android:orientation="horizontal"
-                        android:visibility="gone" >
+                        android:visibility="visible" >
 
                         <CheckBox
                             android:id="@+id/cbVideoRecorderModuleRecording"

@@ -284,7 +284,7 @@ public class TChannel {
 	public TChannel(int pID, String pLocationID, String pProfilesFolder, Class<?> ProfileClass) throws Exception {
 		ID = pID;
 		//.
-		LocationID = GetTypeID()+"."+pLocationID;
+		LocationID = GetTypeID()+":"+pLocationID;
 		//.
 		ProfilesFolder = pProfilesFolder;
 		//.

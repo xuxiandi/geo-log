@@ -35,6 +35,24 @@ import com.geoscope.GeoLog.Application.Network.TServerConnection;
 @SuppressLint("HandlerLeak")
 public class TGeoScopeServerUserSession extends TCancelableThread {
 
+	public static class SessionError extends IOException {
+	
+		private static final long serialVersionUID = 1L;
+
+		public SessionError(String Message) {
+			super(Message);
+		}
+	}
+	
+	public static class SessionConnectionError extends SessionError {
+		
+		private static final long serialVersionUID = 1L;
+
+		public SessionConnectionError(String Message) {
+			super(Message);
+		}
+	}
+	
 	public static class TUserMessage {
 		
 		public long SenderID;
@@ -637,12 +655,17 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
 		flReconnect = true;
 	}
 	
-	public void SendMessage(byte[] Message) throws IOException {
-		if (!flConnected)
-			throw new IOException("user session is not connected"); //. =>
-    	synchronized (ConnectionOutputStream) {
-	        ConnectionOutputStream.write(Message);
-	        ConnectionOutputStream.flush();
+	public void SendMessage(byte[] Message) throws SessionConnectionError {
+		try {
+			if (!flConnected)
+				throw new Exception("user session is not connected"); //. =>
+	    	synchronized (ConnectionOutputStream) {
+		        ConnectionOutputStream.write(Message);
+		        ConnectionOutputStream.flush();
+			}
+		}
+		catch (Exception E) {
+			throw new SessionConnectionError(E.getMessage());
 		}
 	}
 	
@@ -809,6 +832,8 @@ public class TGeoScopeServerUserSession extends TCancelableThread {
     				//.
     				break; //. >
     			}
+        	}
+        	catch (SessionConnectionError SCE) {
         	}
         	catch (Throwable E) {
         		TGeoLogApplication.Log_WriteError(E);

@@ -38,7 +38,15 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 @SuppressLint("HandlerLeak")
 public class TSensorsMetersPanel extends Activity {
 
+	public static final int MODE_NORMAL 	= 0;
+	public static final int MODE_SELECTOR 	= 1;
+	
+	
+	private int Mode = MODE_NORMAL;
+	//.
 	private TDEVICEModule Device;
+	//.
+	private String[] IDs = null;
 	//.
 	private TSensorMeterInfo[] MetersInfo = null;
 	//.
@@ -52,6 +60,14 @@ public class TSensorsMetersPanel extends Activity {
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //.
+        Bundle extras = getIntent().getExtras(); 
+        if (extras != null) { 
+        	Mode = extras.getInt("Mode");
+        	String _IDs = extras.getString("IDs");
+        	if (_IDs != null) 
+            	IDs = _IDs.split(",");
+        }
 		//.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         //.
@@ -100,6 +116,7 @@ public class TSensorsMetersPanel extends Activity {
         		StartUpdating();
             }
         });
+        btnUpdate.setVisibility((Mode == MODE_NORMAL) ? View.VISIBLE : View.GONE);
         //.
         btnApplyChanges = (Button)findViewById(R.id.btnApplyChanges);
         btnApplyChanges.setOnClickListener(new OnClickListener() {
@@ -107,12 +124,31 @@ public class TSensorsMetersPanel extends Activity {
         	@Override
             public void onClick(View v) {
             	try {
-            		ApplyChanges();
+            		switch (Mode) {
+            		
+            		case MODE_NORMAL:
+                		ApplyChanges();
+            			break; //. >
+            			
+            		case MODE_SELECTOR:
+                		String IDs = GetCheckItemsString();
+                		if (IDs != null) {
+                	    	Intent intent = getIntent();
+                	    	//.
+                	    	intent.putExtra("IDs",IDs);
+                	        //.
+                	    	setResult(Activity.RESULT_OK,intent);
+                	    	//.
+                	    	finish();
+                		}
+            			break; //. >
+            		}
 				} catch (Exception E) {
 					Toast.makeText(TSensorsMetersPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 				}
             }
         });
+        btnApplyChanges.setText((Mode == MODE_NORMAL) ? R.string.SApplyChanges : R.string.SSelect);
         //.
         final int HintID = THintManager.HINT__Long_click_to_edit_item_properties;
         final TextView lbListHint = (TextView)findViewById(R.id.lbListHint);
@@ -134,6 +170,8 @@ public class TSensorsMetersPanel extends Activity {
         }
         else
         	lbListHint.setVisibility(View.GONE);
+        //.
+        setResult(Activity.RESULT_CANCELED);
     }
     
     @Override
@@ -261,6 +299,7 @@ public class TSensorsMetersPanel extends Activity {
 		            	progressDialog.setIndeterminate(true); 
 		            	progressDialog.setCancelable(true);
 		            	progressDialog.setOnCancelListener( new OnCancelListener() {
+		            		
 							@Override
 							public void onCancel(DialogInterface arg0) {
 								Cancel();
@@ -269,7 +308,8 @@ public class TSensorsMetersPanel extends Activity {
 									TSensorsMetersPanel.this.finish();
 							}
 						});
-		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TSensorsMetersPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() { 
+		            	progressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, TSensorsMetersPanel.this.getString(R.string.SCancel), new DialogInterface.OnClickListener() {
+		            		
 		            		@Override 
 		            		public void onClick(DialogInterface dialog, int which) { 
 								Cancel();
@@ -320,8 +360,28 @@ public class TSensorsMetersPanel extends Activity {
     			}
     			ArrayAdapter<String> lvItemsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvItems);             
     			lvMeters.setAdapter(lvItemsAdapter);
-    			for (int I = 0; I < MetersInfo.length; I++)
-    				lvMeters.setItemChecked(I,MetersInfo[I].flActive);
+    			//.
+    			switch (Mode) {
+    			
+    			case MODE_NORMAL:
+        			for (int I = 0; I < MetersInfo.length; I++)
+        				lvMeters.setItemChecked(I, MetersInfo[I].flActive);
+    				break; //. >
+        			
+    			case MODE_SELECTOR:
+    				if (IDs != null) {
+            			for (int I = 0; I < MetersInfo.length; I++) 
+                			for (int J = 0; J < IDs.length; J++) 
+                				if (MetersInfo[I].Descriptor.ID.equals(IDs[J])) {
+                    				lvMeters.setItemChecked(I, true);
+                    				//.
+                    				break; //. >
+                				}
+    					//.
+    					IDs = null;
+    				}
+    				break; //. >
+    			}
     			//.
     			lvMeters.setSelectionFromTop(SaveIndex, SaveTop);
     		}
@@ -369,5 +429,18 @@ public class TSensorsMetersPanel extends Activity {
 			}
 		};
 		Processing.Start();
+    }
+
+    private String GetCheckItemsString() {
+    	if ((MetersInfo == null) || (Device == null))
+    		return null; //. ->
+		String Result = "";
+		for (int I = 0; I < MetersInfo.length; I++)
+			if (lvMeters.isItemChecked(I)) 
+				if (Result.length() == 0)
+					Result = MetersInfo[I].Descriptor.ID;
+				else
+					Result += ","+MetersInfo[I].Descriptor.ID;
+		return Result;
     }
 }

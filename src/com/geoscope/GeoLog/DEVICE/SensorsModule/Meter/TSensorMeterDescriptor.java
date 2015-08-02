@@ -33,9 +33,16 @@ public class TSensorMeterDescriptor {
 		TypeID = pTypeID;
 		ContainerTypeID = pContainerTypeID;
 		//.
-		LocationID = pLocationID;
+		LocationID = TypeID+":"+pLocationID;
 		//.
 		Name = pName;
 		Info = pInfo;
+	}
+	
+	public String GetText() {
+		String Result = Name;
+		if (Info.length() > 0)
+			Result += " "+"/"+Info+"/";
+		return Result;
 	}
 }

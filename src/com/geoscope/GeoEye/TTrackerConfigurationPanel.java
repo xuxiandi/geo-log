@@ -2,13 +2,17 @@ package com.geoscope.GeoEye;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.Window;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -20,12 +24,19 @@ import com.geoscope.GeoLog.TrackerService.TTracker;
 @SuppressLint("HandlerLeak")
 public class TTrackerConfigurationPanel extends Activity {
 
+	public static final int REASON_SELECT_METERS = 1;
+	
+	
 	private TTracker Tracker;
 	//.
     private TTrackerPanel.TConfiguration Configuration;
     //.
-    private TSensorMeterInfo[] 	SensorsModuleMeters;
+    @SuppressWarnings("unused")
+	private TSensorMeterInfo[] 	SensorsModuleMeters;
+	@SuppressWarnings("unused")
 	private Spinner 			spMeterToControl;
+	private EditText 			edMetersToControl;
+	private Button				btnSelectMetersToControl;
 	private Spinner 			spMeterControl;
 	private Spinner 			spControlNotifications;
 	private Spinner 			spRecordingNotification;
@@ -48,7 +59,7 @@ public class TTrackerConfigurationPanel extends Activity {
             Configuration = new TConfiguration();
     		Configuration.Load();
             //.
-            spMeterToControl = (Spinner)findViewById(R.id.spMeterToControl);
+            /* spMeterToControl = (Spinner)findViewById(R.id.spMeterToControl);
             SensorsModuleMeters = Tracker.GeoLog.SensorsModule.Meters.Items_GetList();
             int Cnt = SensorsModuleMeters.length;
             String[] MeterItems = new String[Cnt+1]; 
@@ -84,7 +95,21 @@ public class TTrackerConfigurationPanel extends Activity {
                 @Override
                 public void onNothingSelected(AdapterView<?> parentView) {
                 }
-            });        
+            });*/
+    		//.
+            edMetersToControl = (EditText)findViewById(R.id.edMetersToControl);
+            //.
+            btnSelectMetersToControl = (Button)findViewById(R.id.btnSelectMetersToControl);
+            btnSelectMetersToControl.setOnClickListener(new OnClickListener() {
+            	
+    			@Override
+                public void onClick(View v) {
+            		Intent intent = new Intent(TTrackerConfigurationPanel.this, com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMetersPanel.class);
+			    	intent.putExtra("Mode", com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.TSensorsMetersPanel.MODE_SELECTOR); 
+			    	intent.putExtra("IDs", Configuration.SensorsModuleConfiguration.MeterToControl); 
+                    startActivityForResult(intent, REASON_SELECT_METERS);
+                }
+            });
             //.
             spMeterControl = (Spinner)findViewById(R.id.spMeterControl);
             String[] ControlItems = new String[3]; 
@@ -263,10 +288,34 @@ public class TTrackerConfigurationPanel extends Activity {
     protected void onDestroy() {
         super.onDestroy();
     }
+	
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	try {
+            switch (requestCode) {        
 
+            case REASON_SELECT_METERS:
+            	if (resultCode == RESULT_OK) {  
+                    Bundle extras = data.getExtras(); 
+                    if (extras != null) {
+                    	String MetersToControl = extras.getString("IDs");
+                    	//.
+            			Configuration.SensorsModuleConfiguration.MeterToControl = MetersToControl;
+                		Configuration.Save();
+                		//.
+                		Update();
+                    }
+            	}
+            	break; //. >
+            }
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+		}
+        super.onActivityResult(requestCode, resultCode, data);
+    }
     
     private void Update() {
-    	TSensorMeter MeterToControl = Tracker.GeoLog.SensorsModule.Meters.Items_GetItem(Configuration.SensorsModuleConfiguration.MeterToControl);
+    	/*TSensorMeter MeterToControl = Tracker.GeoLog.SensorsModule.Meters.Items_GetItem(Configuration.SensorsModuleConfiguration.MeterToControl);
 		int Cnt = SensorsModuleMeters.length;
     	int SelectedIdx = Cnt;
     	if (MeterToControl != null) 
@@ -276,7 +325,23 @@ public class TTrackerConfigurationPanel extends Activity {
     				break; //. >
     			}
     	if (SelectedIdx >= 0)
-            spMeterToControl.setSelection(SelectedIdx);
+            spMeterToControl.setSelection(SelectedIdx);*/
+    	//.
+    	String MetersToControl = "";
+    	String[] _MetersToControl = Configuration.SensorsModuleConfiguration.MeterToControl.split(",");
+		int CntI = _MetersToControl.length;
+    	for (int I = 0; I < CntI; I++) {
+        	TSensorMeter MeterToControl = Tracker.GeoLog.SensorsModule.Meters.Items_GetItem(_MetersToControl[I]);
+        	if (MeterToControl != null) { 
+				String S = MeterToControl.Descriptor.GetText();
+				//.
+				if (MetersToControl.length() == 0)
+					MetersToControl = S;
+				else
+					MetersToControl += "\n"+S;
+        	}
+    	}
+    	edMetersToControl.setText(MetersToControl);
     	//.
         switch (Configuration.SensorsModuleConfiguration.MeterControl) {
         

@@ -3143,11 +3143,18 @@ public class TTrackerPanel extends Activity {
     	if (SensorsModule_ControlMeter_flActive == flActive)
     		return; //. ->
     	if (Tracker.GeoLog.IsEnabled()) {
-        	TSensorMeter ControlMeter = Tracker.GeoLog.SensorsModule.Meters.Items_GetItem(Configuration.SensorsModuleConfiguration.MeterToControl);
-        	if (ControlMeter != null) 
-        		ControlMeter.SetActive(flActive);
-        	else 
-				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(flActive, false);
+    		int MetersCount = 0;
+        	String[] _MetersToControl = Configuration.SensorsModuleConfiguration.MeterToControl.split(",");
+    		int CntI = _MetersToControl.length;
+        	for (int I = 0; I < CntI; I++) {
+            	TSensorMeter MeterToControl = Tracker.GeoLog.SensorsModule.Meters.Items_GetItem(_MetersToControl[I]);
+            	if (MeterToControl != null) {  
+            		MeterToControl.SetActive(flActive);
+            		MetersCount++;
+            	}
+        	}
+        	if (MetersCount == 0)
+        		Tracker.GeoLog.VideoRecorderModule.SetRecorderState(flActive, false);
     	}
     	SensorsModule_ControlMeter_flActive = flActive;
     	//.
@@ -3530,8 +3537,15 @@ public class TTrackerPanel extends Activity {
         public void run() {
         	try {
             	if (_TrackerPanel.Tracker.GeoLog.IsEnabled() && SensorsModule_ControlMeter_flActive) {
-                	TSensorMeter ControlMeter = Tracker.GeoLog.SensorsModule.Meters.Items_GetItem(Configuration.SensorsModuleConfiguration.MeterToControl);
-                	if ((ControlMeter != null) && ControlMeter.IsActive()) {
+            		int MetersCount = 0;
+                	String[] _MetersToControl = Configuration.SensorsModuleConfiguration.MeterToControl.split(",");
+            		int CntI = _MetersToControl.length;
+                	for (int I = 0; I < CntI; I++) {
+                    	TSensorMeter MeterToControl = Tracker.GeoLog.SensorsModule.Meters.Items_GetItem(_MetersToControl[I]);
+                    	if (MeterToControl != null)   
+                    		MetersCount++;
+                	}
+                	if ((MetersCount > 0) && (MetersCount == CntI)) 
                 		switch (NotificationType) {
                 		
 						case TConfiguration.TSensorsModuleConfiguration.METERRECORDING_NOTIFICATION_BEEPING:
@@ -3543,7 +3557,6 @@ public class TTrackerPanel extends Activity {
 							Vibrator.vibrate(Duration);
 							break; //. ->
 						}
-                	}
             	}
         	}
         	catch (Throwable E) {

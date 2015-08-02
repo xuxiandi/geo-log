@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.geoscope.Classes.Data.Types.Image.Compositions.TThumbnailImageComposition;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.GeoEye.R;
+import com.geoscope.GeoEye.TReflectorComponent;
 import com.geoscope.GeoEye.Space.Defines.SpaceDefines;
 import com.geoscope.GeoEye.Space.Functionality.TTypeFunctionality;
 import com.geoscope.GeoEye.Space.Functionality.ComponentFunctionality.TComponentTypedDataFile;
@@ -126,7 +127,9 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.DataStream.
 				public void DoOnCompleted() throws Exception {
 					if (TypedDataFiles.Count() > 1) {
 						Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
-						intent.putExtra("ComponentID", 0);
+				    	TReflectorComponent Reflector = TReflectorComponent.GetAComponent();
+				    	if (Reflector != null)
+				    		intent.putExtra("ComponentID", Reflector.ID);
 						intent.putExtra("DataFiles", TypedDataFiles.ToByteArrayV0());
 						intent.putExtra("AutoStart", true);
 						//.

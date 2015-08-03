@@ -12,6 +12,7 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelLockedError;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelNotActiveError;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelNotFoundError;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.SourceNotAvailableError;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.TStreamChannel;
 
 public class TVCTRLChannel extends TStreamChannel {
@@ -22,9 +23,11 @@ public class TVCTRLChannel extends TStreamChannel {
 	
 	public static final int RESULT_OK 				= 0;
 	public static final int RESULT_ERROR 			= -1;
-	public static final int RESULT_CHANNELNOTFOUND 	= -101;
-	public static final int RESULT_CHANNELNOTACTIVE = -102;
-	public static final int RESULT_CHANNELLOCKED 	= -103;
+	//.
+	public static final int RESULT_CHANNELNOTFOUND 		= -101;
+	public static final int RESULT_CHANNELNOTACTIVE 	= -102;
+	public static final int RESULT_CHANNELLOCKED 		= -103;
+	public static final int RESULT_SOURCENOTAVAILABLE	= -104;
 	
 	
 	@Override
@@ -69,6 +72,9 @@ public class TVCTRLChannel extends TStreamChannel {
                 }
                 catch (ChannelLockedError CLE) {
           			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_CHANNELLOCKED);
+                }
+                catch (SourceNotAvailableError SNAE) {
+          			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_SOURCENOTAVAILABLE);
                 }
                 catch (Exception E) {
           			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_ERROR);

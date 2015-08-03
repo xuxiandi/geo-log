@@ -9,6 +9,9 @@ import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.IO.Net.TNetworkConnection;
 import com.geoscope.Classes.MultiThreading.TCanceller;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelLockedError;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelNotActiveError;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelNotFoundError;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.TStreamChannel;
 
 public class TVCTRLChannel extends TStreamChannel {
@@ -17,8 +20,11 @@ public class TVCTRLChannel extends TStreamChannel {
 	
 	public static final int DescriptorSize = 4;
 	
-	public static final int RESULT_OK 		= 0;
-	public static final int RESULT_ERROR 	= -1;
+	public static final int RESULT_OK 				= 0;
+	public static final int RESULT_ERROR 			= -1;
+	public static final int RESULT_CHANNELNOTFOUND 	= -101;
+	public static final int RESULT_CHANNELNOTACTIVE = -102;
+	public static final int RESULT_CHANNELLOCKED 	= -103;
 	
 	
 	@Override
@@ -49,17 +55,25 @@ public class TVCTRLChannel extends TStreamChannel {
                 if (Size <= 0) 
                 	break; //. >
 				//. parse and process
+                byte[] Descriptor;
                 try {
                 	ParseFromByteArrayAndProcess(TransferBuffer, 0);
                 	//. success
-          			byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_OK);
-          			pOutputStream.write(Descriptor);		
+          			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_OK);
+                }
+                catch (ChannelNotFoundError CNFE) {
+          			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_CHANNELNOTFOUND);
+                }
+                catch (ChannelNotActiveError CNAE) {
+          			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_CHANNELNOTACTIVE);
+                }
+                catch (ChannelLockedError CLE) {
+          			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_CHANNELLOCKED);
                 }
                 catch (Exception E) {
-                	//. error
-          			byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_ERROR);
-          			pOutputStream.write(Descriptor);		
+          			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_ERROR);
                 }
+      			pOutputStream.write(Descriptor);		
 			}
 		}    	
 	}		

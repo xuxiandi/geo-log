@@ -50,7 +50,7 @@ public class TStreamChannel extends TChannel {
 		}
 	}
 	
-	private void CheckCommandResult(int Descriptor) throws Exception {
+	protected void CheckCommandResult(int Descriptor) throws Exception {
 		if (Descriptor < 0)
 			throw new Exception("error of processing command, RC: "+Integer.toString(Descriptor)); //. =>
 	}

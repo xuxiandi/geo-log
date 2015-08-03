@@ -184,6 +184,8 @@ public class TH264IChannel extends TStreamChannel {
 		private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel DestinationChannel;
 		//.
 		public boolean flStarted = false;
+		//.
+		private volatile TH264EncoderServer Server = null;
 				
 		
 		public TVideoFrameSource() {
@@ -232,11 +234,12 @@ public class TH264IChannel extends TStreamChannel {
 					try {
 				        if (!InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_IsAvailable()) 
 				        	throw new IOException("Video server is not available"); //. ->
+				        //.
 				        android.hardware.Camera camera = android.hardware.Camera.open();
 				        if (camera == null)
 				        	return; //. ->
 				        try {
-					        InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, MyProfile.Width,MyProfile.Height, MyProfile.BitRate, MyProfile.FrameRate, Preview,PreviewFrame);
+				        	Server = InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Start(camera, MyProfile.Width,MyProfile.Height, MyProfile.BitRate, MyProfile.FrameRate, Preview,PreviewFrame);
 					        try {
 					        	TVideoFrameEncoderServerClient VideoFrameEncoderServerClient = new TVideoFrameEncoderServerClient();
 					        	try {
@@ -263,6 +266,7 @@ public class TH264IChannel extends TStreamChannel {
 					        }
 					        finally {
 					        	InternalSensorsModule.Device.VideoRecorderModule.MediaFrameServer.H264EncoderServer_Stop();
+					        	Server = null;
 					        }
 				        }
 				        finally {
@@ -330,6 +334,20 @@ public class TH264IChannel extends TStreamChannel {
 	
 	public int GetFrameRate() {
 		return MyProfile.FrameRate;
+	}
+	
+	public int GetBitrate() {
+		TH264EncoderServer _Server = VideoFrameSource.Server;
+		if (_Server != null) 
+			return _Server.GetBitrate(); //. ->
+		else
+			return -1; //. ->
+	}
+	
+	public void SetBitrate(int Value) {
+		TH264EncoderServer _Server = VideoFrameSource.Server;
+		if (_Server != null)
+			_Server.SetBitrate(Value);
 	}
 	
 	@Override

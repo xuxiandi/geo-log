@@ -21,6 +21,7 @@ import android.opengl.EGLSurface;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import android.os.Bundle;
 import android.view.Surface;
 
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
@@ -763,6 +764,16 @@ public class TH264EncoderServer {
 					     // Subsequent data will conform to new format.
 					     ///? MediaFormat format = codec.getOutputFormat();
 					}
+					//. change the BitRate on the fly
+					if (Codec_Bitrate != Codec_CurrentBitrate) {
+						int Bitrate = Codec_Bitrate;
+						//.
+						Bundle params = new Bundle();
+						params.putInt(MediaCodec.PARAMETER_KEY_VIDEO_BITRATE, Bitrate);
+						Codec.setParameters(params);
+						//.
+						Codec_CurrentBitrate = Bitrate;
+					}
 				}
 			}
 			catch (Throwable T) {
@@ -788,7 +799,9 @@ public class TH264EncoderServer {
 	private Surface PreviewSurface;
 	private Rect 	PreviewSurfaceRect;
 	//.
-	private MediaCodec Codec;
+	private MediaCodec 		Codec;
+	private int 			Codec_CurrentBitrate;
+	private volatile int	Codec_Bitrate;
 	//.
 	private TInputProcessing		InputProcessing = null;
 	//.
@@ -808,10 +821,12 @@ public class TH264EncoderServer {
 		PreviewSurfaceRect = pPreviewSurfaceRect;
 		//.
 		Codec = MediaCodec.createEncoderByType(CodecTypeName);
+		Codec_CurrentBitrate = BitRate;
+		Codec_Bitrate = Codec_CurrentBitrate;
 		//.
 		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, FrameWidth,FrameHeight);
 		format.setInteger(MediaFormat.KEY_FRAME_RATE, FrameRate);
-		format.setInteger(MediaFormat.KEY_BIT_RATE, BitRate);
+		format.setInteger(MediaFormat.KEY_BIT_RATE, Codec_CurrentBitrate);
 		format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, Encoding_IFRAMEInterval);
 		format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
 		//.
@@ -850,6 +865,14 @@ public class TH264EncoderServer {
 	
 	public boolean AreParametersTheSame(int pFrameWidth, int pFrameHeight, int pBitRate, int pFrameRate) {
 		return ((FrameWidth == pFrameWidth) && (FrameHeight == pFrameHeight) && (BitRate == pBitRate) && (FrameRate == pFrameRate));
+	}
+	
+	public void SetBitrate(int Value) {
+		Codec_Bitrate = Value;
+	}
+	
+	public int GetBitrate() {
+		return Codec_CurrentBitrate;
 	}
 	
 	private void Clients_DoOnParameters(byte[] Buffer, int BufferSize) throws Exception {

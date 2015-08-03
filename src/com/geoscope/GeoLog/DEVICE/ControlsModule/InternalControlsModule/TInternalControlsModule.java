@@ -11,6 +11,7 @@ import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.TModel;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Audio.VC.TVCChannel;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel;
 import com.geoscope.GeoLog.DEVICEModule.TModule;
 
 @SuppressLint("HandlerLeak")
@@ -32,7 +33,8 @@ public class TInternalControlsModule extends TModule {
 	//.
 	public TModel Model = null; 
 	//.
-	public TVCChannel VCChannel = null;
+	public TVCChannel 		VCChannel = null;
+	public TVCTRLChannel 	VCTRLChannel = null;
 	
     public TInternalControlsModule(TControlsModule pControlsModule) throws Exception {
     	super(pControlsModule);
@@ -107,6 +109,9 @@ public class TInternalControlsModule extends TModule {
     	//.
     	VCChannel = new TVCChannel(this, 2/*ID*/);
     	Model.Stream.Channels.add(VCChannel);
+    	//.
+    	VCTRLChannel = new TVCTRLChannel(this, 3/*ID*/);
+    	Model.Stream.Channels.add(VCTRLChannel);
     }
     
 	private Handler MessageHandler = new Handler() {

@@ -344,10 +344,15 @@ public class TH264IChannel extends TStreamChannel {
 			return -1; //. ->
 	}
 	
-	public void SetBitrate(int Value) {
+	public boolean SetBitrate(int Value) {
 		TH264EncoderServer _Server = VideoFrameSource.Server;
-		if (_Server != null)
+		if (_Server != null) {
 			_Server.SetBitrate(Value);
+			//.
+			return true; //. ->
+		}
+		else
+			return false; //. ->
 	}
 	
 	@Override

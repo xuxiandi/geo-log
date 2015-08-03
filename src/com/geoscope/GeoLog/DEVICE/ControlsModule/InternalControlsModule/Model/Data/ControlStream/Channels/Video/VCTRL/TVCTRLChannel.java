@@ -47,6 +47,16 @@ public class TVCTRLChannel extends TStreamChannel {
 		}
 	}
 	
+	public static class SourceNotAvailableError extends Exception {
+		
+		private static final long serialVersionUID = 1L;
+
+		
+		public SourceNotAvailableError() {
+			super("");
+		}
+	}
+	
 	public static final int COMMAND_ID = 1;
 	
 	private static Hashtable<Integer, Boolean> ChannelLockTable = new Hashtable<Integer, Boolean>();  
@@ -124,7 +134,8 @@ public class TVCTRLChannel extends TStreamChannel {
 			//.
 			LockChannel(ChannelID);
 			try {
-				SourceChannel.SetBitrate(Bitrate);
+				if (!SourceChannel.SetBitrate(Bitrate))
+					throw new SourceNotAvailableError(); //. =>
 			}
 			finally {
 				UnlockChannel(ChannelID);
@@ -146,7 +157,10 @@ public class TVCTRLChannel extends TStreamChannel {
 			//.
 			LockChannel(ChannelID);
 			try {
-				SourceChannel.SetBitrate((int)(SourceChannel.GetBitrate()*BitrateMultiplier));
+				Bitrate = SourceChannel.GetBitrate();
+				if (Bitrate == -1)
+					throw new SourceNotAvailableError(); //. =>
+				SourceChannel.SetBitrate((int)(Bitrate*BitrateMultiplier));
 			}
 			finally {
 				UnlockChannel(ChannelID);

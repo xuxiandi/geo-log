@@ -56,13 +56,16 @@ public class TVCTRLChannel extends TStreamChannel {
 		switch (Descriptor) {
 		
 		case com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.RESULT_CHANNELNOTFOUND:
-			throw new Exception("Channel not found"); //. => 
+			throw new com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelNotFoundError(); //. => 
 					
 		case com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.RESULT_CHANNELNOTACTIVE:
-			throw new Exception("Channel not active"); //. => 
+			throw new com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelNotActiveError(); //. => 
 					
 		case com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.RESULT_CHANNELLOCKED:
-			throw new Exception("Channel locked"); //. => 
+			throw new com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelLockedError(); //. => 
+					
+		case com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.RESULT_SOURCENOTAVAILABLE:
+			throw new com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.SourceNotAvailableError(); //. => 
 					
 		default:
 			super.CheckCommandResult(Descriptor); 

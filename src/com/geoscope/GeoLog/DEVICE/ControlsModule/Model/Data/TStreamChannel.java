@@ -48,7 +48,7 @@ public class TStreamChannel extends TChannel {
 	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TCanceller Canceller) throws IOException {
 	}	
 	
-	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
-		return Idx;
+	public byte[] ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
+		return null;
 	}
 }

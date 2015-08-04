@@ -36,14 +36,6 @@ public class TVCTRLChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
-		int ID = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += DescriptorSize;
-		TDataType DataType = DataTypes.GetItemByID((short)ID);
-		Idx = DataType.ContainerType.FromByteArray(BA, Idx);
-		return Idx;
-	}
-
-	@Override
 	protected void CheckCommandResult(int Descriptor) throws Exception {
 		switch (Descriptor) {
 		
@@ -84,22 +76,22 @@ public class TVCTRLChannel extends TStreamChannel {
 		return Result;
 	}
 	
-	private void DoOnData(TDataType DataType) throws Exception {
+	private byte[] DoOnData(TDataType DataType) throws Exception {
 		byte[] BA = DataType_ToByteArray(DataType);
 		//.
 		WaitForConnection();
 		//.
-		ProcessCommand(BA);
+		return ProcessCommand(BA);
 	}
 	
-	public void DoCommand(String pCommand) throws Exception {
+	public byte[] DoCommand(String pCommand) throws Exception {
 		byte[] BA = pCommand.getBytes("utf-8");
 		synchronized (Command) {
 			TTimestampedDataContainerType CT = (TTimestampedDataContainerType)Command.ContainerType; 
 			CT.Value.Timestamp = OleDate.UTCCurrentTimestamp();
 			CT.Value.Value = BA;
 			//.
-			DoOnData(Command);
+			return DoOnData(Command); //. ->
 		}
 	}
 

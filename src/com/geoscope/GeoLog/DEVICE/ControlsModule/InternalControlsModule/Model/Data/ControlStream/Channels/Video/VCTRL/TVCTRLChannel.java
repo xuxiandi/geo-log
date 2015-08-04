@@ -118,7 +118,7 @@ public class TVCTRLChannel extends TStreamChannel {
 		return TypeID;
 	}
 
-	public void DataType_SetValue(TDataType DataType) throws Exception {
+	public byte[] DataType_SetValue(TDataType DataType) throws Exception {
 		switch (DataType.ID) {
 		
 		case COMMAND_ID:
@@ -127,23 +127,24 @@ public class TVCTRLChannel extends TStreamChannel {
 				String _Command = new String(TimestampedData.Value.Value, "utf-8");
 				String[] Command = _Command.split(",");
 				//.
-				ProcessCommand(Command);
+				return ProcessCommand(Command);
 			}
-			break; //. >
+			else
+				return null; //. ->
 			
 		default:
 			throw new Exception("unknown action ID"); //. =>
 		}
 	}
 	
-	private void ProcessCommand(String[] Command) throws Exception {
+	private byte[] ProcessCommand(String[] Command) throws Exception {
 		if ((Command == null) || (Command.length == 0))
-			return; //. ->
+			return null; //. ->
 		int Version = Integer.parseInt(Command[0]);
 		switch (Version) {
 		
 		case 0: //. ping command 
-			break; //. >
+			return null; //. -> 
 			
 		case 1: //. set Bitrate
 			int ChannelID = Integer.parseInt(Command[1]);
@@ -175,7 +176,7 @@ public class TVCTRLChannel extends TStreamChannel {
 			finally {
 				UnlockChannel(ChannelID);
 			}
-			break; //. >
+			return null; //. ->
 			
 		case 2: //. multiply Bitrate
 			ChannelID = Integer.parseInt(Command[1]);
@@ -216,7 +217,10 @@ public class TVCTRLChannel extends TStreamChannel {
 			finally {
 				UnlockChannel(ChannelID);
 			}
-			break; //. >
+			return null; //. ->
+			
+		default:
+			return null; //. -> 
 		}
 	}
 }

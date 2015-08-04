@@ -36,14 +36,6 @@ public class TVCChannel extends TStreamChannel {
 		return TypeID;
 	}
 	
-	@Override
-	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
-		int ID = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += DescriptorSize;
-		TDataType DataType = DataTypes.GetItemByID((short)ID);
-		Idx = DataType.ContainerType.FromByteArray(BA, Idx);
-		return Idx;
-	}
-	
 	private byte[] DataType_ToByteArray(TDataType DataType) throws IOException {
 		int DataSize = 4/*SizeOf(ID)*/+DataType.ContainerType.ByteArraySize();
 		byte[] Result = new byte[DescriptorSize+DataSize];
@@ -57,12 +49,12 @@ public class TVCChannel extends TStreamChannel {
 		return Result;
 	}
 	
-	private void DoOnData(TDataType DataType) throws Exception {
+	private byte[] DoOnData(TDataType DataType) throws Exception {
 		byte[] BA = DataType_ToByteArray(DataType);
 		//.
 		WaitForConnection();
 		//.
-		ProcessCommand(BA);
+		return ProcessCommand(BA);
 	}
 	
 	public void SetVoiceCommands(byte[] BA) throws Exception {

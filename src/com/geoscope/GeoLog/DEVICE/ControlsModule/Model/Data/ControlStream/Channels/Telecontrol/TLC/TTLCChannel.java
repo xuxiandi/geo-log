@@ -65,7 +65,7 @@ public class TTLCChannel extends TStreamChannel {
 	}		
 	
 	@Override
-	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
+	public byte[] ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
 		com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.Telecontrol.TLC.TTLCChannel DC = (com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.Telecontrol.TLC.TTLCChannel)DestinationChannel;
 		int ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += DescriptorSize;
 		if (DC.DataTypes != null) {
@@ -76,6 +76,6 @@ public class TTLCChannel extends TStreamChannel {
 				DC.DataType_SetValue(DataType);
 			}
 		}
-		return Idx;
+		return null;
 	}
 }

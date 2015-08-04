@@ -39,11 +39,11 @@ public class TTLCChannel extends TStreamChannel {
 		return Result;
 	}
 	
-	public void DoOnData(TDataType DataType) throws Exception {
+	public byte[] DoOnData(TDataType DataType) throws Exception {
 		byte[] BA = DataType_ToByteArray(DataType);
 		//.
 		WaitForConnection();
 		//.
-		ProcessCommand(BA);
+		return ProcessCommand(BA);
 	}
 }

@@ -63,10 +63,14 @@ public class TVCTRLChannel extends TStreamChannel {
                 	break; //. >
 				//. parse and process
                 byte[] Descriptor;
+                byte[] Response = null;
                 try {
-                	ParseFromByteArrayAndProcess(TransferBuffer, 0);
+                	Response = ParseFromByteArrayAndProcess(TransferBuffer, 0);
                 	//. success
-          			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_OK);
+          			int RC = 0;
+          			if (Response != null)
+          				RC = Response.length;          			
+          			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RC);
                 }
                 catch (ChannelNotFoundError CNFE) {
           			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_CHANNELNOTFOUND);
@@ -89,13 +93,15 @@ public class TVCTRLChannel extends TStreamChannel {
                 catch (Exception E) {
           			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_ERROR);
                 }
-      			pOutputStream.write(Descriptor);		
+      			pOutputStream.write(Descriptor);
+      			if (Response != null)
+          			pOutputStream.write(Response);
 			}
 		}    	
 	}		
 	
 	@Override
-	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
+	public byte[] ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
 		com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel DC = (com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel)DestinationChannel;
 		int ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += DescriptorSize;
 		if (DC.DataTypes != null) {
@@ -103,9 +109,9 @@ public class TVCTRLChannel extends TStreamChannel {
 			if (DataType != null) {
 				Idx = DataType.ContainerType.FromByteArray(BA, Idx);
 				//.
-				DC.DataType_SetValue(DataType);
+				return DC.DataType_SetValue(DataType); //. ->
 			}
 		}
-		return Idx;
+		return null;
 	}
 }

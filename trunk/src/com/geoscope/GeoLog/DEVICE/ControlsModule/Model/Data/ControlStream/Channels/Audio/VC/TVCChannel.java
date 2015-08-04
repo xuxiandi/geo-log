@@ -65,7 +65,7 @@ public class TVCChannel extends TStreamChannel {
 	}		
 	
 	@Override
-	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
+	public byte[] ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
 		com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Audio.VC.TVCChannel DC = (com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Audio.VC.TVCChannel)DestinationChannel;
 		int ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += DescriptorSize;
 		if (DC.DataTypes != null) {
@@ -76,6 +76,6 @@ public class TVCChannel extends TStreamChannel {
 				DC.DataType_SetValue(DataType);
 			}
 		}
-		return Idx;
+		return null;
 	}
 }

@@ -67,7 +67,7 @@ public class TDVRTChannel extends TStreamChannel {
 	}		
 	
 	@Override
-	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
+	public byte[] ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
 		int Descriptor = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += DescriptorSize;
 		com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel DC = (com.geoscope.GeoLog.DEVICE.PluginsModule.IO.Protocols.PIO.Model.Data.ControlStream.Channels.DeviceRotator.DVRT.TDVRTChannel)DestinationChannel;
 		switch (Descriptor) {
@@ -84,6 +84,6 @@ public class TDVRTChannel extends TStreamChannel {
 				DC.Longitude_SetValue(Value.Longitude);
 			break; //. >
 		}
-		return Idx;
+		return null;
 	}
 }

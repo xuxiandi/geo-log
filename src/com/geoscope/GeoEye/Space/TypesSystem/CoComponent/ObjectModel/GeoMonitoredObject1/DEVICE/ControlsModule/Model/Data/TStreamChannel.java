@@ -11,13 +11,25 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 
 public class TStreamChannel extends TChannel {
 
+	public static class TProcessor {
+		
+		public void Process(TStreamChannel Channel, TCanceller Canceller) throws Exception {
+		}
+	}
+	
 	private static final int WaitForConnectionCounter = 600;
 	
 	
-	protected OutputStream ConnectionOutputStream = null;
-	protected InputStream ConnectionInputStream = null;
+	public OutputStream ConnectionOutputStream = null;
+	public InputStream ConnectionInputStream = null;
 	
-	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TCanceller Canceller) throws Exception {
+	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TProcessor Processor, TCanceller Canceller) throws Exception {
+		if (Processor != null)
+			Processor.Process(this, Canceller);
+		else
+			while (!Canceller.flCancel) {
+				Thread.sleep(1000);
+			}    	
 	}
 	
 	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {

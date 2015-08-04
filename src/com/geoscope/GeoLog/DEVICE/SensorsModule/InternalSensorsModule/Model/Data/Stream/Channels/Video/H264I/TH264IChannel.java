@@ -344,15 +344,23 @@ public class TH264IChannel extends TStreamChannel {
 			return -1; //. ->
 	}
 	
-	public boolean SetBitrate(int Value) {
+	public static final int SetBitrateResult_Ok 						= 0;
+	public static final int SetBitrateResult_SourceNotAvailable 		= -1;
+	public static final int SetBitrateResult_SourceNonExcusiveAccess 	= -2;
+	
+	public int SetBitrate(int Value) {
 		TH264EncoderServer _Server = VideoFrameSource.Server;
 		if (_Server != null) {
-			_Server.SetBitrate(Value);
-			//.
-			return true; //. ->
+			if (_Server.Clients_Count() == 1) {
+				_Server.SetBitrate(Value);
+				//.
+				return SetBitrateResult_Ok; //. ->
+			}
+			else
+				return SetBitrateResult_SourceNonExcusiveAccess; //. ->
 		}
 		else
-			return false; //. ->
+			return SetBitrateResult_SourceNotAvailable; //. ->
 	}
 	
 	@Override

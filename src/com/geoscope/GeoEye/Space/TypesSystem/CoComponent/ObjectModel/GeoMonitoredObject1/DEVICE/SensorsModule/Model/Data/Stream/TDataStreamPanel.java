@@ -54,6 +54,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannelFlowControl;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
 
 @SuppressLint("HandlerLeak")
@@ -671,6 +672,29 @@ public class TDataStreamPanel extends Activity {
 		};
 		if (Channel instanceof TH264IChannel) {
 			TH264IChannel H264Channel = (TH264IChannel)Channel;
+			//.
+			if (Object != null) {
+				TH264IChannelFlowControl H264IChannelFlowControl = new TH264IChannelFlowControl(H264Channel, this, ServerAddress,ServerPort, UserID,UserPassword, Object, new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TStreamChannelConnectorAbstract.TOnProgressHandler(H264Channel) {
+					
+					@Override
+					public void DoOnProgress(int ReadSize, TCanceller Canceller) {
+						TDataStreamPanel.this.PostStatusMessage("");
+					}
+				}, new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TStreamChannelConnectorAbstract.TOnIdleHandler(Channel) {
+					
+					@Override
+					public void DoOnIdle(TCanceller Canceller) {
+						TDataStreamPanel.this.PostStatusMessage(TDataStreamPanel.this.getString(R.string.SChannelIdle)+Channel.Name);
+					}
+				}, new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TStreamChannelConnectorAbstract.TOnExceptionHandler(Channel) {
+					
+					@Override
+					public void DoOnException(Exception E) {
+						TDataStreamPanel.this.PostException(E);
+					}
+				});
+				H264Channel.FlowControl_Initialize(H264IChannelFlowControl);
+			}
 			//.
 			final EditText edVideoBuffersProcessed = (EditText)findViewById(R.id.edVideoH264BuffersProcessed);
 			//.

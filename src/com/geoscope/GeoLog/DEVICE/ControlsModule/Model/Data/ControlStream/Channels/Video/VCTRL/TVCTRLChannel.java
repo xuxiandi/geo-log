@@ -12,7 +12,9 @@ import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelLockedError;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelNotActiveError;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ChannelNotFoundError;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.SourceNonExclusiveAccessError;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.SourceNotAvailableError;
+import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ValueOutOfRangeError;
 import com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.TStreamChannel;
 
 public class TVCTRLChannel extends TStreamChannel {
@@ -24,10 +26,12 @@ public class TVCTRLChannel extends TStreamChannel {
 	public static final int RESULT_OK 				= 0;
 	public static final int RESULT_ERROR 			= -1;
 	//.
-	public static final int RESULT_CHANNELNOTFOUND 		= -101;
-	public static final int RESULT_CHANNELNOTACTIVE 	= -102;
-	public static final int RESULT_CHANNELLOCKED 		= -103;
-	public static final int RESULT_SOURCENOTAVAILABLE	= -104;
+	public static final int RESULT_CHANNELNOTFOUND 			= -101;
+	public static final int RESULT_CHANNELNOTACTIVE 		= -102;
+	public static final int RESULT_CHANNELLOCKED 			= -103;
+	public static final int RESULT_SOURCENOTAVAILABLE		= -104;
+	public static final int RESULT_SOURCENONEXCLUSIVEACCESS	= -105;
+	public static final int RESULT_VALUEOUTOFRANGE			= -106;
 	
 	
 	@Override
@@ -76,6 +80,12 @@ public class TVCTRLChannel extends TStreamChannel {
                 catch (SourceNotAvailableError SNAE) {
           			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_SOURCENOTAVAILABLE);
                 }
+                catch (SourceNonExclusiveAccessError SNEAE) {
+          			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_SOURCENONEXCLUSIVEACCESS);
+                }
+                catch (ValueOutOfRangeError VOORE) {
+          			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_VALUEOUTOFRANGE);
+                }
                 catch (Exception E) {
           			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(RESULT_ERROR);
                 }
@@ -86,7 +96,7 @@ public class TVCTRLChannel extends TStreamChannel {
 	
 	@Override
 	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
-		com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Audio.VC.TVCChannel DC = (com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Audio.VC.TVCChannel)DestinationChannel;
+		com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel DC = (com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel)DestinationChannel;
 		int ID = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); Idx += DescriptorSize;
 		if (DC.DataTypes != null) {
 			TDataType DataType = DC.DataTypes.GetItemByID((short)ID);

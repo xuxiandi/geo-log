@@ -1,15 +1,12 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedDataContainerType;
 import com.geoscope.Classes.Data.Types.Date.OleDate;
-import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel;
 
 public class TVCTRLChannel extends TStreamChannel {
@@ -29,19 +26,14 @@ public class TVCTRLChannel extends TStreamChannel {
 		DataTypes = new TDataTypes();
 		//.
 		Command = DataTypes.AddItem(new TDataType(new TTimestampedDataContainerType(),	"Command",	this, COMMAND_ID, "","", ""));
+		//.
+		Hidden = true;
 	}
 	
 	@Override
 	public String GetTypeID() {
 		return TypeID;
 	}
-	
-	@Override
-	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TCanceller Canceller) throws Exception {
-		while (!Canceller.flCancel) {
-			Thread.sleep(100);
-		}    	
-	}		
 	
 	@Override
 	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {
@@ -66,6 +58,12 @@ public class TVCTRLChannel extends TStreamChannel {
 					
 		case com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.RESULT_SOURCENOTAVAILABLE:
 			throw new com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.SourceNotAvailableError(); //. => 
+					
+		case com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.RESULT_SOURCENONEXCLUSIVEACCESS:
+			throw new com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.SourceNonExclusiveAccessError(); //. => 
+					
+		case com.geoscope.GeoLog.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.RESULT_VALUEOUTOFRANGE:
+			throw new com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ValueOutOfRangeError(); //. => 
 					
 		default:
 			super.CheckCommandResult(Descriptor); 
@@ -103,5 +101,17 @@ public class TVCTRLChannel extends TStreamChannel {
 			//.
 			DoOnData(Command);
 		}
+	}
+
+	public void Ping() throws Exception {
+		DoCommand("0"); //. ping command
+	}
+	
+	public void SetChannelBitrate(int ChannelID, int Bitrate) throws Exception {
+		DoCommand("1"+","+Integer.toString(ChannelID)+","+Integer.toString(Bitrate)); 
+	}
+
+	public void MultiplyChannelBitrate(int ChannelID, double Multiplier) throws Exception {
+		DoCommand("2"+","+Integer.toString(ChannelID)+","+Double.toString(Multiplier)); 
 	}
 }

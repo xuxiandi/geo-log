@@ -34,9 +34,18 @@ public class TH264IChannel extends TStreamChannel {
 	
 	
 	private TDoOnH264FramesHandler OnH264FramesHandler = null;
+	//.
+	private volatile TH264IChannelFlowControl FlowControl = null;
 	
 	public TH264IChannel() throws IOException {
 		super();
+	}
+	
+	@Override
+	public void Close() throws Exception {
+		FlowControl_Finalize();
+		//.
+		super.Close();
 	}
 	
 	@Override
@@ -62,49 +71,56 @@ public class TH264IChannel extends TStreamChannel {
 		int BytesRead,BytesRead1;
 		int IdleTimeoutCount = 0; 
 		int _StreamingTimeout = StreamingTimeout*IdleTimeoutCounter;
-		while (!Canceller.flCancel) {
-			try {
-				if (Connection != null)
-					Connection.setSoTimeout(StreamingTimeout);
-                BytesRead = pInputStream.read(TransferBuffer,0,DescriptorSize);
-                if (BytesRead <= 0) 
-                	break; //. >
-				IdleTimeoutCount = 0;
-			}
-			catch (SocketTimeoutException E) {
-				IdleTimeoutCount++;
-				if (IdleTimeoutCount >= IdleTimeoutCounter) {
+		//.
+		FlowControl_Start();
+		try {
+			while (!Canceller.flCancel) {
+				try {
+					if (Connection != null)
+						Connection.setSoTimeout(StreamingTimeout);
+	                BytesRead = pInputStream.read(TransferBuffer,0,DescriptorSize);
+	                if (BytesRead <= 0) 
+	                	break; //. >
 					IdleTimeoutCount = 0;
-					OnIdleHandler.DoOnIdle(Canceller);
+				}
+				catch (SocketTimeoutException E) {
+					IdleTimeoutCount++;
+					if (IdleTimeoutCount >= IdleTimeoutCounter) {
+						IdleTimeoutCount = 0;
+						OnIdleHandler.DoOnIdle(Canceller);
+					}
+					//.
+					continue; //. ^
+				}
+				if (BytesRead != DescriptorSize)
+					throw new IOException("wrong data descriptor"); //. =>
+				//.
+				BytesRead1 = 0;
+				Size = (TransferBuffer[3] << 24)+((TransferBuffer[2] & 0xFF) << 16)+((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF);
+				if (Size > 0) { 
+					if (Size > TransferBuffer.length)
+						TransferBuffer = new byte[Size];
+					if (Connection != null)
+						Connection.setSoTimeout(_StreamingTimeout);
+					BytesRead1 = TNetworkConnection.InputStream_ReadData(pInputStream, TransferBuffer, Size);	
+	                if (BytesRead1 <= 0) 
+	                	break; //. >
+					//. parse and process
+	            	ParseFromByteArrayAndProcess(TransferBuffer, 0, Size);
+	            	//.
+	            	OnProgressHandler.DoOnProgress(BytesRead1, Canceller);
 				}
 				//.
-				continue; //. ^
-			}
-			if (BytesRead != DescriptorSize)
-				throw new IOException("wrong data descriptor"); //. =>
-			//.
-			BytesRead1 = 0;
-			Size = (TransferBuffer[3] << 24)+((TransferBuffer[2] & 0xFF) << 16)+((TransferBuffer[1] & 0xFF) << 8)+(TransferBuffer[0] & 0xFF);
-			if (Size > 0) { 
-				if (Size > TransferBuffer.length)
-					TransferBuffer = new byte[Size];
-				if (Connection != null)
-					Connection.setSoTimeout(_StreamingTimeout);
-				BytesRead1 = TNetworkConnection.InputStream_ReadData(pInputStream, TransferBuffer, Size);	
-                if (BytesRead1 <= 0) 
-                	break; //. >
-				//. parse and process
-            	ParseFromByteArrayAndProcess(TransferBuffer, 0, Size);
-            	//.
-            	OnProgressHandler.DoOnProgress(BytesRead1, Canceller);
-			}
-			//.
-			if (pInputStreamSize > 0) {
-				pInputStreamSize -= (BytesRead+BytesRead1);
-				if (pInputStreamSize <= 0)
-                	break; //. >
-			}
-		}    	
+				if (pInputStreamSize > 0) {
+					pInputStreamSize -= (BytesRead+BytesRead1);
+					if (pInputStreamSize <= 0)
+	                	break; //. >
+				}
+			}    	
+		}
+		finally {
+			FlowControl_Stop();
+		}
 	}		
 	
 	@Override
@@ -122,7 +138,7 @@ public class TH264IChannel extends TStreamChannel {
 		Idx += Size; 
 		return Idx;
 	}
-
+	
 	@Override
 	public TChannelProcessor GetProcessor() throws Exception {
 		if (Processor != null)
@@ -135,5 +151,26 @@ public class TH264IChannel extends TStreamChannel {
 	
 	public synchronized void SetOnH264FramesHandler(TDoOnH264FramesHandler pOnH264FramesHandler) {
 		OnH264FramesHandler = pOnH264FramesHandler;
+	}
+	
+	public void FlowControl_Initialize(TH264IChannelFlowControl pFlowControl) {
+		FlowControl = pFlowControl;
+	}
+	
+	private void FlowControl_Finalize() throws Exception {
+		if (FlowControl != null) {
+			FlowControl.Destroy();
+			FlowControl = null;
+		}
+	}
+	
+	private void FlowControl_Start() throws Exception {
+		if (FlowControl != null)
+			FlowControl.Start();
+	}
+	
+	private void FlowControl_Stop() throws Exception {
+		if (FlowControl != null) 
+			FlowControl.Stop();
 	}
 }

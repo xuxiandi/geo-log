@@ -21,7 +21,7 @@ import android.opengl.EGLSurface;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.os.Bundle;
+import android.util.Log;
 import android.view.Surface;
 
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
@@ -624,77 +624,121 @@ public class TH264EncoderServer {
 		public void run()  {
 			try {
 				//. _Thread.setPriority(Thread.MAX_PRIORITY);
+				Codec_CurrentBitrate = BitRate;
+				Codec_Bitrate = Codec_CurrentBitrate;
 				//.
-				TInputSurface InputSurface = new TInputSurface(Codec.createInputSurface(), FrameWidth,FrameHeight);
-				try {
-	                InputSurface.makeCurrent();
+				int RepeatCount = 0;
+	            while (!Canceller.flCancel) {
+					Codec = MediaCodec.createEncoderByType(CodecTypeName);
 					//.
-	                TSurfaceTextureManager InputSurfaceTextureManager = new TSurfaceTextureManager();
+					MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, FrameWidth,FrameHeight);
+					format.setInteger(MediaFormat.KEY_FRAME_RATE, FrameRate);
+					format.setInteger(MediaFormat.KEY_BIT_RATE, Codec_CurrentBitrate);
+					format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, Encoding_IFRAMEInterval);
+					format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+					//.
+					Codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 					try {
-						SurfaceTexture InputSurfaceTexture = InputSurfaceTextureManager.getSurfaceTexture();
+						Log.w("H264Server", "Bitrate changed: "+Integer.toString(Codec_CurrentBitrate/1000)+" kbps");
 						//.
-			        	SourceCamera.setPreviewTexture(InputSurfaceTexture);
-			        	//.
-			        	TPreviewSurface _PreviewSurface = null;
+						TInputSurface InputSurface = new TInputSurface(Codec.createInputSurface(), FrameWidth,FrameHeight);
 						try {
-							if (PreviewSurface != null)
-								_PreviewSurface = new TPreviewSurface(PreviewSurface, PreviewSurfaceRect.width(),PreviewSurfaceRect.height(), InputSurface.mEGLDisplay, InputSurface.mEGLConfigs, InputSurface.mEGLContext);
-							
+			                InputSurface.makeCurrent();
 							//.
-							Codec.start();
-				        	try {
-					        	TOutputProcessing OutputProcessing = new TOutputProcessing();
+			                TSurfaceTextureManager InputSurfaceTextureManager = new TSurfaceTextureManager();
+							try {
+								SurfaceTexture InputSurfaceTexture = InputSurfaceTextureManager.getSurfaceTexture();
+								//.
+					        	SourceCamera.setPreviewTexture(InputSurfaceTexture);
 					        	try {
-					        		try {
-					        			SignalOfInitialization(); //. fire initialization is done signal
-					        			//.
-							            while (!Canceller.flCancel) {
-							                InputSurfaceTextureManager.awaitNewImage();
-							                //.
-							                InputSurfaceTextureManager.drawImage();
-							                //. set a frame timestamp
-							                InputSurface.setPresentationTime(System.nanoTime());
-							                //. do encoding
-							                InputSurface.swapBuffers();
-							                //. do previewing
-							                if (_PreviewSurface != null) {
-							                	_PreviewSurface.makeCurrent();
-								                InputSurfaceTextureManager.drawImage();
-								                _PreviewSurface.swapBuffers();
-							                	//. restore encoding surface
-								                InputSurface.makeCurrent();
-							                }
-							            }
-					        		}
-					        		catch (InterruptedException IE) {
-							            //. send end-of-stream to encoder
-							            Codec.signalEndOfInputStream();
-							            //.
-							            return; //. ->
-					        		}
-						            //. send end-of-stream to encoder
-						            Codec.signalEndOfInputStream();
+						        	TPreviewSurface _PreviewSurface = null;
+									try {
+										if (PreviewSurface != null)
+											_PreviewSurface = new TPreviewSurface(PreviewSurface, PreviewSurfaceRect.width(),PreviewSurfaceRect.height(), InputSurface.mEGLDisplay, InputSurface.mEGLConfigs, InputSurface.mEGLContext);
+										//.
+										Codec.start();
+							        	try {
+								        	TOutputProcessing OutputProcessing = new TOutputProcessing();
+								        	try {
+								        		try {
+								        			if (RepeatCount == 0)
+								        				SignalOfInitialization(); //. fire initialization is done signal
+								        			else
+								        				SourceCamera.startPreview();
+								        			//.
+										            while (!Canceller.flCancel) {
+										                InputSurfaceTextureManager.awaitNewImage();
+										                //.
+										                InputSurfaceTextureManager.drawImage();
+										                //. set a frame timestamp
+										                InputSurface.setPresentationTime(System.nanoTime());
+										                //. do encoding
+										                InputSurface.swapBuffers();
+										                //. do previewing
+										                if (_PreviewSurface != null) {
+										                	_PreviewSurface.makeCurrent();
+											                InputSurfaceTextureManager.drawImage();
+											                _PreviewSurface.swapBuffers();
+										                	//. restore encoding surface
+											                InputSurface.makeCurrent();
+										                }
+														//. change the BitRate on the fly
+														if ((Codec_Bitrate != Codec_CurrentBitrate) && (android.os.Build.VERSION.SDK_INT >= 19)) {
+															int Bitrate = Codec_Bitrate;
+															//.
+															/* TODO  
+															Bundle params = new Bundle();
+															params.putInt(MediaCodec.PARAMETER_KEY_VIDEO_BITRATE, Bitrate);
+															Codec.setParameters(params);
+															*/
+															//.
+															Codec_CurrentBitrate = Bitrate;
+															//.
+															break; //. >
+														}
+										            }
+								        		}
+								        		catch (InterruptedException IE) {
+										            //. send end-of-stream to encoder
+										            Codec.signalEndOfInputStream();
+										            //.
+										            return; //. ->
+								        		}
+									            //. send end-of-stream to encoder
+									            Codec.signalEndOfInputStream();
+								        	}
+								        	finally {
+								        		OutputProcessing.Destroy();
+								        	}
+							        	}
+							        	finally {
+							    			Codec.stop();
+							        	}
+									}
+									finally {
+										if (_PreviewSurface != null)
+											_PreviewSurface.release();
+									}
 					        	}
 					        	finally {
-					        		OutputProcessing.Destroy();
+					        		SourceCamera.stopPreview();
+					        		SourceCamera.setPreviewTexture(null);
 					        	}
-				        	}
-				        	finally {
-				    			Codec.stop();
-				        	}
+							}
+							finally {
+								InputSurfaceTextureManager.release();
+							}
 						}
 						finally {
-							if (_PreviewSurface != null)
-								_PreviewSurface.release();
+							InputSurface.release();
 						}
 					}
 					finally {
-						InputSurfaceTextureManager.release();
+						Codec.release();
 					}
-				}
-				finally {
-					InputSurface.release();
-				}
+					//.
+					RepeatCount++;
+	            }
 			}
 			catch (Throwable T) {
 				//. fire initialization is done signal to unblock the waiting threads
@@ -764,16 +808,6 @@ public class TH264EncoderServer {
 					     // Subsequent data will conform to new format.
 					     ///? MediaFormat format = codec.getOutputFormat();
 					}
-					//. change the BitRate on the fly
-					if (Codec_Bitrate != Codec_CurrentBitrate) {
-						int Bitrate = Codec_Bitrate;
-						//.
-						Bundle params = new Bundle();
-						params.putInt(MediaCodec.PARAMETER_KEY_VIDEO_BITRATE, Bitrate);
-						Codec.setParameters(params);
-						//.
-						Codec_CurrentBitrate = Bitrate;
-					}
 				}
 			}
 			catch (Throwable T) {
@@ -799,9 +833,9 @@ public class TH264EncoderServer {
 	private Surface PreviewSurface;
 	private Rect 	PreviewSurfaceRect;
 	//.
-	private MediaCodec 		Codec;
+	private MediaCodec 		Codec = null;
 	private int 			Codec_CurrentBitrate;
-	private volatile int	Codec_Bitrate;
+	private volatile int	Codec_Bitrate = -1;
 	//.
 	private TInputProcessing		InputProcessing = null;
 	//.
@@ -820,18 +854,6 @@ public class TH264EncoderServer {
 		PreviewSurface = pPreviewSurface;
 		PreviewSurfaceRect = pPreviewSurfaceRect;
 		//.
-		Codec = MediaCodec.createEncoderByType(CodecTypeName);
-		Codec_CurrentBitrate = BitRate;
-		Codec_Bitrate = Codec_CurrentBitrate;
-		//.
-		MediaFormat format = MediaFormat.createVideoFormat(CodecTypeName, FrameWidth,FrameHeight);
-		format.setInteger(MediaFormat.KEY_FRAME_RATE, FrameRate);
-		format.setInteger(MediaFormat.KEY_BIT_RATE, Codec_CurrentBitrate);
-		format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, Encoding_IFRAMEInterval);
-		format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-		//.
-		Codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-		//.
 		InputProcessing = new TInputProcessing();
 	}
  
@@ -843,11 +865,6 @@ public class TH264EncoderServer {
 		if (InputProcessing != null) {
 			InputProcessing.Destroy();
 			InputProcessing = null;
-		}
-		//.
-		if (Codec != null) {
-			Codec.release();
-			Codec = null;
 		}
 	}
  
@@ -873,6 +890,12 @@ public class TH264EncoderServer {
 	
 	public int GetBitrate() {
 		return Codec_CurrentBitrate;
+	}
+
+	public int Clients_Count() {
+		synchronized (Clients) {
+			return Clients.size();
+		}
 	}
 	
 	private void Clients_DoOnParameters(byte[] Buffer, int BufferSize) throws Exception {

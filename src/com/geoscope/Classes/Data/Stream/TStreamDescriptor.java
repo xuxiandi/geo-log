@@ -290,4 +290,15 @@ public class TStreamDescriptor {
 				I++;
 		}
 	}
+
+	public void Channels_RemoveHiddenItems() {
+		int I = 0; 
+		while (I < Channels.size()) {
+			TChannel Channel = Channels.get(I);
+			if (Channel.Hidden)
+				Channels.remove(I);
+			else
+				I++;
+		}
+	}
 }

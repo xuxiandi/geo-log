@@ -8,6 +8,7 @@ import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel.TProcessor;
 
 public abstract class TStreamChannelConnectorAbstract {
 
@@ -99,6 +100,7 @@ public abstract class TStreamChannelConnectorAbstract {
 	    	Connector.DoOnStreamChannelException(E);
 	    }
 	}
+    
 	
 	protected Context context;
 	//.
@@ -123,11 +125,13 @@ public abstract class TStreamChannelConnectorAbstract {
     //.
     protected TChannelConnectionAbstract ChannelConnection = null;
     //.
+    protected TProcessor Processor;
+    //.
     protected TOnProgressHandler	OnProgressHandler;
     protected TOnIdleHandler 		OnIdleHandler;
     protected TOnExceptionHandler 	OnExceptionHandler;
 
-    public TStreamChannelConnectorAbstract(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    public TStreamChannelConnectorAbstract(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, TProcessor pProcessor, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	context = pcontext;
     	//.
     	ServerAddress = pServerAddress;
@@ -140,7 +144,9 @@ public abstract class TStreamChannelConnectorAbstract {
     	//.
     	Channel = pChannel;
     	//.
-    	ReadingTimeout = DefaultReadingTimeout; 
+    	ReadingTimeout = DefaultReadingTimeout;
+    	//.
+    	Processor = pProcessor;
     	//.
     	OnProgressHandler = pOnProgressHandler;
     	OnIdleHandler = pOnIdleHandler;

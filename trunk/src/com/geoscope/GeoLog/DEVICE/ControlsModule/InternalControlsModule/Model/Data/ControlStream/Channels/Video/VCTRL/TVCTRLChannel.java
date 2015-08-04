@@ -12,7 +12,10 @@ import com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Da
 public class TVCTRLChannel extends TStreamChannel {
 
 	public static final String TypeID = "Video.VCTRL";
-		
+
+	public static final int MinBitrate = 1024;
+	public static final int MaxBitrate = 1024*1024*16;
+	
 	public static class TMyProfile extends TChannel.TProfile {
 		
 	}
@@ -57,6 +60,26 @@ public class TVCTRLChannel extends TStreamChannel {
 		}
 	}
 	
+	public static class SourceNonExclusiveAccessError extends Exception {
+		
+		private static final long serialVersionUID = 1L;
+
+		
+		public SourceNonExclusiveAccessError() {
+			super("");
+		}
+	}
+	
+	public static class ValueOutOfRangeError extends Exception {
+		
+		private static final long serialVersionUID = 1L;
+
+		
+		public ValueOutOfRangeError() {
+			super("");
+		}
+	}
+	
 	public static final int COMMAND_ID = 1;
 	
 	private static Hashtable<Integer, Boolean> ChannelLockTable = new Hashtable<Integer, Boolean>();  
@@ -79,9 +102,9 @@ public class TVCTRLChannel extends TStreamChannel {
 		//.
 		Kind = TChannel.CHANNEL_KIND_INOUT;
 		DataFormat = 0;
-		Name = "Audio voice commands";
+		Name = "Video channel control";
 		Info = "";
-		Size = 1024*1024*1;
+		Size = 1024;
 		Configuration = "";
 		Parameters = "";
 		//.
@@ -119,11 +142,14 @@ public class TVCTRLChannel extends TStreamChannel {
 		int Version = Integer.parseInt(Command[0]);
 		switch (Version) {
 		
-		case 1:
+		case 0: //. ping command 
+			break; //. >
+			
+		case 1: //. set Bitrate
 			int ChannelID = Integer.parseInt(Command[1]);
 			int Bitrate = Integer.parseInt(Command[2]);
 			//.
-			com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)InternalControlsModule.ControlsModule.Model.StreamChannels_GetOneByID(ChannelID);
+			com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)InternalControlsModule.ControlsModule.Device.SensorsModule.Model.StreamChannels_GetOneByID(ChannelID);
 			if (Channel == null) 
 				throw new ChannelNotFoundError(); //. =>
 			com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel SourceChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)Channel.SourceChannel_Get();
@@ -134,19 +160,28 @@ public class TVCTRLChannel extends TStreamChannel {
 			//.
 			LockChannel(ChannelID);
 			try {
-				if (!SourceChannel.SetBitrate(Bitrate))
+				switch (SourceChannel.SetBitrate(Bitrate)) {
+				
+				case com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.SetBitrateResult_Ok:
+					break; //. > 
+
+				case com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.SetBitrateResult_SourceNotAvailable:
 					throw new SourceNotAvailableError(); //. =>
+
+				case com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.SetBitrateResult_SourceNonExcusiveAccess:
+					throw new SourceNonExclusiveAccessError(); //. =>
+				}
 			}
 			finally {
 				UnlockChannel(ChannelID);
 			}
 			break; //. >
 			
-		case 2:
+		case 2: //. multiply Bitrate
 			ChannelID = Integer.parseInt(Command[1]);
 			double BitrateMultiplier = Double.parseDouble(Command[2]);
 			//.
-			Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)InternalControlsModule.ControlsModule.Model.StreamChannels_GetOneByID(ChannelID);
+			Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)InternalControlsModule.ControlsModule.Device.SensorsModule.Model.StreamChannels_GetOneByID(ChannelID);
 			if (Channel == null) 
 				throw new ChannelNotFoundError(); //. =>
 			SourceChannel = (com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel)Channel.SourceChannel_Get();
@@ -160,7 +195,23 @@ public class TVCTRLChannel extends TStreamChannel {
 				Bitrate = SourceChannel.GetBitrate();
 				if (Bitrate == -1)
 					throw new SourceNotAvailableError(); //. =>
-				SourceChannel.SetBitrate((int)(Bitrate*BitrateMultiplier));
+				Bitrate = (int)(Bitrate*BitrateMultiplier);
+				if (Bitrate < MinBitrate)
+					throw new ValueOutOfRangeError(); //. =>
+				if (Bitrate > MaxBitrate)
+					throw new ValueOutOfRangeError(); //. =>
+				//.
+				switch (SourceChannel.SetBitrate(Bitrate)) {
+				
+				case com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.SetBitrateResult_Ok:
+					break; //. > 
+
+				case com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.SetBitrateResult_SourceNotAvailable:
+					throw new SourceNotAvailableError(); //. =>
+
+				case com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.SetBitrateResult_SourceNonExcusiveAccess:
+					throw new SourceNonExclusiveAccessError(); //. =>
+				}
 			}
 			finally {
 				UnlockChannel(ChannelID);

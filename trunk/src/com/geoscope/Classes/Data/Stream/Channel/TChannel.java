@@ -264,6 +264,9 @@ public class TChannel {
 	public String Info = "";
 	//.
 	public boolean Enabled = true;
+	//.
+	public boolean Hidden = false;
+	//. streaming settings
 	public int Kind = CHANNEL_KIND_OUT;
 	public int 	DataFormat = 0;
 	public int 	Size = 8192;

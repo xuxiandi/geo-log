@@ -387,6 +387,7 @@ public class TDataStreamPropsPanel extends Activity {
 					        								byte[] ModelData = DC.ControlsModule.ControlsDataValue.Value;
 					        								com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.TModel Model = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.TModel(ModelData);
 					        								DataStreamDescriptor = Model.ControlStream;
+					        								DataStreamDescriptor.Channels_RemoveHiddenItems();
 					        					        	DataStreamChannels = DataStreamDescriptor.Channels;
 					        								//.
 					        			    				Canceller.Check();

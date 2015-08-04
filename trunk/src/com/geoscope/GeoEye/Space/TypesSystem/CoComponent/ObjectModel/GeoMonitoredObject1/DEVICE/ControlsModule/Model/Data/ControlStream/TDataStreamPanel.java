@@ -167,7 +167,7 @@ public class TDataStreamPanel extends Activity {
 		for (int I = 0; I < StreamDescriptor.Channels.size(); I++) {
 			TStreamChannel Channel = (TStreamChannel)StreamDescriptor.Channels.get(I);
 			if ((StreamChannels == null) || StreamChannels.IDExists(Channel.ID)) {
-				TStreamChannelConnectorAbstract ChannelConnector = new TStreamChannelConnector(this, ServerAddress,ServerPort, UserID,UserPassword, Object, Channel, new TStreamChannelConnectorAbstract.TOnProgressHandler(Channel) {
+				TStreamChannelConnectorAbstract ChannelConnector = new TStreamChannelConnector(this, ServerAddress,ServerPort, UserID,UserPassword, Object, Channel, null/*Processor*/, new TStreamChannelConnectorAbstract.TOnProgressHandler(Channel) {
 					
 					@Override
 					public void DoOnProgress(int ReadSize, TCanceller Canceller) {

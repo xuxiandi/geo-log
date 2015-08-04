@@ -1,12 +1,9 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.Channels.Telecontrol.TLC;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
-import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel;
 
 public class TTLCChannel extends TStreamChannel {
@@ -20,13 +17,6 @@ public class TTLCChannel extends TStreamChannel {
 	public String GetTypeID() {
 		return TypeID;
 	}
-	
-	@Override
-	public void DoStreaming(InputStream pInputStream, OutputStream pOutputStream, TCanceller Canceller) throws Exception {
-		while (!Canceller.flCancel) {
-			Thread.sleep(100);
-		}    	
-	}		
 	
 	@Override
 	public int ParseFromByteArrayAndProcess(byte[] BA, int Idx) throws Exception {

@@ -30,7 +30,7 @@ public class TVCChannel extends TStreamChannel {
 		DataFormat = 0;
 		Name = "Audio voice commands";
 		Info = "";
-		Size = 1024*1024*1;
+		Size = 1024;
 		Configuration = "";
 		Parameters = "";
 		//.

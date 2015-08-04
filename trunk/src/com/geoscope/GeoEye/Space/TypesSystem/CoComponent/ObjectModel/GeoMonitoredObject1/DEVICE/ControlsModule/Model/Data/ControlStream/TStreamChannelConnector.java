@@ -13,6 +13,7 @@ import com.geoscope.Classes.Exception.CancelException;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.TGeoMonitoredObject1Model;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel.TProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.LANConnectionRepeaterDefines;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionExceptionHandler;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.LANModule.TLANConnectionRepeater;
@@ -78,7 +79,7 @@ public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
 								Connector.Channel.SetConnection(OS,IS);
 								try {
 									//. processing ...
-									Connector.Channel.DoStreaming(IS,OS, Canceller);
+									Connector.Channel.DoStreaming(IS,OS, Connector.Processor, Canceller);
 								}
 								finally {
 									Connector.Channel.ClearConnection();
@@ -113,8 +114,8 @@ public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
 	    }
 	}
 	
-    public TStreamChannelConnector(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
-    	super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pObject, pChannel, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
+    public TStreamChannelConnector(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, TProcessor pProcessor, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    	super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pObject, pChannel, pProcessor, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
     }
 
     @Override

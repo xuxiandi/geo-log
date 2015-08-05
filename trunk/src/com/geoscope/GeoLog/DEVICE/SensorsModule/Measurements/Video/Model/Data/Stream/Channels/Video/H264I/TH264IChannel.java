@@ -26,15 +26,15 @@ public class TH264IChannel extends TStreamChannel {
 		
 		private TH264IChannel Channel;
 		//.
-		public int	IndexBase = -1;
-		public long TimestampBase;
-		
+		private int  	Index = 0;
+		private long	TimestampBase = 0;
+		//.
+		private byte[] IndexBA = new byte[4];
+		private byte[] TimestampBA = new byte[4];
+				
 		public TOutputStream(TH264IChannel pChannel) {
 			Channel = pChannel;
 		}
-		
-		private byte[] IndexBA = new byte[4];
-		private byte[] TimestampBA = new byte[4];
 		
 		@Override
 		public void write(byte[] buffer, int byteOffset, int byteCount) throws IOException {
@@ -46,32 +46,28 @@ public class TH264IChannel extends TStreamChannel {
 				switch (Descriptor) {
 				
 				case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.DataTag:
-					Channel.VideoFrameBufferedStream.write(buffer, byteOffset, DataSize); byteOffset += DataSize; 
+					Channel.VideoFrameBufferedStream.write(buffer, byteOffset, DataSize); 
+					//.
+					Index += DataSize;
+					if (Channel.Packets == 1)
+						TimestampBase = System.currentTimeMillis();
 					//.
 					Channel.Packets++;
 					//.
 					break; //. >
 					
 				case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.IndexTag:
-					//. make index as zero-based
-					int Index = TDataConverter.ConvertLEByteArrayToInt32(buffer, byteOffset); byteOffset += DataSize; 
-					if (IndexBase < 0)
-						IndexBase = Index;
-					Index -= IndexBase;
 					TDataConverter.ConvertInt32ToLEByteArray(Index, IndexBA, 0);
-					//.
 					Channel.VideoFrameIndexBufferedStream.write(IndexBA);
-					break; //. >
-					
-				case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.TimestampTag:
-					//. make timestamp as zero-based
-					int Timestamp = TDataConverter.ConvertLEByteArrayToInt32(buffer, byteOffset); byteOffset += DataSize;
-					Timestamp -= TimestampBase; 
-					TDataConverter.ConvertInt32ToLEByteArray(Timestamp, TimestampBA, 0);
 					//.
+					TDataConverter.ConvertInt32ToLEByteArray((int)(System.currentTimeMillis()-TimestampBase), TimestampBA, 0);
 					Channel.VideoFrameTimestampBufferedStream.write(TimestampBA);
+					//.
 					break; //. >
 				}
+				//.
+				byteOffset += DataSize;
+				//.
 			} while (byteCount > 0);
 		}
 
@@ -144,8 +140,6 @@ public class TH264IChannel extends TStreamChannel {
 		Packets = 0;
 		//.
 		DestinationStream = new TOutputStream(this);
-		//.
-		DestinationStream.TimestampBase = System.nanoTime()/1000000;
 	}
 	
 	@Override

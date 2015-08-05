@@ -168,13 +168,13 @@ public class TH264IChannel extends TStreamChannel {
 			
 			@Override
 			public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws Exception {
-				DestinationChannel.DoOnH264Packet(Buffer, BufferSize);
-				//.
 				if (flSyncFrame) {
 					Timestamp = Timestamp/1000; //. convert to milliseconds from microseconds
 					//.
 					DestinationChannel.DoOnH264IndexAndTimestamp(Index, (int)Timestamp);
 				}
+				//.
+				DestinationChannel.DoOnH264Packet(Buffer, BufferSize);
 				//.
 				Index += BufferSize;
 			}

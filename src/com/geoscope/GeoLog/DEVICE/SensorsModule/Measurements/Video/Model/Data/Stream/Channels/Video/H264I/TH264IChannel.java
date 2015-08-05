@@ -26,41 +26,53 @@ public class TH264IChannel extends TStreamChannel {
 		
 		private TH264IChannel Channel;
 		//.
+		public int	IndexBase = -1;
 		public long TimestampBase;
 		
 		public TOutputStream(TH264IChannel pChannel) {
 			Channel = pChannel;
 		}
 		
+		private byte[] IndexBA = new byte[4];
 		private byte[] TimestampBA = new byte[4];
 		
 		@Override
 		public void write(byte[] buffer, int byteOffset, int byteCount) throws IOException {
-			byteOffset += BufferDescriptorSize; byteCount -= BufferDescriptorSize;
-			//.
-			short Descriptor = TDataConverter.ConvertLEByteArrayToInt16(buffer, byteOffset); byteOffset += com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.TagSize; byteCount -= com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.TagSize;
-			switch (Descriptor) {
-			
-			case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.DataTag:
-				Channel.VideoFrameBufferedStream.write(buffer, byteOffset, byteCount);
+			do {
+				int DataSize = TDataConverter.ConvertLEByteArrayToInt32(buffer, byteOffset); byteOffset += BufferDescriptorSize; byteCount -= (BufferDescriptorSize+DataSize);
 				//.
-				Channel.Packets++;
+				short Descriptor = TDataConverter.ConvertLEByteArrayToInt16(buffer, byteOffset); byteOffset += com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.TagSize; DataSize -= com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.TagSize;
 				//.
-				break; //. >
+				switch (Descriptor) {
 				
-			case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.IndexTag:
-				Channel.VideoFrameIndexBufferedStream.write(buffer, byteOffset, byteCount);
-				break; //. >
-				
-			case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.TimestampTag:
-				//. make timestamp as zero-based
-				int Timestamp = TDataConverter.ConvertLEByteArrayToInt32(buffer, byteOffset);
-				Timestamp -= TimestampBase; 
-				TDataConverter.ConvertInt32ToLEByteArray(Timestamp, TimestampBA,0);
-				//.
-				Channel.VideoFrameTimestampBufferedStream.write(TimestampBA);
-				break; //. >
-			}
+				case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.DataTag:
+					Channel.VideoFrameBufferedStream.write(buffer, byteOffset, DataSize); byteOffset += DataSize; 
+					//.
+					Channel.Packets++;
+					//.
+					break; //. >
+					
+				case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.IndexTag:
+					//. make index as zero-based
+					int Index = TDataConverter.ConvertLEByteArrayToInt32(buffer, byteOffset); byteOffset += DataSize; 
+					if (IndexBase < 0)
+						IndexBase = Index;
+					Index -= IndexBase;
+					TDataConverter.ConvertInt32ToLEByteArray(Index, IndexBA, 0);
+					//.
+					Channel.VideoFrameIndexBufferedStream.write(IndexBA);
+					break; //. >
+					
+				case com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel.TimestampTag:
+					//. make timestamp as zero-based
+					int Timestamp = TDataConverter.ConvertLEByteArrayToInt32(buffer, byteOffset); byteOffset += DataSize;
+					Timestamp -= TimestampBase; 
+					TDataConverter.ConvertInt32ToLEByteArray(Timestamp, TimestampBA, 0);
+					//.
+					Channel.VideoFrameTimestampBufferedStream.write(TimestampBA);
+					break; //. >
+				}
+			} while (byteCount > 0);
 		}
 
 		@Override

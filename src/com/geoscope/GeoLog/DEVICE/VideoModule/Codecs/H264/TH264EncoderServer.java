@@ -794,8 +794,11 @@ public class TH264EncoderServer {
 								//.
 								Clients_DoOnParameters(Parameters,Parameters.length);
 							}
-						else
-							Clients_DoOnOutputBuffer(OutData,bufferInfo.size, bufferInfo.presentationTimeUs,((bufferInfo.flags & MediaCodec.BUFFER_FLAG_SYNC_FRAME) > 0));
+						else {
+							int OutDataSize = bufferInfo.size; 
+							if (OutDataSize > 0)
+								Clients_DoOnOutputBuffer(OutData, OutDataSize, bufferInfo.presentationTimeUs,((bufferInfo.flags & MediaCodec.BUFFER_FLAG_SYNC_FRAME) > 0));
+						}
 						OutputBufferCount++;
 						//.
 						Codec.releaseOutputBuffer(outputBufferIndex, false);

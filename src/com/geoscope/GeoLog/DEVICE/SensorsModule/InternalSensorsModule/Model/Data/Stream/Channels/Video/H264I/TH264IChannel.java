@@ -171,10 +171,9 @@ public class TH264IChannel extends TStreamChannel {
 				DestinationChannel.DoOnH264Packet(Buffer, BufferSize);
 				//.
 				if (flSyncFrame) {
-					DestinationChannel.DoOnH264Index(Index);
-					//.
 					Timestamp = Timestamp/1000; //. convert to milliseconds from microseconds
-					DestinationChannel.DoOnH264Timestamp((int)Timestamp);
+					//.
+					DestinationChannel.DoOnH264IndexAndTimestamp(Index, (int)Timestamp);
 				}
 				//.
 				Index += BufferSize;

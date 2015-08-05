@@ -153,7 +153,7 @@ public class TNewClientRegistrationPanel extends Activity {
 	}
 
 	private void Update() {
-		cbNewTrackerObjectPrivateAccess.setChecked(false);
+		cbNewTrackerObjectPrivateAccess.setChecked(true);
     	spNewTrackerObjectGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByID(Component.Configuration.GeoSpaceID));
 		edNewTrackerObjectMapID.setText(Integer.toString(Component.Configuration.GeoLog_GPSModuleMapID));
 	}

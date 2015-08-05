@@ -53,12 +53,14 @@ public class TH264IChannelFlowControl {
     private TProcessor Processor = new TProcessor() {
 
     	private static final int 	Check_Interval = 5000; //. ms
-    	private static final double Check_ReduceBitrateFactor = 0.99;
-    	private static final double Check_IncreaseBitrateFactor = 0.01;
+    	private static final double Check_ReduceBitrateFactor = 0.50;
+    	private static final double Check_IncreaseBitrateZeroFillFactorCount = 6;
     	private static final int 	Check_PauseAfterBitrateChange = 5000; //. ms
     	
     	@Override
     	public void Process(com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.TStreamChannel Channel, TCanceller Canceller) throws Exception {
+    		double LastFillFactor = -1.0;
+    		int ZeroFillFactorCount = 0;
     		while (!Canceller.flCancel) {
     			Thread.sleep(Check_Interval);
     			//. 
@@ -66,7 +68,12 @@ public class TH264IChannelFlowControl {
     				TVCTRLChannel.TPacketsBufferInfo PacketsBufferInfo = ControlChannel.GetChannelSubscriberPacketsBufferInfo(H264IChannel.ID, H264IChannel.UserAccessKey);
     				if (PacketsBufferInfo.BuffersCount > 0) {
     					double FillFactor = (PacketsBufferInfo.PendingPackets+0.0)/PacketsBufferInfo.BuffersCount;
-    					if (FillFactor > Check_ReduceBitrateFactor) {
+    					double FillFactorTrend = ((LastFillFactor >= 0) ? (FillFactor-LastFillFactor) : 0.0);
+    					LastFillFactor = FillFactor;
+    					if (FillFactor == 0.0)
+    						ZeroFillFactorCount++;
+    					//.
+    					if ((FillFactor > Check_ReduceBitrateFactor) && (FillFactorTrend > 0.0)) {
     						try {
             					ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 0.5);
             				}
@@ -78,7 +85,9 @@ public class TH264IChannelFlowControl {
         					Thread.sleep(Check_PauseAfterBitrateChange);
             			}
     					else 
-        					if (FillFactor < Check_IncreaseBitrateFactor) {
+        					if (ZeroFillFactorCount >= Check_IncreaseBitrateZeroFillFactorCount) {
+        						ZeroFillFactorCount = 0;
+        						//.
         						try {
                 					ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 2.0);
                 				}

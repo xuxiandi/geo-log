@@ -87,7 +87,7 @@ public class TAACChannel extends TStreamChannel {
 			try {
 				if (Connection != null)
 					Connection.setSoTimeout(StreamingTimeout);
-                BytesRead = pInputStream.read(TransferBuffer,0,DescriptorSize);
+                BytesRead = TNetworkConnection.InputStream_ReadData(pInputStream, TransferBuffer, DescriptorSize);
                 if (BytesRead <= 0) 
                 	break; //. >
 				IdleTimeoutCount = 0;

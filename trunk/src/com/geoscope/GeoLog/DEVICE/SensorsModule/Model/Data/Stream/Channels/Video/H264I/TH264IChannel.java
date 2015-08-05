@@ -153,25 +153,15 @@ public class TH264IChannel extends TStreamChannel {
 		ProcessPacket(Packet, PacketSize);
 	}
 
-	public void DoOnH264Index(int Index) throws Exception {
-		int Descriptor = TagSize+4/*SizeOf(Index)*/;
-		int PacketSize = DescriptorSize+Descriptor;
+	public void DoOnH264IndexAndTimestamp(int Index, int Timestamp) throws Exception {
+		int Descriptor = TagSize+4/*SizeOf(Index OR Timestamp)*/;
+		int PacketSize = ((DescriptorSize+Descriptor) << 1);
 		if (PacketSize > Packet.length) 
 			Packet = new byte[PacketSize];
 		int Idx = 0;
 		TDataConverter.ConvertInt32ToLEByteArray(Descriptor, Packet, Idx); Idx += DescriptorSize; 
 		TDataConverter.ConvertInt16ToLEByteArray(IndexTag, Packet, Idx); Idx += TagSize; 
-		TDataConverter.ConvertInt32ToLEByteArray(Index, Packet, Idx);  
-		//.
-		ProcessPacket(Packet, PacketSize);
-	}
-
-	public void DoOnH264Timestamp(int Timestamp) throws Exception {
-		int Descriptor = TagSize+4/*SizeOf(Timestamp)*/;
-		int PacketSize = DescriptorSize+Descriptor;
-		if (PacketSize > Packet.length) 
-			Packet = new byte[PacketSize];
-		int Idx = 0;
+		TDataConverter.ConvertInt32ToLEByteArray(Index, Packet, Idx); Idx += 4; //. SizeOf(Index) 
 		TDataConverter.ConvertInt32ToLEByteArray(Descriptor, Packet, Idx); Idx += DescriptorSize; 
 		TDataConverter.ConvertInt16ToLEByteArray(TimestampTag, Packet, Idx); Idx += TagSize; 
 		TDataConverter.ConvertInt32ToLEByteArray(Timestamp, Packet, Idx);  

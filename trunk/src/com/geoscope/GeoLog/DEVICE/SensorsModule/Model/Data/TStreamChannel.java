@@ -34,10 +34,20 @@ public class TStreamChannel extends TChannel {
 			//.
 			Buffering = new TMemoryBuffering(pBufferSize, new TMemoryBuffering.TOnBufferDequeueHandler() {
 				
+				private int 	ABuffer_Size = 0;
+				private byte[] 	ABuffer = new byte[8192];
+				
 				@Override
 				public void DoOnBufferDequeue(TBuffer Buffer) {
 					try {
-						ProcessPacket(Buffer.Data, Buffer.Size);
+						synchronized (Buffer) {
+							ABuffer_Size = Buffer.Size;
+							if (ABuffer_Size > ABuffer.length)
+								ABuffer = new byte[ABuffer_Size];
+							System.arraycopy(Buffer.Data,0, ABuffer,0, ABuffer_Size);
+						}
+						//.
+						ProcessPacket(ABuffer, ABuffer_Size);
 					} catch (IOException E) {
 						if (Channel != null)
 							Channel.SensorsModule.Device.Log.WriteError("Channel.PacketSubscriber.ProcessPacket", E.getMessage());

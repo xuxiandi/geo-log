@@ -53,7 +53,8 @@ public class TH264IChannelFlowControl {
     private TProcessor Processor = new TProcessor() {
 
     	private static final int 	Check_Interval = 5000; //. ms
-    	private static final double Check_ReduceBitrateFactor = 0.50;
+    	private static final double Check_ReduceBitrateFillFactor = 0.50;
+    	private static final double Check_ZeroFillFactor = 0.05;
     	private static final double Check_IncreaseBitrateZeroFillFactorCount = 6;
     	private static final int 	Check_PauseAfterBitrateChange = 5000; //. ms
     	
@@ -70,10 +71,8 @@ public class TH264IChannelFlowControl {
     					double FillFactor = (PacketsBufferInfo.PendingPackets+0.0)/PacketsBufferInfo.BuffersCount;
     					double FillFactorTrend = ((LastFillFactor >= 0) ? (FillFactor-LastFillFactor) : 0.0);
     					LastFillFactor = FillFactor;
-    					if (FillFactor == 0.0)
-    						ZeroFillFactorCount++;
     					//.
-    					if ((FillFactor > Check_ReduceBitrateFactor) && (FillFactorTrend > 0.0)) {
+    					if ((FillFactor > Check_ReduceBitrateFillFactor) && (FillFactorTrend > 0.0)) {
     						try {
             					ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 0.5);
             				}
@@ -85,19 +84,25 @@ public class TH264IChannelFlowControl {
         					Thread.sleep(Check_PauseAfterBitrateChange);
             			}
     					else 
-        					if (ZeroFillFactorCount >= Check_IncreaseBitrateZeroFillFactorCount) {
-        						ZeroFillFactorCount = 0;
-        						//.
-        						try {
-                					ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 2.0);
-                				}
-                				catch (com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ValueOutOfRangeError VOORE) {
-                				}
-                				catch (Exception E) {
-                				}    					
+        					if (FillFactor < Check_ZeroFillFactor) {
+        						ZeroFillFactorCount++;
             					//.
-            					Thread.sleep(Check_PauseAfterBitrateChange);
-                			}
+            					if (ZeroFillFactorCount >= Check_IncreaseBitrateZeroFillFactorCount) {
+            						ZeroFillFactorCount = 0;
+            						//.
+            						try {
+                    					ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 2.0);
+                    				}
+                    				catch (com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ValueOutOfRangeError VOORE) {
+                    				}
+                    				catch (Exception E) {
+                    				}    					
+                					//.
+                					Thread.sleep(Check_PauseAfterBitrateChange);
+                    			}
+        					}
+        					else
+        						ZeroFillFactorCount = 0;
     				}
     			}
     			catch (Exception E) {

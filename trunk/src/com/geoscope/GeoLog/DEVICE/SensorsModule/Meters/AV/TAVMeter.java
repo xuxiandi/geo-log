@@ -2,6 +2,7 @@ package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.AV;
 
 import com.geoscope.Classes.MultiThreading.TStartableCancelableThread;
 import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedReadWriteLock;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurement;
@@ -68,7 +69,7 @@ public class TAVMeter extends TSensorMeter {
 										@Override
 										public void run() {
 											try {
-												AudioChannel.DoStreaming(Measurement.AACChannel.DestinationStream, Canceller, MeasurementMaxDuration);
+												AudioChannel.DoStreaming(TUserAccessKey.GenerateValue(), Measurement.AACChannel.DestinationStream, Canceller, MeasurementMaxDuration);
 											}
 									    	catch (Throwable E) {
 												SetStatus(STATUS_ERROR);
@@ -85,7 +86,7 @@ public class TAVMeter extends TSensorMeter {
 										@Override
 										public void run() {
 											try {
-												VideoChannel.DoStreaming(Measurement.H264IChannel.DestinationStream, Canceller, MeasurementMaxDuration);
+												VideoChannel.DoStreaming(TUserAccessKey.GenerateValue(), Measurement.H264IChannel.DestinationStream, Canceller, MeasurementMaxDuration);
 											}
 									    	catch (Throwable E) {
 												SetStatus(STATUS_ERROR);

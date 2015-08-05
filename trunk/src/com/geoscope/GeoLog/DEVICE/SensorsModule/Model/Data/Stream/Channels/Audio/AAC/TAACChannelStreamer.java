@@ -1,6 +1,7 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC;
 
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreaming;
 
@@ -28,7 +29,7 @@ public class TAACChannelStreamer extends TComponentDataStreaming.TStreamer {
 		@Override
 		public void run() {
 			try {
-				Channel.DoStreaming(StreamingBuffer_OutputStream, Canceller);
+				Channel.DoStreaming(TUserAccessKey.GenerateValue(), StreamingBuffer_OutputStream, Canceller);
 			}
         	catch (Throwable E) {
 				String S = E.getMessage();

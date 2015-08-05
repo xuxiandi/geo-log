@@ -275,8 +275,7 @@ public class TChannel {
 	//.
 	public TDataTypes DataTypes = null;
 	//.
-	public long 	UserID = 0;
-	public String 	UserAccessKey = null;
+	public String UserAccessKey = null;
 	
 	public TChannel() {
 		ID = -1;

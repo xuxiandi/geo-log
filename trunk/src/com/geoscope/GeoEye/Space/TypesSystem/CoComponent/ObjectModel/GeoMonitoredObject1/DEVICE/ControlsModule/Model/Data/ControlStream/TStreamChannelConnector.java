@@ -23,7 +23,7 @@ import com.geoscope.GeoLog.DEVICE.ControlsModule.TControlsModule;
 
 public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
 
-	public static final int DeviceControlsModuleStreamingServerPort = 10008;
+	private static final int DeviceControlsModuleStreamingServerPort = 10008;
 	
     public static class TChannelProcessing extends TChannelConnectionAbstract {
 		

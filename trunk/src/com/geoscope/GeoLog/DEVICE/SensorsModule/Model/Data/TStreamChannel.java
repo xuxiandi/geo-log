@@ -10,6 +10,8 @@ import org.xmlpull.v1.XmlSerializer;
 
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
+import com.geoscope.Classes.IO.Memory.Buffering.TMemoryBuffering;
+import com.geoscope.Classes.IO.Memory.Buffering.TMemoryBuffering.TBuffer;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICEModule.TDEVICEModule.TComponentDataStreamingAbstract;
@@ -18,22 +20,66 @@ public class TStreamChannel extends TChannel {
 
 	public static class TPacketSubscriber {
 		
+		private static final int DefaultBufferSize = 20;
+		
+		
+		public String UserAccessKeyID;
+		//.
+		public TMemoryBuffering Buffering;
+		//.
 		public TStreamChannel Channel;
 		
-		public TPacketSubscriber() {
+		public TPacketSubscriber(String pUserAccessKeyID, int pBufferSize) {
+			UserAccessKeyID = pUserAccessKeyID;
+			//.
+			Buffering = new TMemoryBuffering(pBufferSize, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					try {
+						ProcessPacket(Buffer.Data, Buffer.Size);
+					} catch (IOException E) {
+						if (Channel != null)
+							Channel.SensorsModule.Device.Log.WriteError("Channel.PacketSubscriber.ProcessPacket", E.getMessage());
+					}
+				}
+			});
+		}
+		
+		public TPacketSubscriber(String pUserAccessKeyID) {
+			this(pUserAccessKeyID, DefaultBufferSize);
+		}
+		
+		public void Destroy() throws Exception {
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
 		}
 		
 		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {			
 		}
 
-		public void ProcessPacket(byte[] Packet, int PacketSize) throws IOException {
+		private void ProcessPacket(byte[] Packet, int PacketSize) throws IOException {
 			synchronized (this) {
 				DoOnPacket(Packet, PacketSize);
 			}
 		}
-
-		public void ProcessPacket(byte[] Packet) throws IOException {
-			ProcessPacket(Packet, Packet.length);
+		
+		public void EnqueuePacket(byte[] Packet, int PacketSize) throws IOException {
+			Buffering.EnqueueBuffer(Packet, PacketSize, System.currentTimeMillis());
+		}
+		
+		public void EnqueuePacket(byte[] Packet) throws IOException {
+			EnqueuePacket(Packet, Packet.length);
+		}
+		
+		public int PacketsBufferSize() {
+			return Buffering.Count();
+		}
+		
+		public int PendingPackets() {
+			return Buffering.PendingBuffers();
 		}
 	}
 	
@@ -172,6 +218,22 @@ public class TStreamChannel extends TChannel {
 			}
 		}
 		
+		public TPacketSubscriber GetSubscriberByUserAccessKey(String UserAccessKey) {
+			Lock.lock();
+			try {
+				int Cnt = Items.size();
+				for (int I = 0; I < Cnt; I++) {
+					TPacketSubscriber Subscriber = Items.get(I);
+					if ((Subscriber.UserAccessKeyID != null) && Subscriber.UserAccessKeyID.equals(UserAccessKey))
+						return Subscriber; //. ->
+				}
+			}
+			finally {
+				Lock.unlock();
+			}
+			return null;
+		}
+
 		public int Count() {
 			Lock.lock();
 			try {
@@ -234,7 +296,7 @@ public class TStreamChannel extends TChannel {
 				int Cnt = Items.size();
 				int PacketSize = Packet.length;
 				for (int I = 0; I < Cnt; I++)
-					Items.get(I).ProcessPacket(Packet,PacketSize);
+					Items.get(I).EnqueuePacket(Packet,PacketSize);
 			}
 			finally {
 				Lock.unlock();
@@ -248,7 +310,7 @@ public class TStreamChannel extends TChannel {
 				//.
 				int Cnt = Items.size();
 				for (int I = 0; I < Cnt; I++)
-					Items.get(I).ProcessPacket(Packet,PacketSize);
+					Items.get(I).EnqueuePacket(Packet,PacketSize);
 			}
 			finally {
 				Lock.unlock();
@@ -260,7 +322,7 @@ public class TStreamChannel extends TChannel {
 			try {
 				WaitForResume();
 				//.
-				Subscriber.ProcessPacket(Packet,Packet.length);
+				Subscriber.EnqueuePacket(Packet,Packet.length);
 			}
 			finally {
 				Lock.unlock();
@@ -272,7 +334,7 @@ public class TStreamChannel extends TChannel {
 			try {
 				WaitForResume();
 				//.
-				Subscriber.ProcessPacket(Packet,PacketSize);
+				Subscriber.EnqueuePacket(Packet,PacketSize);
 			}
 			finally {
 				Lock.unlock();
@@ -393,11 +455,11 @@ public class TStreamChannel extends TChannel {
 		return (PacketSubscribers.Count() > 0);
 	}
 	
-	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws Exception {
+	public void DoStreaming(String UserAccessKey, final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws Exception {
 	}	
 	
-	public void DoStreaming(OutputStream pOutputStream, TCanceller Canceller) throws Exception {
-		DoStreaming(pOutputStream, Canceller, -1);
+	public void DoStreaming(String UserAccessKey, OutputStream pOutputStream, TCanceller Canceller) throws Exception {
+		DoStreaming(UserAccessKey, pOutputStream, Canceller, -1);
 	}	
 	
 	public TComponentDataStreamingAbstract.TStreamer GetStreamer(int pidTComponent, long pidComponent, int pChannelID, String pConfiguration, String pParameters) throws Exception {

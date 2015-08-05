@@ -106,4 +106,20 @@ public class TVCTRLChannel extends TStreamChannel {
 	public void MultiplyChannelBitrate(int ChannelID, double Multiplier) throws Exception {
 		DoCommand("2"+","+Integer.toString(ChannelID)+","+Double.toString(Multiplier)); 
 	}
+
+	public static class TPacketsBufferInfo {
+		
+		public int BuffersCount;
+		public int PendingPackets;
+		
+		public TPacketsBufferInfo(byte[] BA) throws IOException {
+			BuffersCount = TDataConverter.ConvertLEByteArrayToInt32(BA, 0);
+			PendingPackets = TDataConverter.ConvertLEByteArrayToInt32(BA, 4);
+		}
+	}
+	
+	public TPacketsBufferInfo GetChannelSubscriberPacketsBufferInfo(int ChannelID, String UserAccessKey) throws Exception {
+		byte[] Response = DoCommand("3"+","+Integer.toString(ChannelID)+","+UserAccessKey);
+		return (new TPacketsBufferInfo(Response));
+	}
 }

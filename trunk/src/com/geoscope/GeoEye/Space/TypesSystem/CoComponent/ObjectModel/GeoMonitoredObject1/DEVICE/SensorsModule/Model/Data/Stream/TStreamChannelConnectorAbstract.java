@@ -148,6 +148,7 @@ public abstract class TStreamChannelConnectorAbstract {
     	Channel = pChannel;
     	//.
     	UserAccessKey = pUserAccessKey;
+    	Channel.UserAccessKey = UserAccessKey;
     	//.
     	ReadingTimeout = DefaultReadingTimeout; 
     	//.

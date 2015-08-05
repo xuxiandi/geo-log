@@ -34,8 +34,9 @@ public class TXENVCChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws Exception {
-		TStreamChannel.TPacketSubscriber PacketSubscriber  = new TStreamChannel.TPacketSubscriber() {
+	public void DoStreaming(String UserAccessKey, final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws Exception {
+		TStreamChannel.TPacketSubscriber PacketSubscriber  = new TStreamChannel.TPacketSubscriber(UserAccessKey) {
+			
     		@Override
     		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
     			try {
@@ -47,20 +48,25 @@ public class TXENVCChannel extends TStreamChannel {
     			}
     		}
     	};
-    	PacketSubscribers.Subscribe(PacketSubscriber);
     	try {
-    		try {
-    			if (MaxDuration > 0)
-    				Thread.sleep(MaxDuration);
-    			else
-    				while (!Canceller.flCancel) 
-    					Thread.sleep(100);
-    		}
-    		catch (InterruptedException IE) {
-    		}
+        	PacketSubscribers.Subscribe(PacketSubscriber);
+        	try {
+        		try {
+        			if (MaxDuration > 0)
+        				Thread.sleep(MaxDuration);
+        			else
+        				while (!Canceller.flCancel) 
+        					Thread.sleep(100);
+        		}
+        		catch (InterruptedException IE) {
+        		}
+        	}
+        	finally {
+        		PacketSubscribers.Unsubscribe(PacketSubscriber);
+        	}
     	}
     	finally {
-    		PacketSubscribers.Unsubscribe(PacketSubscriber);
+    		PacketSubscriber.Destroy();
     	}
 	}
 

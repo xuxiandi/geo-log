@@ -225,9 +225,9 @@ public class TH264IChannel extends TStreamChannel {
 							TChannelStreamConfiguration CC = ChannelStreamConfiguration.Get();
 							if (CC != null) {
 								//. send new session packet
-								Subscriber.ProcessPacket(DestinationChannel.ChannelStreamSession_ToByteArray(CC.Session));
+								Subscriber.EnqueuePacket(DestinationChannel.ChannelStreamSession_ToByteArray(CC.Session));
 								//. send channel configuration
-								Subscriber.ProcessPacket(DestinationChannel.H264Packet_ToByteArray(CC.Data, CC.Data.length));
+								Subscriber.EnqueuePacket(DestinationChannel.H264Packet_ToByteArray(CC.Data, CC.Data.length));
 							}
 						}
 					});

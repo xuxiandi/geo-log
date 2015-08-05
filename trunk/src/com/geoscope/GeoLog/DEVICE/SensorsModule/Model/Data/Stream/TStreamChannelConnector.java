@@ -7,6 +7,7 @@ import com.geoscope.Classes.IO.Memory.TMemoryInOutStreamAdapter;
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.R;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.TStreamChannelConnectorAbstract;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.TrackerService.TTracker;
@@ -24,7 +25,7 @@ public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
 	    	try {
 	  	  		TStreamChannel SourceChannel = (TStreamChannel)(((TStreamChannelConnector)Connector).SensorsModule.Model.StreamChannels_GetOneByID(Connector.Channel.ID));
 	  	  		//. streaming ...
-	  	  		SourceChannel.DoStreaming(((TStreamChannelConnector)Connector).InOutStreamAdapter.OutStream, Canceller);
+	  	  		SourceChannel.DoStreaming(TUserAccessKey.GenerateValue(), ((TStreamChannelConnector)Connector).InOutStreamAdapter.OutStream, Canceller);
 	    	}
 	    	catch (InterruptedException IE) {
 	    	}

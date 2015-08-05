@@ -2,6 +2,7 @@ package com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.D
 
 import java.util.Hashtable;
 
+import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
@@ -218,6 +219,27 @@ public class TVCTRLChannel extends TStreamChannel {
 				UnlockChannel(ChannelID);
 			}
 			return null; //. ->
+			
+		case 3: //. get a channel subscriber packets buffering info 
+			ChannelID = Integer.parseInt(Command[1]);
+			String UserAccessKey = Command[2];
+			//.
+			Channel = (com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel)InternalControlsModule.ControlsModule.Device.SensorsModule.Model.StreamChannels_GetOneByID(ChannelID);
+			if (Channel == null) 
+				throw new ChannelNotFoundError(); //. =>
+			//.
+			com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber PacketSubscriber = Channel.PacketSubscribers.GetSubscriberByUserAccessKey(UserAccessKey);
+			int BuffersCount = -1;
+			int PendingPackets = -1;
+			if (PacketSubscriber != null) {
+				BuffersCount = PacketSubscriber.PacketsBufferSize();
+				PendingPackets = PacketSubscriber.PendingPackets();
+			}
+			byte[] Result = new byte[8];
+			TDataConverter.ConvertInt32ToLEByteArray(BuffersCount, Result, 0); 
+			TDataConverter.ConvertInt32ToLEByteArray(PendingPackets, Result, 4);
+			//.
+			return Result; //. ->
 			
 		default:
 			return null; //. -> 

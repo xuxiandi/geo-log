@@ -131,4 +131,17 @@ public class TMemoryBuffering {
 			Canceller.Check();
 		}
 	}
+	
+	public int Count() {
+		return BuffersCount;
+	}
+	
+	public int PendingBuffers() {
+		synchronized (this) {
+			int R = (WritePos-ReadPos);
+			if (R < 0)
+				R += BuffersCount;
+			return R; //. ->
+		}
+	}
 }

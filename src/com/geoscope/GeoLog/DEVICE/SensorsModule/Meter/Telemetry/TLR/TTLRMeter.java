@@ -1,6 +1,7 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.Telemetry.TLR;
 
 import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedReadWriteLock;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurement.Telemetry.TLR.TMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meter.TSensorMeter;
@@ -38,7 +39,7 @@ public class TTLRMeter extends TSensorMeter {
 						//.
 						Measurement.Start();
 						try {
-							SourceChannel.DoStreaming(Measurement.TLRChannel.DestinationStream, Canceller, MeasurementMaxDuration);
+							SourceChannel.DoStreaming(TUserAccessKey.GenerateValue(), Measurement.TLRChannel.DestinationStream, Canceller, MeasurementMaxDuration);
 						}
 						finally {
 							Measurement.Finish();

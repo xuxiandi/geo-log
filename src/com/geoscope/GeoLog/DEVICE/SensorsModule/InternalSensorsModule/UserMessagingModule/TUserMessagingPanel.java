@@ -850,7 +850,7 @@ public class TUserMessagingPanel extends Activity {
 		if (!ServersInfo.IsSpaceDataServerValid()) 
 			throw new Exception("Invalid space data server"); //. =>
 		//.
-		InChannel_Reader = new TStreamChannelConnector(this, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, UserAgent.Server.User.UserID,UserAgent.Server.User.UserPassword, UserMessaging.Object, UserMessaging.InChannel, UserMessaging.SessionID(), new TStreamChannelConnectorAbstract.TOnProgressHandler(UserMessaging.InChannel) {
+		InChannel_Reader = new TStreamChannelConnector(TStreamChannelConnector.VERSION_CHANNELBYDESCRIPTOR, this, ServersInfo.SpaceDataServerAddress,ServersInfo.SpaceDataServerPort, UserAgent.Server.User.UserID,UserAgent.Server.User.UserPassword, UserMessaging.Object, UserMessaging.InChannel, UserMessaging.SessionID(), new TStreamChannelConnectorAbstract.TOnProgressHandler(UserMessaging.InChannel) {
 			@Override
 			public void DoOnProgress(int ReadSize, TCanceller Canceller) {
 				//. TUserMessagingPanel.this.DoOnStatusMessage("ReceivedPacket size: "+Integer.toString(ReadSize));

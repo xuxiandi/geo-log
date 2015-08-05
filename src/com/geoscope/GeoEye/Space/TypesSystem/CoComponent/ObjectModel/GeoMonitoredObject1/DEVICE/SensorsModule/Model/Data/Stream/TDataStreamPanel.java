@@ -56,6 +56,7 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannelFlowControl;
 import com.geoscope.GeoLog.Application.TGeoLogApplication;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 
 @SuppressLint("HandlerLeak")
 public class TDataStreamPanel extends Activity {
@@ -229,7 +230,7 @@ public class TDataStreamPanel extends Activity {
 	}
 	
 	protected TStreamChannelConnectorAbstract StreamChannelConnectors_CreateOneForChannel(TStreamChannel Channel) throws Exception {
-		TStreamChannelConnectorAbstract ChannelConnector = new TStreamChannelConnector(this, ServerAddress,ServerPort, UserID,UserPassword, Object, Channel, new TStreamChannelConnectorAbstract.TOnProgressHandler(Channel) {
+		TStreamChannelConnectorAbstract ChannelConnector = new TStreamChannelConnector(TStreamChannelConnector.VERSION_CHANNELBYID, this, ServerAddress,ServerPort, UserID,UserPassword, Object, Channel, TUserAccessKey.GenerateValue(), new TStreamChannelConnectorAbstract.TOnProgressHandler(Channel) {
 			
 			@Override
 			public void DoOnProgress(int ReadSize, TCanceller Canceller) {

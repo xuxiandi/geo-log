@@ -23,7 +23,10 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 
 public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
 
-	public static final int DeviceSensorsModuleStreamingServerPort = 10009;
+	public static final int VERSION_CHANNELBYID 			= 0;
+	public static final int VERSION_CHANNELBYDESCRIPTOR 	= 1;
+	
+	private static final int DeviceSensorsModuleStreamingServerPort = 10009;
 	
     public static class TChannelConnection extends TChannelConnectionAbstract {
 		
@@ -64,7 +67,9 @@ public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
 						try {
 							OutputStream OS = Connection.getOutputStream();
 							try {
-								if (Connector.UserAccessKey == null) {
+								switch (((TStreamChannelConnector)Connector).Version) {
+								
+								case VERSION_CHANNELBYID:
 									//. send Version
 									int Version = 1;
 									byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
@@ -77,11 +82,12 @@ public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
 									int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
 									if (RC != TSensorsModule.SENSORSSTREAMINGSERVER_MESSAGE_OK)
 										throw new OperationException(RC,"error of connecting to the sensors streaming server, RC: "+Integer.toString(RC)); //. =>
-								}
-								else {
+									break; //. >
+
+								case VERSION_CHANNELBYDESCRIPTOR:
 									//. send Version
-									int Version = 2;
-									byte[] Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
+									Version = 2;
+									Descriptor = TDataConverter.ConvertInt32ToLEByteArray(Version);
 									OS.write(Descriptor);
 									//. send ChannelDescriptor
 									byte[] ChannelDescriptor = Connector.Channel.ToByteArray();
@@ -90,9 +96,10 @@ public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
 									OS.write(ChannelDescriptor);
 									//. get and check result
 									IS.read(Descriptor);
-									int RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
+									RC = TDataConverter.ConvertLEByteArrayToInt32(Descriptor,0);
 									if (RC != TSensorsModule.SENSORSSTREAMINGSERVER_MESSAGE_OK)
 										throw new OperationException(RC,"error of connecting to the sensors streaming server, RC: "+Integer.toString(RC)); //. =>
+									break; //. >
 								}
 								//.
 								TStreamChannel.TOnProgressHandler OnProgressHandler = new TStreamChannel.TOnProgressHandler() {
@@ -142,12 +149,16 @@ public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
 	}
 	
     
-    public TStreamChannelConnector(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, String pUserAccessKey, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    private int Version;
+    
+    public TStreamChannelConnector(int pVersion, Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, String pUserAccessKey, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	super(pcontext, pServerAddress,pServerPort, pUserID,pUserPassword, pObject, pChannel, pUserAccessKey, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
+    	//.
+    	Version = pVersion;
     }
 
-    public TStreamChannelConnector(Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
-    	this(pcontext, pServerAddress,pServerPort, pUserID, pUserPassword, pObject, pChannel, null, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
+    public TStreamChannelConnector(int pVersion, Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TStreamChannel pChannel, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    	this(pVersion, pcontext, pServerAddress,pServerPort, pUserID, pUserPassword, pObject, pChannel, null, pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
     }
     
     @Override

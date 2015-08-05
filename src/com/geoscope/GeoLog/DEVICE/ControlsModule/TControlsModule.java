@@ -141,8 +141,6 @@ public class TControlsModule extends TModule {
   			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(CONTROLSSTREAMINGSERVER_MESSAGE_OK);
   	  		DestinationConnectionOutputStream.write(Descriptor);		
   	  		//. streaming ...
-  	  		Channel.UserID = DestinationUserID;
-  	  		Channel.UserAccessKey = DestinationUserAccessKey;
   	  		Channel.DoStreaming(DestinationConnectionInputStream, DestinationConnectionOutputStream, Canceller);
   			return; //. ->
   			
@@ -172,8 +170,6 @@ public class TControlsModule extends TModule {
   			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(CONTROLSSTREAMINGSERVER_MESSAGE_OK);
   	  		DestinationConnectionOutputStream.write(Descriptor);		
   	  		//. streaming ...
-	  		Channel.UserID = DestinationUserID;
-  	  		Channel.UserAccessKey = DestinationUserAccessKey;
   	  		Channel.DoStreaming(DestinationConnectionInputStream, DestinationConnectionOutputStream, Canceller);
   			return; //. ->
   			

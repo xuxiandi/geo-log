@@ -1,6 +1,7 @@
 package com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Audio;
 
 import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedReadWriteLock;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.Audio.TMeasurement;
@@ -52,7 +53,7 @@ public class TAudioMeter extends TSensorMeter {
 						//.
 						Measurement.Start();
 						try {
-							Channel.DoStreaming(Measurement.AACChannel.DestinationStream, Canceller, MeasurementMaxDuration);
+							Channel.DoStreaming(TUserAccessKey.GenerateValue(), Measurement.AACChannel.DestinationStream, Canceller, MeasurementMaxDuration);
 						}
 						finally {
 							Measurement.Finish();

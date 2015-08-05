@@ -9,6 +9,7 @@ import android.view.SurfaceHolder;
 
 import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.Synchronization.Lock.TNamedReadWriteLock;
+import com.geoscope.GeoLog.DEVICE.ConnectorModule.OperationsBaseClasses.Security.TUserAccessKey;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurements;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurement;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Measurements.AV.TMeasurementDescriptor;
@@ -19,7 +20,7 @@ public class CameraStreamerFRAME extends Camera {
 	
 	private com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel	AACSourceChannel = null;
 	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel 						AACChannel = null;
-	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber AACChannelSubscriber = new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber() {
+	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber AACChannelSubscriber = new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber(TUserAccessKey.GenerateValue()) {
 		
 		@Override
 		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
@@ -30,7 +31,7 @@ public class CameraStreamerFRAME extends Camera {
 	//.
 	private com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel	H264ISourceChannel = null;
 	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel 						H264IChannel = null;
-	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber H264IChannelSubscriber = new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber() {
+	private com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber H264IChannelSubscriber = new com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber(TUserAccessKey.GenerateValue()) {
 		
 		@Override
 		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
@@ -135,16 +136,24 @@ public class CameraStreamerFRAME extends Camera {
 			if (MeasurementID != null) {
 				try {
 					if (flVideo) {
-						if (H264IChannel.PacketSubscribers.SubscriberExists(H264IChannelSubscriber)) 
-							H264IChannel.PacketSubscribers.Unsubscribe(H264IChannelSubscriber);
+						if (H264IChannelSubscriber != null) {
+							if (H264IChannel.PacketSubscribers.SubscriberExists(H264IChannelSubscriber)) 
+								H264IChannel.PacketSubscribers.Unsubscribe(H264IChannelSubscriber);
+							H264IChannelSubscriber.Destroy();
+							H264IChannelSubscriber = null;
+						}
 						//.
 			        	H264ISourceChannel.Preview = null;
 			        	H264ISourceChannel.PreviewFrame = null;
 					}
 					//.
 					if (flAudio) {
-						if (AACChannel.PacketSubscribers.SubscriberExists(AACChannelSubscriber)) 
-							AACChannel.PacketSubscribers.Unsubscribe(AACChannelSubscriber);
+						if (AACChannelSubscriber != null) {
+							if (AACChannel.PacketSubscribers.SubscriberExists(AACChannelSubscriber)) 
+								AACChannel.PacketSubscribers.Unsubscribe(AACChannelSubscriber);
+							AACChannelSubscriber.Destroy();
+							AACChannelSubscriber = null;
+						}
 						AACSourceChannel.AudioSampleSource.OnAudiaPacketHandler = null;
 					}
 				}
@@ -170,16 +179,24 @@ public class CameraStreamerFRAME extends Camera {
 		super.Finalize();
 		//.
 		if (flVideo) {
-			if (H264IChannel.PacketSubscribers.SubscriberExists(H264IChannelSubscriber)) 
-				H264IChannel.PacketSubscribers.Unsubscribe(H264IChannelSubscriber);
+			if (H264IChannelSubscriber != null) {
+				if (H264IChannel.PacketSubscribers.SubscriberExists(H264IChannelSubscriber)) 
+					H264IChannel.PacketSubscribers.Unsubscribe(H264IChannelSubscriber);
+				H264IChannelSubscriber.Destroy();
+				H264IChannelSubscriber = null;
+			}
 			//.
         	H264ISourceChannel.Preview = null;
         	H264ISourceChannel.PreviewFrame = null;
 		}
 		//.
 		if (flAudio) {
-			if (AACChannel.PacketSubscribers.SubscriberExists(AACChannelSubscriber)) 
-				AACChannel.PacketSubscribers.Unsubscribe(AACChannelSubscriber);
+			if (AACChannelSubscriber != null) {
+				if (AACChannel.PacketSubscribers.SubscriberExists(AACChannelSubscriber)) 
+					AACChannel.PacketSubscribers.Unsubscribe(AACChannelSubscriber);
+				AACChannelSubscriber.Destroy();
+				AACChannelSubscriber = null;
+			}
 			AACSourceChannel.AudioSampleSource.OnAudiaPacketHandler = null;
 		}
 	}
@@ -230,8 +247,12 @@ public class CameraStreamerFRAME extends Camera {
 		if (flVideo) {
 			VideoRecorderModule.MediaFrameServer.flVideoActive = false;
 			//.
-			if (H264IChannel.PacketSubscribers.SubscriberExists(H264IChannelSubscriber)) 
-				H264IChannel.PacketSubscribers.Unsubscribe(H264IChannelSubscriber);
+			if (H264IChannelSubscriber != null) {
+				if (H264IChannel.PacketSubscribers.SubscriberExists(H264IChannelSubscriber)) 
+					H264IChannel.PacketSubscribers.Unsubscribe(H264IChannelSubscriber);
+				H264IChannelSubscriber.Destroy();
+				H264IChannelSubscriber = null;
+			}
 			//.
         	H264ISourceChannel.Preview = null;
         	H264ISourceChannel.PreviewFrame = null;
@@ -240,8 +261,12 @@ public class CameraStreamerFRAME extends Camera {
 		if (flAudio) {
 			VideoRecorderModule.MediaFrameServer.flAudioActive = false;
 			//.
-			if (AACChannel.PacketSubscribers.SubscriberExists(AACChannelSubscriber)) 
-				AACChannel.PacketSubscribers.Unsubscribe(AACChannelSubscriber);
+			if (AACChannelSubscriber != null) {
+				if (AACChannel.PacketSubscribers.SubscriberExists(AACChannelSubscriber)) 
+					AACChannel.PacketSubscribers.Unsubscribe(AACChannelSubscriber);
+				AACChannelSubscriber.Destroy();
+				AACChannelSubscriber = null;
+			}
 			AACSourceChannel.AudioSampleSource.OnAudiaPacketHandler = null;
 		}
 		//. Finish the measurement

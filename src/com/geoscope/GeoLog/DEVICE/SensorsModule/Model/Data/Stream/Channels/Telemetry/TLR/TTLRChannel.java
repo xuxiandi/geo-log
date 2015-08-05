@@ -26,7 +26,7 @@ public class TTLRChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void DoStreaming(final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws Exception {
+	public void DoStreaming(String UserAccessKey, final OutputStream pOutputStream, final TCanceller Canceller, int MaxDuration) throws Exception {
 		final long 		FinishTimestamp;
 		final Object 	FinishSignal;
 		if (MaxDuration > 0) { 
@@ -38,7 +38,7 @@ public class TTLRChannel extends TStreamChannel {
 			FinishTimestamp = 0;
 		}
 		//.
-		TStreamChannel.TPacketSubscriber PacketSubscriber  = new TStreamChannel.TPacketSubscriber() {
+		TStreamChannel.TPacketSubscriber PacketSubscriber  = new TStreamChannel.TPacketSubscriber(UserAccessKey) {
 			
     		@Override
     		protected void DoOnPacket(byte[] Packet, int PacketSize) throws IOException {
@@ -56,31 +56,36 @@ public class TTLRChannel extends TStreamChannel {
 					}
     		}
     	};
-    	PacketSubscribers.Subscribe(PacketSubscriber);
     	try {
-    		try {
-        		boolean flSuspended = IsSuspended();
-        		if (flSuspended)
-        			Resume();
-    			try {
-        			if (FinishTimestamp > 0)
-        				synchronized (FinishSignal) {
-        					FinishSignal.wait();
-    					}
-        			else
-        				while (!Canceller.flCancel) 
-        					Thread.sleep(100);
-    			}
-    			finally {
+        	PacketSubscribers.Subscribe(PacketSubscriber);
+        	try {
+        		try {
+            		boolean flSuspended = IsSuspended();
             		if (flSuspended)
-            			Suspend();
-    			}
-    		}
-    		catch (InterruptedException IE) {
-    		}
+            			Resume();
+        			try {
+            			if (FinishTimestamp > 0)
+            				synchronized (FinishSignal) {
+            					FinishSignal.wait();
+        					}
+            			else
+            				while (!Canceller.flCancel) 
+            					Thread.sleep(100);
+        			}
+        			finally {
+                		if (flSuspended)
+                			Suspend();
+        			}
+        		}
+        		catch (InterruptedException IE) {
+        		}
+        	}
+        	finally {
+        		PacketSubscribers.Unsubscribe(PacketSubscriber);
+        	}
     	}
     	finally {
-    		PacketSubscribers.Unsubscribe(PacketSubscriber);
+    		PacketSubscriber.Destroy();
     	}
 	}
 

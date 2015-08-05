@@ -351,9 +351,7 @@ public class TSensorsModule extends TModule {
   			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_OK);
   	  		DestinationConnectionOutputStream.write(Descriptor);		
   	  		//. streaming ...
-	  		Channel.UserID = DestinationUserID;
-	  		Channel.UserAccessKey = DestinationUserAccessKey;
-  			Channel.DoStreaming(DestinationConnectionOutputStream, Canceller);
+  			Channel.DoStreaming(DestinationUserAccessKey, DestinationConnectionOutputStream, Canceller);
   			return; //. ->
   			
   		case 2: //. get channel by its ChannelDescriptor
@@ -387,9 +385,7 @@ public class TSensorsModule extends TModule {
   			Descriptor = TDataConverter.ConvertInt32ToLEByteArray(SENSORSSTREAMINGSERVER_MESSAGE_OK);
   	  		DestinationConnectionOutputStream.write(Descriptor);		
   	  		//. streaming ...
-	  		Channel.UserID = DestinationUserID;
-	  		Channel.UserAccessKey = DestinationUserAccessKey;
-  			Channel.DoStreaming(DestinationConnectionOutputStream, Canceller);
+  			Channel.DoStreaming(DestinationUserAccessKey, DestinationConnectionOutputStream, Canceller);
   			return; //. ->
   			
   		case 3: //. get channel by its ChannelDescriptor, return a real ChannelDescriptor 
@@ -436,9 +432,7 @@ public class TSensorsModule extends TModule {
   	  		DestinationConnectionOutputStream.write(Descriptor);		
   	  		DestinationConnectionOutputStream.write(ChannelDescriptor);		
   	  		//. streaming ...
-	  		Channel.UserID = DestinationUserID;
-	  		Channel.UserAccessKey = DestinationUserAccessKey;
-  			Channel.DoStreaming(DestinationConnectionOutputStream, Canceller);
+  			Channel.DoStreaming(DestinationUserAccessKey, DestinationConnectionOutputStream, Canceller);
   			return; //. ->
   			
   		default:

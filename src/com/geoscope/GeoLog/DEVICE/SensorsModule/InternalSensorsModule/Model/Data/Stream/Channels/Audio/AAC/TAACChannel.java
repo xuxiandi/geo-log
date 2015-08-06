@@ -5,25 +5,20 @@ import java.io.IOException;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.os.Handler;
-import android.os.Message;
-import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
-import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.AudioModule.TMicrophoneCapturingServer;
 import com.geoscope.GeoLog.DEVICE.AudioModule.Codecs.AAC.TAACADTSEncoder;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TSourceStreamChannel;
 
-@SuppressLint("HandlerLeak")
 public class TAACChannel extends TStreamChannel {
 
 	public static final String TypeID = "Audio.AAC";
@@ -109,6 +104,11 @@ public class TAACChannel extends TStreamChannel {
 		
 		public void Release() throws Exception {
 			Stop();
+		}
+		
+		public void Check() throws Exception {
+			if ((InternalSensorsModule.Device.AudioModule.MicrophoneCapturingServer != null) && InternalSensorsModule.Device.AudioModule.MicrophoneCapturingServer.IsActive())
+	        	throw new TSourceStreamChannel.SourceIsLockedError("audio server is locked"); //. =>
 		}
 		
 		public void Start() {
@@ -274,59 +274,19 @@ public class TAACChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void StartSource() {
-		PostStart();
+	public void StartSource() throws Exception {
+		AudioSampleSource.Check();
+		//.
+		AudioSampleSource.Start();
 	}
 
 	@Override
-	public void StopSource() {
-		PostStop();
+	public void StopSource() throws Exception {
+		AudioSampleSource.Stop();
 	}
 	
 	@Override
 	public boolean IsActive() {
 		return AudioSampleSource.flStarted;
 	}
-	
-    public void PostStart() {
-		MessageHandler.obtainMessage(MESSAGE_START).sendToTarget();
-    }
-    
-    public void PostStop() {
-		MessageHandler.obtainMessage(MESSAGE_STOP).sendToTarget();
-    }
-    
-	public static final int MESSAGE_START 	= 1;
-	public static final int MESSAGE_STOP 	= 2;
-	
-	public Handler MessageHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-        	try {
-                switch (msg.what) {
-
-                case MESSAGE_START: 
-                	try {
-            			AudioSampleSource.Start();
-                	}
-                	catch (Exception E) {
-                		Toast.makeText(InternalSensorsModule.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
-                	}
-                	break; //. >
-
-                case MESSAGE_STOP: 
-                	try {
-            			AudioSampleSource.Stop();
-                	}
-                	catch (Exception E) {
-                		Toast.makeText(InternalSensorsModule.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
-                	}
-                	break; //. >
-                }
-        	}
-        	catch (Throwable E) {
-        		TGeoLogApplication.Log_WriteError(E);
-        	}
-        }
-    };
 }

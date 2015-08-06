@@ -304,6 +304,10 @@ public class TSensorsMeters {
 				SB.append(","+(Meter.IsEnabled() ? "1" : "0"));
 				SB.append(","+(Meter.IsActive() ? "1" : "0"));
 				SB.append(","+Integer.toString(Meter.GetStatus()));
+				SB.append(","+Double.toString(Meter.GetStatusTimestamp()));
+				String SS = Meter.GetStatusString();
+				if (SS != null)
+					SB.append(","+SS);
 				if (I < (Cnt-1))
 					SB.append(";");
 			}
@@ -335,7 +339,7 @@ public class TSensorsMeters {
 			Descriptor.Configuration = Meter.Descriptor.Configuration;
 			Descriptor.Parameters = Meter.Descriptor.Parameters;
 			//.
-			Result[I] = new TSensorMeterInfo(Descriptor, Meter.IsEnabled(), Meter.IsActive(), Meter.GetStatus());
+			Result[I] = new TSensorMeterInfo(Descriptor, Meter.IsEnabled(), Meter.IsActive(), Meter.GetStatus(),Meter.GetStatusTimestamp(),Meter.GetStatusString());
 		}
 		return Result;
 	}

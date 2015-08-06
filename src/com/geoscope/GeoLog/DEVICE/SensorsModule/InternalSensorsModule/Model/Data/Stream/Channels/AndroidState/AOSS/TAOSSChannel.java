@@ -7,14 +7,10 @@ import java.io.InputStreamReader;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.os.StatFs;
-import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
@@ -22,11 +18,9 @@ import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.Classes.Data.Stream.Channel.TDataTypes;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt32ContainerType;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
-import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 
-@SuppressLint("HandlerLeak")
 public class TAOSSChannel extends TTLRChannel {
 
 	public static final String TypeID = TTLRChannel.TypeID+"."+"AndroidState.AOSS";
@@ -253,59 +247,17 @@ public class TAOSSChannel extends TTLRChannel {
 		return TypeID;
 	}
 	
-	public void StartSource() {
-		PostStart();
+	public void StartSource() throws Exception {
+		SampleSource.Start();
 	}
 
 	@Override
-	public void StopSource() {
-		PostStop();
+	public void StopSource() throws Exception {
+		SampleSource.Stop();
 	}
 	
 	@Override
 	public boolean IsActive() {
 		return SampleSource.flStarted;
 	}
-	
-    public void PostStart() {
-		MessageHandler.obtainMessage(MESSAGE_START).sendToTarget();
-    }
-    
-    public void PostStop() {
-		MessageHandler.obtainMessage(MESSAGE_STOP).sendToTarget();
-    }
-    
-	public static final int MESSAGE_START 	= 1;
-	public static final int MESSAGE_STOP 	= 2;
-	
-	public Handler MessageHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-        	try {
-                switch (msg.what) {
-
-                case MESSAGE_START: 
-                	try {
-            			SampleSource.Start();
-                	}
-                	catch (Exception E) {
-                		Toast.makeText(InternalSensorsModule.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
-                	}
-                	break; //. >
-
-                case MESSAGE_STOP: 
-                	try {
-            			SampleSource.Stop();
-                	}
-                	catch (Exception E) {
-                		Toast.makeText(InternalSensorsModule.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
-                	}
-                	break; //. >
-                }
-        	}
-        	catch (Throwable E) {
-        		TGeoLogApplication.Log_WriteError(E);
-        	}
-        }
-    };
 }

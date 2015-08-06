@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
+import com.geoscope.Classes.Data.Types.Date.OleDate;
 import com.geoscope.Classes.MultiThreading.TAsyncProcessing;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
 import com.geoscope.GeoEye.R;
@@ -355,8 +356,19 @@ public class TSensorsMetersPanel extends Activity {
     				lvItems[I] = MetersInfo[I].Descriptor.Name;
     				if (MetersInfo[I].Descriptor.Info.length() > 0)
     					lvItems[I] += " "+"/"+MetersInfo[I].Descriptor.Info+"/"; 
-    				if (MetersInfo[I].Status != TSensorMeter.STATUS_NOTRUNNING)
-    					lvItems[I] += "   "+"["+TSensorMeter.STATUS_GetString(MetersInfo[I].Status, this)+"]"; 
+    				switch (MetersInfo[I].Status) {
+
+    				case TSensorMeter.STATUS_ERROR:
+    					lvItems[I] += "   "+"["+TSensorMeter.STATUS_GetString(MetersInfo[I].Status, this)+((MetersInfo[I].StatusString != null) ? (", "+MetersInfo[I].StatusString) : "")+"]"; 
+    					break; //. >
+    				
+    				case TSensorMeter.STATUS_NOTRUNNING:
+    					break; //. >
+    					
+    				case TSensorMeter.STATUS_RUNNING:
+    					lvItems[I] += "   "+"["+TSensorMeter.STATUS_GetString(MetersInfo[I].Status, this)+((MetersInfo[I].StatusTimestamp > 0.0) ? (" "+Integer.toString((int)((OleDate.UTCCurrentTimestamp()-MetersInfo[I].StatusTimestamp)*24.0*60.0))+" min") : "")+"]"; 
+    					break; //. >
+    				}
     			}
     			ArrayAdapter<String> lvItemsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,lvItems);             
     			lvMeters.setAdapter(lvItemsAdapter);

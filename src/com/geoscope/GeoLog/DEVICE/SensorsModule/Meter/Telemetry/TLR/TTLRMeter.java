@@ -24,9 +24,9 @@ public class TTLRMeter extends TSensorMeter {
 	protected void DoProcess() throws Exception {
 		GetChannels();
 		//.
-		SourceChannel.Suspend();
+		SourceChannel.SourceChannel_Start();
 		try {
-			SourceChannel.SourceChannel_Start();
+			SourceChannel.Suspend();
 			try {
 				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 				while (!Canceller.flCancel) {
@@ -53,11 +53,11 @@ public class TTLRMeter extends TSensorMeter {
 				}
 			}
 			finally {
-				SourceChannel.SourceChannel_Stop();
+				SourceChannel.Resume();
 			}
 		}
 		finally {
-			SourceChannel.Resume();
+			SourceChannel.SourceChannel_Stop();
 		}
 	}
 }

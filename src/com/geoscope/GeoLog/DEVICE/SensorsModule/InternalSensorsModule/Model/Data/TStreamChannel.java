@@ -6,7 +6,6 @@ import com.geoscope.Classes.Data.Stream.Channel.TDataType;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TSourceStreamChannel;
-import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber;
 
 public class TStreamChannel extends TSourceStreamChannel {
 
@@ -22,12 +21,12 @@ public class TStreamChannel extends TSourceStreamChannel {
 	}
 	
 	@Override
-	public void StartSource() {
+	public void StartSource() throws Exception {
 		InternalSensorsModule.PostStart();
 	}
 
 	@Override
-	public void StopSource() {
+	public void StopSource() throws Exception {
 		InternalSensorsModule.PostStop();
 	}
 	
@@ -68,25 +67,13 @@ public class TStreamChannel extends TSourceStreamChannel {
 	public void DoOnPacket(byte[] Packet, int PacketSize) throws Exception {
 		com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
 		if (DestinationChannel != null) 
-			DestinationChannel.ProcessPacket(Packet, PacketSize);
+			DestinationChannel.EnqueuePacket(Packet, PacketSize);
 		else
 			throw new IOException("DoOnData() error, DestinationChannel is not set"); //. =>
 	}
 
 	public void DoOnPacket(byte[] Packet) throws Exception {
 		DoOnPacket(Packet,Packet.length);
-	}
-	
-	public void DoOnPacket(byte[] Packet, int PacketSize, TPacketSubscriber Subscriber) throws Exception {
-		com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel DestinationChannel = DestinationChannel_Get();
-		if (DestinationChannel != null) 
-			DestinationChannel.ProcessPacket(Packet, PacketSize, Subscriber);
-		else
-			throw new IOException("DoOnData() error, DestinationChannel is not set"); //. =>
-	}
-	
-	public void DoOnPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
-		DoOnPacket(Packet, Packet.length, Subscriber);
 	}
 	
 	public void DoOnData(TDataType DataType) throws Exception {

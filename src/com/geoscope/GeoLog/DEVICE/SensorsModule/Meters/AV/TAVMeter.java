@@ -41,13 +41,13 @@ public class TAVMeter extends TSensorMeter {
 	protected void DoProcess() throws Exception {
 		GetChannels();
 		//.
-		AudioChannel.Suspend();
+		AudioChannel.SourceChannel_Start();
 		try {
-			AudioChannel.SourceChannel_Start();
+			AudioChannel.Suspend();
 			try {
-				VideoChannel.Suspend();
+				VideoChannel.SourceChannel_Start();
 				try {
-					VideoChannel.SourceChannel_Start();
+					VideoChannel.Suspend();
 					try {
 						final int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 						while (!Canceller.flCancel) {
@@ -121,19 +121,19 @@ public class TAVMeter extends TSensorMeter {
 						}
 					}
 					finally {
-						VideoChannel.SourceChannel_Stop();
+						VideoChannel.Resume();
 					}
 				}
 				finally {
-					VideoChannel.Resume();
+					VideoChannel.SourceChannel_Stop();
 				}
 			}
 			finally {
-				AudioChannel.SourceChannel_Stop();
+				AudioChannel.Resume();
 			}
 		}
 		finally {
-			AudioChannel.Resume();
+			AudioChannel.SourceChannel_Stop();
 		}
 	}
 }

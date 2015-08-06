@@ -48,9 +48,9 @@ public class TStreamChannel extends TChannel {
 						}
 						//.
 						ProcessPacket(ABuffer, ABuffer_Size);
-					} catch (IOException E) {
+					} catch (IOException IOE) {
 						if (Channel != null)
-							Channel.SensorsModule.Device.Log.WriteError("Channel.PacketSubscriber.ProcessPacket", E.getMessage());
+							Channel.SensorsModule.Device.Log.WriteError("Channel.PacketSubscriber.ProcessPacket", IOE.getMessage());
 					}
 				}
 			});
@@ -95,6 +95,8 @@ public class TStreamChannel extends TChannel {
 	
 	public static class TPacketSubscribers {
 
+		private static final int DefaultBufferSize = 100;
+		
 		public static class TItemsNotifier {
 			
 			protected void DoOnSubscribe(TPacketSubscriber Subscriber) throws Exception {			
@@ -120,6 +122,8 @@ public class TStreamChannel extends TChannel {
 		
 		private TStreamChannel Channel;
 		//.
+		public TMemoryBuffering Buffering;
+		//.
 		protected ReentrantLock Lock = new ReentrantLock();
 		//.
 		private ArrayList<TPacketSubscriber> 	Items = new ArrayList<TPacketSubscriber>();
@@ -129,10 +133,38 @@ public class TStreamChannel extends TChannel {
 		
 		public TPacketSubscribers(TStreamChannel pChannel) {
 			Channel = pChannel;
+			//.
+			Buffering = new TMemoryBuffering(DefaultBufferSize, new TMemoryBuffering.TOnBufferDequeueHandler() {
+				
+				private int 	ABuffer_Size = 0;
+				private byte[] 	ABuffer = new byte[8192];
+				
+				@Override
+				public void DoOnBufferDequeue(TBuffer Buffer) {
+					try {
+						synchronized (Buffer) {
+							ABuffer_Size = Buffer.Size;
+							if (ABuffer_Size > ABuffer.length)
+								ABuffer = new byte[ABuffer_Size];
+							System.arraycopy(Buffer.Data,0, ABuffer,0, ABuffer_Size);
+						}
+						//.
+						ProcessPacket(ABuffer, ABuffer_Size);
+					} catch (Exception E) {
+						if (Channel != null)
+							Channel.SensorsModule.Device.Log.WriteError("Channel.PacketSubscribers.ProcessPacket", E.getMessage());
+					}
+				}
+			});
 		}
 		
-		public void Destroy() {
+		public void Destroy() throws Exception {
 			ClearSubscribers();
+			//.
+			if (Buffering != null) {
+				Buffering.Destroy();
+				Buffering = null;
+			}
 		}
 
 		public void SetItemsNotifier(TItemsNotifier pNotifier) {
@@ -298,21 +330,6 @@ public class TStreamChannel extends TChannel {
 			}
 		}
 		
-		public void ProcessPacket(byte[] Packet) throws Exception {
-			Lock.lock();
-			try {
-				WaitForResume();
-				//.
-				int Cnt = Items.size();
-				int PacketSize = Packet.length;
-				for (int I = 0; I < Cnt; I++)
-					Items.get(I).EnqueuePacket(Packet,PacketSize);
-			}
-			finally {
-				Lock.unlock();
-			}
-		}
-
 		public void ProcessPacket(byte[] Packet, int PacketSize) throws Exception {
 			Lock.lock();
 			try {
@@ -326,8 +343,8 @@ public class TStreamChannel extends TChannel {
 				Lock.unlock();
 			}
 		}
-
-		public void ProcessPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
+		
+		private void ProcessPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
 			Lock.lock();
 			try {
 				WaitForResume();
@@ -338,17 +355,21 @@ public class TStreamChannel extends TChannel {
 				Lock.unlock();
 			}
 		}
+		
+		public void EnqueuePacket(byte[] Packet, int PacketSize) throws Exception {
+			Buffering.EnqueueBuffer(Packet, PacketSize, System.currentTimeMillis());
+		}
 
-		public void ProcessPacket(byte[] Packet, int PacketSize, TPacketSubscriber Subscriber) throws Exception {
-			Lock.lock();
-			try {
-				WaitForResume();
-				//.
-				Subscriber.EnqueuePacket(Packet,PacketSize);
-			}
-			finally {
-				Lock.unlock();
-			}
+		public void EnqueuePacket(byte[] Packet) throws Exception {
+			EnqueuePacket(Packet, Packet.length);
+		}
+
+		public int PacketsBufferSize() {
+			return Buffering.Count();
+		}
+		
+		public int PendingPackets() {
+			return Buffering.PendingBuffers();
 		}
 	}
 
@@ -410,7 +431,7 @@ public class TStreamChannel extends TChannel {
 		}
 	}
 	
-	public void SourceChannel_Start() {
+	public void SourceChannel_Start() throws Exception {
 		synchronized (this) {
 			SourceChannel_StartCounter++;
 			if (SourceChannel_StartCounter == 1) {
@@ -420,7 +441,7 @@ public class TStreamChannel extends TChannel {
 		}
 	}
 	
-	public void SourceChannel_Stop() {
+	public void SourceChannel_Stop() throws Exception {
 		synchronized (this) {
 			SourceChannel_StartCounter--;
 			if (SourceChannel_StartCounter == 0) {
@@ -488,29 +509,21 @@ public class TStreamChannel extends TChannel {
 		return PacketSubscribers.IsSuspended();
 	}
 	
-	public void ProcessPacket(byte[] Packet, int PacketSize) throws Exception {
-		PacketSubscribers.ProcessPacket(Packet, PacketSize);
+	public void EnqueuePacket(byte[] Packet, int PacketSize) throws Exception {
+		PacketSubscribers.EnqueuePacket(Packet, PacketSize);
 	}
 
-	public void ProcessPacket(byte[] Packet) throws Exception {
-		ProcessPacket(Packet, Packet.length);
+	public void EnqueuePacket(byte[] Packet) throws Exception {
+		EnqueuePacket(Packet, Packet.length);
 	}
 
-	public void ProcessPacket(byte[] Packet, int PacketSize, TPacketSubscriber Subscriber) throws Exception {
-		PacketSubscribers.ProcessPacket(Packet, PacketSize, Subscriber);
-	}
-	
-	public void ProcessPacket(byte[] Packet, TPacketSubscriber Subscriber) throws Exception {
-		PacketSubscribers.ProcessPacket(Packet, Packet.length, Subscriber);
-	}
-	
 	protected byte[] DataType_ToByteArray(TDataType DataType) throws IOException {
 		return null;
 	}
 	
 	public void DoOnData(TDataType DataType) throws Exception {
 		byte[] BA = DataType_ToByteArray(DataType);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 
 	public void DoOnData(TDataType DataType, TPacketSubscriber Subscriber) throws Exception {

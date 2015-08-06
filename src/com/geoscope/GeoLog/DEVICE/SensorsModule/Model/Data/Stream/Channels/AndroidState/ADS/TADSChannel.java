@@ -157,41 +157,41 @@ public class TADSChannel extends TStreamChannel {
 	
 	public void DoOnTimestamp(double Timestamp) throws Exception {
 		byte[] BA = Timestamp_ToByteArray(Timestamp);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 
 	public void DoOnBatteryVoltage(int BatteryVoltage) throws Exception {
 		byte[] BA = BatteryVoltage_ToByteArray(BatteryVoltage);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 
 	public void DoOnBatteryTemperature(int BatteryTemperature) throws Exception {
 		byte[] BA = BatteryTemperature_ToByteArray(BatteryTemperature);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 
 	public void DoOnBatteryLevel(int BatteryLevel) throws Exception {
 		byte[] BA = BatteryLevel_ToByteArray(BatteryLevel);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 
 	public void DoOnBatteryHealth(int BatteryHealth) throws Exception {
 		byte[] BA = BatteryHealth_ToByteArray(BatteryHealth);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 
 	public void DoOnBatteryStatus(int BatteryStatus) throws Exception {
 		byte[] BA = BatteryStatus_ToByteArray(BatteryStatus);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 
 	public void DoOnBatteryPlugType(int BatteryPlugType) throws Exception {
 		byte[] BA = BatteryPlugType_ToByteArray(BatteryPlugType);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 
 	public void DoOnCellularConnectorSignalStrength(int CellularConnectorSignalStrength) throws Exception {
 		byte[] BA = CellularConnectorSignalStrength_ToByteArray(CellularConnectorSignalStrength);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 }

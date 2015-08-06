@@ -72,7 +72,7 @@ public class TH264IChannelFlowControl {
     					double FillFactorTrend = ((LastFillFactor >= 0) ? (FillFactor-LastFillFactor) : 0.0);
     					LastFillFactor = FillFactor;
     					//.
-    					if ((FillFactor > Check_ReduceBitrateFillFactor) && (FillFactorTrend > 0.0)) {
+    					if ((FillFactor > Check_ReduceBitrateFillFactor) && (FillFactorTrend >= 0.0)) {
     						try {
             					ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 0.5);
             				}

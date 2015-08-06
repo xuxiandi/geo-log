@@ -8,27 +8,22 @@ import java.io.IOException;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Rect;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 import android.view.Surface;
-import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.Classes.MultiThreading.TCancelableThread;
-import com.geoscope.GeoLog.Application.TGeoLogApplication;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.TStreamChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TSourceStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber;
 import com.geoscope.GeoLog.DEVICE.VideoModule.Codecs.H264.TH264EncoderServer;
 
-@SuppressLint("HandlerLeak")
 public class TH264IChannel extends TStreamChannel {
 
 	public static final String TypeID = "Video.H264I";
@@ -193,6 +188,19 @@ public class TH264IChannel extends TStreamChannel {
 		
 		public void Release() throws Exception {
 			Stop();
+		}
+		
+		public void Check() throws Exception {
+	        android.hardware.Camera camera;
+	        try {
+	        	camera = android.hardware.Camera.open();
+	        }
+	        catch (Exception E) {
+	        	throw new TSourceStreamChannel.SourceNotAvailableError("video-camera is in use"); //. =>
+	        }
+	        if (camera == null)
+	        	throw new TSourceStreamChannel.SourceNotExistError("video-camera not exist"); //. =>
+	        camera.release();
 		}
 		
 		public void Start() {
@@ -413,59 +421,19 @@ public class TH264IChannel extends TStreamChannel {
 	}
 	
 	@Override
-	public void StartSource() {
-		PostStart();
+	public void StartSource() throws Exception {
+		VideoFrameSource.Check();
+		//.
+		VideoFrameSource.Start();
 	}
 
 	@Override
-	public void StopSource() {
-		PostStop();
+	public void StopSource() throws Exception {
+		VideoFrameSource.Stop();
 	}
 	
 	@Override
 	public boolean IsActive() {
 		return VideoFrameSource.flStarted;
 	}
-	
-    public void PostStart() {
-		MessageHandler.obtainMessage(MESSAGE_START).sendToTarget();
-    }
-    
-    public void PostStop() {
-		MessageHandler.obtainMessage(MESSAGE_STOP).sendToTarget();
-    }
-    
-	public static final int MESSAGE_START 	= 1;
-	public static final int MESSAGE_STOP 	= 2;
-	
-	public Handler MessageHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-        	try {
-                switch (msg.what) {
-
-                case MESSAGE_START: 
-                	try {
-            			VideoFrameSource.Start();
-                	}
-                	catch (Exception E) {
-                		Toast.makeText(InternalSensorsModule.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
-                	}
-                	break; //. >
-
-                case MESSAGE_STOP: 
-                	try {
-            			VideoFrameSource.Stop();
-                	}
-                	catch (Exception E) {
-                		Toast.makeText(InternalSensorsModule.Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
-                	}
-                	break; //. >
-                }
-        	}
-        	catch (Throwable E) {
-        		TGeoLogApplication.Log_WriteError(E);
-        	}
-        }
-    };
 }

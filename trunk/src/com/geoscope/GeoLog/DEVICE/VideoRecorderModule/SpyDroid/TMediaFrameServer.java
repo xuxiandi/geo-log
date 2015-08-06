@@ -114,7 +114,7 @@ public class TMediaFrameServer {
 	public TPacketSubscribers 	CurrentFrameSubscribers = new TPacketSubscribers();
 	//.
 	public TH264EncoderServer 						H264EncoderServer = null;
-	public ArrayList<TH264EncoderServer.TClient> 	H264EncoderServer_Clients = new ArrayList<TH264EncoderServer.TClient>(); 
+	private ArrayList<TH264EncoderServer.TClient> 	H264EncoderServer_Clients = new ArrayList<TH264EncoderServer.TClient>(); 
 	
 	public TMediaFrameServer(TVideoRecorderModule pVideoRecorderModule) {
 		VideoRecorderModule = pVideoRecorderModule;

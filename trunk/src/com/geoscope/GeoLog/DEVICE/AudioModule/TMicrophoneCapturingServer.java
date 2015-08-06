@@ -177,6 +177,10 @@ public class TMicrophoneCapturingServer extends TCancelableThread {
 		}
 	}
 	
+	public boolean IsActive() {
+		return flStarted;
+	}
+	
     private void Microphone_Initialize() throws IOException {
     	if (Configuration.Source == TConfiguration.SOURCE_ANY)
     		Configuration.Source = MediaRecorder.AudioSource.DEFAULT;

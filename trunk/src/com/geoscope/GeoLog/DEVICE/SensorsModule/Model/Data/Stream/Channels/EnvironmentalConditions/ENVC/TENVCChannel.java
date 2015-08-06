@@ -113,21 +113,21 @@ public class TENVCChannel extends TStreamChannel {
 	
 	public void DoOnTimestamp(double Timestamp) throws Exception {
 		byte[] BA = Timestamp_ToByteArray(Timestamp);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 
 	public void DoOnTemperature(double Temperature) throws Exception {
 		byte[] BA = Temperature_ToByteArray(Temperature);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 
 	public void DoOnPressure(double Pressure) throws Exception {
 		byte[] BA = Pressure_ToByteArray(Pressure);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 
 	public void DoOnHumidity(double Humidity) throws Exception {
 		byte[] BA = Humidity_ToByteArray(Humidity);
-		PacketSubscribers.ProcessPacket(BA);
+		PacketSubscribers.EnqueuePacket(BA);
 	}
 }

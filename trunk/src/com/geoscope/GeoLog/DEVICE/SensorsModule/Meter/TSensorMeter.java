@@ -210,7 +210,9 @@ public class TSensorMeter extends TCancelableThread {
 	private String 		ProfileFile;
 	protected TProfile 	Profile;
 	//.
-	private int Status = STATUS_NOTRUNNING;
+	private int 	Status = STATUS_NOTRUNNING;
+	private double 	StatusTimestamp = 0.0;
+	private String 	StatusString = null;
 	//.
 	private Thread OnMeasurementFinishProcessing = null;
 	
@@ -312,12 +314,26 @@ public class TSensorMeter extends TCancelableThread {
 		return Profile.flActive;
 	}
 	
-	public synchronized void SetStatus(int Value) {
+	public synchronized void SetStatus(int Value, String ValueString) {
 		Status = Value;
+		StatusTimestamp = OleDate.UTCCurrentTimestamp();
+		StatusString = ValueString;
+	}
+	
+	public synchronized void SetStatus(int Value) {
+		SetStatus(Value, null);
 	}
 	
 	public synchronized int GetStatus() {
 		return Status;
+	}
+	
+	public synchronized double GetStatusTimestamp() {
+		return StatusTimestamp;
+	}
+	
+	public synchronized String GetStatusString() {
+		return StatusString;
 	}
 	
 	public void Start() {
@@ -352,11 +368,12 @@ public class TSensorMeter extends TCancelableThread {
 		catch (CancelException CE) {
 		}
     	catch (Throwable E) {
-			SetStatus(STATUS_ERROR);
-			//.
 			String S = E.getMessage();
 			if (S == null)
 				S = E.getClass().getName();
+			//.
+			SetStatus(STATUS_ERROR, S);
+			//.
 			SensorsModule.Device.Log.WriteError("Sensors meter: "+GetTypeID(),S);
     	}
 	}

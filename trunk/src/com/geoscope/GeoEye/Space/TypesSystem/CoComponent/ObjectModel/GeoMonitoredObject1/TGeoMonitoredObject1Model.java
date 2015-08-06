@@ -1235,9 +1235,15 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 				//.
 				boolean flActive = (Integer.parseInt(Properties[9]) != 0);
 				//.
-				int Status = Integer.parseInt(Properties[10]);
+				int 	Status = Integer.parseInt(Properties[10]);
+				double 	StatusTimestamp = 0.0;
+				if (Properties.length > 11)
+					StatusTimestamp = Double.parseDouble(Properties[11]);
+				String	StatusString  = null;
+				if (Properties.length > 12)
+					StatusString = Properties[12];
 				//.
-				Result[I] = new TSensorMeterInfo(Descriptor, flEnabled, flActive, Status);
+				Result[I] = new TSensorMeterInfo(Descriptor, flEnabled, flActive, Status,StatusTimestamp,StatusString);
 			}
 		}
 		else

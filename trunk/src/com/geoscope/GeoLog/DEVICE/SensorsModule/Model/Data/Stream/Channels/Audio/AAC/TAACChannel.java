@@ -103,6 +103,6 @@ public class TAACChannel extends TStreamChannel {
 		TDataConverter.ConvertInt16ToLEByteArray(Descriptor, Packet, 0);
 		System.arraycopy(AACPacket,0, Packet,DescriptorSize, AACPacketSize);
 		//.
-		ProcessPacket(Packet, PacketSize);
+		EnqueuePacket(Packet, PacketSize);
 	}
 }

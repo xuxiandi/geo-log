@@ -659,10 +659,10 @@ public class TChannel {
 	    }
     }
     
-	public void StartSource() {
+	public void StartSource() throws Exception {
 	}
 
-	public void StopSource() {
+	public void StopSource() throws Exception {
 	}
 	
 	public boolean IsActive() { //. true if the channel started or the channel source started

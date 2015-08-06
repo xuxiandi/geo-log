@@ -9,8 +9,10 @@ public class TSensorMeterInfo {
 	public boolean 	flActive;
 	//.
 	public int 		Status;
+	public double 	StatusTimestamp;
+	public String	StatusString;
 	
-	public TSensorMeterInfo(TSensorMeterDescriptor pDescriptor, boolean pflEnabled, boolean pflActive, int pStatus) {
+	public TSensorMeterInfo(TSensorMeterDescriptor pDescriptor, boolean pflEnabled, boolean pflActive, int pStatus, double pStatusTimestamp, String pStatusString) {
 		Descriptor = pDescriptor;
 		//.
 		flEnabled = pflEnabled;
@@ -18,5 +20,7 @@ public class TSensorMeterInfo {
 		flActive = pflActive;
 		//.
 		Status = pStatus;
+		StatusTimestamp = pStatusTimestamp;
+		StatusString = pStatusString;
 	}
 }

@@ -35,13 +35,16 @@ public class TMemoryBuffering {
     		_Thread.start();
     	}
     	
-    	@Override
-    	public void Destroy() throws Exception {
-    		CancelByCanceller();
-    		//.
-    		Process();
-    		//.
-    		Wait();
+    	public void Destroy(boolean flInterrupt) throws Exception {
+    		if (flInterrupt)
+    			super.Destroy();
+    		else {
+        		CancelByCanceller();
+        		//.
+        		Process();
+        		//.
+        		Wait();
+    		}
     	}
     	
 		public void Process() {
@@ -88,11 +91,18 @@ public class TMemoryBuffering {
 		BuffersDequeueing = new TBuffersDequeueing();
 	}
 	
-	public void Destroy() throws Exception {
+	public void Destroy(boolean flInterrupt) throws Exception {
+		if (flInterrupt)
+			Empty();
+		//.
 		if (BuffersDequeueing != null) {
-			BuffersDequeueing.Destroy();
+			BuffersDequeueing.Destroy(flInterrupt);
 			BuffersDequeueing = null;
 		}
+	}
+	
+	public void Destroy() throws Exception {
+		Destroy(false);
 	}
 	
 	public void EnqueueBuffer(byte[] buffer, int size, long timestamp) {
@@ -109,13 +119,14 @@ public class TMemoryBuffering {
 				if (ReadPos >= BuffersCount)
 					ReadPos = 0;
 			}
-		}
-		synchronized (Buffer) {
-			Buffer.Timestamp = timestamp;
-			if (Buffer.Data.length < size)
-				Buffer.Data = new byte[size];
-			System.arraycopy(buffer,0, Buffer.Data,0, size);
-			Buffer.Size = size;
+			//.
+			synchronized (Buffer) {
+				Buffer.Timestamp = timestamp;
+				if (Buffer.Data.length < size)
+					Buffer.Data = new byte[size];
+				System.arraycopy(buffer,0, Buffer.Data,0, size);
+				Buffer.Size = size;
+			}
 		}
 		//.
 		BuffersDequeueing.Process();
@@ -125,7 +136,7 @@ public class TMemoryBuffering {
 		TBuffer Buffer;
 		while (true) {
 			synchronized (this) {
-				if (WritePos == ReadPos) 
+				if (ReadPos == WritePos) 
 					return; //. ->
 				//.
 				Buffer = Buffers[ReadPos];
@@ -140,6 +151,12 @@ public class TMemoryBuffering {
 	
 	public int Count() {
 		return BuffersCount;
+	}
+	
+	public void Empty() {
+		synchronized (this) {
+			ReadPos = WritePos;
+		}
 	}
 	
 	public int PendingBuffers() {

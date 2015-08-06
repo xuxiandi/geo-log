@@ -37,9 +37,9 @@ public class TAudioMeter extends TSensorMeter {
 	protected void DoProcess() throws Exception {
 		GetChannels();
 		//.
-		Channel.Suspend();
+		Channel.SourceChannel_Start();
 		try {
-			Channel.SourceChannel_Start();
+			Channel.Suspend();
 			try {
 				int MeasurementMaxDuration = (int)(Profile.MeasurementMaxDuration*(24.0*3600.0*1000.0));
 				while (!Canceller.flCancel) {
@@ -67,11 +67,11 @@ public class TAudioMeter extends TSensorMeter {
 				}
 			}
 			finally {
-				Channel.SourceChannel_Stop();
+				Channel.Resume();
 			}
 		}
 		finally {
-			Channel.Resume();
+			Channel.SourceChannel_Stop();
 		}
 	}
 }

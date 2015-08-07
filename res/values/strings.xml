@@ -1133,5 +1133,6 @@
     <string name="SSetVoiceCommands">Set voice commands</string>
     <string name="SChannelsOfStreaming">Channels of the streaming</string>
     <string name="SDataStreamerChannelsConflictError">Data streamer has a channels conflict</string>
+    <string name="SBitrate">"Bitrate: "</string>
     
 </resources>

@@ -103,8 +103,12 @@ public class TVCTRLChannel extends TStreamChannel {
 		DoCommand("1"+","+Integer.toString(ChannelID)+","+Integer.toString(Bitrate)); 
 	}
 
-	public void MultiplyChannelBitrate(int ChannelID, double Multiplier) throws Exception {
-		DoCommand("2"+","+Integer.toString(ChannelID)+","+Double.toString(Multiplier)); 
+	public int MultiplyChannelBitrate(int ChannelID, double Multiplier) throws Exception {
+		byte[] Response = DoCommand("2"+","+Integer.toString(ChannelID)+","+Double.toString(Multiplier));
+		if (Response != null)
+			return TDataConverter.ConvertLEByteArrayToInt32(Response, 0); //. ->
+		else
+			return -1; //. ->
 	}
 
 	public static class TPacketsBufferInfo {

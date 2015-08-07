@@ -218,7 +218,10 @@ public class TVCTRLChannel extends TStreamChannel {
 			finally {
 				UnlockChannel(ChannelID);
 			}
-			return null; //. ->
+			byte[] Result = new byte[4];
+			TDataConverter.ConvertInt32ToLEByteArray(Bitrate, Result, 0); 
+			//.
+			return Result; //. ->
 			
 		case 3: //. get a channel subscriber packets buffering info 
 			ChannelID = Integer.parseInt(Command[1]);
@@ -235,7 +238,7 @@ public class TVCTRLChannel extends TStreamChannel {
 				BuffersCount = PacketSubscriber.PacketsBufferSize();
 				PendingPackets = PacketSubscriber.PendingPackets();
 			}
-			byte[] Result = new byte[8];
+			Result = new byte[8];
 			TDataConverter.ConvertInt32ToLEByteArray(BuffersCount, Result, 0); 
 			TDataConverter.ConvertInt32ToLEByteArray(PendingPackets, Result, 4);
 			//.

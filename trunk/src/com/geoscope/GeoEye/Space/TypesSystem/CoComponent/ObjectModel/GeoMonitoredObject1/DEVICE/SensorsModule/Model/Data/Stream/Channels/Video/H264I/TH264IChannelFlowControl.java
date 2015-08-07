@@ -1,6 +1,7 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
@@ -74,7 +75,8 @@ public class TH264IChannelFlowControl {
     					//.
     					if ((FillFactor > Check_ReduceBitrateFillFactor) && (FillFactorTrend >= 0.0)) {
     						try {
-            					ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 0.5);
+            					int Bitrate = ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 0.5);
+            					Log.d("VCTRLChannel", "Bitrate down: "+Integer.toString(Bitrate));
             				}
             				catch (com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ValueOutOfRangeError VOORE) {
             				}
@@ -91,7 +93,8 @@ public class TH264IChannelFlowControl {
             						ZeroFillFactorCount = 0;
             						//.
             						try {
-                    					ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 2.0);
+            							int Bitrate = ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 2.0);
+                    					Log.d("VCTRLChannel", "Bitrate up: "+Integer.toString(Bitrate));
                     				}
                     				catch (com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ValueOutOfRangeError VOORE) {
                     				}

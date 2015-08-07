@@ -421,9 +421,17 @@ public class TTrackerOSOQueuePanel extends Activity {
 	protected void onPause() {
 		super.onPause();
 		//.
-    	TTracker Tracker = TTracker.GetTracker();
-    	if (Tracker != null)
-    		Tracker.GeoLog.ConnectorModule.Resume();
+		try {
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
+	    	if (Tracker != null)
+	    		Tracker.GeoLog.ConnectorModule.Resume();
+		}
+		catch (Exception E) {
+			String S = E.getMessage();
+			if (S == null)
+				S = E.getClass().getName();
+			Toast.makeText(TTrackerOSOQueuePanel.this, S, Toast.LENGTH_LONG).show();  						
+		}
 	}
 	
 	@Override
@@ -466,7 +474,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-				    	TTracker Tracker = TTracker.GetTracker();
+				    	TTracker Tracker = TTracker.GetTracker(TTrackerOSOQueuePanel.this.getApplicationContext());
 				    	if (Tracker == null)
 				    		throw new Exception(TTrackerOSOQueuePanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 				    	//.
@@ -731,7 +739,7 @@ public class TTrackerOSOQueuePanel extends Activity {
 	}
 	
 	private void QueueItems_Remove(TObjectSetComponentDataServiceOperation Item) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(TTrackerOSOQueuePanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 		//.

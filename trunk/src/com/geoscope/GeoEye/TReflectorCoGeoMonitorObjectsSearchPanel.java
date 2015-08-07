@@ -101,7 +101,7 @@ public class TReflectorCoGeoMonitorObjectsSearchPanel extends Activity {
 			
 			@Override
 			public void Process() throws Exception {
-		    	TUserAgent UserAgent = TUserAgent.GetUserAgent();
+		    	TUserAgent UserAgent = TUserAgent.GetUserAgent(context.getApplicationContext());
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 				ResultItems = TCoGeoMonitorObjects.GetDataForDomains(UserAgent.Server, Domains, Params);

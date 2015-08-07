@@ -81,7 +81,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 		super.onCreate(savedInstanceState);
         //.
 		try {
-			TTracker Tracker = TTracker.GetTracker();
+			TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 			if (Tracker == null) 
 				throw new Exception("Tracker is null"); //. =>
 			Device = Tracker.GeoLog;
@@ -228,7 +228,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 
         	    		    				@Override
         	    		    				public void Process() throws Exception {
-        	    	    				    	TTracker Tracker = TTracker.GetTracker();
+        	    	    				    	TTracker Tracker = TTracker.GetTracker(TSensorsModuleMeasurementsArchive.this.getApplicationContext());
         	    	    				    	if (Tracker == null)
         	    	    				    		throw new Exception(TSensorsModuleMeasurementsArchive.this.getString(R.string.STrackerIsNotInitialized)); //. =>
         	    	    				    	//.
@@ -330,7 +330,7 @@ public class TSensorsModuleMeasurementsArchive extends Activity {
 
         	    		    				@Override
         	    		    				public void Process() throws Exception {
-        	    	    				    	TTracker Tracker = TTracker.GetTracker();
+        	    	    				    	TTracker Tracker = TTracker.GetTracker(TSensorsModuleMeasurementsArchive.this.getApplicationContext());
         	    	    				    	if (Tracker == null)
         	    	    				    		throw new Exception(TSensorsModuleMeasurementsArchive.this.getString(R.string.STrackerIsNotInitialized)); //. =>
         	    								//.

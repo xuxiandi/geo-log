@@ -168,7 +168,7 @@ public class TDataStreamPropsPanel extends Activity {
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent(TDataStreamPropsPanel.this.getApplicationContext());
 	    				if (UserAgent == null)
 	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    				//.
@@ -349,7 +349,7 @@ public class TDataStreamPropsPanel extends Activity {
 			
 			@Override
 			public void Process() throws Exception {
-				UserAgent = TUserAgent.GetUserAgent();
+				UserAgent = TUserAgent.GetUserAgent(TDataStreamPropsPanel.this.getApplicationContext());
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 				ServersInfo = UserAgent.Server.Info.GetInfo();
@@ -401,7 +401,7 @@ public class TDataStreamPropsPanel extends Activity {
 			
 			@Override
 			public void Process() throws Exception {
-				UserAgent = TUserAgent.GetUserAgent();
+				UserAgent = TUserAgent.GetUserAgent(TDataStreamPropsPanel.this.getApplicationContext());
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 				ServersInfo = UserAgent.Server.Info.GetInfo();

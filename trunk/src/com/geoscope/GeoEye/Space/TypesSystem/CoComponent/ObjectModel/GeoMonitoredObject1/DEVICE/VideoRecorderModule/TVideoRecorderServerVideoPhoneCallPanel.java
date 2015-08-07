@@ -106,10 +106,10 @@ public class TVideoRecorderServerVideoPhoneCallPanel extends Activity {
         	Name = "?";
         //.
 		try {
-	    	Tracker = TTracker.GetTracker();
+	    	Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
-			UserAgent = TUserAgent.GetUserAgent();
+			UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 			//.

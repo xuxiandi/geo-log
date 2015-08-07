@@ -22,8 +22,8 @@ public class TUserAgentModule extends TModule {
     public void Destroy() {
     }
     
-    public void UpdateUserIDFromAgent() {
-    	TUserAgent UserAgent = TUserAgent.GetUserAgent();
+    public void UpdateUserIDFromAgent() throws Exception {
+    	TUserAgent UserAgent = TUserAgent.GetUserAgent(Device.context);
     	if (UserAgent != null) 
     		UserID.SetValue(OleDate.UTCCurrentTimestamp(), (int)UserAgent.Server.User.UserID);
     }

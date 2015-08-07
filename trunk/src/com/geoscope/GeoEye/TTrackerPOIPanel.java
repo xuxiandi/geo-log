@@ -58,64 +58,74 @@ public class TTrackerPOIPanel extends Activity {
         //.
         setContentView(R.layout.tracker_poi_panel);
     	//.
-        spPOIMapIDGeoSpace = (Spinner)findViewById(R.id.spPOIMapIDGeoSpace);
-        String[] GeoSpaceNames = TSystemTGeoSpace.WellKnownGeoSpaces_GetNames();
-        ArrayAdapter<String> saPOIMapIDGeoSpace = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, GeoSpaceNames);
-        saPOIMapIDGeoSpace.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spPOIMapIDGeoSpace.setAdapter(saPOIMapIDGeoSpace);
-        //.
-        edPOIName = (EditText)findViewById(R.id.edPOIName);
-        //.
-    	//.
-        String[] SecuritySA = new String[2];
-        SecuritySA[DEFAULT_SECURITY_FILE_INDEX] = getString(R.string.SDefault);
-        SecuritySA[PRIVATE_SECURITY_FILE_INDEX] = getString(R.string.SPrivate);
-        //. SecuritySA[OTHER_SECURITY_FILE_INDEX] = getString(R.string.SOther);
-        spSecurity = (Spinner)findViewById(R.id.spSecurity);
-        ArrayAdapter<String> saSecurity = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SecuritySA);
-        saSecurity.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spSecurity.setAdapter(saSecurity);
-        spSecurity.setOnItemSelectedListener(new OnItemSelectedListener() {
-        	
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-            	switch (position) {
+        try {
+            spPOIMapIDGeoSpace = (Spinner)findViewById(R.id.spPOIMapIDGeoSpace);
+            String[] GeoSpaceNames = TSystemTGeoSpace.WellKnownGeoSpaces_GetNames();
+            ArrayAdapter<String> saPOIMapIDGeoSpace = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, GeoSpaceNames);
+            saPOIMapIDGeoSpace.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spPOIMapIDGeoSpace.setAdapter(saPOIMapIDGeoSpace);
+            //.
+            edPOIName = (EditText)findViewById(R.id.edPOIName);
+            //.
+        	//.
+            String[] SecuritySA = new String[2];
+            SecuritySA[DEFAULT_SECURITY_FILE_INDEX] = getString(R.string.SDefault);
+            SecuritySA[PRIVATE_SECURITY_FILE_INDEX] = getString(R.string.SPrivate);
+            //. SecuritySA[OTHER_SECURITY_FILE_INDEX] = getString(R.string.SOther);
+            spSecurity = (Spinner)findViewById(R.id.spSecurity);
+            ArrayAdapter<String> saSecurity = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SecuritySA);
+            saSecurity.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spSecurity.setAdapter(saSecurity);
+            spSecurity.setOnItemSelectedListener(new OnItemSelectedListener() {
             	
-            	case OTHER_SECURITY_FILE_INDEX:
-            		break; //. >
-            	}
-            }
+                @Override
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                	switch (position) {
+                	
+                	case OTHER_SECURITY_FILE_INDEX:
+                		break; //. >
+                	}
+                }
 
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-			}
-        });        
-        //.
-        cbPOIModifyLast = (CheckBox)findViewById(R.id.cbPOIModifyLast);
-        cbPOIModifyLast.setChecked(false);
-        //.
-        btnOk = (Button)findViewById(R.id.TrackerPOIPanel_btnOk);
-        btnOk.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-        		if (CreateNewPOI())
-        			setResult(Activity.RESULT_OK);
-        		//.
-            	finish();
-            }
-        });
-        //.
-        setResult(Activity.RESULT_CANCELED);
-        //.
-        Update();
+    			@Override
+    			public void onNothingSelected(AdapterView<?> arg0) {
+    			}
+            });        
+            //.
+            cbPOIModifyLast = (CheckBox)findViewById(R.id.cbPOIModifyLast);
+            cbPOIModifyLast.setChecked(false);
+            //.
+            btnOk = (Button)findViewById(R.id.TrackerPOIPanel_btnOk);
+            btnOk.setOnClickListener(new OnClickListener() {
+            	
+            	@Override
+                public void onClick(View v) {
+            		try {
+                		if (CreateNewPOI())
+                			setResult(Activity.RESULT_OK);
+                		//.
+                    	finish();
+                    }
+                    catch (Exception E) {
+                    	Toast.makeText(TTrackerPOIPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+            //.
+            setResult(Activity.RESULT_CANCELED);
+            //.
+            Update();
+        }
+        catch (Exception E) {
+        	Toast.makeText(this, E.getMessage(), Toast.LENGTH_SHORT).show();
+        }
 	}
 
 	@SuppressLint("SimpleDateFormat")
-	public void Update() {
-		if (TTracker.GetTracker() == null)
+	public void Update() throws Exception {
+		if (TTracker.GetTracker(TTrackerPOIPanel.this.getApplicationContext()) == null)
 			return; //. ->
-		MapID = TTracker.GetTracker().GeoLog.GPSModule.MapID;
+		MapID = TTracker.GetTracker(TTrackerPOIPanel.this.getApplicationContext()).GeoLog.GPSModule.MapID;
     	spPOIMapIDGeoSpace.setSelection(TSystemTGeoSpace.WellKnownGeoSpaces_GetIndexByPOIMapID(MapID));
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");      
 		POIName = "POI@"+sdf.format(new Date()); 
@@ -136,10 +146,15 @@ public class TTrackerPOIPanel extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case MENU_CREATE:
-    		if (CreateNewPOI())
-    			setResult(Activity.RESULT_OK);
-    		//.
-    		finish();
+    		try {
+        		if (CreateNewPOI())
+        			setResult(Activity.RESULT_OK);
+        		//.
+        		finish();
+            }
+            catch (Exception E) {
+            	Toast.makeText(TTrackerPOIPanel.this, E.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         	//.
             return true; //. >
         
@@ -151,7 +166,7 @@ public class TTrackerPOIPanel extends Activity {
         return false;
     }
     
-    private boolean CreateNewPOI() {
+    private boolean CreateNewPOI() throws Exception {
     	int Idx = spPOIMapIDGeoSpace.getSelectedItemPosition();
     	if (Idx < 0)
     		Idx = 0;
@@ -164,7 +179,7 @@ public class TTrackerPOIPanel extends Activity {
 			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_SHORT).show();
 			return false; //. ->
 		}
-        TTracker Tracker = TTracker.GetTracker(); 
+        TTracker Tracker = TTracker.GetTracker(this.getApplicationContext()); 
         TGPSFixValue GPSFix = null;
         if (!Tracker.GeoLog.GPSModule.flProcessingIsDisabled) {
             GPSFix =  Tracker.GeoLog.GPSModule.GetCurrentFix();

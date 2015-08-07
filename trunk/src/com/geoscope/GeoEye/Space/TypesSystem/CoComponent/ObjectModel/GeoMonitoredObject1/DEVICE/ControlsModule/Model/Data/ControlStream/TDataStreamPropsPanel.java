@@ -217,7 +217,7 @@ public class TDataStreamPropsPanel extends Activity {
                     			
                     			@Override
                     			public void Process() throws Exception {
-                    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+                    				TUserAgent UserAgent = TUserAgent.GetUserAgent(context.getApplicationContext());
                     				if (UserAgent == null)
                     					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
                     				TCoGeoMonitorObject	Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
@@ -321,7 +321,7 @@ public class TDataStreamPropsPanel extends Activity {
 		public void run() {
 			try {
 				try {
-    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+    				TUserAgent UserAgent = TUserAgent.GetUserAgent(TDataStreamPropsPanel.this.getApplicationContext());
     				if (UserAgent == null)
     					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
     				TCoGeoMonitorObject	Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
@@ -606,7 +606,7 @@ public class TDataStreamPropsPanel extends Activity {
 			
 			@Override
 			public void Process() throws Exception {
-				UserAgent = TUserAgent.GetUserAgent();
+				UserAgent = TUserAgent.GetUserAgent(context.getApplicationContext());
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 				ServersInfo = UserAgent.Server.Info.GetInfo();
@@ -696,7 +696,7 @@ public class TDataStreamPropsPanel extends Activity {
 			
 			@Override
 			public void Process() throws Exception {
-				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+				TUserAgent UserAgent = TUserAgent.GetUserAgent(context.getApplicationContext());
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 				TCoGeoMonitorObject	Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);

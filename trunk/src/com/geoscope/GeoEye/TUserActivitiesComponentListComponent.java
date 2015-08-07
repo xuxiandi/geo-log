@@ -616,7 +616,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		ParentActivity = pParentActivity;
 		ParentLayout = pParentLayout;
 		//.
-		UserAgent = TUserAgent.GetUserAgent();
+		UserAgent = TUserAgent.GetUserAgent(ParentActivity.getApplicationContext());
 		if (UserAgent == null)
 			throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		//.

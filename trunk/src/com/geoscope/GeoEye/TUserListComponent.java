@@ -507,7 +507,7 @@ public class TUserListComponent extends TUIComponent {
 				//.
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+    				TUserAgent UserAgent = TUserAgent.GetUserAgent(ParentActivity.getApplicationContext());
     				if (UserAgent == null)
     					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
     				_Items = UserAgent.User().GetUserList(NameContext);
@@ -639,7 +639,7 @@ public class TUserListComponent extends TUIComponent {
 						flUpdateImmediately = false;
 					//.
 					try {
-	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent(ParentActivity.getApplicationContext());
 	    				if (UserAgent == null)
 	    					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 						TGeoScopeServerUser.TUserDescriptor[] _Items;

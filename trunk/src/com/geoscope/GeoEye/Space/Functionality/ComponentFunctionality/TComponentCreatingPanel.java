@@ -324,7 +324,7 @@ public class TComponentCreatingPanel extends Activity {
 					
 					@Override
 					public void Process() throws Exception {
-				    	TTracker Tracker = TTracker.GetTracker();
+				    	TTracker Tracker = TTracker.GetTracker(context.getApplicationContext());
 				    	if (Tracker == null)
 				    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 						//.
@@ -701,10 +701,10 @@ public class TComponentCreatingPanel extends Activity {
     			}
     		};
     		Processing.Start();*/
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
@@ -719,7 +719,7 @@ public class TComponentCreatingPanel extends Activity {
 			//. try to gc
 			TGeoLogApplication.Instance().GarbageCollector.Collect();
 			//.
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	//.
@@ -800,10 +800,10 @@ public class TComponentCreatingPanel extends Activity {
 	    			}
 	    		};
 	    		Processing.Start();*/
-				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+				TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-		    	Tracker = TTracker.GetTracker();
+		    	Tracker = TTracker.GetTracker(this.getApplicationContext());
 		    	if (Tracker == null)
 		    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 		    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
@@ -859,10 +859,10 @@ public class TComponentCreatingPanel extends Activity {
     			}
     		};
     		Processing.Start(); */
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
@@ -905,10 +905,10 @@ public class TComponentCreatingPanel extends Activity {
     			}
     		};
     		Processing.Start();*/
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);
@@ -950,10 +950,10 @@ public class TComponentCreatingPanel extends Activity {
 				}
 			};
 			Processing.Start();*/
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp,DataFileName);

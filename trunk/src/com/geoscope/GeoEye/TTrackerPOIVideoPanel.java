@@ -60,7 +60,7 @@ public class TTrackerPOIVideoPanel extends Activity implements OnClickListener, 
 	}
     
 	private void InitRecorder() throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(TTrackerPOIVideoPanel.this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
         //. prepare for output file

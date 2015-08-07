@@ -85,6 +85,7 @@ public class TUserActivityPanel extends Activity {
         //.
         edCurrentUserActivityName = (EditText)findViewById(R.id.edCurrentUserActivityName);
         edCurrentUserActivityName.setOnFocusChangeListener(new OnFocusChangeListener() {
+        	
         	@Override
         	public void onFocusChange(View v, boolean hasFocus) {
         	    if (hasFocus)
@@ -93,6 +94,7 @@ public class TUserActivityPanel extends Activity {
         });
         edCurrentUserActivityInfo = (EditText)findViewById(R.id.edCurrentUserActivityInfo);
         edCurrentUserActivityInfo.setOnFocusChangeListener(new OnFocusChangeListener() {
+        	
         	@Override
         	public void onFocusChange(View v, boolean hasFocus) {
         	    if (hasFocus)
@@ -101,18 +103,25 @@ public class TUserActivityPanel extends Activity {
         });
         btnSetCurrentUserActivity = (Button)findViewById(R.id.btnSetCurrentUserActivity);
         btnSetCurrentUserActivity.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
-    			TActivity NewActivity = new TActivity();
-    			NewActivity.Name = edCurrentUserActivityName.getText().toString();
-    			NewActivity.Info = edCurrentUserActivityInfo.getText().toString();
-    			if ((CurrentActivity != null) && NewActivity.Name.equals(CurrentActivity.Name))
-    				return; //. ->
-            	SetCurrentActivity(NewActivity);
+				try {
+	    			TActivity NewActivity = new TActivity();
+	    			NewActivity.Name = edCurrentUserActivityName.getText().toString();
+	    			NewActivity.Info = edCurrentUserActivityInfo.getText().toString();
+	    			if ((CurrentActivity != null) && NewActivity.Name.equals(CurrentActivity.Name))
+	    				return; //. ->
+	            	SetCurrentActivity(NewActivity);
+            	}
+            	catch (Exception Ex) {
+            		Toast.makeText(TUserActivityPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+            	}
             }
         });
         btnRestartUserActivity = (Button)findViewById(R.id.btnRestartUserActivity);
         btnRestartUserActivity.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
             	RestartActivityForCurrent();
@@ -120,6 +129,7 @@ public class TUserActivityPanel extends Activity {
         });
         btnSelectCurrentUserActivity = (Button)findViewById(R.id.btnSelectCurrentUserActivity);
         btnSelectCurrentUserActivity.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
             	SelectCurrentActivity();
@@ -127,9 +137,15 @@ public class TUserActivityPanel extends Activity {
         });
         btnClearCurrentUserActivity = (Button)findViewById(R.id.btnClearCurrentUserActivity);
         btnClearCurrentUserActivity.setOnClickListener(new OnClickListener() {
+        	
         	@Override
             public void onClick(View v) {
-            	SetCurrentActivity(null);
+				try {
+	            	SetCurrentActivity(null);
+            	}
+            	catch (Exception Ex) {
+            		Toast.makeText(TUserActivityPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+            	}
             }
         });
         //.
@@ -183,8 +199,8 @@ public class TUserActivityPanel extends Activity {
 		CurrentActivityLoading = new TCurrentActivityLoading();
 	}
 	
-	private void SetCurrentActivity(TActivity NewActivity) {
-    	TTracker Tracker = TTracker.GetTracker();
+	private void SetCurrentActivity(TActivity NewActivity) throws Exception {
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
 			CurrentActivitySetting = new TCurrentActivitySetting(NewActivity);
 		else
@@ -225,7 +241,7 @@ public class TUserActivityPanel extends Activity {
 				TActivity CurrentActivity;
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+    				TUserAgent UserAgent = TUserAgent.GetUserAgent(TUserActivityPanel.this.getApplicationContext());
     				if (UserAgent == null)
     					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
     				CurrentActivity = UserAgent.Server.User.GetUserCurrentActivity();
@@ -330,7 +346,7 @@ public class TUserActivityPanel extends Activity {
 			try {
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+    				TUserAgent UserAgent = TUserAgent.GetUserAgent(TUserActivityPanel.this.getApplicationContext());
     				if (UserAgent == null)
     					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
     				if (NewActivity != null)
@@ -408,7 +424,7 @@ public class TUserActivityPanel extends Activity {
     }
 		
     private void Activities_Start(TActivity pActivity) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	//.
@@ -482,7 +498,7 @@ public class TUserActivityPanel extends Activity {
 				TActivities UserActivities;
     			MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
     			try {
-    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+    				TUserAgent UserAgent = TUserAgent.GetUserAgent(TUserActivityPanel.this.getApplicationContext());
     				if (UserAgent == null)
     					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
     				UserActivities = UserAgent.Server.User.GetUserActivityList(TActivity.MinTimestamp,TActivity.MaxTimestamp);
@@ -667,11 +683,17 @@ public class TUserActivityPanel extends Activity {
     				builder.setTitle(R.string.SLastUserActivities);
     				builder.setNegativeButton(R.string.SCancel,null);
     				builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+    					
     					@Override
     					public void onClick(DialogInterface arg0, int arg1) {
     						CurrentActivity = UserActivities.Items[arg1];
     						//.
-    						SetCurrentActivity(CurrentActivity);
+    						try {
+        						SetCurrentActivity(CurrentActivity);
+    	                	}
+    	                	catch (Exception Ex) {
+    	                		Toast.makeText(TUserActivityPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+    	                	}
     						//.
     						arg0.dismiss();
     					}
@@ -695,12 +717,18 @@ public class TUserActivityPanel extends Activity {
     				builder.setTitle(R.string.SLastUserActivities);
     				builder.setNegativeButton(R.string.SCancel,null);
     				builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+    					
     					@Override
     					public void onClick(DialogInterface arg0, int arg1) {
     						CurrentActivity = UserActivities.Items[arg1];
     						//.
     						CurrentActivity.ID = 0;
-    						SetCurrentActivity(CurrentActivity);
+    						try {
+        						SetCurrentActivity(CurrentActivity);
+    	                	}
+    	                	catch (Exception Ex) {
+    	                		Toast.makeText(TUserActivityPanel.this, Ex.getMessage(), Toast.LENGTH_LONG).show();
+    	                	}
     						//.
     						arg0.dismiss();
     					}

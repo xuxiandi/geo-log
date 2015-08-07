@@ -68,7 +68,7 @@ public class TReflectorCoGeoMonitorObjectsReportsPanel extends Activity {
 			private String ReportURL;
 			@Override
 			public void Process() throws Exception {
-		    	TUserAgent UserAgent = TUserAgent.GetUserAgent();
+		    	TUserAgent UserAgent = TUserAgent.GetUserAgent(context.getApplicationContext());
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		    	byte[] Report = TCoGeoMonitorObjects.GetReportForDomains(UserAgent.Server, ReportDomains, ReportParams);

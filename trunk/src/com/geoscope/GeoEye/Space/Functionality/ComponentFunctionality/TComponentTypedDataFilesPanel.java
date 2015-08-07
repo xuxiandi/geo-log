@@ -533,265 +533,152 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
-		//.
-        int ComponentID = 0;
-        Bundle extras = getIntent().getExtras(); 
-        if (extras != null) { 
-			ComponentID = extras.getInt("ComponentID");
-        	DataFilesBA = extras.getByteArray("DataFiles");
-        	flAutoStart = extras.getBoolean("AutoStart");
-        }
-        else {
-        	finish();
-        	return; //. ->
-        }
-		Component = TReflectorComponent.GetComponent(ComponentID);
-		//.
-		UserAgent = TUserAgent.GetUserAgent();
-		if (UserAgent == null) {
-        	finish();
-        	return; //. ->
-		}
-		//.
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //. 
-        setContentView(R.layout.componenttypeddatafiles_panel);
-        //.
-        lbName = (TextView)findViewById(R.id.lbName);
-        lbName.setOnLongClickListener(new OnLongClickListener() {
-			
-			@Override
-			public boolean onLongClick(View v) {
-				final CharSequence[] _items;
-				_items = new CharSequence[1];
-				_items[0] = TComponentTypedDataFilesPanel.this.getString(R.string.SGetURLFile);
-				AlertDialog.Builder builder = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
-				builder.setTitle(R.string.SOperations);
-				builder.setNegativeButton(TComponentTypedDataFilesPanel.this.getString(R.string.SCancel),null);
-				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						arg0.dismiss();
-						//.
-		            	try {
-							switch (arg1) {
-							
-							case 0: 
-			            		if (DataFiles == null)
-			            			return; //. ->
-								TComponentTypedDataFile RootItem = DataFiles.GetRootItem();
-								if (RootItem == null)
-									throw new Exception("there is no a root element of the data files"); //. =>
-								//.
-			            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
-			            		com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL URL = new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL(RootItem.DataComponentType,RootItem.DataComponentID);
-			        			URL.Name = lbName.getText().toString();
-			            		URL.ConstructURLFile(URLFN);
-			            		//.
-				    		    new AlertDialog.Builder(TComponentTypedDataFilesPanel.this)
-				    	        .setIcon(android.R.drawable.ic_dialog_alert)
-				    	        .setTitle(R.string.SInfo)
-				    	        .setMessage(TComponentTypedDataFilesPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TComponentTypedDataFilesPanel.this.getString(R.string.SUseItForImport))
-				    		    .setPositiveButton(R.string.SOk, null)
-				    		    .show();
-								break; //. >
+		try {
+	        int ComponentID = 0;
+	        Bundle extras = getIntent().getExtras(); 
+	        if (extras != null) { 
+				ComponentID = extras.getInt("ComponentID");
+	        	DataFilesBA = extras.getByteArray("DataFiles");
+	        	flAutoStart = extras.getBoolean("AutoStart");
+	        }
+	        else {
+	        	finish();
+	        	return; //. ->
+	        }
+			Component = TReflectorComponent.GetComponent(ComponentID);
+			//.
+			UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
+			if (UserAgent == null) {
+	        	finish();
+	        	return; //. ->
+			}
+			//.
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+	        //. 
+	        setContentView(R.layout.componenttypeddatafiles_panel);
+	        //.
+	        lbName = (TextView)findViewById(R.id.lbName);
+	        lbName.setOnLongClickListener(new OnLongClickListener() {
+				
+				@Override
+				public boolean onLongClick(View v) {
+					final CharSequence[] _items;
+					_items = new CharSequence[1];
+					_items[0] = TComponentTypedDataFilesPanel.this.getString(R.string.SGetURLFile);
+					AlertDialog.Builder builder = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
+					builder.setTitle(R.string.SOperations);
+					builder.setNegativeButton(TComponentTypedDataFilesPanel.this.getString(R.string.SCancel),null);
+					builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface arg0, int arg1) {
+							arg0.dismiss();
+							//.
+			            	try {
+								switch (arg1) {
+								
+								case 0: 
+				            		if (DataFiles == null)
+				            			return; //. ->
+									TComponentTypedDataFile RootItem = DataFiles.GetRootItem();
+									if (RootItem == null)
+										throw new Exception("there is no a root element of the data files"); //. =>
+									//.
+				            		String URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+				            		com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL URL = new com.geoscope.GeoEye.Space.URLs.Functionality.ComponentFunctionality.ComponentTypedDataFiles.Panel.TURL(RootItem.DataComponentType,RootItem.DataComponentID);
+				        			URL.Name = lbName.getText().toString();
+				            		URL.ConstructURLFile(URLFN);
+				            		//.
+					    		    new AlertDialog.Builder(TComponentTypedDataFilesPanel.this)
+					    	        .setIcon(android.R.drawable.ic_dialog_alert)
+					    	        .setTitle(R.string.SInfo)
+					    	        .setMessage(TComponentTypedDataFilesPanel.this.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+TComponentTypedDataFilesPanel.this.getString(R.string.SUseItForImport))
+					    		    .setPositiveButton(R.string.SOk, null)
+					    		    .show();
+									break; //. >
+								}
+							}
+							catch (Exception E) {
+								String S = E.getMessage();
+								if (S == null)
+									S = E.getClass().getName();
+			        			Toast.makeText(TComponentTypedDataFilesPanel.this, TComponentTypedDataFilesPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
 							}
 						}
-						catch (Exception E) {
-							String S = E.getMessage();
-							if (S == null)
-								S = E.getClass().getName();
-		        			Toast.makeText(TComponentTypedDataFilesPanel.this, TComponentTypedDataFilesPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
-						}
-					}
-				});
-				AlertDialog alert = builder.create();
-				alert.show();
-				//.
-				return true;
-			}
-		});
-        //.
-        lvDataFiles = (ListView)findViewById(R.id.lvDataFiles);
-        lvDataFiles.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lvDataFiles.setOnItemClickListener(new OnItemClickListener() { 
-        	
-			@Override
-        	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				if ((DataFiles == null) || (DataFiles.Count() == 0))
-					return; //. ->
-				TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2];
-				ComponentTypedDataFile_Process(ComponentTypedDataFile);
-        	}              
-        });         
-        lvDataFiles.setOnItemLongClickListener(new OnItemLongClickListener() {
-        	
-			@Override
-			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				if ((DataFiles == null) || (DataFiles.Count() == 0))
-					return false; //. ->
-            	//.
-				final TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2];
-				//.
-	    		final CharSequence[] _items;
-	    		int SelectedIdx = -1;
-	    		_items = new CharSequence[4];
-	    		_items[0] = TComponentTypedDataFilesPanel.this.getString(R.string.SOpen); 
-	    		_items[1] = TComponentTypedDataFilesPanel.this.getString(R.string.SContent1); 
-	    		_items[2] = TComponentTypedDataFilesPanel.this.getString(R.string.SGetURLFile); 
-	    		_items[3] = TComponentTypedDataFilesPanel.this.getString(R.string.SRemove); 
-	    		//.
-	    		AlertDialog.Builder builder = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
-	    		builder.setTitle(R.string.SSelect);
-	    		builder.setNegativeButton(R.string.SClose,null);
-	    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
-	    			@Override
-	    			public void onClick(DialogInterface arg0, int arg1) {
-	    		    	try {
-	    		    		switch (arg1) {
-	    		    		
-	    		    		case 0: //. open
-	    						ComponentTypedDataFile_Process(ComponentTypedDataFile);
-	        		    		//.
-	    		    			break; //. >
-	    		    			
-	    		    		case 1: //. content
-	    						try {
-    		    					final TComponentTypedDataFile _ComponentTypedDataFile = ComponentTypedDataFile;
-    		    					//.
-    		    					TAsyncProcessing ContentOpening = new TAsyncProcessing(TComponentTypedDataFilesPanel.this) {
-
-    		    						private TComponentTypedDataFiles TypedDataFiles;
-    		    						
-    		    						@Override
-    		    						public void Process() throws Exception {
-    				    					TypedDataFiles = new TComponentTypedDataFiles(context, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
-    				    					TypedDataFiles.PrepareForComponent(_ComponentTypedDataFile.DataComponentType,_ComponentTypedDataFile.DataComponentID, true, UserAgent.Server);
-    		    						}
-
-    		    						@Override
-    		    						public void DoOnCompleted() throws Exception {
-    	    								Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
-    	    								if (Component != null)
-    	    									intent.putExtra("ComponentID", Component.ID);
-    	    								intent.putExtra("DataFiles", TypedDataFiles.ToByteArrayV0());
-    	    								intent.putExtra("AutoStart", false);
-    	    								//.
-    	    								startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
-    		    						}
-    		    						
-    		    						@Override
-    		    						public void DoOnException(Exception E) {
-    		    							Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
-    		    						}
-    		    					};
-    		    					ContentOpening.Start();
-		    						//.
-		        		    		arg0.dismiss();
-	    						}
-	    						catch (Exception E) {
-	    			                Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-	    						}
-	        		    		//.
-	    		    			break; //. >
-	    		    			
-	    		    		case 2: //. get URL-file
-		    					TAsyncProcessing Processing = new TAsyncProcessing(TComponentTypedDataFilesPanel.this) {
-
-		    						private TComponentTypedDataFile _ComponentTypedDataFile = ComponentTypedDataFile.Clone();
-		    						//.
-		    						private String URLFN;
-		    						
-		    						@Override
-		    						public void Process() throws Exception {
-	    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_ComponentTypedDataFile.DataComponentType,_ComponentTypedDataFile.DataComponentID);
-	    								if (CF != null) 
-	    									try {
-	    										TURL URL = CF.GetDefaultURL();
-	    										if (URL != null) 
-	    											try {
-	    												if (URL.HasData()) {
-	    													_ComponentTypedDataFile.DataType = SpaceDefines.TYPEDDATAFILE_TYPE_Document; 
-	    													_ComponentTypedDataFile.PrepareForComponent(_ComponentTypedDataFile.DataComponentType,_ComponentTypedDataFile.DataComponentID, false, UserAgent.Server);
-	    													if (_ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) 
-			    	    										CF.ParseFromXMLDocument(_ComponentTypedDataFile.GetFileData());
-	    												}
-	    	    										//.
-		    											URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
-		    											URL.Name = ComponentTypedDataFile.DataName;
-		    											URL.ConstructURLFile(URLFN);
-	    											}
-	    											finally {
-	    												URL.Release();
-	    											}
-    	    										else
-    	    											throw new Exception("there is no URL there"); //. =>
-	    												
-	    									}
-	    									finally {
-	    										CF.Release();
-	    									}
-    										else
-    											throw new Exception("there is no component functionality there"); //. =>
-		    						}
-
-		    						@Override
-		    						public void DoOnCompleted() throws Exception {
-		    			    		    new AlertDialog.Builder(context)
-		    			    	        .setIcon(android.R.drawable.ic_dialog_alert)
-		    			    	        .setTitle(R.string.SInfo)
-		    			    	        .setMessage(context.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+context.getString(R.string.SUseItForImport))
-		    			    		    .setPositiveButton(R.string.SOk, null)
-		    			    		    .show();
-		    						}
-		    						
-		    						@Override
-		    						public void DoOnException(Exception E) {
-		    							Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
-		    						}
-		    					};
-		    					Processing.Start();
-	    		    			//.
-	        		    		arg0.dismiss();
-	        		    		//.
-	    		    			break; //. >
-	    		    			
-	    		    		case 3: //. remove component
-	    		    			AlertDialog.Builder alert = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
-	    		    			//.
-	    		    			alert.setTitle(R.string.SRemoval);
-	    		    			alert.setMessage(R.string.SRemoveSelectedComponent);
-	    		    			//.
-	    		    			alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
-	    		    				
-	    		    				@Override
-	    		    				public void onClick(DialogInterface dialog, int whichButton) {
+					});
+					AlertDialog alert = builder.create();
+					alert.show();
+					//.
+					return true;
+				}
+			});
+	        //.
+	        lvDataFiles = (ListView)findViewById(R.id.lvDataFiles);
+	        lvDataFiles.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+	        lvDataFiles.setOnItemClickListener(new OnItemClickListener() { 
+	        	
+				@Override
+	        	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+					if ((DataFiles == null) || (DataFiles.Count() == 0))
+						return; //. ->
+					TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2];
+					ComponentTypedDataFile_Process(ComponentTypedDataFile);
+	        	}              
+	        });         
+	        lvDataFiles.setOnItemLongClickListener(new OnItemLongClickListener() {
+	        	
+				@Override
+				public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+					if ((DataFiles == null) || (DataFiles.Count() == 0))
+						return false; //. ->
+	            	//.
+					final TComponentTypedDataFile ComponentTypedDataFile = DataFiles.Items[arg2];
+					//.
+		    		final CharSequence[] _items;
+		    		int SelectedIdx = -1;
+		    		_items = new CharSequence[4];
+		    		_items[0] = TComponentTypedDataFilesPanel.this.getString(R.string.SOpen); 
+		    		_items[1] = TComponentTypedDataFilesPanel.this.getString(R.string.SContent1); 
+		    		_items[2] = TComponentTypedDataFilesPanel.this.getString(R.string.SGetURLFile); 
+		    		_items[3] = TComponentTypedDataFilesPanel.this.getString(R.string.SRemove); 
+		    		//.
+		    		AlertDialog.Builder builder = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
+		    		builder.setTitle(R.string.SSelect);
+		    		builder.setNegativeButton(R.string.SClose,null);
+		    		builder.setSingleChoiceItems(_items, SelectedIdx, new DialogInterface.OnClickListener() {
+		    			@Override
+		    			public void onClick(DialogInterface arg0, int arg1) {
+		    		    	try {
+		    		    		switch (arg1) {
+		    		    		
+		    		    		case 0: //. open
+		    						ComponentTypedDataFile_Process(ComponentTypedDataFile);
+		        		    		//.
+		    		    			break; //. >
+		    		    			
+		    		    		case 1: //. content
+		    						try {
 	    		    					final TComponentTypedDataFile _ComponentTypedDataFile = ComponentTypedDataFile;
 	    		    					//.
-	    		    					TAsyncProcessing Removing = new TAsyncProcessing(TComponentTypedDataFilesPanel.this, TComponentTypedDataFilesPanel.this.getString(R.string.SRemoving)) {
+	    		    					TAsyncProcessing ContentOpening = new TAsyncProcessing(TComponentTypedDataFilesPanel.this) {
 
+	    		    						private TComponentTypedDataFiles TypedDataFiles;
+	    		    						
 	    		    						@Override
 	    		    						public void Process() throws Exception {
-	    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(ComponentTypedDataFile.DataComponentType);
-	    		    							if (TF != null)
-	    		    								try {
-	    		    									TF.DestroyInstance(_ComponentTypedDataFile.DataComponentID);
-	    		    								} finally {
-	    		    									TF.Release();
-	    		    								}
-	    		    								else
-	    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(_ComponentTypedDataFile.DataComponentType)); //. =>
-	    		    									
+	    				    					TypedDataFiles = new TComponentTypedDataFiles(context, SpaceDefines.TYPEDDATAFILE_MODEL_HUMANREADABLECOLLECTION, SpaceDefines.TYPEDDATAFILE_TYPE_AllName);
+	    				    					TypedDataFiles.PrepareForComponent(_ComponentTypedDataFile.DataComponentType,_ComponentTypedDataFile.DataComponentID, true, UserAgent.Server);
 	    		    						}
 
 	    		    						@Override
 	    		    						public void DoOnCompleted() throws Exception {
-	    		    							DataFiles.RemoveItem(_ComponentTypedDataFile);
-	    		    							//.
-	    		    							Update();	    		    							
-	    		    							//.
-	    		    							Toast.makeText(TComponentTypedDataFilesPanel.this, R.string.SObjectHasBeenRemoved, Toast.LENGTH_LONG).show();
+	    	    								Intent intent = new Intent(context, TComponentTypedDataFilesPanel.class);
+	    	    								if (Component != null)
+	    	    									intent.putExtra("ComponentID", Component.ID);
+	    	    								intent.putExtra("DataFiles", TypedDataFiles.ToByteArrayV0());
+	    	    								intent.putExtra("AutoStart", false);
+	    	    								//.
+	    	    								startActivityForResult(intent, REQUEST_COMPONENT_CONTENT);
 	    		    						}
 	    		    						
 	    		    						@Override
@@ -799,87 +686,208 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	    		    							Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
 	    		    						}
 	    		    					};
-	    		    					Removing.Start();
-	    		    				}
-	    		    			});
-	    		    			//.
-	    		    			alert.setNegativeButton(R.string.SCancel, null);
-	    		    			//.
-	    		    			alert.show();
-	    		    			//.
-	        		    		arg0.dismiss();
-	        		    		//.
-	    		    			break; //. >
-	    		    		}
-	    		    	}
-	    		    	catch (Exception E) {
-	    		    		Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-	    		    		//.
-	    		    		arg0.dismiss();
-	    		    	}
+	    		    					ContentOpening.Start();
+			    						//.
+			        		    		arg0.dismiss();
+		    						}
+		    						catch (Exception E) {
+		    			                Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    						}
+		        		    		//.
+		    		    			break; //. >
+		    		    			
+		    		    		case 2: //. get URL-file
+			    					TAsyncProcessing Processing = new TAsyncProcessing(TComponentTypedDataFilesPanel.this) {
+
+			    						private TComponentTypedDataFile _ComponentTypedDataFile = ComponentTypedDataFile.Clone();
+			    						//.
+			    						private String URLFN;
+			    						
+			    						@Override
+			    						public void Process() throws Exception {
+		    								TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_ComponentTypedDataFile.DataComponentType,_ComponentTypedDataFile.DataComponentID);
+		    								if (CF != null) 
+		    									try {
+		    										TURL URL = CF.GetDefaultURL();
+		    										if (URL != null) 
+		    											try {
+		    												if (URL.HasData()) {
+		    													_ComponentTypedDataFile.DataType = SpaceDefines.TYPEDDATAFILE_TYPE_Document; 
+		    													_ComponentTypedDataFile.PrepareForComponent(_ComponentTypedDataFile.DataComponentType,_ComponentTypedDataFile.DataComponentID, false, UserAgent.Server);
+		    													if (_ComponentTypedDataFile.DataFormat.equals(SpaceDefines.TYPEDDATAFILE_TYPE_Document_FORMAT_XML)) 
+				    	    										CF.ParseFromXMLDocument(_ComponentTypedDataFile.GetFileData());
+		    												}
+		    	    										//.
+			    											URLFN = TGeoLogApplication.GetTempFolder()+"/"+TURL.DefaultURLFileName;
+			    											URL.Name = ComponentTypedDataFile.DataName;
+			    											URL.ConstructURLFile(URLFN);
+		    											}
+		    											finally {
+		    												URL.Release();
+		    											}
+	    	    										else
+	    	    											throw new Exception("there is no URL there"); //. =>
+		    												
+		    									}
+		    									finally {
+		    										CF.Release();
+		    									}
+	    										else
+	    											throw new Exception("there is no component functionality there"); //. =>
+			    						}
+
+			    						@Override
+			    						public void DoOnCompleted() throws Exception {
+			    			    		    new AlertDialog.Builder(context)
+			    			    	        .setIcon(android.R.drawable.ic_dialog_alert)
+			    			    	        .setTitle(R.string.SInfo)
+			    			    	        .setMessage(context.getString(R.string.SURLFileNameHasBeenSaved)+URLFN+"\n"+context.getString(R.string.SUseItForImport))
+			    			    		    .setPositiveButton(R.string.SOk, null)
+			    			    		    .show();
+			    						}
+			    						
+			    						@Override
+			    						public void DoOnException(Exception E) {
+			    							Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+			    						}
+			    					};
+			    					Processing.Start();
+		    		    			//.
+		        		    		arg0.dismiss();
+		        		    		//.
+		    		    			break; //. >
+		    		    			
+		    		    		case 3: //. remove component
+		    		    			AlertDialog.Builder alert = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
+		    		    			//.
+		    		    			alert.setTitle(R.string.SRemoval);
+		    		    			alert.setMessage(R.string.SRemoveSelectedComponent);
+		    		    			//.
+		    		    			alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+		    		    				
+		    		    				@Override
+		    		    				public void onClick(DialogInterface dialog, int whichButton) {
+		    		    					final TComponentTypedDataFile _ComponentTypedDataFile = ComponentTypedDataFile;
+		    		    					//.
+		    		    					TAsyncProcessing Removing = new TAsyncProcessing(TComponentTypedDataFilesPanel.this, TComponentTypedDataFilesPanel.this.getString(R.string.SRemoving)) {
+
+		    		    						@Override
+		    		    						public void Process() throws Exception {
+		    		    							TTypeFunctionality TF = UserAgent.User().Space.TypesSystem.TTypeFunctionality_Create(ComponentTypedDataFile.DataComponentType);
+		    		    							if (TF != null)
+		    		    								try {
+		    		    									TF.DestroyInstance(_ComponentTypedDataFile.DataComponentID);
+		    		    								} finally {
+		    		    									TF.Release();
+		    		    								}
+		    		    								else
+		    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(_ComponentTypedDataFile.DataComponentType)); //. =>
+		    		    									
+		    		    						}
+
+		    		    						@Override
+		    		    						public void DoOnCompleted() throws Exception {
+		    		    							DataFiles.RemoveItem(_ComponentTypedDataFile);
+		    		    							//.
+		    		    							Update();	    		    							
+		    		    							//.
+		    		    							Toast.makeText(TComponentTypedDataFilesPanel.this, R.string.SObjectHasBeenRemoved, Toast.LENGTH_LONG).show();
+		    		    						}
+		    		    						
+		    		    						@Override
+		    		    						public void DoOnException(Exception E) {
+		    		    							Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+		    		    						}
+		    		    					};
+		    		    					Removing.Start();
+		    		    				}
+		    		    			});
+		    		    			//.
+		    		    			alert.setNegativeButton(R.string.SCancel, null);
+		    		    			//.
+		    		    			alert.show();
+		    		    			//.
+		        		    		arg0.dismiss();
+		        		    		//.
+		    		    			break; //. >
+		    		    		}
+		    		    	}
+		    		    	catch (Exception E) {
+		    		    		Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    		    		//.
+		    		    		arg0.dismiss();
+		    		    	}
+		    			}
+		    		});
+		    		AlertDialog alert = builder.create();
+		    		alert.show();
+	            	//.
+	            	return true; 
+				}
+			}); 
+	        lvDataFiles.setOnScrollListener(new OnScrollListener() {
+	        	
+	            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+	            }
+
+	            public void onScrollStateChanged(AbsListView view, int scrollState) {
+	            	if (lvDataFilesAdapter != null)
+	            		lvDataFilesAdapter.flListIsScrolling = (scrollState != OnScrollListener.SCROLL_STATE_IDLE); 
+	            }
+	        });
+	        //.
+	        ProgressBar = findViewById(R.id.pbProgress);
+	        //.
+	        btnUpdate = (Button)findViewById(R.id.btnUpdate);
+	        btnUpdate.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	        		StartUpdating();
+	            }
+	        });
+	        //.
+	        btnCreateNewComponent = (Button)findViewById(R.id.btnCreateNewComponent);
+	        btnCreateNewComponent.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	        		CreateNewComponent();
+	            }
+	        });
+	        //.
+	        final int HintID = THintManager.HINT__ComponentTypedDataFilesPanel;
+	        final TextView lbListHint = (TextView)findViewById(R.id.lbHint);
+	        String Hint = THintManager.GetHint(HintID, this);
+	        if (Hint != null) {
+	        	lbListHint.setText(Hint);
+	            lbListHint.setOnLongClickListener(new OnLongClickListener() {
+	            	
+	    			@Override
+	    			public boolean onLongClick(View v) {
+	    				THintManager.SetHintAsDisabled(HintID);
+	    	        	lbListHint.setVisibility(View.GONE);
+	    	        	//.
+	    				return true;
 	    			}
 	    		});
-	    		AlertDialog alert = builder.create();
-	    		alert.show();
-            	//.
-            	return true; 
-			}
-		}); 
-        lvDataFiles.setOnScrollListener(new OnScrollListener() {
-        	
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            }
-
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-            	if (lvDataFilesAdapter != null)
-            		lvDataFilesAdapter.flListIsScrolling = (scrollState != OnScrollListener.SCROLL_STATE_IDLE); 
-            }
-        });
-        //.
-        ProgressBar = findViewById(R.id.pbProgress);
-        //.
-        btnUpdate = (Button)findViewById(R.id.btnUpdate);
-        btnUpdate.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-        		StartUpdating();
-            }
-        });
-        //.
-        btnCreateNewComponent = (Button)findViewById(R.id.btnCreateNewComponent);
-        btnCreateNewComponent.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-        		CreateNewComponent();
-            }
-        });
-        //.
-        final int HintID = THintManager.HINT__ComponentTypedDataFilesPanel;
-        final TextView lbListHint = (TextView)findViewById(R.id.lbHint);
-        String Hint = THintManager.GetHint(HintID, this);
-        if (Hint != null) {
-        	lbListHint.setText(Hint);
-            lbListHint.setOnLongClickListener(new OnLongClickListener() {
-            	
-    			@Override
-    			public boolean onLongClick(View v) {
-    				THintManager.SetHintAsDisabled(HintID);
-    	        	lbListHint.setVisibility(View.GONE);
-    	        	//.
-    				return true;
-    			}
-    		});
-            //.
-        	lbListHint.setVisibility(View.VISIBLE);
-        }
-        else
-        	lbListHint.setVisibility(View.GONE);
-        //.
-        setResult(RESULT_CANCELED);
-        //.
-        flExists = true;
+	            //.
+	        	lbListHint.setVisibility(View.VISIBLE);
+	        }
+	        else
+	        	lbListHint.setVisibility(View.GONE);
+	        //.
+	        setResult(RESULT_CANCELED);
+	        //.
+	        flExists = true;
+		}
+		catch (Exception E) {
+			String S = E.getMessage();
+			if (S == null)
+				S = E.getClass().getName();
+			Toast.makeText(TComponentTypedDataFilesPanel.this, TComponentTypedDataFilesPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();
+			finish();
+		}
 	}
 
 	@Override

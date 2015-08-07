@@ -89,7 +89,7 @@ public class TStreamChannelConnector extends TStreamChannelConnectorAbstract {
     public TStreamChannelConnector(Context pcontext, com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel pChannel, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
     	super(pcontext, "",0, 0,"", null, pChannel, "", pOnProgressHandler, pOnIdleHandler, pOnExceptionHandler);
     	//.
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(pcontext);
     	if (Tracker == null)
     		throw new Exception(context.getString(R.string.STrackerIsNotInitialized)); //. =>
     	if (Tracker.GeoLog.SensorsModule.Model == null)

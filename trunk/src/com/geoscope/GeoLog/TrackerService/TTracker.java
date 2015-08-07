@@ -25,16 +25,14 @@ public class TTracker {
     	}
     }
     
-    public static synchronized TTracker GetTracker() {
+    public static synchronized TTracker GetTracker(Context context) throws Exception {
     	if (Tracker == null)
-    		return null; //. ->
-    	if (Tracker.GeoLog == null)
-    		return null; //. ->
+    		Tracker = new TTracker(context);
     	return Tracker;
     }
     
-    public static boolean TrackerIsNull() {
-    	return (GetTracker() == null);
+    public static synchronized boolean TrackerIsNull() {
+    	return (Tracker == null);
     }
     
     public static synchronized void EnableDisableTracker(boolean flEnable) throws Exception {

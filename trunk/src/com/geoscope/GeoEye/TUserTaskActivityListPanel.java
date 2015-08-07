@@ -137,7 +137,7 @@ public class TUserTaskActivityListPanel extends Activity {
 	}
 	
     private void Task_GetActivities() throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();

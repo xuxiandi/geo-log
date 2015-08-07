@@ -28,7 +28,7 @@ public class TDataStreamerStreamingComponentsValue extends TComponentTimestamped
     	try {
     		TDataStreamerModule.TStreamingComponents NewStreamingComponents = new TDataStreamerModule.TStreamingComponents(Value);
     		//. supply the streaming components with its descriptors (stream descriptor datas)
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TUserAgent UserAgent = TUserAgent.GetUserAgent(DataStreamerModule.Device.context);
 			if (UserAgent != null) 
 				NewStreamingComponents.SupplyComponentsWithStreamDescriptors(UserAgent.User());
     		//. set new streaming components

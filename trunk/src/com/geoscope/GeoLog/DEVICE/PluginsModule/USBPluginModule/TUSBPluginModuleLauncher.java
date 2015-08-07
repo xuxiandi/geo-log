@@ -38,7 +38,7 @@ public class TUSBPluginModuleLauncher extends Activity {
 			//. initialize an application instance and start services
 			TGeoLogApplication.InitializeInstance(getApplicationContext()).StartServices(getApplicationContext());
 			//. check connected accessory
-			TTracker Tracker = TTracker.GetTracker();
+			TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 			if (Tracker != null) 
 				Accessory = Tracker.GeoLog.PluginsModule.USBPluginModule.CheckConnectedAccesory();
 		} catch (Exception E) {

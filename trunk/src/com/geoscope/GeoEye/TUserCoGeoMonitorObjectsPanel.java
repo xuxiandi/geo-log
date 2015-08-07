@@ -115,7 +115,7 @@ public class TUserCoGeoMonitorObjectsPanel extends Activity {
 			@Override
 			public void Process() throws Exception {
 				if (UserCoGeoMonitorObjectsData == null) {
-			    	TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			    	TUserAgent UserAgent = TUserAgent.GetUserAgent(context.getApplicationContext());
 					if (UserAgent == null)
 						throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 					ResultItems = UserAgent.User().GetUserCoGeoMonitorObjects(UserID);

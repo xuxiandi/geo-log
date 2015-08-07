@@ -76,13 +76,14 @@ public class TMyUserTaskListPanel extends Activity {
         	lbUserTaskList.setText(getString(R.string.SMyTasks));
         lvUserTaskList = (ListView)findViewById(R.id.lvUserTaskList);
         lvUserTaskList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lvUserTaskList.setOnItemClickListener(new OnItemClickListener() {         
+        lvUserTaskList.setOnItemClickListener(new OnItemClickListener() {    
+        	
 			@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				if (UserTasks == null)
 					return; //. ->
 				try {
-			    	TTracker Tracker = TTracker.GetTracker();
+			    	TTracker Tracker = TTracker.GetTracker(TMyUserTaskListPanel.this.getApplicationContext());
 			    	if (Tracker == null)
 			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 					//. Tasks_OpenTaskPanel(UserTasks.Items[arg2].ID);
@@ -165,7 +166,7 @@ public class TMyUserTaskListPanel extends Activity {
 	}
 	
     private void Tasks_GetData(boolean flOnlyActive) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
@@ -191,7 +192,7 @@ public class TMyUserTaskListPanel extends Activity {
         
     @SuppressWarnings("unused")
 	private void Tasks_OpenTaskPanel(int TaskID) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();

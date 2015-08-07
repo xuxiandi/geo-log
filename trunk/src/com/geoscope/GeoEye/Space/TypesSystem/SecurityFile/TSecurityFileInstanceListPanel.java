@@ -24,7 +24,7 @@ public class TSecurityFileInstanceListPanel extends Activity {
 		super.onCreate(savedInstanceState);
 		//.
         try {
-        	TUserAgent UserAgent = TUserAgent.GetUserAgent();
+        	TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
     		if (UserAgent == null)
     			throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
     		//.

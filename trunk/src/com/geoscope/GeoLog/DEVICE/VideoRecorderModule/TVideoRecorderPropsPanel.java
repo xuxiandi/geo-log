@@ -73,9 +73,16 @@ public class TVideoRecorderPropsPanel extends Activity {
             		break; //. >
             		
             	}
-				TTracker Tracker = TTracker.GetTracker();
-				Tracker.GeoLog.VideoRecorderModule.SetMode(Mode);
-				DoOnItemChanged();
+				try {
+					TTracker Tracker = TTracker.GetTracker(TVideoRecorderPropsPanel.this.getApplicationContext());
+					Tracker.GeoLog.VideoRecorderModule.SetMode(Mode);
+					DoOnItemChanged();
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+		            Toast.makeText(TVideoRecorderPropsPanel.this, S, Toast.LENGTH_LONG).show();
+				}
             }
 
             @Override
@@ -83,9 +90,16 @@ public class TVideoRecorderPropsPanel extends Activity {
 				if (flUpdating)
 					return; //. ->
             	short Mode = TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1;
-				TTracker Tracker = TTracker.GetTracker();
-				Tracker.GeoLog.VideoRecorderModule.SetMode(Mode);
-				DoOnItemChanged();
+				try {
+					TTracker Tracker = TTracker.GetTracker(TVideoRecorderPropsPanel.this.getApplicationContext());
+					Tracker.GeoLog.VideoRecorderModule.SetMode(Mode);
+					DoOnItemChanged();
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+		            Toast.makeText(TVideoRecorderPropsPanel.this, S, Toast.LENGTH_LONG).show();
+				}
             }
         });        
         //.
@@ -99,9 +113,16 @@ public class TVideoRecorderPropsPanel extends Activity {
 				if (checked)
 					TVideoRecorderPropsPanel.this.finish();
 				//.
-				TTracker Tracker = TTracker.GetTracker();
-				//.
-				Tracker.GeoLog.VideoRecorderModule.SetRecorderState(checked, true);
+				try {
+					TTracker Tracker = TTracker.GetTracker(TVideoRecorderPropsPanel.this.getApplicationContext());
+					//.
+					Tracker.GeoLog.VideoRecorderModule.SetRecorderState(checked, true);
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+		            Toast.makeText(TVideoRecorderPropsPanel.this, S, Toast.LENGTH_LONG).show();
+				}
             }
         });        
         //.
@@ -112,9 +133,16 @@ public class TVideoRecorderPropsPanel extends Activity {
 				if (flUpdating)
 					return; //. ->
                 boolean checked = ((CheckBox)v).isChecked();
-				TTracker Tracker = TTracker.GetTracker();
-				Tracker.GeoLog.VideoRecorderModule.SetAudio(checked);
-				DoOnItemChanged();
+				try {
+					TTracker Tracker = TTracker.GetTracker(TVideoRecorderPropsPanel.this.getApplicationContext());
+					Tracker.GeoLog.VideoRecorderModule.SetAudio(checked);
+					DoOnItemChanged();
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+		            Toast.makeText(TVideoRecorderPropsPanel.this, S, Toast.LENGTH_LONG).show();
+				}
             }
         });        
         //.
@@ -125,9 +153,16 @@ public class TVideoRecorderPropsPanel extends Activity {
 				if (flUpdating)
 					return; //. ->
                 boolean checked = ((CheckBox)v).isChecked();
-				TTracker Tracker = TTracker.GetTracker();
-				Tracker.GeoLog.VideoRecorderModule.SetVideo(checked);
-				DoOnItemChanged();
+				try {
+					TTracker Tracker = TTracker.GetTracker(TVideoRecorderPropsPanel.this.getApplicationContext());
+					Tracker.GeoLog.VideoRecorderModule.SetVideo(checked);
+					DoOnItemChanged();
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+		            Toast.makeText(TVideoRecorderPropsPanel.this, S, Toast.LENGTH_LONG).show();
+				}
             }
         });        
         //.
@@ -138,9 +173,16 @@ public class TVideoRecorderPropsPanel extends Activity {
 				if (flUpdating)
 					return; //. ->
                 boolean checked = ((CheckBox)v).isChecked();
-				TTracker Tracker = TTracker.GetTracker();
-				Tracker.GeoLog.VideoRecorderModule.SetTransmitting(checked);
-				DoOnItemChanged();
+				try {
+					TTracker Tracker = TTracker.GetTracker(TVideoRecorderPropsPanel.this.getApplicationContext());
+					Tracker.GeoLog.VideoRecorderModule.SetTransmitting(checked);
+					DoOnItemChanged();
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+		            Toast.makeText(TVideoRecorderPropsPanel.this, S, Toast.LENGTH_LONG).show();
+				}
             }
         });        
         //.
@@ -151,9 +193,16 @@ public class TVideoRecorderPropsPanel extends Activity {
 				if (flUpdating)
 					return; //. ->
                 boolean checked = ((CheckBox)v).isChecked();
-				TTracker Tracker = TTracker.GetTracker();
-				Tracker.GeoLog.VideoRecorderModule.SetSaving(checked);
-				DoOnItemChanged();
+				try {
+					TTracker Tracker = TTracker.GetTracker(TVideoRecorderPropsPanel.this.getApplicationContext());
+					Tracker.GeoLog.VideoRecorderModule.SetSaving(checked);
+					DoOnItemChanged();
+				} catch (Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+		            Toast.makeText(TVideoRecorderPropsPanel.this, S, Toast.LENGTH_LONG).show();
+				}
             }
         });        
         //.
@@ -165,9 +214,9 @@ public class TVideoRecorderPropsPanel extends Activity {
 					return; //. ->
                 boolean checked = ((CheckBox)v).isChecked();
 				//.
-				TTracker Tracker = TTracker.GetTracker();
-				//.
 				try {
+					TTracker Tracker = TTracker.GetTracker(TVideoRecorderPropsPanel.this.getApplicationContext());
+					//.
 					Tracker.GeoLog.DataStreamerModule.SetActiveValue(checked);
 				} catch (Exception E) {
 					String S = E.getMessage();
@@ -182,51 +231,57 @@ public class TVideoRecorderPropsPanel extends Activity {
     }
 	
 	private void Update() {
-		TTracker Tracker = TTracker.GetTracker();
-		if (Tracker == null)
-			return; //. ->
-		TVideoRecorderModule VRM = Tracker.GeoLog.VideoRecorderModule;
-		//.
 		flUpdating = true;
 		try {
-	        switch (VRM.Mode.GetValue()) {
-	        case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
-	            spVideoRecorderMode.setSelection(0);
-	        	break; //. >
-	        	
-	        case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
-	            spVideoRecorderMode.setSelection(1);
-	        	break; //. >
-	        	
-	        case TVideoRecorderModule.MODE_MPEG4:
-	        	spVideoRecorderMode.setSelection(2);
-	        	break; //. >
-	        	
-	        case TVideoRecorderModule.MODE_3GP:
-	        	spVideoRecorderMode.setSelection(3);
-	        	break; //. >
+			try {
+				TTracker Tracker = TTracker.GetTracker(TVideoRecorderPropsPanel.this.getApplicationContext());
+				if (Tracker == null)
+					return; //. ->
+				TVideoRecorderModule VRM = Tracker.GeoLog.VideoRecorderModule;
+		        switch (VRM.Mode.GetValue()) {
+		        case TVideoRecorderModule.MODE_H263STREAM1_AMRNBSTREAM1:
+		            spVideoRecorderMode.setSelection(0);
+		        	break; //. >
+		        	
+		        case TVideoRecorderModule.MODE_H264STREAM1_AMRNBSTREAM1:
+		            spVideoRecorderMode.setSelection(1);
+		        	break; //. >
+		        	
+		        case TVideoRecorderModule.MODE_MPEG4:
+		        	spVideoRecorderMode.setSelection(2);
+		        	break; //. >
+		        	
+		        case TVideoRecorderModule.MODE_3GP:
+		        	spVideoRecorderMode.setSelection(3);
+		        	break; //. >
 
-	        case TVideoRecorderModule.MODE_FRAMESTREAM:
-	        	spVideoRecorderMode.setSelection(4);
-	        	break; //. >
-	        }
-			//.
-			cbVideoRecorderRecording.setChecked(VRM.Recording.BooleanValue());
-			cbVideoRecorderAudio.setChecked(VRM.Audio.BooleanValue());
-			cbVideoRecorderVideo.setChecked(VRM.Video.BooleanValue());
-			cbVideoRecorderTransmitting.setChecked(VRM.Transmitting.BooleanValue());
-			cbVideoRecorderSaving.setChecked(VRM.Saving.BooleanValue());
-			//.
-			cbDataStreamingActive.setEnabled(Tracker.GeoLog.DataStreamerModule.StreamingComponentsCount() > 0);
-			cbDataStreamingActive.setChecked(Tracker.GeoLog.DataStreamerModule.ActiveValue.BooleanValue());
+		        case TVideoRecorderModule.MODE_FRAMESTREAM:
+		        	spVideoRecorderMode.setSelection(4);
+		        	break; //. >
+		        }
+				//.
+				cbVideoRecorderRecording.setChecked(VRM.Recording.BooleanValue());
+				cbVideoRecorderAudio.setChecked(VRM.Audio.BooleanValue());
+				cbVideoRecorderVideo.setChecked(VRM.Video.BooleanValue());
+				cbVideoRecorderTransmitting.setChecked(VRM.Transmitting.BooleanValue());
+				cbVideoRecorderSaving.setChecked(VRM.Saving.BooleanValue());
+				//.
+				cbDataStreamingActive.setEnabled(Tracker.GeoLog.DataStreamerModule.StreamingComponentsCount() > 0);
+				cbDataStreamingActive.setChecked(Tracker.GeoLog.DataStreamerModule.ActiveValue.BooleanValue());
+			} catch (Exception E) {
+				String S = E.getMessage();
+				if (S == null)
+					S = E.getClass().getName();
+	            Toast.makeText(TVideoRecorderPropsPanel.this, S, Toast.LENGTH_LONG).show();
+			}
 		}
 		finally {
 			flUpdating = false;
 		}
 	}
 	
-	private void DoOnItemChanged() {
-		TTracker Tracker = TTracker.GetTracker();
+	private void DoOnItemChanged() throws Exception {
+		TTracker Tracker = TTracker.GetTracker(TVideoRecorderPropsPanel.this.getApplicationContext());
 		if (Tracker == null)
 			return; //. ->
 		Tracker.GeoLog.VideoRecorderModule.PostUpdateRecorderState();

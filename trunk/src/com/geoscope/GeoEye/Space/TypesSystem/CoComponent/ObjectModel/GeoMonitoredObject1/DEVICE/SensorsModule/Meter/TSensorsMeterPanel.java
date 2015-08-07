@@ -175,7 +175,7 @@ public class TSensorsMeterPanel extends Activity {
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
 						try {
-		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+		    				TUserAgent UserAgent = TUserAgent.GetUserAgent(TSensorsMeterPanel.this.getApplicationContext());
 		    				if (UserAgent == null)
 		    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		    				TCoGeoMonitorObject	Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);

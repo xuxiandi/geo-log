@@ -68,7 +68,7 @@ public class TDataStreamPropsPanel extends Activity {
             		ChannelIDs = new TChannelIDs(_ChannelIDs);
             }
     		//.
-        	TTracker Tracker = TTracker.GetTracker();
+        	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
         	if (Tracker == null)
         		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
         	if (Tracker.GeoLog.SensorsModule.Model == null)

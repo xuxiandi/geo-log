@@ -335,10 +335,14 @@ public class TReflector extends Activity {
 		//.
 		if (Component != null)
 			Component.Resume();
-		//. start tracker position fixing immediately if it is in impulse mode
-		TTracker Tracker = TTracker.GetTracker();
-		if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode)
-			Tracker.GeoLog.GPSModule.ProcessImmediately();
+		try {
+			//. start tracker position fixing immediately if it is in impulse mode
+			TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
+			if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode)
+				Tracker.GeoLog.GPSModule.ProcessImmediately();
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+		}
 	}
 
 	@Override

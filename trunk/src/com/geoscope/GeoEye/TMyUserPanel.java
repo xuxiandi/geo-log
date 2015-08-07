@@ -543,6 +543,7 @@ public class TMyUserPanel extends Activity {
         llUserTasks = (LinearLayout)findViewById(R.id.llUserTasks);
     	btnOriginateUserTask = (Button)findViewById(R.id.btnOriginateUserTask);
     	btnOriginateUserTask.setOnClickListener(new OnClickListener() {
+    		
         	@Override
             public void onClick(View v) {
         		if ((UserInfo == null) || (UserCurrentActivity == null))
@@ -552,10 +553,11 @@ public class TMyUserPanel extends Activity {
     	        .setTitle(R.string.SConfirmation)
     	        .setMessage(R.string.SDoYouWantToOriginateANewTask)
     		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+    		    	
     		    	@Override
     		    	public void onClick(DialogInterface dialog, int id) {
     	        		try {
-        		        	TTracker Tracker = TTracker.GetTracker();
+        		        	TTracker Tracker = TTracker.GetTracker(TMyUserPanel.this.getApplicationContext());
         		        	if (Tracker == null)
         		        		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
         		    		boolean flActivityDataIsNotReady = ((Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.GetComponentFileStreamCount() > 0) || (Tracker.GeoLog.ComponentFileStreaming.GetItemsCount() > 0));
@@ -679,10 +681,15 @@ public class TMyUserPanel extends Activity {
 		Update();
     	if ((UserInfo == null) || (UserCurrentActivity == null))
     		StartUpdating();
-        //. start tracker position fixing immediately if it is in impulse mode
-        TTracker Tracker = TTracker.GetTracker();
-    	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
-			Tracker.GeoLog.GPSModule.ProcessImmediately();
+    	//.
+		try {
+	        //. start tracker position fixing immediately if it is in impulse mode
+	        TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
+	    	if ((Tracker != null) && (Tracker.GeoLog.GPSModule != null) && Tracker.GeoLog.GPSModule.IsEnabled() && Tracker.GeoLog.GPSModule.flImpulseMode) 
+				Tracker.GeoLog.GPSModule.ProcessImmediately();
+		} catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
+		}
 	}
 	
     @Override
@@ -788,7 +795,7 @@ public class TMyUserPanel extends Activity {
 					
 					@Override
 					public void Process() throws Exception {
-				    	TTracker Tracker = TTracker.GetTracker();
+				    	TTracker Tracker = TTracker.GetTracker(context.getApplicationContext());
 				    	if (Tracker == null)
 				    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 						//.
@@ -1093,9 +1100,10 @@ public class TMyUserPanel extends Activity {
     	final boolean Value = _Value;
     	//.
 		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SWaitAMoment)) {
+			
 			@Override
 			public void Process() throws Exception {
-				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+				TUserAgent UserAgent = TUserAgent.GetUserAgent(context.getApplicationContext());
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 				//.
@@ -1115,7 +1123,7 @@ public class TMyUserPanel extends Activity {
     }
     
     private void User_GetLocation() throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	//.
@@ -1311,10 +1319,10 @@ public class TMyUserPanel extends Activity {
     			}
     		};
     		Processing.Start();*/
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp, DataFileName, SecurityFileID);
@@ -1329,7 +1337,7 @@ public class TMyUserPanel extends Activity {
 			//. try to gc
 			TGeoLogApplication.Instance().GarbageCollector.Collect();
 			//.
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	//.
@@ -1410,10 +1418,10 @@ public class TMyUserPanel extends Activity {
 	    			}
 	    		};
 	    		Processing.Start();*/
-				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+				TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-		    	Tracker = TTracker.GetTracker();
+		    	Tracker = TTracker.GetTracker(this.getApplicationContext());
 		    	if (Tracker == null)
 		    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 		    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp, DataFileName, SecurityFileID);
@@ -1469,10 +1477,10 @@ public class TMyUserPanel extends Activity {
     			}
     		};
     		Processing.Start(); */
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp, DataFileName, SecurityFileID);
@@ -1515,10 +1523,10 @@ public class TMyUserPanel extends Activity {
     			}
     		};
     		Processing.Start();*/
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp, DataFileName, SecurityFileID);
@@ -1560,10 +1568,10 @@ public class TMyUserPanel extends Activity {
 				}
 			};
 			Processing.Start();*/
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	TGeoScopeServerUserDataFile DataFile = new TGeoScopeServerUserDataFile(UserAgent.User(), Timestamp, DataFileName, SecurityFileID);
@@ -1663,7 +1671,7 @@ public class TMyUserPanel extends Activity {
     	int TaskType = 2; 		//. MODELUSER_TASK_TYPE_UserTask
     	int TaskService = 0; 	//. MODELUSER_TASK_TYPE_UserTask_SERVICE_Any
     	//.
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	String Comment;
@@ -1698,7 +1706,7 @@ public class TMyUserPanel extends Activity {
     }
         
     private void Tasks_OpenTaskPanel(int TaskID) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
@@ -1766,7 +1774,7 @@ public class TMyUserPanel extends Activity {
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent(TMyUserPanel.this.getApplicationContext());
 	    				if (UserAgent == null)
 	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    				//.
@@ -2011,7 +2019,7 @@ public class TMyUserPanel extends Activity {
                 	byte[] TaskData = (byte[])msg.obj;
                 	//.
     				try {
-    			    	TTracker Tracker = TTracker.GetTracker();
+    			    	TTracker Tracker = TTracker.GetTracker(TMyUserPanel.this.getApplicationContext());
     			    	if (Tracker == null)
     			    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	            	Intent intent = new Intent(TMyUserPanel.this, TUserTaskPanel.class);
@@ -2090,7 +2098,7 @@ public class TMyUserPanel extends Activity {
         }
     }
     
-    private void UpdateStatus() {
+    private void UpdateStatus() throws Exception {
     	if (UserInfo != null) {
         	if (UserInfo.UserIsOnline) {
         		String S = getString(R.string.SOnline);
@@ -2109,7 +2117,7 @@ public class TMyUserPanel extends Activity {
     		edUserConnectionState.setTextColor(Color.GRAY);
     	}
     	//.
-		TUserAgent UserAgent = TUserAgent.GetUserAgent();
+		TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 		if (UserAgent != null) {
 			TGeoScopeServerUser User = UserAgent.User();
 			if (User.InSession()) {
@@ -2130,7 +2138,7 @@ public class TMyUserPanel extends Activity {
 			edUserSessionState.setTextColor(Color.GRAY);
 		}
     	//.
-    	TTracker Tracker = TTracker.GetTracker(); 
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext()); 
     	if ((Tracker != null) && Tracker.GeoLog.IsEnabled()) {
             //. GPS module info
             if (Tracker.GeoLog.GPSModule.flProcessing) {

@@ -684,783 +684,792 @@ public class TTrackerPanel extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//.
-    	Tracker = TTracker.GetTracker();
-    	if (Tracker == null) {
-			Toast.makeText(this, R.string.STrackerIsNotInitialized, Toast.LENGTH_LONG).show();  						
-    		finish();
-    		return; //. ->
-    	}
-		//.
-        int ComponentID = 0;
-		Bundle extras = getIntent().getExtras();
-		if (extras != null) 
-			ComponentID = extras.getInt("ComponentID");
-		Component = TReflectorComponent.GetComponent(ComponentID);
-    	//.
-		if (ViewConfiguration.get(this).hasPermanentMenuKey())  
-			requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		//.
-        setContentView(R.layout.tracker_panel);
-        //.
-        Configuration = new TConfiguration();
-        try {
-			Configuration.Load();
-		} catch (Exception E) {
-			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
-		}
-        //.
-        llMainScreen = (LinearLayout)findViewById(R.id.llMainScreen);
-        llLockScreen = (LinearLayout)findViewById(R.id.llLockScreen);
-        //.
-        tbTrackerIsOn = (ToggleButton)findViewById(R.id.tbTrackerIsOn);
-        tbTrackerIsOn.setTextOn(getString(R.string.STrackerIsON));
-        tbTrackerIsOn.setTextOff(getString(R.string.STrackerIsOff));
-        tbTrackerIsOn.setChecked(TTracker.TrackerIsEnabled());
-        tbTrackerIsOn.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-			public void onClick(View arg0) {
-				((ToggleButton)arg0).setChecked(!((ToggleButton)arg0).isChecked());
+		try {
+	    	Tracker = TTracker.GetTracker(this.getApplicationContext());
+	    	if (Tracker == null) {
+				Toast.makeText(this, R.string.STrackerIsNotInitialized, Toast.LENGTH_LONG).show();  						
+	    		finish();
+	    		return; //. ->
+	    	}
+			//.
+	        int ComponentID = 0;
+			Bundle extras = getIntent().getExtras();
+			if (extras != null) 
+				ComponentID = extras.getInt("ComponentID");
+			Component = TReflectorComponent.GetComponent(ComponentID);
+	    	//.
+			if (ViewConfiguration.get(this).hasPermanentMenuKey())  
+				requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+			//.
+	        setContentView(R.layout.tracker_panel);
+	        //.
+	        Configuration = new TConfiguration();
+	        try {
+				Configuration.Load();
+			} catch (Exception E) {
+				Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();  						
 			}
-		});
-        tbTrackerIsOn.setOnLongClickListener(new OnLongClickListener() {
-        	
-			@Override
-			public boolean onLongClick(View arg0) {
-				final ToggleButton TB = (ToggleButton)arg0;
-				if (TUserAccess.UserAccessFileExists()) {
-					final TUserAccess AR = new TUserAccess();
-					if (AR.AdministrativeAccessPassword != null) {
-				    	AlertDialog.Builder alert = new AlertDialog.Builder(TTrackerPanel.this);
-				    	//.
-				    	alert.setTitle("");
-				    	alert.setMessage(R.string.SEnterPassword);
-				    	//.
-				    	final EditText input = new EditText(TTrackerPanel.this);
-				    	alert.setView(input);
-				    	//.
-				    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
-				    		
-				    		@Override
-				        	public void onClick(DialogInterface dialog, int whichButton) {
-				    			//. hide keyboard
-				        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-				        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-				        		//.
-				        		String Password = input.getText().toString();
-				        		if (Password.equals(AR.AdministrativeAccessPassword)) {
-				    				EnableDisableTrackerByButton(TB);
-				        		}
-				        		else
-				        			Toast.makeText(TTrackerPanel.this, R.string.SIncorrectPassword, Toast.LENGTH_LONG).show();  						
-				          	}
-				    	});
-				    	//.
-				    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
-				    		
-				    		@Override
-				    		public void onClick(DialogInterface dialog, int whichButton) {
-				    			//. hide keyboard
-				        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-				        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-				    		}
-				    	});
-				    	//.
-				    	alert.show();   
-						//.
-						return true; // . >
+	        //.
+	        llMainScreen = (LinearLayout)findViewById(R.id.llMainScreen);
+	        llLockScreen = (LinearLayout)findViewById(R.id.llLockScreen);
+	        //.
+	        tbTrackerIsOn = (ToggleButton)findViewById(R.id.tbTrackerIsOn);
+	        tbTrackerIsOn.setTextOn(getString(R.string.STrackerIsON));
+	        tbTrackerIsOn.setTextOff(getString(R.string.STrackerIsOff));
+	        tbTrackerIsOn.setChecked(TTracker.TrackerIsEnabled());
+	        tbTrackerIsOn.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+				public void onClick(View arg0) {
+					((ToggleButton)arg0).setChecked(!((ToggleButton)arg0).isChecked());
+				}
+			});
+	        tbTrackerIsOn.setOnLongClickListener(new OnLongClickListener() {
+	        	
+				@Override
+				public boolean onLongClick(View arg0) {
+					final ToggleButton TB = (ToggleButton)arg0;
+					if (TUserAccess.UserAccessFileExists()) {
+						final TUserAccess AR = new TUserAccess();
+						if (AR.AdministrativeAccessPassword != null) {
+					    	AlertDialog.Builder alert = new AlertDialog.Builder(TTrackerPanel.this);
+					    	//.
+					    	alert.setTitle("");
+					    	alert.setMessage(R.string.SEnterPassword);
+					    	//.
+					    	final EditText input = new EditText(TTrackerPanel.this);
+					    	alert.setView(input);
+					    	//.
+					    	alert.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+					    		
+					    		@Override
+					        	public void onClick(DialogInterface dialog, int whichButton) {
+					    			//. hide keyboard
+					        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+					        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+					        		//.
+					        		String Password = input.getText().toString();
+					        		if (Password.equals(AR.AdministrativeAccessPassword)) {
+					    				EnableDisableTrackerByButton(TB);
+					        		}
+					        		else
+					        			Toast.makeText(TTrackerPanel.this, R.string.SIncorrectPassword, Toast.LENGTH_LONG).show();  						
+					          	}
+					    	});
+					    	//.
+					    	alert.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+					    		
+					    		@Override
+					    		public void onClick(DialogInterface dialog, int whichButton) {
+					    			//. hide keyboard
+					        		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+					        		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+					    		}
+					    	});
+					    	//.
+					    	alert.show();   
+							//.
+							return true; // . >
+						}
 					}
+					EnableDisableTrackerByButton(TB);
+	    	    	return true; //. ->
 				}
-				EnableDisableTrackerByButton(TB);
-    	    	return true; //. ->
-			}
-		});
-        btnLock = (Button)findViewById(R.id.btnLock);
-        btnLock.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-            	try {
-					Lock();
-				} catch (InterruptedException IE) {
-				}
-            }
-        });
-        //.
-        lbTitle = (TextView)findViewById(R.id.lbTitle);
-        edFix = (EditText)findViewById(R.id.edFix);
-        edFixSpeed = (EditText)findViewById(R.id.edFixSpeed);
-        edFixPrecision = (EditText)findViewById(R.id.edFixPrecision);
-        btnObtainCurrentFix = (Button)findViewById(R.id.btnObtainCurrentFix);
-        btnObtainCurrentFix.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-            	StartObtainingCurrentFix();
-            }
-        });
-        btnInterfacePanel = (Button)findViewById(R.id.btnInterfacePanel);
-        btnInterfacePanel.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-				try {
-	            	ShowInterfacePanel();
-				}
-				catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, S, Toast.LENGTH_LONG).show();  						
-				}
-            }
-        });
-        btnShowLocation = (Button)findViewById(R.id.btnShowLocation);
-        btnShowLocation.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-            	StartObtainingCurrentPosition();
-            }
-        });
-        btnNewPOI = (Button)findViewById(R.id.btnNewPOI);
-        btnNewPOI.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-        		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOIPanel.class);
-                startActivityForResult(intent,SHOW_NEWPOIPANEL);
-            }
-        });
-        cbPOIDataName = (CheckBox)findViewById(R.id.cbPOIDataName);
-        cbPOIDataName.setChecked(Configuration.GPSModuleConfiguration.MapPOI_flDataName);
-        cbPOIDataName.setOnClickListener(new OnClickListener() {
-        	
-            @Override
-            public void onClick(View v) {
-                boolean checked = ((CheckBox)v).isChecked();
-                //.
-                Configuration.GPSModuleConfiguration.MapPOI_flDataName = checked;
-                Configuration.flChanged = true;
-            }
-        });        
-        btnAddPOIText = (Button)findViewById(R.id.btnAddPOIText);
-        btnAddPOIText.setEnabled(false);
-        btnAddPOIText.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-        		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOITextPanel.class);
-                startActivityForResult(intent,SHOW_LASTPOITEXTEDITOR);
-            }
-        });
-        btnAddPOIImage = (Button)findViewById(R.id.btnAddPOIImage);
-        btnAddPOIImage.setEnabled(false);
-        btnAddPOIImage.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-      		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetImageTempFile(TTrackerPanel.this))); 
-      		    startActivityForResult(intent, SHOW_LASTPOICAMERA);    		
-            }
-        });
-        btnAddPOIImage.setOnLongClickListener(new OnLongClickListener() {
-			
-			@Override
-			public boolean onLongClick(View v) {
-				final CharSequence[] _items;
-				_items = new CharSequence[2];
-				_items[0] = getString(R.string.SAddImage);
-				_items[1] = getString(R.string.STakePictureWithCameraAndEdit);
-				AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
-				builder.setTitle(R.string.SOperations);
-				builder.setNegativeButton(getString(R.string.SCancel),null);
-				builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						arg0.dismiss();
-						//.
-		            	try {
-							switch (arg1) {
-							
-							case 0: //. take a picture
-				      		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetImageTempFile(TTrackerPanel.this))); 
-				      		    startActivityForResult(intent, SHOW_LASTPOICAMERA);    		
-								break; //. >
+			});
+	        btnLock = (Button)findViewById(R.id.btnLock);
+	        btnLock.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+	            	try {
+						Lock();
+					} catch (InterruptedException IE) {
+					}
+	            }
+	        });
+	        //.
+	        lbTitle = (TextView)findViewById(R.id.lbTitle);
+	        edFix = (EditText)findViewById(R.id.edFix);
+	        edFixSpeed = (EditText)findViewById(R.id.edFixSpeed);
+	        edFixPrecision = (EditText)findViewById(R.id.edFixPrecision);
+	        btnObtainCurrentFix = (Button)findViewById(R.id.btnObtainCurrentFix);
+	        btnObtainCurrentFix.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+	            	StartObtainingCurrentFix();
+	            }
+	        });
+	        btnInterfacePanel = (Button)findViewById(R.id.btnInterfacePanel);
+	        btnInterfacePanel.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+					try {
+		            	ShowInterfacePanel();
+					}
+					catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(TTrackerPanel.this, S, Toast.LENGTH_LONG).show();  						
+					}
+	            }
+	        });
+	        btnShowLocation = (Button)findViewById(R.id.btnShowLocation);
+	        btnShowLocation.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+	            	StartObtainingCurrentPosition();
+	            }
+	        });
+	        btnNewPOI = (Button)findViewById(R.id.btnNewPOI);
+	        btnNewPOI.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+	        		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOIPanel.class);
+	                startActivityForResult(intent,SHOW_NEWPOIPANEL);
+	            }
+	        });
+	        cbPOIDataName = (CheckBox)findViewById(R.id.cbPOIDataName);
+	        cbPOIDataName.setChecked(Configuration.GPSModuleConfiguration.MapPOI_flDataName);
+	        cbPOIDataName.setOnClickListener(new OnClickListener() {
+	        	
+	            @Override
+	            public void onClick(View v) {
+	                boolean checked = ((CheckBox)v).isChecked();
+	                //.
+	                Configuration.GPSModuleConfiguration.MapPOI_flDataName = checked;
+	                Configuration.flChanged = true;
+	            }
+	        });        
+	        btnAddPOIText = (Button)findViewById(R.id.btnAddPOIText);
+	        btnAddPOIText.setEnabled(false);
+	        btnAddPOIText.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+	        		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOITextPanel.class);
+	                startActivityForResult(intent,SHOW_LASTPOITEXTEDITOR);
+	            }
+	        });
+	        btnAddPOIImage = (Button)findViewById(R.id.btnAddPOIImage);
+	        btnAddPOIImage.setEnabled(false);
+	        btnAddPOIImage.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+	      		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+	      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetImageTempFile(TTrackerPanel.this))); 
+	      		    startActivityForResult(intent, SHOW_LASTPOICAMERA);    		
+	            }
+	        });
+	        btnAddPOIImage.setOnLongClickListener(new OnLongClickListener() {
+				
+				@Override
+				public boolean onLongClick(View v) {
+					final CharSequence[] _items;
+					_items = new CharSequence[2];
+					_items[0] = getString(R.string.SAddImage);
+					_items[1] = getString(R.string.STakePictureWithCameraAndEdit);
+					AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
+					builder.setTitle(R.string.SOperations);
+					builder.setNegativeButton(getString(R.string.SCancel),null);
+					builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface arg0, int arg1) {
+							arg0.dismiss();
+							//.
+			            	try {
+								switch (arg1) {
 								
-							case 1: //. take a picture and edit
-				      		    intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetImageTempFile(TTrackerPanel.this))); 
-				      		    startActivityForResult(intent, SHOW_LASTPOICAMERAANDEDITOR);    		
-								break; //. >
+								case 0: //. take a picture
+					      		    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+					      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetImageTempFile(TTrackerPanel.this))); 
+					      		    startActivityForResult(intent, SHOW_LASTPOICAMERA);    		
+									break; //. >
+									
+								case 1: //. take a picture and edit
+					      		    intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+					      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetImageTempFile(TTrackerPanel.this))); 
+					      		    startActivityForResult(intent, SHOW_LASTPOICAMERAANDEDITOR);    		
+									break; //. >
+								}
+							}
+							catch (Exception E) {
+								String S = E.getMessage();
+								if (S == null)
+									S = E.getClass().getName();
+			        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
 							}
 						}
-						catch (Exception E) {
-							String S = E.getMessage();
-							if (S == null)
-								S = E.getClass().getName();
-		        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
-						}
-					}
-				});
-				AlertDialog alert = builder.create();
-				alert.show();
-				//.
-				return true;
-			}
-		});
-        btnAddPOIVideo = (Button)findViewById(R.id.btnAddPOIVideo);
-        btnAddPOIVideo.setEnabled(false);
-        btnAddPOIVideo.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-      		    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetVideoTempFile(TTrackerPanel.this))); 
-      		    startActivityForResult(intent, SHOW_LASTPOIVIDEOCAMERA1);    		
-            }
-        });
-        btnAddPOIVideo.setOnLongClickListener(new OnLongClickListener() {
-        	
-			@Override
-			public boolean onLongClick(View v) {
-        		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOIVideoPanel.class);
-                startActivityForResult(intent,SHOW_LASTPOIVIDEOCAMERA);
-				return true;
-			}
-        });
-        btnAddPOIDrawing = (Button)findViewById(R.id.btnAddPOIDrawing);
-        btnAddPOIDrawing.setEnabled(false);
-        btnAddPOIDrawing.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-				Intent intent = new Intent(TTrackerPanel.this, TDrawingEditor.class);
-	    		File F = GetDrawingTempFile(TTrackerPanel.this);
-	    		F.delete();
-	  		    intent.putExtra("FileName", F.getAbsolutePath()); 
-	  		    intent.putExtra("ReadOnly", false); 
-	  		    startActivityForResult(intent, SHOW_LASTPOIDRAWINGEDITOR);    		
-            }
-        });
-        btnAddPOIFile = (Button)findViewById(R.id.btnAddPOIFile);
-        btnAddPOIFile.setEnabled(false);
-        btnAddPOIFile.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-				TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TTrackerPanel.this, null, new TFileSystemFileSelector.OpenDialogListener() {
-		        	
-		            @Override
-		            public void OnSelectedFile(String fileName) {
-		        		final String SelectedFileName = fileName; 
-	                    //.
-						try {
-			            	if (Configuration.GPSModuleConfiguration.MapPOI_flDataName) 
-			            		DataFileName_Dialog(TConfiguration.TGPSModuleConfiguration.MapPOI_DataNameMaxSize, new TOnDataFileNameHandler() {
-			            			
-			            			@Override
-			            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
-			            	    		EnqueueDataFile(POI_DATAFILE_TYPE_FILE, SelectedFileName,Name);
-			            			}
-			            		});
-			            	else 
-			    	    		EnqueueDataFile(POI_DATAFILE_TYPE_FILE, SelectedFileName,null);
-						}
-						catch (Throwable E) {
-							String S = E.getMessage();
-							if (S == null)
-								S = E.getClass().getName();
-		        			Toast.makeText(TTrackerPanel.this, S, Toast.LENGTH_LONG).show();  						
-						}
-		            }
-
-					@Override
-					public void OnCancel() {
-					}
-		        });
-		    	FileSelector.show();    	
-            }
-        });
-        tbAlarm = (ToggleButton)findViewById(R.id.tbAlarm);
-        tbAlarm.setChecked(GetAlarm() > 0);
-        tbAlarm.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-			public void onClick(View arg0) {
-				((ToggleButton)arg0).setChecked(!((ToggleButton)arg0).isChecked());
-			}
-		});
-        tbAlarm.setOnLongClickListener(new OnLongClickListener() {			
-        	
-			@Override
-			public boolean onLongClick(View arg0) {
-    			try {
-    				((ToggleButton)arg0).setChecked(!((ToggleButton)arg0).isChecked());
-    				SetAlarm(((ToggleButton)arg0).isChecked());
-    	    	}
-    	    	catch (Exception E) {
-    	            Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
-    	    	}
-    	    	return true;
-			}
-		});
-        btnSensorsModuleChannelsPanel = (Button)findViewById(R.id.btnSensorsModuleChannelsPanel);
-        btnSensorsModuleChannelsPanel.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	try {
-    				Intent intent = new Intent(TTrackerPanel.this, TDataStreamPropsPanel.class);
-    		        startActivity(intent);
-            	}
-            	catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
-            	}
-            }
-        }); 
-        btnSensorsModuleMetersPanel = (Button)findViewById(R.id.btnSensorsModuleMetersPanel);
-        btnSensorsModuleMetersPanel.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	try {
-    				Intent intent = new Intent(TTrackerPanel.this, TSensorsMetersPanel.class);
-    		        startActivity(intent);
-            	}
-            	catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
-            	}
-            }
-        }); 
-        btnSensorsModuleMeasurementsArchive = (Button)findViewById(R.id.btnSensorsModuleMeasurementsArchive);
-        btnSensorsModuleMeasurementsArchive.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	try {
-    				Intent intent = new Intent(TTrackerPanel.this, TSensorsModuleMeasurementsArchive.class);
-    		        startActivity(intent);
-            	}
-            	catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
-            	}
-            }
-        }); 
-        btnSensorsModuleMeasurementsTransferProcessPanel = (Button)findViewById(R.id.btnSensorsModuleMeasurementsTransferProcessPanel);
-        btnSensorsModuleMeasurementsTransferProcessPanel.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	try {
-        			Tracker.GeoLog.SensorsModule.ShowMeasurementsTransferProcessPanel(TTrackerPanel.this);
-            	}
-            	catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
-            	}
-            }
-        });
-        cbVideoRecorderModuleRecording =  (CheckBox)findViewById(R.id.cbVideoRecorderModuleRecording);
-        cbVideoRecorderModuleRecording.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-			public void onClick(View arg0) {
-				((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
-			}
-		});
-        cbVideoRecorderModuleRecording.setOnLongClickListener(new OnLongClickListener() {	
-        	
-			@Override
-			public boolean onLongClick(View arg0) {
-            	try {
-			    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
-			    	//.	
-			    	boolean flSet = ((CheckBox)arg0).isChecked();
-			    	//.
-					Tracker.GeoLog.VideoRecorderModule.SetRecorderState(flSet, true);
+					});
+					AlertDialog alert = builder.create();
+					alert.show();
 					//.
-					if (flSet)
-						ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_SENSORSMODULE_METER_START,CONTROL_METHOD_DEFAULT);
-					else
-						ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_SENSORSMODULE_METER_FINISH,CONTROL_METHOD_DEFAULT);
+					return true;
 				}
-				catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+			});
+	        btnAddPOIVideo = (Button)findViewById(R.id.btnAddPOIVideo);
+	        btnAddPOIVideo.setEnabled(false);
+	        btnAddPOIVideo.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+	      		    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+	      		    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(TTrackerPanel.this.GetVideoTempFile(TTrackerPanel.this))); 
+	      		    startActivityForResult(intent, SHOW_LASTPOIVIDEOCAMERA1);    		
+	            }
+	        });
+	        btnAddPOIVideo.setOnLongClickListener(new OnLongClickListener() {
+	        	
+				@Override
+				public boolean onLongClick(View v) {
+	        		Intent intent = new Intent(TTrackerPanel.this, TTrackerPOIVideoPanel.class);
+	                startActivityForResult(intent,SHOW_LASTPOIVIDEOCAMERA);
+					return true;
 				}
-    	    	return true;
-			}
-		});
-        btnVideoRecorderModulePanel = (Button)findViewById(R.id.btnVideoRecorderModulePanel);
-        btnVideoRecorderModulePanel.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	try {
-        			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TTrackerPanel.this);
-            	}
-            	catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
-            	}
-            }
-        });
-        cbDataStreamerModuleActive =  (CheckBox)findViewById(R.id.cbDataStreamerModuleActive);
-        cbDataStreamerModuleActive.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-			public void onClick(View arg0) {
-				((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
-			}
-		});
-        cbDataStreamerModuleActive.setOnLongClickListener(new OnLongClickListener() {	
-        	
-			@Override
-			public boolean onLongClick(View arg0) {
-            	try {
-			    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
-			    	//.	
-					Tracker.GeoLog.DataStreamerModule.SetActiveValue(((CheckBox)arg0).isChecked());
-				}
-				catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
-				}
-    	    	return true;
-			}
-		});
-        btnDataStreamerModulePanel = (Button)findViewById(R.id.btnDataStreamerModulePanel);
-        btnDataStreamerModulePanel.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	try {
-            		if (Tracker.GeoLog.DataStreamerModule.StreamingComponentsCount() == 0) 
-            			Tracker.GeoLog.DataStreamerModule.ShowStreamChannelsPanel(TTrackerPanel.this);
-            		else
-            			Tracker.GeoLog.DataStreamerModule.ShowPropsPanel(TTrackerPanel.this);
-            	}
-            	catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
-            	}
-            }
-        });
-        edConnectorInfo = (EditText)findViewById(R.id.edConnectorInfo);
-        btnConnectorCommands = (Button)findViewById(R.id.btnConnectorCommands);
-        btnConnectorCommands.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-        		final CharSequence[] _items;
-    			_items = new CharSequence[2];
-    			_items[0] = getString(R.string.SReconnect);
-    			_items[1] = getString(R.string.SForceReconnect);
-        		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
-        		builder.setTitle(R.string.SQueueOperations);
-        		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
-        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
-        			@Override
-        			public void onClick(DialogInterface arg0, int arg1) {
-	                	try {
-	    					switch (arg1) {
-	    					
-	    					case 0:
-    					    	Tracker.GeoLog.ConnectorModule.Reconnect();
-    	                		Toast.makeText(TTrackerPanel.this, R.string.SDone, Toast.LENGTH_SHORT).show();
-    	                		break; //. >
-    						
-	    					case 1:
-    					    	Tracker.GeoLog.ConnectorModule.ForceReconnect();
-    	                		Toast.makeText(TTrackerPanel.this, R.string.SDone, Toast.LENGTH_SHORT).show();
-	    						break; //. >
-	    					}
+	        });
+	        btnAddPOIDrawing = (Button)findViewById(R.id.btnAddPOIDrawing);
+	        btnAddPOIDrawing.setEnabled(false);
+	        btnAddPOIDrawing.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+					Intent intent = new Intent(TTrackerPanel.this, TDrawingEditor.class);
+		    		File F = GetDrawingTempFile(TTrackerPanel.this);
+		    		F.delete();
+		  		    intent.putExtra("FileName", F.getAbsolutePath()); 
+		  		    intent.putExtra("ReadOnly", false); 
+		  		    startActivityForResult(intent, SHOW_LASTPOIDRAWINGEDITOR);    		
+	            }
+	        });
+	        btnAddPOIFile = (Button)findViewById(R.id.btnAddPOIFile);
+	        btnAddPOIFile.setEnabled(false);
+	        btnAddPOIFile.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+					TFileSystemPreviewFileSelector FileSelector = new TFileSystemPreviewFileSelector(TTrackerPanel.this, null, new TFileSystemFileSelector.OpenDialogListener() {
+			        	
+			            @Override
+			            public void OnSelectedFile(String fileName) {
+			        		final String SelectedFileName = fileName; 
+		                    //.
+							try {
+				            	if (Configuration.GPSModuleConfiguration.MapPOI_flDataName) 
+				            		DataFileName_Dialog(TConfiguration.TGPSModuleConfiguration.MapPOI_DataNameMaxSize, new TOnDataFileNameHandler() {
+				            			
+				            			@Override
+				            			public void DoOnDataFileNameHandler(String Name)  throws Exception {
+				            	    		EnqueueDataFile(POI_DATAFILE_TYPE_FILE, SelectedFileName,Name);
+				            			}
+				            		});
+				            	else 
+				    	    		EnqueueDataFile(POI_DATAFILE_TYPE_FILE, SelectedFileName,null);
+							}
+							catch (Throwable E) {
+								String S = E.getMessage();
+								if (S == null)
+									S = E.getClass().getName();
+			        			Toast.makeText(TTrackerPanel.this, S, Toast.LENGTH_LONG).show();  						
+							}
+			            }
+
+						@Override
+						public void OnCancel() {
 						}
-						catch (Exception E) {
-							String S = E.getMessage();
-							if (S == null)
-								S = E.getClass().getName();
-		        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
-						}
+			        });
+			    	FileSelector.show();    	
+	            }
+	        });
+	        tbAlarm = (ToggleButton)findViewById(R.id.tbAlarm);
+	        tbAlarm.setChecked(GetAlarm() > 0);
+	        tbAlarm.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+				public void onClick(View arg0) {
+					((ToggleButton)arg0).setChecked(!((ToggleButton)arg0).isChecked());
+				}
+			});
+	        tbAlarm.setOnLongClickListener(new OnLongClickListener() {			
+	        	
+				@Override
+				public boolean onLongClick(View arg0) {
+	    			try {
+	    				((ToggleButton)arg0).setChecked(!((ToggleButton)arg0).isChecked());
+	    				SetAlarm(((ToggleButton)arg0).isChecked());
+	    	    	}
+	    	    	catch (Exception E) {
+	    	            Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
+	    	    	}
+	    	    	return true;
+				}
+			});
+	        btnSensorsModuleChannelsPanel = (Button)findViewById(R.id.btnSensorsModuleChannelsPanel);
+	        btnSensorsModuleChannelsPanel.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	            	try {
+	    				Intent intent = new Intent(TTrackerPanel.this, TDataStreamPropsPanel.class);
+	    		        startActivity(intent);
+	            	}
+	            	catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+	            	}
+	            }
+	        }); 
+	        btnSensorsModuleMetersPanel = (Button)findViewById(R.id.btnSensorsModuleMetersPanel);
+	        btnSensorsModuleMetersPanel.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	            	try {
+	    				Intent intent = new Intent(TTrackerPanel.this, TSensorsMetersPanel.class);
+	    		        startActivity(intent);
+	            	}
+	            	catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+	            	}
+	            }
+	        }); 
+	        btnSensorsModuleMeasurementsArchive = (Button)findViewById(R.id.btnSensorsModuleMeasurementsArchive);
+	        btnSensorsModuleMeasurementsArchive.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	            	try {
+	    				Intent intent = new Intent(TTrackerPanel.this, TSensorsModuleMeasurementsArchive.class);
+	    		        startActivity(intent);
+	            	}
+	            	catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+	            	}
+	            }
+	        }); 
+	        btnSensorsModuleMeasurementsTransferProcessPanel = (Button)findViewById(R.id.btnSensorsModuleMeasurementsTransferProcessPanel);
+	        btnSensorsModuleMeasurementsTransferProcessPanel.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	            	try {
+	        			Tracker.GeoLog.SensorsModule.ShowMeasurementsTransferProcessPanel(TTrackerPanel.this);
+	            	}
+	            	catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+	            	}
+	            }
+	        });
+	        cbVideoRecorderModuleRecording =  (CheckBox)findViewById(R.id.cbVideoRecorderModuleRecording);
+	        cbVideoRecorderModuleRecording.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+				public void onClick(View arg0) {
+					((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
+				}
+			});
+	        cbVideoRecorderModuleRecording.setOnLongClickListener(new OnLongClickListener() {	
+	        	
+				@Override
+				public boolean onLongClick(View arg0) {
+	            	try {
+				    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
+				    	//.	
+				    	boolean flSet = ((CheckBox)arg0).isChecked();
+				    	//.
+						Tracker.GeoLog.VideoRecorderModule.SetRecorderState(flSet, true);
 						//.
-						arg0.dismiss();
-        			}
-        		});
-        		AlertDialog alert = builder.create();
-        		alert.show();
-            }
-        });
-        edCheckpoint = (EditText)findViewById(R.id.edCheckpoint);
-        edOpQueueTransmitInterval = (EditText)findViewById(R.id.edOpQueueTransmitInterval);
-        edPositionReadInterval = (EditText)findViewById(R.id.edPositionReadInterval);
-        cbIgnoreImpulseModeSleepingOnMovement =  (CheckBox)findViewById(R.id.cbIgnoreImpulseModeSleepingOnMovement);
-        cbIgnoreImpulseModeSleepingOnMovement.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-			public void onClick(View arg0) {
-				((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
-			}
-		});
-        cbIgnoreImpulseModeSleepingOnMovement.setOnLongClickListener(new OnLongClickListener() {	
-        	
-			@Override
-			public boolean onLongClick(View arg0) {
-            	try {
-			    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
-			    	Tracker.GeoLog.GPSModule.flIgnoreImpulseModeSleepingOnMovement = ((CheckBox)arg0).isChecked();
-			    	Tracker.GeoLog.SaveProfile();
+						if (flSet)
+							ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_SENSORSMODULE_METER_START,CONTROL_METHOD_DEFAULT);
+						else
+							ControlCommand_NotifyOnAfterCommand(CONTROL_COMMAND_SENSORSMODULE_METER_FINISH,CONTROL_METHOD_DEFAULT);
+					}
+					catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+					}
+	    	    	return true;
 				}
-				catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+			});
+	        btnVideoRecorderModulePanel = (Button)findViewById(R.id.btnVideoRecorderModulePanel);
+	        btnVideoRecorderModulePanel.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	            	try {
+	        			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TTrackerPanel.this);
+	            	}
+	            	catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+	            	}
+	            }
+	        });
+	        cbDataStreamerModuleActive =  (CheckBox)findViewById(R.id.cbDataStreamerModuleActive);
+	        cbDataStreamerModuleActive.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+				public void onClick(View arg0) {
+					((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
 				}
-    	    	return true;
-			}
-		});
-        edGeoThreshold = (EditText)findViewById(R.id.edGeoThreshold);
-        edOpQueue = (EditText)findViewById(R.id.edOpQueue);
-        btnOpQueueCommands = (Button)findViewById(R.id.btnOpQueueCommands);
-        btnOpQueueCommands.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-        		final CharSequence[] _items;
-    			_items = new CharSequence[4];
-    			_items[0] = getString(R.string.SContent);
-    			_items[1] = getString(R.string.STransmiteImmediately);
-    			_items[2] = getString(R.string.SSave);
-    			_items[3] = getString(R.string.SClear);
-        		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
-        		builder.setTitle(R.string.SQueueOperations);
-        		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
-        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
-        			
-        			@Override
-        			public void onClick(DialogInterface arg0, int arg1) {
-	                	try {
-	    					switch (arg1) {
-	    					
-	    					case 0:
-	    						Intent intent = new Intent(TTrackerPanel.this,TTrackerOSOQueuePanel.class);
-	    						TTrackerPanel.this.startActivity(intent);
-    	                		break; //. >
-    						
-	    					case 1:
-    					    	Tracker.GeoLog.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
-    	                		Toast.makeText(TTrackerPanel.this, R.string.SImmediateTransmissionStarted, Toast.LENGTH_SHORT).show();
-    	                		break; //. >
-    						
-	    					case 2:
-	    					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Save();
-	    	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsSavedToDisk, Toast.LENGTH_SHORT).show();
-	    						break; //. >
+			});
+	        cbDataStreamerModuleActive.setOnLongClickListener(new OnLongClickListener() {	
+	        	
+				@Override
+				public boolean onLongClick(View arg0) {
+	            	try {
+				    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
+				    	//.	
+						Tracker.GeoLog.DataStreamerModule.SetActiveValue(((CheckBox)arg0).isChecked());
+					}
+					catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+					}
+	    	    	return true;
+				}
+			});
+	        btnDataStreamerModulePanel = (Button)findViewById(R.id.btnDataStreamerModulePanel);
+	        btnDataStreamerModulePanel.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	            	try {
+	            		if (Tracker.GeoLog.DataStreamerModule.StreamingComponentsCount() == 0) 
+	            			Tracker.GeoLog.DataStreamerModule.ShowStreamChannelsPanel(TTrackerPanel.this);
+	            		else
+	            			Tracker.GeoLog.DataStreamerModule.ShowPropsPanel(TTrackerPanel.this);
+	            	}
+	            	catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+	            	}
+	            }
+	        });
+	        edConnectorInfo = (EditText)findViewById(R.id.edConnectorInfo);
+	        btnConnectorCommands = (Button)findViewById(R.id.btnConnectorCommands);
+	        btnConnectorCommands.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	        		final CharSequence[] _items;
+	    			_items = new CharSequence[2];
+	    			_items[0] = getString(R.string.SReconnect);
+	    			_items[1] = getString(R.string.SForceReconnect);
+	        		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
+	        		builder.setTitle(R.string.SQueueOperations);
+	        		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
+	        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+	        			@Override
+	        			public void onClick(DialogInterface arg0, int arg1) {
+		                	try {
+		    					switch (arg1) {
+		    					
+		    					case 0:
+	    					    	Tracker.GeoLog.ConnectorModule.Reconnect();
+	    	                		Toast.makeText(TTrackerPanel.this, R.string.SDone, Toast.LENGTH_SHORT).show();
+	    	                		break; //. >
 	    						
-	    					case 3:
-	    		    		    new AlertDialog.Builder(TTrackerPanel.this)
-	    		    	        .setIcon(android.R.drawable.ic_dialog_alert)
-	    		    	        .setTitle(R.string.SConfirmation)
-	    		    	        .setMessage(R.string.SEmptyTheQueue)
-	    		    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
-	    		    		    	@Override
-	    		    		    	public void onClick(DialogInterface dialog, int id) {
-	    		    		    		try {
-		        					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Clear();
-		        					    	Update();
-		        	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsCleared, Toast.LENGTH_SHORT).show();
-	    								}
-	    								catch (Exception E) {
-	    									String S = E.getMessage();
-	    									if (S == null)
-	    										S = E.getClass().getName();
-	    				        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
-	    								}
-	    		    		    	}
-	    		    		    })
-	    		    		    .setNegativeButton(R.string.SNo, null)
-	    		    		    .show();
-	    						break; //. >
-	    					}
-						}
-						catch (Exception E) {
-							String S = E.getMessage();
-							if (S == null)
-								S = E.getClass().getName();
-		        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
-						}
-						//.
-						arg0.dismiss();
-        			}
-        		});
-        		AlertDialog alert = builder.create();
-        		alert.show();
-            }
-        });
-        edComponentFileStreaming = (EditText)findViewById(R.id.edComponentFileStreaming);
-        pbComponentFileStreaming = (ProgressBar)findViewById(R.id.pbComponentFileStreaming);
-        btnComponentFileStreamingCommands = (Button)findViewById(R.id.btnComponentFileStreamingCommands);
-        btnComponentFileStreamingCommands.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-        		final CharSequence[] _items;
-    			_items = new CharSequence[5];
-    			_items[0] = getString(R.string.SContent);
-    			_items[1] = getString(R.string.SSuspend);
-    			_items[2] = getString(R.string.SResume);
-    			_items[3] = getString(R.string.STransmiteImmediately);
-    			_items[4] = getString(R.string.SClear);
-        		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
-        		builder.setTitle(R.string.SQueueOperations);
-        		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
-        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
-        			
-        			@Override
-        			public void onClick(DialogInterface arg0, int arg1) {
-	                	try {
-	    					switch (arg1) {
-	    					
-	    					case 0:
-	    						Intent intent = new Intent(TTrackerPanel.this,TTrackerComponentFileStreamingPanel.class);
-	    						TTrackerPanel.this.startActivity(intent);
-    	                		break; //. >
-    						
-	    					case 1:
-	    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
-	    							TAsyncProcessing Processing = new TAsyncProcessing(TTrackerPanel.this,getString(R.string.SWaitAMoment)) {
-	    								@Override
-	    								public void Process() throws Exception {
-	    	    							Tracker.GeoLog.ComponentFileStreaming.SetEnabledStreaming(false);
-	    	    							//.
-	    	    							Thread.sleep(100);
-	    								}
-	    								@Override
-	    								public void DoOnCompleted() throws Exception {
-	        	                			Toast.makeText(TTrackerPanel.this, R.string.SStreamingHasBeenSuspended, Toast.LENGTH_SHORT).show();
-	    								}
-	    								@Override
-	    								public void DoOnException(Exception E) {
-	    									Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-	    								}
-	    							};
-	    							Processing.Start();
-	    						}
-    	                		break; //. >
-    						
-	    					case 2:
-	    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
-	    							TAsyncProcessing Processing = new TAsyncProcessing(TTrackerPanel.this,getString(R.string.SWaitAMoment)) {
-	    								@Override
-	    								public void Process() throws Exception {
-	    	    							Tracker.GeoLog.ComponentFileStreaming.SetEnabledStreaming(true);
-	    	    							//.
-	    	    							Thread.sleep(100);
-	    								}
-	    								@Override
-	    								public void DoOnCompleted() throws Exception {
-	        	                			Toast.makeText(TTrackerPanel.this, R.string.SStreamingHasBeenResumed, Toast.LENGTH_SHORT).show();
-	    								}
-	    								@Override
-	    								public void DoOnException(Exception E) {
-	    									Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-	    								}
-	    							};
-	    							Processing.Start();
-	    						}
-    	                		break; //. >
-    						
-	    					case 3:
-	    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
-	    							Tracker.GeoLog.ComponentFileStreaming.Process();
-    	                			Toast.makeText(TTrackerPanel.this, R.string.SImmediateTransmissionStarted, Toast.LENGTH_SHORT).show();
-	    						}
-    	                		break; //. >
-    						
-	    					/*case 4:
-	    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
-	    							Tracker.GeoLog.ComponentFileStreaming.RemoveLastItem();
-    					    		UpdateInfo();
-	    	                		Toast.makeText(TTrackerPanel.this, R.string.SLastItemHasBeenRemoved, Toast.LENGTH_SHORT).show();
-    							}    							
-	    						break; //. >*/
+		    					case 1:
+	    					    	Tracker.GeoLog.ConnectorModule.ForceReconnect();
+	    	                		Toast.makeText(TTrackerPanel.this, R.string.SDone, Toast.LENGTH_SHORT).show();
+		    						break; //. >
+		    					}
+							}
+							catch (Exception E) {
+								String S = E.getMessage();
+								if (S == null)
+									S = E.getClass().getName();
+			        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+							}
+							//.
+							arg0.dismiss();
+	        			}
+	        		});
+	        		AlertDialog alert = builder.create();
+	        		alert.show();
+	            }
+	        });
+	        edCheckpoint = (EditText)findViewById(R.id.edCheckpoint);
+	        edOpQueueTransmitInterval = (EditText)findViewById(R.id.edOpQueueTransmitInterval);
+	        edPositionReadInterval = (EditText)findViewById(R.id.edPositionReadInterval);
+	        cbIgnoreImpulseModeSleepingOnMovement =  (CheckBox)findViewById(R.id.cbIgnoreImpulseModeSleepingOnMovement);
+	        cbIgnoreImpulseModeSleepingOnMovement.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+				public void onClick(View arg0) {
+					((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
+				}
+			});
+	        cbIgnoreImpulseModeSleepingOnMovement.setOnLongClickListener(new OnLongClickListener() {	
+	        	
+				@Override
+				public boolean onLongClick(View arg0) {
+	            	try {
+				    	((CheckBox)arg0).setChecked(!((CheckBox)arg0).isChecked());
+				    	Tracker.GeoLog.GPSModule.flIgnoreImpulseModeSleepingOnMovement = ((CheckBox)arg0).isChecked();
+				    	Tracker.GeoLog.SaveProfile();
+					}
+					catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SSetError)+S, Toast.LENGTH_LONG).show();  						
+					}
+	    	    	return true;
+				}
+			});
+	        edGeoThreshold = (EditText)findViewById(R.id.edGeoThreshold);
+	        edOpQueue = (EditText)findViewById(R.id.edOpQueue);
+	        btnOpQueueCommands = (Button)findViewById(R.id.btnOpQueueCommands);
+	        btnOpQueueCommands.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	        		final CharSequence[] _items;
+	    			_items = new CharSequence[4];
+	    			_items[0] = getString(R.string.SContent);
+	    			_items[1] = getString(R.string.STransmiteImmediately);
+	    			_items[2] = getString(R.string.SSave);
+	    			_items[3] = getString(R.string.SClear);
+	        		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
+	        		builder.setTitle(R.string.SQueueOperations);
+	        		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
+	        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+	        			
+	        			@Override
+	        			public void onClick(DialogInterface arg0, int arg1) {
+		                	try {
+		    					switch (arg1) {
+		    					
+		    					case 0:
+		    						Intent intent = new Intent(TTrackerPanel.this,TTrackerOSOQueuePanel.class);
+		    						TTrackerPanel.this.startActivity(intent);
+	    	                		break; //. >
 	    						
-	    					case 4:
-	    		    		    new AlertDialog.Builder(TTrackerPanel.this)
-	    		    	        .setIcon(android.R.drawable.ic_dialog_alert)
-	    		    	        .setTitle(R.string.SConfirmation)
-	    		    	        .setMessage(R.string.SEmptyTheQueue)
-	    		    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
-	    		    		    	@Override
-	    		    		    	public void onClick(DialogInterface dialog, int id) {
-	    		    		    		try {
-	    		    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
-	    		    							Tracker.GeoLog.ComponentFileStreaming.Clear();
-	    		    					    	Update();
-	    	    		                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsCleared, Toast.LENGTH_SHORT).show();
-	    	    							}    							
-	    								}
-	    								catch (Exception E) {
-	    									String S = E.getMessage();
-	    									if (S == null)
-	    										S = E.getClass().getName();
-	    				        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
-	    								}
-	    		    		    	}
-	    		    		    })
-	    		    		    .setNegativeButton(R.string.SNo, null)
-	    		    		    .show();
-	    						break; //. >
-	    					}
-						}
-						catch (Exception E) {
-							String S = E.getMessage();
-							if (S == null)
-								S = E.getClass().getName();
-		        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
-						}
-						//.
-						arg0.dismiss();
-        			}
-        		});
-        		AlertDialog alert = builder.create();
-        		alert.show();
-            }
-        });
-        //.
-        EnableDisablePanelItems(TTracker.TrackerIsEnabled());
-        //.
-        Vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-        //.
-        Initialize();
-        //.
-        setResult(Activity.RESULT_CANCELED);
-        //.
-        flExists = true;
+		    					case 1:
+	    					    	Tracker.GeoLog.ConnectorModule.ImmediateTransmiteOutgoingSetComponentDataOperations();
+	    	                		Toast.makeText(TTrackerPanel.this, R.string.SImmediateTransmissionStarted, Toast.LENGTH_SHORT).show();
+	    	                		break; //. >
+	    						
+		    					case 2:
+		    					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Save();
+		    	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsSavedToDisk, Toast.LENGTH_SHORT).show();
+		    						break; //. >
+		    						
+		    					case 3:
+		    		    		    new AlertDialog.Builder(TTrackerPanel.this)
+		    		    	        .setIcon(android.R.drawable.ic_dialog_alert)
+		    		    	        .setTitle(R.string.SConfirmation)
+		    		    	        .setMessage(R.string.SEmptyTheQueue)
+		    		    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+		    		    		    	@Override
+		    		    		    	public void onClick(DialogInterface dialog, int id) {
+		    		    		    		try {
+			        					    	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.Clear();
+			        					    	Update();
+			        	                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsCleared, Toast.LENGTH_SHORT).show();
+		    								}
+		    								catch (Exception E) {
+		    									String S = E.getMessage();
+		    									if (S == null)
+		    										S = E.getClass().getName();
+		    				        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+		    								}
+		    		    		    	}
+		    		    		    })
+		    		    		    .setNegativeButton(R.string.SNo, null)
+		    		    		    .show();
+		    						break; //. >
+		    					}
+							}
+							catch (Exception E) {
+								String S = E.getMessage();
+								if (S == null)
+									S = E.getClass().getName();
+			        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+							}
+							//.
+							arg0.dismiss();
+	        			}
+	        		});
+	        		AlertDialog alert = builder.create();
+	        		alert.show();
+	            }
+	        });
+	        edComponentFileStreaming = (EditText)findViewById(R.id.edComponentFileStreaming);
+	        pbComponentFileStreaming = (ProgressBar)findViewById(R.id.pbComponentFileStreaming);
+	        btnComponentFileStreamingCommands = (Button)findViewById(R.id.btnComponentFileStreamingCommands);
+	        btnComponentFileStreamingCommands.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	        		final CharSequence[] _items;
+	    			_items = new CharSequence[5];
+	    			_items[0] = getString(R.string.SContent);
+	    			_items[1] = getString(R.string.SSuspend);
+	    			_items[2] = getString(R.string.SResume);
+	    			_items[3] = getString(R.string.STransmiteImmediately);
+	    			_items[4] = getString(R.string.SClear);
+	        		AlertDialog.Builder builder = new AlertDialog.Builder(TTrackerPanel.this);
+	        		builder.setTitle(R.string.SQueueOperations);
+	        		builder.setNegativeButton(TTrackerPanel.this.getString(R.string.SCancel),null);
+	        		builder.setSingleChoiceItems(_items, 0, new DialogInterface.OnClickListener() {
+	        			
+	        			@Override
+	        			public void onClick(DialogInterface arg0, int arg1) {
+		                	try {
+		    					switch (arg1) {
+		    					
+		    					case 0:
+		    						Intent intent = new Intent(TTrackerPanel.this,TTrackerComponentFileStreamingPanel.class);
+		    						TTrackerPanel.this.startActivity(intent);
+	    	                		break; //. >
+	    						
+		    					case 1:
+		    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
+		    							TAsyncProcessing Processing = new TAsyncProcessing(TTrackerPanel.this,getString(R.string.SWaitAMoment)) {
+		    								@Override
+		    								public void Process() throws Exception {
+		    	    							Tracker.GeoLog.ComponentFileStreaming.SetEnabledStreaming(false);
+		    	    							//.
+		    	    							Thread.sleep(100);
+		    								}
+		    								@Override
+		    								public void DoOnCompleted() throws Exception {
+		        	                			Toast.makeText(TTrackerPanel.this, R.string.SStreamingHasBeenSuspended, Toast.LENGTH_SHORT).show();
+		    								}
+		    								@Override
+		    								public void DoOnException(Exception E) {
+		    									Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    								}
+		    							};
+		    							Processing.Start();
+		    						}
+	    	                		break; //. >
+	    						
+		    					case 2:
+		    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
+		    							TAsyncProcessing Processing = new TAsyncProcessing(TTrackerPanel.this,getString(R.string.SWaitAMoment)) {
+		    								@Override
+		    								public void Process() throws Exception {
+		    	    							Tracker.GeoLog.ComponentFileStreaming.SetEnabledStreaming(true);
+		    	    							//.
+		    	    							Thread.sleep(100);
+		    								}
+		    								@Override
+		    								public void DoOnCompleted() throws Exception {
+		        	                			Toast.makeText(TTrackerPanel.this, R.string.SStreamingHasBeenResumed, Toast.LENGTH_SHORT).show();
+		    								}
+		    								@Override
+		    								public void DoOnException(Exception E) {
+		    									Toast.makeText(TTrackerPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    								}
+		    							};
+		    							Processing.Start();
+		    						}
+	    	                		break; //. >
+	    						
+		    					case 3:
+		    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
+		    							Tracker.GeoLog.ComponentFileStreaming.Process();
+	    	                			Toast.makeText(TTrackerPanel.this, R.string.SImmediateTransmissionStarted, Toast.LENGTH_SHORT).show();
+		    						}
+	    	                		break; //. >
+	    						
+		    					/*case 4:
+		    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
+		    							Tracker.GeoLog.ComponentFileStreaming.RemoveLastItem();
+	    					    		UpdateInfo();
+		    	                		Toast.makeText(TTrackerPanel.this, R.string.SLastItemHasBeenRemoved, Toast.LENGTH_SHORT).show();
+	    							}    							
+		    						break; //. >*/
+		    						
+		    					case 4:
+		    		    		    new AlertDialog.Builder(TTrackerPanel.this)
+		    		    	        .setIcon(android.R.drawable.ic_dialog_alert)
+		    		    	        .setTitle(R.string.SConfirmation)
+		    		    	        .setMessage(R.string.SEmptyTheQueue)
+		    		    		    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+		    		    		    	@Override
+		    		    		    	public void onClick(DialogInterface dialog, int id) {
+		    		    		    		try {
+		    		    						if (Tracker.GeoLog.ComponentFileStreaming != null) {
+		    		    							Tracker.GeoLog.ComponentFileStreaming.Clear();
+		    		    					    	Update();
+		    	    		                		Toast.makeText(TTrackerPanel.this, R.string.SQueueIsCleared, Toast.LENGTH_SHORT).show();
+		    	    							}    							
+		    								}
+		    								catch (Exception E) {
+		    									String S = E.getMessage();
+		    									if (S == null)
+		    										S = E.getClass().getName();
+		    				        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+		    								}
+		    		    		    	}
+		    		    		    })
+		    		    		    .setNegativeButton(R.string.SNo, null)
+		    		    		    .show();
+		    						break; //. >
+		    					}
+							}
+							catch (Exception E) {
+								String S = E.getMessage();
+								if (S == null)
+									S = E.getClass().getName();
+			        			Toast.makeText(TTrackerPanel.this, TTrackerPanel.this.getString(R.string.SError)+S, Toast.LENGTH_LONG).show();  						
+							}
+							//.
+							arg0.dismiss();
+	        			}
+	        		});
+	        		AlertDialog alert = builder.create();
+	        		alert.show();
+	            }
+	        });
+	        //.
+	        EnableDisablePanelItems(TTracker.TrackerIsEnabled());
+	        //.
+	        Vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+	        //.
+	        Initialize();
+	        //.
+	        setResult(Activity.RESULT_CANCELED);
+	        //.
+	        flExists = true;
+		}
+		catch (Exception E) {
+			String S = E.getMessage();
+			if (S == null)
+				S = E.getClass().getName();
+			Toast.makeText(TTrackerPanel.this, S, Toast.LENGTH_LONG).show();
+			finish();
+		}
 	}
 
     @Override
@@ -2988,7 +2997,7 @@ public class TTrackerPanel extends Activity {
     }
     
     @SuppressWarnings("unused")
-	private void POI_AddText(double Timestamp, String FileName) throws IOException {
+	private void POI_AddText(double Timestamp, String FileName) throws Exception {
 		if (!TTracker.TrackerIsEnabled()) {
 			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_LONG).show();
 			return; //. ->
@@ -2996,7 +3005,7 @@ public class TTrackerPanel extends Activity {
         if ((new File(FileName)).exists())
         {
             TMapPOITextValue MapPOIText = new TMapPOITextValue(Timestamp,FileName);
-            TObjectSetGetMapPOITextSO SO = new TObjectSetGetMapPOITextSO(TTracker.GetTracker().GeoLog.ConnectorModule,TTracker.GetTracker().GeoLog.UserID, TTracker.GetTracker().GeoLog.UserPassword, TTracker.GetTracker().GeoLog.ObjectID, null);
+            TObjectSetGetMapPOITextSO SO = new TObjectSetGetMapPOITextSO(TTracker.GetTracker(this.getApplicationContext()).GeoLog.ConnectorModule,TTracker.GetTracker(this.getApplicationContext()).GeoLog.UserID, TTracker.GetTracker(this.getApplicationContext()).GeoLog.UserPassword, TTracker.GetTracker(this.getApplicationContext()).GeoLog.ObjectID, null);
             SO.setValue(MapPOIText);
             try {
             	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
@@ -3012,7 +3021,7 @@ public class TTrackerPanel extends Activity {
     }
     
     @SuppressWarnings("unused")
-	private void POI_AddImage(double Timestamp, String FileName) throws IOException {
+	private void POI_AddImage(double Timestamp, String FileName) throws Exception {
 		if (!TTracker.TrackerIsEnabled()) {
 			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_LONG).show();
 			return; //. ->
@@ -3020,7 +3029,7 @@ public class TTrackerPanel extends Activity {
         if ((new File(FileName)).exists())
         {
             TMapPOIImageValue MapPOIImage = new TMapPOIImageValue(Timestamp,FileName);
-            TObjectSetGetMapPOIJPEGImageSO SO = new TObjectSetGetMapPOIJPEGImageSO(TTracker.GetTracker().GeoLog.ConnectorModule,TTracker.GetTracker().GeoLog.UserID, TTracker.GetTracker().GeoLog.UserPassword, TTracker.GetTracker().GeoLog.ObjectID, null);
+            TObjectSetGetMapPOIJPEGImageSO SO = new TObjectSetGetMapPOIJPEGImageSO(TTracker.GetTracker(this.getApplicationContext()).GeoLog.ConnectorModule,TTracker.GetTracker(this.getApplicationContext()).GeoLog.UserID, TTracker.GetTracker(this.getApplicationContext()).GeoLog.UserPassword, TTracker.GetTracker(this.getApplicationContext()).GeoLog.ObjectID, null);
             SO.setValue(MapPOIImage);
             try {
             	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
@@ -3035,7 +3044,7 @@ public class TTrackerPanel extends Activity {
 			Toast.makeText(this, R.string.SImageIsNull, Toast.LENGTH_LONG).show();  
     }
     
-    private void POI_AddDataFile(double Timestamp, String FileName) throws IOException {
+    private void POI_AddDataFile(double Timestamp, String FileName) throws Exception {
 		if (!TTracker.TrackerIsEnabled()) {
 			Toast.makeText(this, R.string.STrackerIsNotActive, Toast.LENGTH_LONG).show();
 			return; //. ->
@@ -3046,7 +3055,7 @@ public class TTrackerPanel extends Activity {
             byte[] AddressData = Params.getBytes("windows-1251");
 			//.
             TMapPOIDataFileValue MapPOIDataFile = new TMapPOIDataFileValue(Timestamp,FileName);
-            TObjectSetGetMapPOIDataFileSO SO = new TObjectSetGetMapPOIDataFileSO(TTracker.GetTracker().GeoLog.ConnectorModule,TTracker.GetTracker().GeoLog.UserID, TTracker.GetTracker().GeoLog.UserPassword, TTracker.GetTracker().GeoLog.ObjectID, null, AddressData);
+            TObjectSetGetMapPOIDataFileSO SO = new TObjectSetGetMapPOIDataFileSO(TTracker.GetTracker(this.getApplicationContext()).GeoLog.ConnectorModule,TTracker.GetTracker(this.getApplicationContext()).GeoLog.UserID, TTracker.GetTracker(this.getApplicationContext()).GeoLog.UserPassword, TTracker.GetTracker(this.getApplicationContext()).GeoLog.ObjectID, null, AddressData);
             SO.setValue(MapPOIDataFile);
             try {
             	Tracker.GeoLog.ConnectorModule.OutgoingSetComponentDataOperationsQueue.AddNewOperation(SO);
@@ -3118,7 +3127,7 @@ public class TTrackerPanel extends Activity {
     
     public TXYCoord ObtainCurrentPosition() throws Exception {
     	TGPSFixValue Fix;
-		Fix = TTracker.GetTracker().GeoLog.GPSModule.GetCurrentFix();
+		Fix = TTracker.GetTracker(this.getApplicationContext()).GeoLog.GPSModule.GetCurrentFix();
 		if (!Fix.IsSet()) 
 			throw new Exception(getString(R.string.SCurrentPositionIsUnavailable)); //. =>
 		if (Fix.IsEmpty()) 
@@ -3142,7 +3151,7 @@ public class TTrackerPanel extends Activity {
     		V = 2; //. major alert priority
     	else 
     		V = 0; //. no alert
-    	TTracker.GetTracker().GeoLog.GPIModule.SetValue(V);
+    	TTracker.GetTracker(this.getApplicationContext()).GeoLog.GPIModule.SetValue(V);
     }
     
     private void SensorsModule_ControlMeter_SetActive(boolean flActive) throws Exception {

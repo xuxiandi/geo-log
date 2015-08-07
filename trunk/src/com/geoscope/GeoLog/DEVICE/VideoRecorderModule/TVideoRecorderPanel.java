@@ -132,7 +132,7 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
             VideoRecorder_lbStatus = (TextView)findViewById(R.id.lbVideoRecorderPanelCameraStatus);
     		//.
             try {
-        		TTracker Tracker = TTracker.GetTracker();
+        		TTracker Tracker = TTracker.GetTracker(this);
         		if (Tracker == null)
         			throw new Exception("Tracker is null"); //. =>
         		VideoRecorder = new TVideoRecorder(this, Tracker.GeoLog.VideoRecorderModule, VideoRecorder_lbStatus);
@@ -218,9 +218,14 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
             return true; //. >
             
         case R.id.miCancelVideoRecording:
-			TTracker Tracker = TTracker.GetTracker();
-			if (Tracker != null)
-				Tracker.GeoLog.VideoRecorderModule.CancelRecording();
+        	try {
+    			TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
+    			if (Tracker != null)
+    				Tracker.GeoLog.VideoRecorderModule.CancelRecording();
+            }
+            catch (Exception E) {
+            	Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+            }
             return true; //. >
     	}
     
@@ -234,16 +239,23 @@ public class TVideoRecorderPanel extends Activity implements IVideoRecorderPanel
         .setTitle(R.string.SConfirmation)
         .setMessage(R.string.SFinishRecording)
 	    .setPositiveButton(R.string.SYes, new DialogInterface.OnClickListener() {
+	    	
 	    	@Override
 	    	public void onClick(DialogInterface dialog, int id) {
-				TTracker Tracker = TTracker.GetTracker();
-				if (Tracker != null)
-					Tracker.GeoLog.VideoRecorderModule.CancelRecording();
+	    		try {
+					TTracker Tracker = TTracker.GetTracker(TVideoRecorderPanel.this.getApplicationContext());
+					if (Tracker != null)
+						Tracker.GeoLog.VideoRecorderModule.CancelRecording();
+	            }
+	            catch (Exception E) {
+	            	Toast.makeText(TVideoRecorderPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            }
 				//.
 	    		TVideoRecorderPanel.this.finish();
 	    	}
 	    })
 	    .setNegativeButton(R.string.SNo, new DialogInterface.OnClickListener() {
+	    	
 	    	@Override
 	    	public void onClick(DialogInterface dialog, int id) {
 	    	}

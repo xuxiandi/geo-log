@@ -2112,6 +2112,7 @@ public class TGeoScopeServerUser {
 	            				synchronized (Messages) {
 	            					_Messages = new ArrayList<TIncomingMessage>(Messages); 
 	        					}
+	            				boolean flWasAGetUserInfoError = false;
 	            				for (int I = 0; I < _Messages.size(); I++) {
 	            					if (Canceller.flCancel)
 	            						return; //. ->
@@ -2121,12 +2122,17 @@ public class TGeoScopeServerUser {
 	                    				//. supply message with sender info
 	                    				TUserDescriptor Sender = Senders.get(TypedMessage.SenderID);
 	                    				if ((Sender == null) && Server.IsNetworkAvailable()) {
-	                    					try {
-	                    						Sender = User.GetUserInfo(TypedMessage.SenderID);
-	                    					}
-	                    					catch (Exception E) {
-	                    						Sender = TUserDescriptor.UnknownUser(TypedMessage.SenderID);
-	                    					}
+	                    					if (!flWasAGetUserInfoError)
+		                    					try {
+		                    						Sender = User.GetUserInfo(TypedMessage.SenderID);
+		                    					}
+		                    					catch (Exception E) {
+		                    						flWasAGetUserInfoError = true;
+		                    						//.
+		                    						Sender = TUserDescriptor.UnknownUser(TypedMessage.SenderID);
+		                    					}
+		                    					else
+		                    						Sender = TUserDescriptor.UnknownUser(TypedMessage.SenderID);
 	                						Senders.put(TypedMessage.SenderID, Sender);
 	                    				}
 	                    				TypedMessage.Sender = Sender;

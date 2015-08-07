@@ -822,7 +822,7 @@ public class TVideoRecorderServerArchive extends Activity {
 					}
     				//.
     				long ThisGeographServerObjectID = 0;
-    				TTracker Tracker = TTracker.GetTracker();
+    				TTracker Tracker = TTracker.GetTracker(context.getApplicationContext());
     				if (Tracker != null)
     					ThisGeographServerObjectID = Tracker.GeoLog.idGeographServerObject;
     				//.

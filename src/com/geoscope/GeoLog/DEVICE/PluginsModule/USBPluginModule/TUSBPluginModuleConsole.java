@@ -61,7 +61,7 @@ public class TUSBPluginModuleConsole extends Activity {
 		super.onCreate(savedInstanceState);
 		//.
 		try {
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	//.

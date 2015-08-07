@@ -389,7 +389,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 		super.onCreate(savedInstanceState);
         //. 
 		try {
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 			Server = UserAgent.Server;
@@ -1631,7 +1631,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 									
 									@Override
 									public void Process() throws Exception {
-										TTracker Tracker = TTracker.GetTracker();
+										TTracker Tracker = TTracker.GetTracker(context.getApplicationContext());
 										if (Tracker == null)
 											throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 										Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule.StartUserMessagingForObject(Object, Object.Server.User.UserID,"", Tracker.GeoLog.idTOwnerComponent,Tracker.GeoLog.idOwnerComponent);

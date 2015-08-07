@@ -1104,7 +1104,7 @@ public class TTileLevel {
 		TTilesFile TilesFile = new TTilesFile(Compilation.Descriptor.SID, Compilation.Descriptor.PID, Compilation.Descriptor.CID, Level, SecurityFileID, ReSetInterval, TilesPlace, Tiles);
 		TilesFile.SaveToFile(NFN);
 		//. 
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(Compilation.TileImagery.Reflector.context.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(Compilation.Reflector.context.getString(R.string.STrackerIsNotInitialized)); //. =>
     	Tracker.GeoLog.ComponentFileStreaming.AddItem(SpaceDefines.idTTileServerVisualization,0, NFN);

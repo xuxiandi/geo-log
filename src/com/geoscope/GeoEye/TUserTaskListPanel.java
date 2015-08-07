@@ -164,7 +164,7 @@ public class TUserTaskListPanel extends Activity {
 	}
 	
     private void Tasks_GetData(boolean flOnlyActive) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
@@ -190,7 +190,7 @@ public class TUserTaskListPanel extends Activity {
         
     @SuppressWarnings("unused")
 	private void Tasks_OpenTaskPanel(int TaskID) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();

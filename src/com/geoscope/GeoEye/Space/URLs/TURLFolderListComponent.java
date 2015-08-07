@@ -1313,7 +1313,7 @@ public class TURLFolderListComponent extends TUIComponent {
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent(ParentActivity.getApplicationContext());
 	    				if (UserAgent == null)
 	    					throw new Exception(ParentActivity.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    				//.

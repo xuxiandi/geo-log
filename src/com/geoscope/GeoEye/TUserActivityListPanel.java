@@ -145,7 +145,7 @@ public class TUserActivityListPanel extends Activity {
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent(TUserActivityListPanel.this.getApplicationContext());
 	    				if (UserAgent == null)
 	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    				//.

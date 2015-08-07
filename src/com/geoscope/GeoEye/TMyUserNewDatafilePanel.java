@@ -89,7 +89,7 @@ public class TMyUserNewDatafilePanel extends Activity {
         				
         				@Override
         				public void Process() throws Exception {
-        					TUserAgent UserAgent = TUserAgent.GetUserAgent();
+        					TUserAgent UserAgent = TUserAgent.GetUserAgent(context.getApplicationContext());
         					if (UserAgent == null)
         						throw new Exception(TMyUserNewDatafilePanel.this.getString(R.string.SUserAgentIsNotInitialized)); //. =>
         					UserDescriptor = UserAgent.User().GetUserInfo();

@@ -146,7 +146,7 @@ public class TUserChatPanel extends Activity {
 		super.onCreate(savedInstanceState);
 		//.
 		try {
-			UserAgent = TUserAgent.GetUserAgent();
+			UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		} catch (Exception E) {

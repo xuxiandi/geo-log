@@ -66,7 +66,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.T
 			
 			@Override
 			public void Process() throws Exception {
-				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+				TUserAgent UserAgent = TUserAgent.GetUserAgent(User.Server.context);
 				if (UserAgent != null) {
 					TUserDescriptor UserInfo = User.GetUserInfo(idComponent);
 					if (UserInfo.UserIsOnline) {
@@ -104,7 +104,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.T
 	public boolean IsUserAvailable() {
 		boolean flOnline = false;
 		try {
-			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			TUserAgent UserAgent = TUserAgent.GetUserAgent(User.Server.context);
 			if (UserAgent != null) {
 				TUserDescriptor UserInfo = User.GetUserInfo(idComponent);
 				if (UserInfo.UserIsOnline) {

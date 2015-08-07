@@ -1438,7 +1438,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 			
 			@Override
 			public void Process() throws Exception {
-				TTracker Tracker = TTracker.GetTracker();
+				TTracker Tracker = TTracker.GetTracker(context.getApplicationContext());
 				if ((Tracker == null) || !Tracker.GeoLog.IsEnabled()) 
 					throw new Exception(context.getString(R.string.STrackerIsNotInitialized)); //. =>
 				Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule.StartUserMessagingForObject(Object, Object.Server.User.UserID,"", Tracker.GeoLog.idTOwnerComponent,Tracker.GeoLog.idOwnerComponent);
@@ -1467,7 +1467,7 @@ public class TGeoMonitoredObject1Model extends TObjectModel
 
 	@Override
 	public void UserVideoPhone_Start(TCoGeoMonitorObject Object, Context context) throws Exception {
-		TTracker Tracker = TTracker.GetTracker();
+		TTracker Tracker = TTracker.GetTracker(context.getApplicationContext());
 		if ((Tracker == null) || !Tracker.GeoLog.IsEnabled()) 
 			throw new Exception(context.getString(R.string.STrackerIsNotInitialized)); //. =>
 		//.

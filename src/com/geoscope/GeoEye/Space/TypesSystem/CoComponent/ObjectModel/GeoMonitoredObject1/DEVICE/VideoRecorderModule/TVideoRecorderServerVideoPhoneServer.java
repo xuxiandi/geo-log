@@ -349,7 +349,7 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
 						TGeoScopeServerUser User;
 						TGeoScopeServerInfo.TInfo ServersInfo;
 			    		try {
-			    			TUserAgent UserAgent = TUserAgent.GetUserAgent();
+			    			TUserAgent UserAgent = TUserAgent.GetUserAgent(Session.Device.context.getApplicationContext());
 			    			if (UserAgent == null)
 			    				throw new Exception(Session.Device.context.getString(R.string.SUserAgentIsNotInitialized)); //. =>
 			    			User = UserAgent.User();
@@ -945,33 +945,39 @@ public class TVideoRecorderServerVideoPhoneServer extends TVideoRecorderPanel {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 		//.
-        svSurface.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-			public void onClick(View v) {
-				ShowInitializationDialog();
-			}
-		});
-        //.
-        Session.Panel = this;
-        //.
-        Bundle extras = getIntent().getExtras();
-    	//.
-        int AudioDestination;
-        if (Session.flVideo)
-        	AudioDestination = AudioManager.STREAM_MUSIC;
-        else
-        	AudioDestination = AudioManager.STREAM_VOICE_CALL;
-        //.
-    	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Session.Object, Session.flAudio,AudioDestination, Session.flVideo, Session.GetValue(), new TExceptionHandler() {
-    		
-			@Override
-			public void DoOnException(Throwable E) {
-				TVideoRecorderServerVideoPhoneServer.this.DoOnException(E);
-			}
-		}, lbStatus,ivAudioOnly);
-    	//.
-        SetSurface(true,Session.flVideo);
+        try {
+            svSurface.setOnClickListener(new OnClickListener() {
+            	
+    			@Override
+    			public void onClick(View v) {
+    				ShowInitializationDialog();
+    			}
+    		});
+            //.
+            Session.Panel = this;
+            //.
+            Bundle extras = getIntent().getExtras();
+        	//.
+            int AudioDestination;
+            if (Session.flVideo)
+            	AudioDestination = AudioManager.STREAM_MUSIC;
+            else
+            	AudioDestination = AudioManager.STREAM_VOICE_CALL;
+            //.
+        	VideoRecorderServerView = new TVideoRecorderServerViewUDPRTP(this,extras.getString("GeographProxyServerAddress"), TUDPEchoServerClient.ServerDefaultPort, extras.getLong("UserID"), extras.getString("UserPassword"), Session.Object, Session.flAudio,AudioDestination, Session.flVideo, Session.GetValue(), new TExceptionHandler() {
+        		
+    			@Override
+    			public void DoOnException(Throwable E) {
+    				TVideoRecorderServerVideoPhoneServer.this.DoOnException(E);
+    			}
+    		}, lbStatus,ivAudioOnly);
+        	//.
+            SetSurface(true,Session.flVideo);
+        }
+        catch (Exception E) {
+			Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+			finish();
+        }
     }
 	
     public void onDestroy() {

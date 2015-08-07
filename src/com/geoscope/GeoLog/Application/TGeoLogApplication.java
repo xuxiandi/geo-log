@@ -432,12 +432,12 @@ public class TGeoLogApplication {
 	
 	public synchronized void StartServices(Context context) throws Exception {
 		//. start server user-agent service
-		if (TUserAgent.GetUserAgent() == null)
+		if (TUserAgent.GetUserAgent(context) == null)
 			TUserAgent.CreateUserAgent(context);
 		Intent UserAgentServiceLauncher = new Intent(context, TUserAgentService.class);
 		context.startService(UserAgentServiceLauncher);
 		//. start tracker service
-		if (TTracker.GetTracker() == null)
+		if (TTracker.GetTracker(context) == null)
 			TTracker.CreateTracker(context);
 		Intent TrackerServiceLauncher = new Intent(context, TTrackerService.class);
 		context.startService(TrackerServiceLauncher);

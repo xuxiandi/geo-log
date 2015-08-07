@@ -37,8 +37,13 @@ public class TDataStreamerPropsPanel extends Activity {
         //.
         setContentView(R.layout.datastreamer_props_panel);
         //.
-		TTracker Tracker = TTracker.GetTracker();
-		if (Tracker == null) {
+        TTracker Tracker;
+		try {
+			Tracker = TTracker.GetTracker(this.getApplicationContext());
+	    	if (Tracker == null)
+	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
+		} catch (Exception E) {
+            Toast.makeText(TDataStreamerPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
 			finish();
 			return; //. ->
 		}
@@ -53,9 +58,9 @@ public class TDataStreamerPropsPanel extends Activity {
 					return; //. ->
                 boolean checked = ((CheckBox)v).isChecked();
 				//.
-				TTracker Tracker = TTracker.GetTracker();
-				//.
 				try {
+					TTracker Tracker = TTracker.GetTracker(TDataStreamerPropsPanel.this.getApplicationContext());
+					//.
 					Tracker.GeoLog.DataStreamerModule.SetActiveValue(checked);
 				} catch (Exception E) {
 		            Toast.makeText(TDataStreamerPropsPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();

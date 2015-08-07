@@ -484,7 +484,7 @@ public class TUserTaskPanel extends Activity {
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent(TUserTaskPanel.this.getApplicationContext());
 	    				if (UserAgent == null)
 	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    				//.
@@ -608,7 +608,7 @@ public class TUserTaskPanel extends Activity {
     }
 
     private void Task_SetStatus(int pStatus, int pStatusReason, String pStatusComment) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(TUserTaskPanel.this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
@@ -633,7 +633,7 @@ public class TUserTaskPanel extends Activity {
     }
     
     private void Task_SetResult(int pCompletedStatusReason, String pCompletedStatusComment, int pResultCode, String pResultComment) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(TUserTaskPanel.this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
@@ -665,7 +665,7 @@ public class TUserTaskPanel extends Activity {
     }
     
     private void Task_AssignActivity(TActivity pActivity, final TTaskDataValue.TDoneHandler pDoneHandler) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(TUserTaskPanel.this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	final long ActivityID = pActivity.ID;
@@ -709,7 +709,7 @@ public class TUserTaskPanel extends Activity {
     }
     
     private void Task_DispatchTask() throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(TUserTaskPanel.this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
@@ -729,7 +729,7 @@ public class TUserTaskPanel extends Activity {
     }
     
     private void Task_DispatchTaskToSpecifiedExpert(long SpecifiedExpertID) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(TUserTaskPanel.this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	ServiceOperation_Cancel();
@@ -885,7 +885,7 @@ public class TUserTaskPanel extends Activity {
 						
 						@Override
 						public void Process() throws Exception {
-		    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+		    				TUserAgent UserAgent = TUserAgent.GetUserAgent(context.getApplicationContext());
 		    				if (UserAgent == null)
 		    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 		    				//.

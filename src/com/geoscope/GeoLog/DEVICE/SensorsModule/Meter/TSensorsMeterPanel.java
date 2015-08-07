@@ -163,7 +163,7 @@ public class TSensorsMeterPanel extends Activity {
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-    		        	TTracker Tracker = TTracker.GetTracker();
+    		        	TTracker Tracker = TTracker.GetTracker(Device.context);
     		        	if (Tracker == null)
     		        		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     		        	Device = Tracker.GeoLog;

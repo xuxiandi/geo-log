@@ -46,7 +46,7 @@ public class TTrackerConfigurationPanel extends Activity {
         super.onCreate(savedInstanceState);
         //.
         try {
-        	Tracker = TTracker.GetTracker();
+        	Tracker = TTracker.GetTracker(this.getApplicationContext());
         	if (Tracker == null)
         		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     		//.
@@ -98,6 +98,7 @@ public class TTrackerConfigurationPanel extends Activity {
             });*/
     		//.
             edMetersToControl = (EditText)findViewById(R.id.edMetersToControl);
+            edMetersToControl.setKeyListener(null);
             //.
             btnSelectMetersToControl = (Button)findViewById(R.id.btnSelectMetersToControl);
             btnSelectMetersToControl.setOnClickListener(new OnClickListener() {
@@ -341,6 +342,8 @@ public class TTrackerConfigurationPanel extends Activity {
 					MetersToControl += "\n"+S;
         	}
     	}
+    	if (MetersToControl.length() == 0)
+    		MetersToControl = TTrackerPanel.TConfiguration.TSensorsModuleConfiguration.VideoRecorderModuleMeterID;
     	edMetersToControl.setText(MetersToControl);
     	//.
         switch (Configuration.SensorsModuleConfiguration.MeterControl) {

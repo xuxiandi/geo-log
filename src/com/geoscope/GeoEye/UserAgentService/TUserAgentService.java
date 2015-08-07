@@ -129,7 +129,7 @@ public class TUserAgentService extends Service {
 				while (!flCancel) {
 					Thread.sleep(CheckingInterval);
 					//.
-					TUserAgent UserAgent = TUserAgent.GetUserAgent();
+					TUserAgent UserAgent = TUserAgent.GetUserAgent(TUserAgentService.this.getApplicationContext());
 					if (UserAgent != null)
 						try {
 							UserAgent.Check();
@@ -219,7 +219,7 @@ public class TUserAgentService extends Service {
     }
 
     public synchronized void StartUserAgentService() throws Exception {
-    	TUserAgent UserAgent = TUserAgent.GetUserAgent(); 
+    	TUserAgent UserAgent = TUserAgent.GetUserAgent(TUserAgentService.this.getApplicationContext()); 
 		if (UserAgent == null) 
 			UserAgent = TUserAgent.CreateUserAgent(this);
 		//.
@@ -245,7 +245,7 @@ public class TUserAgentService extends Service {
     }
     
     public synchronized boolean UserAgentServiceIsStarted() throws Exception {
-    	return (TUserAgent.GetUserAgent() != null);
+    	return (TUserAgent.GetUserAgent(TUserAgentService.this.getApplicationContext()) != null);
     }
     
     public synchronized void Validate() throws Exception {

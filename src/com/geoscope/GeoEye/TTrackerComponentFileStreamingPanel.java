@@ -424,7 +424,7 @@ public class TTrackerComponentFileStreamingPanel extends Activity {
 		//.
 		try {
 			if (flResumeStreaming) {
-		    	TTracker Tracker = TTracker.GetTracker();
+		    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
 		    	if (Tracker != null)
 		    		Tracker.GeoLog.ComponentFileStreaming.Start();
 			}
@@ -477,7 +477,7 @@ public class TTrackerComponentFileStreamingPanel extends Activity {
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-				    	TTracker Tracker = TTracker.GetTracker();
+				    	TTracker Tracker = TTracker.GetTracker(TTrackerComponentFileStreamingPanel.this.getApplicationContext());
 				    	if (Tracker == null)
 				    		throw new Exception(TTrackerComponentFileStreamingPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 				    	//.
@@ -743,7 +743,7 @@ public class TTrackerComponentFileStreamingPanel extends Activity {
 	}
 	
 	private void QueueItems_Remove(TItem Item) throws Exception {
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(TTrackerComponentFileStreamingPanel.this.getString(R.string.STrackerIsNotInitialized)); //. =>
 		//.

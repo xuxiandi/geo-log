@@ -1988,7 +1988,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
         						if (idDATAFile == 0)
         							throw new Exception("unable to get TDATAFile component of the clone"); //. =>
         						//. prepare and send datafile
-                		    	TTracker Tracker = TTracker.GetTracker();
+                		    	TTracker Tracker = TTracker.GetTracker(TReflectionWindowEditorPanel.this.getApplicationContext());
                 		    	if (Tracker == null)
                 		    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
         				    	double Timestamp = OleDate.UTCCurrentTimestamp();
@@ -3669,7 +3669,7 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 	}
 	
 	private void Moving_SetCurrentGeoLocation() throws Exception{
-    	TTracker Tracker = TTracker.GetTracker();
+    	TTracker Tracker = TTracker.GetTracker(TReflectionWindowEditorPanel.this.getApplicationContext());
     	if (Tracker == null)
     		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
     	//.

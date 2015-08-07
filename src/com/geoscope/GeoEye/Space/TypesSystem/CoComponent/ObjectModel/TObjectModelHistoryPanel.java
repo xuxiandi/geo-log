@@ -1317,389 +1317,394 @@ public class TObjectModelHistoryPanel extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //.
-    	flBigScreen = true; //. (getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
-        //.
-		UserAgent = TUserAgent.GetUserAgent();
-		if (UserAgent == null) {
-			Toast.makeText(this, R.string.SUserAgentIsNotInitialized, Toast.LENGTH_LONG).show();
-			finish();
-			return; //. ->
-		}
-        //.
-        Bundle extras = getIntent().getExtras(); 
-        if (extras != null) {
-        	ObjectID = extras.getLong("ObjectID");
-        	Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
-        	//.
-        	DayDate = extras.getDouble("DayDate");
-        	DaysCount = extras.getShort("DaysCount");
-        	//.
-        	GeographDataServerAddress = extras.getString("GeographDataServerAddress");
-        	GeographDataServerPort = extras.getInt("GeographDataServerPort");
-        	UserID = extras.getLong("UserID");
-        	UserPassword = extras.getString("UserPassword");
-        }
-		//.
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        //.
-        setContentView(R.layout.objectmodel_history_panel);
-        //.
-        TimeIntervalSlider = (TTimeIntervalSlider)findViewById(R.id.svTimeIntervalSlider);
-        TimeIntervalSlider.Initialize(this);
-        //.
-        btnFilterMeasurementsByType = (Button)findViewById(R.id.btnFilterMeasurementsByType);
-        btnFilterMeasurementsByType.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-				try {
-					Measurements_FilterByType();
-				} catch (Exception E) {
-					Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-				}
-            }
-        });
-        //.
-        lvBusinessModelRecords = (ListView)findViewById(R.id.lvBusinessModelRecords);
-        lvBusinessModelRecords.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-            	lvBusinessModelRecords_SetSelectedItem(position, true);
-            	//.
-            	lvBusinessModelRecords_flUpdating = true;
-            	try {
-                	TimeIntervalSlider.SetCurrentTime(History.Records.BusinessModelRecords.get(History.BusinessModelRecords.length-position-1).Timestamp, false, true, true);
-            	}
-            	finally {
-            		lvBusinessModelRecords_flUpdating = false;
-            	}
-            }
-        });        
-        //.
-        btnFilterMeasurementsByType = (Button)findViewById(R.id.btnFilterMeasurementsByType);
-        btnFilterMeasurementsByType.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-				try {
-					Measurements_FilterByType();
-				} catch (Exception E) {
-					Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-				}
-            }
-        });
-        //.
-        btnShowCurrentTimeInReflector = (Button)findViewById(R.id.btnShowCurrentTimeInReflector);
-        btnShowCurrentTimeInReflector.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-				try {
-					OpenCurrentTimeInReflector();
-				} catch (Exception E) {
-					Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-				}
-            }
-        });
-        //.
-        btnShowCurrentTimeMeasurementViewer = (Button)findViewById(R.id.btnShowCurrentTimeMeasurementViewer);
-        btnShowCurrentTimeMeasurementViewer.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-				OpenCurrentTimeAVMeasurementInProcessor();
-            }
-        });
-        //.
-        llBigScreenControls = (LinearLayout)findViewById(R.id.llBigScreenControls);
-        llBigScreenControls.setVisibility(flBigScreen ? View.VISIBLE : View.GONE);
-        //.
-        UserActivitiesComponentList_Layout = (LinearLayout)findViewById(R.id.UserActivitiesComponentListLayout);
-        //.
-        ObjectTrackViewer_Layout = (RelativeLayout)findViewById(R.id.ReflectorLayout);
-        if (flBigScreen)
-        	try {
-    			ObjectTrackViewer_Initialize();
-    		} catch (Exception E) {
-    			Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-    			//.
-    			finish();
-    			//.
-    			return; //. ->
-    		}
-        //.
-        MeasurementProcessors_Layout = (LinearLayout)findViewById(R.id.MeasurementProcessorsLayout);
-        //.
-        cbShowUserActivitiesComponentList = (CheckBox)findViewById(R.id.cbShowUserActivitiesComponentList);
-        cbShowUserActivitiesComponentList.setOnClickListener(new OnClickListener(){
-        	
-            @Override
-            public void onClick(View v) {
-            	//. start component
-            	if (cbShowUserActivitiesComponentList.isChecked()) {
-            		if (!UserActivitiesComponentList.flStarted)
-            			UserActivitiesComponentList.Start();
-            	}
-            	//.
-            	if (cbShowUserActivitiesComponentList.isChecked())
-            		UserActivitiesComponentList.Show();
-            	else
-            		UserActivitiesComponentList.Hide();
-                //. validation
-            	TimeIntervalSlider.ValidateCurrentTime(true);
-            }
-        });        
-        //.
-        cbShowReflector = (CheckBox)findViewById(R.id.cbShowReflector);
-        cbShowReflector.setOnClickListener(new OnClickListener(){
-        	
-            @Override
-            public void onClick(View v) {
-            	if (cbShowReflector.isChecked())
-            		ObjectTrackViewer.Show();
-            	else
-            		ObjectTrackViewer.Hide();
-                //. validation
-            	TimeIntervalSlider.ValidateCurrentTime(true);
-            }
-        });        
-        //.
-        cbShowMeasurementViewer = (CheckBox)findViewById(R.id.cbShowMeasurementViewer);
-        cbShowMeasurementViewer.setOnClickListener(new OnClickListener(){
-        	
-            @Override
-            public void onClick(View v) {
-            	MeasurementProcessors_flEnabled = cbShowMeasurementViewer.isChecked(); 
-            	if (MeasurementProcessors_flEnabled) {
-            		Animation_SetEnabled(true);
-            	}
-            	else {
-            		MeasurementProcessors_Pause();
-                	//.
-            		Animation_SetEnabled(false);
-            	}
-            	//. validation
-            	TimeIntervalSlider.ValidateCurrentTime(true);
-            }
-        });        
-        //.
-        cbTimeAnimation = (CheckBox)findViewById(R.id.cbTimeAnimation);
-        cbTimeAnimation.setOnClickListener(new OnClickListener(){
-        	
-            @Override
-            public void onClick(View v) {
-            	if (Animation_IsAllowedAtTheMoment())
-                	TimeIntervalSlider.ValidateCurrentTime(true);
-            	else
-            		MeasurementProcessors_Pause();
-            }
-        });        
-        //.
-		TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SLoading)) {
-			
-			private TObjectModel _ObjectModel = null; 
-			private THistory _History = null;
-			
-			@Override
-			public boolean ProcessIsIndeterminate() {
-				return false;
+		try {
+	    	flBigScreen = true; //. (getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+	        //.
+			UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
+			if (UserAgent == null) {
+				Toast.makeText(this, R.string.SUserAgentIsNotInitialized, Toast.LENGTH_LONG).show();
+				finish();
+				return; //. ->
 			}
-			
-			@Override
-			public void Process() throws Exception {
-				try {
-					TCoGeoMonitorObject Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
-					//.
-					byte[] ObjectModelData = Object.GetData(1000001);
-					if (ObjectModelData != null) {
-	    				Canceller.Check();
-	    				//.
-						int Idx = 0;
-						int ObjectModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
-						int BusinessModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+	        //.
+	        Bundle extras = getIntent().getExtras(); 
+	        if (extras != null) {
+	        	ObjectID = extras.getLong("ObjectID");
+	        	Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
+	        	//.
+	        	DayDate = extras.getDouble("DayDate");
+	        	DaysCount = extras.getShort("DaysCount");
+	        	//.
+	        	GeographDataServerAddress = extras.getString("GeographDataServerAddress");
+	        	GeographDataServerPort = extras.getInt("GeographDataServerPort");
+	        	UserID = extras.getLong("UserID");
+	        	UserPassword = extras.getString("UserPassword");
+	        }
+			//.
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+	        //.
+	        setContentView(R.layout.objectmodel_history_panel);
+	        //.
+	        TimeIntervalSlider = (TTimeIntervalSlider)findViewById(R.id.svTimeIntervalSlider);
+	        TimeIntervalSlider.Initialize(this);
+	        //.
+	        btnFilterMeasurementsByType = (Button)findViewById(R.id.btnFilterMeasurementsByType);
+	        btnFilterMeasurementsByType.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+					try {
+						Measurements_FilterByType();
+					} catch (Exception E) {
+						Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+	            }
+	        });
+	        //.
+	        lvBusinessModelRecords = (ListView)findViewById(R.id.lvBusinessModelRecords);
+	        lvBusinessModelRecords.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+	            @Override
+	            public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
+	            	lvBusinessModelRecords_SetSelectedItem(position, true);
+	            	//.
+	            	lvBusinessModelRecords_flUpdating = true;
+	            	try {
+	                	TimeIntervalSlider.SetCurrentTime(History.Records.BusinessModelRecords.get(History.BusinessModelRecords.length-position-1).Timestamp, false, true, true);
+	            	}
+	            	finally {
+	            		lvBusinessModelRecords_flUpdating = false;
+	            	}
+	            }
+	        });        
+	        //.
+	        btnFilterMeasurementsByType = (Button)findViewById(R.id.btnFilterMeasurementsByType);
+	        btnFilterMeasurementsByType.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+					try {
+						Measurements_FilterByType();
+					} catch (Exception E) {
+						Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+	            }
+	        });
+	        //.
+	        btnShowCurrentTimeInReflector = (Button)findViewById(R.id.btnShowCurrentTimeInReflector);
+	        btnShowCurrentTimeInReflector.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+					try {
+						OpenCurrentTimeInReflector();
+					} catch (Exception E) {
+						Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+					}
+	            }
+	        });
+	        //.
+	        btnShowCurrentTimeMeasurementViewer = (Button)findViewById(R.id.btnShowCurrentTimeMeasurementViewer);
+	        btnShowCurrentTimeMeasurementViewer.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+					OpenCurrentTimeAVMeasurementInProcessor();
+	            }
+	        });
+	        //.
+	        llBigScreenControls = (LinearLayout)findViewById(R.id.llBigScreenControls);
+	        llBigScreenControls.setVisibility(flBigScreen ? View.VISIBLE : View.GONE);
+	        //.
+	        UserActivitiesComponentList_Layout = (LinearLayout)findViewById(R.id.UserActivitiesComponentListLayout);
+	        //.
+	        ObjectTrackViewer_Layout = (RelativeLayout)findViewById(R.id.ReflectorLayout);
+	        if (flBigScreen)
+	        	try {
+	    			ObjectTrackViewer_Initialize();
+	    		} catch (Exception E) {
+	    			Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	    			//.
+	    			finish();
+	    			//.
+	    			return; //. ->
+	    		}
+	        //.
+	        MeasurementProcessors_Layout = (LinearLayout)findViewById(R.id.MeasurementProcessorsLayout);
+	        //.
+	        cbShowUserActivitiesComponentList = (CheckBox)findViewById(R.id.cbShowUserActivitiesComponentList);
+	        cbShowUserActivitiesComponentList.setOnClickListener(new OnClickListener(){
+	        	
+	            @Override
+	            public void onClick(View v) {
+	            	//. start component
+	            	if (cbShowUserActivitiesComponentList.isChecked()) {
+	            		if (!UserActivitiesComponentList.flStarted)
+	            			UserActivitiesComponentList.Start();
+	            	}
+	            	//.
+	            	if (cbShowUserActivitiesComponentList.isChecked())
+	            		UserActivitiesComponentList.Show();
+	            	else
+	            		UserActivitiesComponentList.Hide();
+	                //. validation
+	            	TimeIntervalSlider.ValidateCurrentTime(true);
+	            }
+	        });        
+	        //.
+	        cbShowReflector = (CheckBox)findViewById(R.id.cbShowReflector);
+	        cbShowReflector.setOnClickListener(new OnClickListener(){
+	        	
+	            @Override
+	            public void onClick(View v) {
+	            	if (cbShowReflector.isChecked())
+	            		ObjectTrackViewer.Show();
+	            	else
+	            		ObjectTrackViewer.Hide();
+	                //. validation
+	            	TimeIntervalSlider.ValidateCurrentTime(true);
+	            }
+	        });        
+	        //.
+	        cbShowMeasurementViewer = (CheckBox)findViewById(R.id.cbShowMeasurementViewer);
+	        cbShowMeasurementViewer.setOnClickListener(new OnClickListener(){
+	        	
+	            @Override
+	            public void onClick(View v) {
+	            	MeasurementProcessors_flEnabled = cbShowMeasurementViewer.isChecked(); 
+	            	if (MeasurementProcessors_flEnabled) {
+	            		Animation_SetEnabled(true);
+	            	}
+	            	else {
+	            		MeasurementProcessors_Pause();
+	                	//.
+	            		Animation_SetEnabled(false);
+	            	}
+	            	//. validation
+	            	TimeIntervalSlider.ValidateCurrentTime(true);
+	            }
+	        });        
+	        //.
+	        cbTimeAnimation = (CheckBox)findViewById(R.id.cbTimeAnimation);
+	        cbTimeAnimation.setOnClickListener(new OnClickListener(){
+	        	
+	            @Override
+	            public void onClick(View v) {
+	            	if (Animation_IsAllowedAtTheMoment())
+	                	TimeIntervalSlider.ValidateCurrentTime(true);
+	            	else
+	            		MeasurementProcessors_Pause();
+	            }
+	        });        
+	        //.
+			TAsyncProcessing Processing = new TAsyncProcessing(this,getString(R.string.SLoading)) {
+				
+				private TObjectModel _ObjectModel = null; 
+				private THistory _History = null;
+				
+				@Override
+				public boolean ProcessIsIndeterminate() {
+					return false;
+				}
+				
+				@Override
+				public void Process() throws Exception {
+					try {
+						TCoGeoMonitorObject Object = new TCoGeoMonitorObject(UserAgent.Server, ObjectID);
 						//.
-						if (ObjectModelID != 0) {
-							_ObjectModel = TObjectModel.GetObjectModel(ObjectModelID);
-							if (_ObjectModel != null) {
-								_ObjectModel.SetBusinessModel(BusinessModelID);
-								//.
-								TGeographServerObjectController GSOC = Object.GeographServerObjectController();
-								synchronized (GSOC) {
-									boolean flKeepConnectionLast = GSOC.KeepConnection();
-									try {
-										GSOC.Connect();
+						byte[] ObjectModelData = Object.GetData(1000001);
+						if (ObjectModelData != null) {
+		    				Canceller.Check();
+		    				//.
+							int Idx = 0;
+							int ObjectModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+							int BusinessModelID = TDataConverter.ConvertLEByteArrayToInt32(ObjectModelData,Idx); Idx+=4;
+							//.
+							if (ObjectModelID != 0) {
+								_ObjectModel = TObjectModel.GetObjectModel(ObjectModelID);
+								if (_ObjectModel != null) {
+									_ObjectModel.SetBusinessModel(BusinessModelID);
+									//.
+									TGeographServerObjectController GSOC = Object.GeographServerObjectController();
+									synchronized (GSOC) {
+										boolean flKeepConnectionLast = GSOC.KeepConnection();
 										try {
-						    				Canceller.Check();
-						    				//.
-											byte[] ObjectSchemaData = GSOC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
-											//.
-											DoOnProgress(10);
-											//.
-						    				Canceller.Check();
-						    				//.
-											if (ObjectSchemaData != null)
-												_ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
-											//.
-											byte[] ObjectDeviceSchemaData = GSOC.Component_ReadAllCUAC(new int[] {2/*device side*/});
-											//.
-											DoOnProgress(20);
-											//.
-						    				Canceller.Check();
-						    				//.
-											if (ObjectDeviceSchemaData != null)
-												_ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
-											//.
-											_ObjectModel.SetObjectController(GSOC, false);
-											TObjectHistoryRecords _HistoryRecords = _ObjectModel.History_GetRecords(DayDate,DaysCount, context);
-											//.
-											DoOnProgress(60);
-											//.
-						    				Canceller.Check();
-											//.
-											TSensorMeasurementDescriptor[] _SensorMeasurements = _ObjectModel.Sensors_Measurements_GetList(DayDate, DayDate+DaysCount, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, Canceller);
-											//.
-											DoOnProgress(80);
-											//.
-						    				Canceller.Check();
-											//.
-											_History = new THistory(TObjectModelHistoryPanel.this, _ObjectModel.ObjectDatumID(), _HistoryRecords, _SensorMeasurements);
-											//.
-											DoOnProgress(100);
+											GSOC.Connect();
+											try {
+							    				Canceller.Check();
+							    				//.
+												byte[] ObjectSchemaData = GSOC.Component_ReadAllCUAC(new int[] {1}/*object side*/);
+												//.
+												DoOnProgress(10);
+												//.
+							    				Canceller.Check();
+							    				//.
+												if (ObjectSchemaData != null)
+													_ObjectModel.ObjectSchema.RootComponent.FromByteArray(ObjectSchemaData,new TIndex());
+												//.
+												byte[] ObjectDeviceSchemaData = GSOC.Component_ReadAllCUAC(new int[] {2/*device side*/});
+												//.
+												DoOnProgress(20);
+												//.
+							    				Canceller.Check();
+							    				//.
+												if (ObjectDeviceSchemaData != null)
+													_ObjectModel.ObjectDeviceSchema.RootComponent.FromByteArray(ObjectDeviceSchemaData,new TIndex());
+												//.
+												_ObjectModel.SetObjectController(GSOC, false);
+												TObjectHistoryRecords _HistoryRecords = _ObjectModel.History_GetRecords(DayDate,DaysCount, context);
+												//.
+												DoOnProgress(60);
+												//.
+							    				Canceller.Check();
+												//.
+												TSensorMeasurementDescriptor[] _SensorMeasurements = _ObjectModel.Sensors_Measurements_GetList(DayDate, DayDate+DaysCount, GeographDataServerAddress,GeographDataServerPort, TObjectModelHistoryPanel.this, Canceller);
+												//.
+												DoOnProgress(80);
+												//.
+							    				Canceller.Check();
+												//.
+												_History = new THistory(TObjectModelHistoryPanel.this, _ObjectModel.ObjectDatumID(), _HistoryRecords, _SensorMeasurements);
+												//.
+												DoOnProgress(100);
+											}
+											finally {
+												GSOC.Disconnect();
+											}
 										}
 										finally {
-											GSOC.Disconnect();
+											GSOC.Connection_flKeepAlive = flKeepConnectionLast;
 										}
-									}
-									finally {
-										GSOC.Connection_flKeepAlive = flKeepConnectionLast;
 									}
 								}
 							}
 						}
 					}
+					catch (Exception E) {
+						if (_ObjectModel != null)
+							_ObjectModel.Destroy();
+						throw E; //. =>
+					}
 				}
-				catch (Exception E) {
-					if (_ObjectModel != null)
-						_ObjectModel.Destroy();
-					throw E; //. =>
-				}
-			}
-			
-			@Override 
-			public void DoOnCompleted() throws Exception {
-				if (!flExists)
-					return; //. ->
-				//.
-				ObjectModel = _ObjectModel;
-				History = _History;
-				//.
-				if (History.Records.ObjectModelRecords.size() > 0) {
-					int Width = TimeIntervalSlider.Width;
-					if (Width == 0)
-						Width = 1024;
-					double TimeResolution = (History.EndTimestamp-History.BeginTimestamp)/Width;
-					if (TimeResolution == 0.0)
-						TimeResolution = 1.0/1024;
-			        TimeIntervalSlider.Setup(TObjectModelHistoryPanel.this, History.EndTimestamp, TimeResolution, History.BeginTimestamp,History.EndTimestamp, History.TimeIntervalSliderTimeMarks,History.TimeIntervalSliderTimeIntervalMarks, new TTimeIntervalSlider.TOnTimeChangeHandler() {
+				
+				@Override 
+				public void DoOnCompleted() throws Exception {
+					if (!flExists)
+						return; //. ->
+					//.
+					ObjectModel = _ObjectModel;
+					History = _History;
+					//.
+					if (History.Records.ObjectModelRecords.size() > 0) {
+						int Width = TimeIntervalSlider.Width;
+						if (Width == 0)
+							Width = 1024;
+						double TimeResolution = (History.EndTimestamp-History.BeginTimestamp)/Width;
+						if (TimeResolution == 0.0)
+							TimeResolution = 1.0/1024;
+				        TimeIntervalSlider.Setup(TObjectModelHistoryPanel.this, History.EndTimestamp, TimeResolution, History.BeginTimestamp,History.EndTimestamp, History.TimeIntervalSliderTimeMarks,History.TimeIntervalSliderTimeIntervalMarks, new TTimeIntervalSlider.TOnTimeChangeHandler() {
 
-			        	@Override
-			        	public void DoOnTimeChanging(double Time, boolean flChanging, boolean flDelayAllowed) {
-			        		if (!lvBusinessModelRecords_flUpdating) {
-				        		int ItemIndex = History.Records.BusinessModelRecords_GetNearestItemToTimestamp(Time);
-				        		if (ItemIndex >= 0) {
-				        			ItemIndex = History.BusinessModelRecords.length-ItemIndex-1;
-				        			//.
-				        			lvBusinessModelRecords.setItemChecked(ItemIndex, true);
-				        			lvBusinessModelRecords.setSelection(ItemIndex);
-				        			//.
-				        			lvBusinessModelRecords_SetSelectedItem(ItemIndex, false);
+				        	@Override
+				        	public void DoOnTimeChanging(double Time, boolean flChanging, boolean flDelayAllowed) {
+				        		if (!lvBusinessModelRecords_flUpdating) {
+					        		int ItemIndex = History.Records.BusinessModelRecords_GetNearestItemToTimestamp(Time);
+					        		if (ItemIndex >= 0) {
+					        			ItemIndex = History.BusinessModelRecords.length-ItemIndex-1;
+					        			//.
+					        			lvBusinessModelRecords.setItemChecked(ItemIndex, true);
+					        			lvBusinessModelRecords.setSelection(ItemIndex);
+					        			//.
+					        			lvBusinessModelRecords_SetSelectedItem(ItemIndex, false);
+					        		}
 				        		}
-			        		}
-			        		//.
-			        		if (cbShowUserActivitiesComponentList.isChecked() && !UserActivitiesComponentList_flUpdating)
-				        		try {
-				        			UserActivitiesComponentList_SetCurrentTime(Time, (flDelayAllowed ? UserActivitiesComponentList_SetPositionDelay : 0));
-								} catch (Exception E) {
-									Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-								}
-			        		//.
-			        		if (cbShowReflector.isChecked())
-				        		try {
-									ObjectTrackViewer_SetCurrentTime(Time, (flDelayAllowed ? ObjectTrackViewer_SetPositionDelay : 0));
-								} catch (Exception E) {
-									Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-								}
-			        		//.
-							if (MeasurementProcessors_flEnabled || (MeasurementProcessors_VisibleCounter > 0)) 
-								try {
-									MeasurementProcessors_SetCurrentTime(Time, (flChanging || !Animation_IsAllowedAtTheMoment()), (flDelayAllowed ? MeasurementProcessor_SetPositionDelay : 0));			        		
-								} catch (Exception E) {
-									Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-								}
-			        	}
-			        });
-				}
-				//.
-				lvBusinessModelRecords_Adapter = new ArrayAdapter<String>(TObjectModelHistoryPanel.this, android.R.layout.simple_list_item_1, History.BusinessModelRecords) {
+				        		//.
+				        		if (cbShowUserActivitiesComponentList.isChecked() && !UserActivitiesComponentList_flUpdating)
+					        		try {
+					        			UserActivitiesComponentList_SetCurrentTime(Time, (flDelayAllowed ? UserActivitiesComponentList_SetPositionDelay : 0));
+									} catch (Exception E) {
+										Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+				        		//.
+				        		if (cbShowReflector.isChecked())
+					        		try {
+										ObjectTrackViewer_SetCurrentTime(Time, (flDelayAllowed ? ObjectTrackViewer_SetPositionDelay : 0));
+									} catch (Exception E) {
+										Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+				        		//.
+								if (MeasurementProcessors_flEnabled || (MeasurementProcessors_VisibleCounter > 0)) 
+									try {
+										MeasurementProcessors_SetCurrentTime(Time, (flChanging || !Animation_IsAllowedAtTheMoment()), (flDelayAllowed ? MeasurementProcessor_SetPositionDelay : 0));			        		
+									} catch (Exception E) {
+										Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+									}
+				        	}
+				        });
+					}
+					//.
+					lvBusinessModelRecords_Adapter = new ArrayAdapter<String>(TObjectModelHistoryPanel.this, android.R.layout.simple_list_item_1, History.BusinessModelRecords) {
 
-			        @Override
-			        public View getView(int position, View convertView, ViewGroup parent) {
-			            TextView view = (TextView) super.getView(position, convertView, parent);
-			            if (view != null) {
-			                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16); 
-			                view.setText(History.BusinessModelRecords[position]);
-		                    if (lvBusinessModelRecords_SelectedIndex == position) 
-		                        view.setBackgroundColor(getContext().getResources().getColor(android.R.color.holo_blue_dark));
-		                    else {
-		                    	int ItemColor = History.Records.BusinessModelRecords.get(History.BusinessModelRecords.length-position-1).GetSeverityColor();
-		                    	if (ItemColor == Color.TRANSPARENT)
-		                    		ItemColor = getContext().getResources().getColor(android.R.color.white);
-		                        view.setBackgroundColor(ItemColor);
-		                    }
-			                view.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, (int)(view.getTextSize()*1.5)));
-			            }
-			            return view;
-			        }
-			    };
-				lvBusinessModelRecords.setAdapter(lvBusinessModelRecords_Adapter);
-				//.
-		        if (flBigScreen)
-		        	try {
-                		MeasurementProcessors_Initialize();
-                		//.
-		        		if (UserActivitiesComponentList_IsAvailable())
-		        			UserActivitiesComponentList_Initialize();
-		        		else
-		                	cbShowUserActivitiesComponentList.setEnabled(false);
-		    		} catch (Exception E) {
-		    			Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-		    			//.
-		    			finish();
-		    			//.
-		    			return; //. ->
-		    		}
-			}
-			
-			@Override
-			public void DoOnCancelIsOccured() {
-				TObjectModelHistoryPanel.this.finish();
-			}
-			
-			@Override
-			public void DoOnException(Exception E) {
-				String S = E.getMessage();
-				if (S == null)
-					S = E.getClass().getName();
-				Toast.makeText(TObjectModelHistoryPanel.this, S, Toast.LENGTH_LONG).show();
-				//.
-				finish();
-			}
-		};
-		Processing.Start();
-		//.
-		flExists = true;
+				        @Override
+				        public View getView(int position, View convertView, ViewGroup parent) {
+				            TextView view = (TextView) super.getView(position, convertView, parent);
+				            if (view != null) {
+				                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP,16); 
+				                view.setText(History.BusinessModelRecords[position]);
+			                    if (lvBusinessModelRecords_SelectedIndex == position) 
+			                        view.setBackgroundColor(getContext().getResources().getColor(android.R.color.holo_blue_dark));
+			                    else {
+			                    	int ItemColor = History.Records.BusinessModelRecords.get(History.BusinessModelRecords.length-position-1).GetSeverityColor();
+			                    	if (ItemColor == Color.TRANSPARENT)
+			                    		ItemColor = getContext().getResources().getColor(android.R.color.white);
+			                        view.setBackgroundColor(ItemColor);
+			                    }
+				                view.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, (int)(view.getTextSize()*1.5)));
+				            }
+				            return view;
+				        }
+				    };
+					lvBusinessModelRecords.setAdapter(lvBusinessModelRecords_Adapter);
+					//.
+			        if (flBigScreen)
+			        	try {
+	                		MeasurementProcessors_Initialize();
+	                		//.
+			        		if (UserActivitiesComponentList_IsAvailable())
+			        			UserActivitiesComponentList_Initialize();
+			        		else
+			                	cbShowUserActivitiesComponentList.setEnabled(false);
+			    		} catch (Exception E) {
+			    			Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			    			//.
+			    			finish();
+			    			//.
+			    			return; //. ->
+			    		}
+				}
+				
+				@Override
+				public void DoOnCancelIsOccured() {
+					TObjectModelHistoryPanel.this.finish();
+				}
+				
+				@Override
+				public void DoOnException(Exception E) {
+					String S = E.getMessage();
+					if (S == null)
+						S = E.getClass().getName();
+					Toast.makeText(TObjectModelHistoryPanel.this, S, Toast.LENGTH_LONG).show();
+					//.
+					finish();
+				}
+			};
+			Processing.Start();
+			//.
+			flExists = true;
+		} catch (Exception E) {
+			Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+			finish();
+		}
     }
     
     @Override

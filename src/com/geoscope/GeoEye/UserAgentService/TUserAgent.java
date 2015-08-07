@@ -45,7 +45,9 @@ public class TUserAgent {
     	CreateUserAgent(context);
     }
     
-    public static synchronized TUserAgent GetUserAgent() {
+    public static synchronized TUserAgent GetUserAgent(Context context) throws Exception {
+    	if (UserAgent == null)
+    		UserAgent = new TUserAgent(context);
     	return UserAgent;
     }
     

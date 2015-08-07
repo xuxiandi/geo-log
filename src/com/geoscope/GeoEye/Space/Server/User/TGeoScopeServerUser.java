@@ -2378,7 +2378,7 @@ public class TGeoScopeServerUser {
     				public void run() {
 						try {
 	    					try {
-	        					TTracker Tracker = TTracker.GetTracker();
+	        					TTracker Tracker = TTracker.GetTracker(User.Server.context.getApplicationContext());
 								TUserLocation UserLocation = new TUserLocation();
 	        					if (Tracker != null) {
 	        						TGPSModule GPSModule = Tracker.GeoLog.GPSModule;

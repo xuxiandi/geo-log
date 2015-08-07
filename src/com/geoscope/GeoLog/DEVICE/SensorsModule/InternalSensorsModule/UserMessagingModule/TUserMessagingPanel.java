@@ -280,10 +280,10 @@ public class TUserMessagingPanel extends Activity {
                 return; //. ->
         	}
         	//.
-			UserAgent = TUserAgent.GetUserAgent();
+			UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
 			if (UserAgent == null)
 				throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
-	    	Tracker = TTracker.GetTracker();
+	    	Tracker = TTracker.GetTracker(this.getApplicationContext());
 	    	if (Tracker == null)
 	    		throw new Exception(getString(R.string.STrackerIsNotInitialized)); //. =>
 	    	UserMessagingModule = Tracker.GeoLog.SensorsModule.InternalSensorsModule.UserMessagingModule;

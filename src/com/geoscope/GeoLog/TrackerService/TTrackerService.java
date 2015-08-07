@@ -65,14 +65,13 @@ public class TTrackerService extends Service {
 				while (!flCancel) {
 					Thread.sleep(CheckingInterval);
 					//.
-					TTracker Tracker = TTracker.GetTracker();
-					if (Tracker != null)
-						try {
-							Tracker.Check();
-						}
-						catch (Exception E) {
-							TTracker.RestartTracker(TTrackerService.this);
-						}
+					try {
+						TTracker Tracker = TTracker.GetTracker(TTrackerService.this);
+						Tracker.Check();
+					}
+					catch (Exception E) {
+						TTracker.RestartTracker(TTrackerService.this);
+					}
 				}
 			}
 			catch (InterruptedException E) {

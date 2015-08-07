@@ -302,7 +302,7 @@ public class TReflectorConfigurationPanel extends Activity {
             	try {
             		TReflectorConfigurationPanel.this.finish();
             		//.
-            		TTracker Tracker = TTracker.GetTracker();
+            		TTracker Tracker = TTracker.GetTracker(TReflectorConfigurationPanel.this.getApplicationContext());
             		if (Tracker != null)
             			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TReflectorConfigurationPanel.this);
             	}
@@ -322,7 +322,7 @@ public class TReflectorConfigurationPanel extends Activity {
             	if (flUpdating) 
             		return; //. ->
             	try {
-            		TTracker Tracker = TTracker.GetTracker();
+            		TTracker Tracker = TTracker.GetTracker(TReflectorConfigurationPanel.this.getApplicationContext());
             		if (Tracker != null)
             			Tracker.GeoLog.DataStreamerModule.ShowPropsPanel(TReflectorConfigurationPanel.this);
             	}
@@ -1052,7 +1052,7 @@ public class TReflectorConfigurationPanel extends Activity {
 					if (flShowProgress)
 						MessageHandler.obtainMessage(MESSAGE_PROGRESSBAR_SHOW).sendToTarget();
 	    			try {
-	    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+	    				TUserAgent UserAgent = TUserAgent.GetUserAgent(TReflectorConfigurationPanel.this.getApplicationContext());
 	    				if (UserAgent == null)
 	    					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 	    				UserCurrentActivity = UserAgent.Server.User.GetUserCurrentActivity();

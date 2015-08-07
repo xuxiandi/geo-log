@@ -584,10 +584,10 @@ public class TVideoRecorderServerViewUDPRTP extends TVideoRecorderServerView {
 	private TLANConnectionUDPRepeater	VideoLocalServer = null;
 	private TVideoClient				VideoClient = null;
 	
-    public TVideoRecorderServerViewUDPRTP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, int pAudioDestination, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer, ImageView pivAudioOnly) {
+    public TVideoRecorderServerViewUDPRTP(Context pcontext, String pGeographProxyServerAddress, int pGeographProxyServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, boolean pflAudio, int pAudioDestination, boolean pflVideo, String pUserAccessKey, TExceptionHandler pExceptionHandler, TextView plbVideoRecorderServer, ImageView pivAudioOnly) throws Exception {
     	super(pcontext, pGeographProxyServerAddress,pGeographProxyServerPort, pUserID,pUserPassword, pObject, pflAudio,pAudioDestination, pflVideo, pUserAccessKey, pExceptionHandler, plbVideoRecorderServer,pivAudioOnly);
 		if (GeographProxyServerPort == TUDPEchoServerClient.ServerDefaultPort) {
-	    	TTracker Tracker = TTracker.GetTracker();
+	    	TTracker Tracker = TTracker.GetTracker(pcontext.getApplicationContext());
 	    	if (Tracker != null) {
 	    		try {
 					TGeographProxyServerClient.TServerInfo GPSI = Tracker.GeoLog.ConnectorModule.GetGeographProxyServerInfo();

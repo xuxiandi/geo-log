@@ -472,7 +472,7 @@ public class TReflectorComponent extends TUIComponent {
 				else
 					GeoLog_flHide = false;
 				// .
-				TTracker Tracker = TTracker.GetTracker();
+				TTracker Tracker = TTracker.GetTracker(context.getApplicationContext());
 				if (Tracker != null) {
 					if (Tracker.GeoLog.ConnectorModule != null) {
 						GeoLog_QueueTransmitInterval = (int) (Tracker.GeoLog.ConnectorModule.TransmitInterval / 1000);
@@ -798,7 +798,7 @@ public class TReflectorComponent extends TUIComponent {
 			//. validate tracker
 			try {
 				// . set tracker configuration as well
-				TTracker Tracker = TTracker.GetTracker();
+				TTracker Tracker = TTracker.GetTracker(context.getApplicationContext());
 				if (Tracker != null) {
 					Tracker.GeoLog.Stop();
 					//.
@@ -1202,7 +1202,7 @@ public class TReflectorComponent extends TUIComponent {
 		private void Tasks_OpenTaskPanel(
 				TGeoScopeServerUser.TUserTaskStatusCommandMessage pMessage)
 				throws Exception {
-			TTracker Tracker = TTracker.GetTracker();
+			TTracker Tracker = TTracker.GetTracker(context.getApplicationContext());
 			if (Tracker == null)
 				throw new Exception(
 						context.getString(R.string.STrackerIsNotInitialized)); // . =>
@@ -3035,11 +3035,15 @@ public class TReflectorComponent extends TUIComponent {
 			} catch (CancelException CE) {
 			} catch (TimeIsExpiredException TES) {
 			} catch (Throwable TE) {
-				TTracker Tracker = TTracker.GetTracker();
-				if (Tracker != null)
-					Tracker.GeoLog.Log.WriteError(
-							"UserAgent.Reflector.WorkSpace.DrawOnCanvas()",
-							TE.getMessage());
+				TTracker Tracker;
+				try {
+					Tracker = TTracker.GetTracker(Reflector.context.getApplicationContext());
+					if (Tracker != null)
+						Tracker.GeoLog.Log.WriteError(
+								"UserAgent.Reflector.WorkSpace.DrawOnCanvas()",
+								TE.getMessage());
+				} catch (Exception E) {
+				}
 			}
 		}
 
@@ -7546,7 +7550,7 @@ public class TReflectorComponent extends TUIComponent {
 					byte[] TaskData = (byte[]) msg.obj;
 					// .
 					try {
-						TTracker Tracker = TTracker.GetTracker();
+						TTracker Tracker = TTracker.GetTracker(ParentActivity.getApplicationContext());
 						if (Tracker == null)
 							throw new Exception(
 									context.getString(R.string.STrackerIsNotInitialized)); // .
@@ -7632,7 +7636,7 @@ public class TReflectorComponent extends TUIComponent {
 		Configuration.Load();
 		// . Initialize User
 		try {
-			Server = TUserAgent.GetUserAgent().Server;
+			Server = TUserAgent.GetUserAgent(ParentActivity.getApplicationContext()).Server;
 			// . re-initialize server info later
 			Server.Info.Finalize();
 			// .
@@ -9129,7 +9133,7 @@ public class TReflectorComponent extends TUIComponent {
 		TGPSFixValue Fix;
 		TXYCoord Crd = new TXYCoord();
 		try {
-			Fix = TTracker.GetTracker().GeoLog.GPSModule.GetCurrentFix();
+			Fix = TTracker.GetTracker(context.getApplicationContext()).GeoLog.GPSModule.GetCurrentFix();
 			if (!Fix.IsSet()) {
 				Toast.makeText(context, R.string.SCurrentPositionIsUnavailable,
 						Toast.LENGTH_SHORT).show();
@@ -9253,7 +9257,7 @@ public class TReflectorComponent extends TUIComponent {
 			
 			@Override
 			public void Process() throws Exception {
-		    	TTracker Tracker = TTracker.GetTracker();
+		    	TTracker Tracker = TTracker.GetTracker(context.getApplicationContext());
 		    	if (Tracker == null)
 		    		throw new Exception(context.getString(R.string.STrackerIsNotInitialized)); //. =>
 		    	//.
@@ -9469,7 +9473,7 @@ public class TReflectorComponent extends TUIComponent {
 
 			@Override
 			public void Process() throws Exception {
-		    	TTracker Tracker = TTracker.GetTracker();
+		    	TTracker Tracker = TTracker.GetTracker(context.getApplicationContext());
 		    	if (Tracker == null)
 		    		throw new Exception(context.getString(R.string.STrackerIsNotInitialized)); //. =>
 		    	//.

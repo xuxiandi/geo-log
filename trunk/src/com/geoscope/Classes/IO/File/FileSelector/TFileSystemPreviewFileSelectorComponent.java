@@ -1063,10 +1063,16 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
 		            	if (progressDialog.isShowing()) {
 	           		 		if (Parent instanceof Activity) {
 	    		                if (!((Activity)Parent).isFinishing()) 
-	    		                	progressDialog.dismiss();
+	    		                	try {
+	    			                	progressDialog.dismiss(); 
+	    		                	}
+	    		                	catch (IllegalArgumentException IAE) {} 
 	           		 		}
 	           		 		else
-			                	progressDialog.dismiss(); 
+			                	try {
+				                	progressDialog.dismiss(); 
+			                	}
+			                	catch (IllegalArgumentException IAE) {} 
 		            	}
 		            	//.
 		            	break; //. >

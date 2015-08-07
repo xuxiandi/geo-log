@@ -581,7 +581,10 @@ public class TUserListComponent extends TUIComponent {
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
 		                if ((!ParentActivity.isFinishing()) && progressDialog.isShowing()) 
-		                	progressDialog.dismiss(); 
+		                	try {
+			                	progressDialog.dismiss(); 
+		                	}
+		                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            

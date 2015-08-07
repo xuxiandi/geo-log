@@ -1075,7 +1075,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	                	try {
 		                	progressDialog.dismiss(); 
 	                	}
-	                	catch (IllegalArgumentException IAE) {} //. TODO
+	                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            
@@ -1383,7 +1383,7 @@ public class TComponentTypedDataFilesPanel extends Activity {
 	                	try {
 		                	progressDialog.dismiss(); 
 	                	}
-	                	catch (IllegalArgumentException IAE) {} //. TODO
+	                	catch (IllegalArgumentException IAE) {} 
 						// .
 						break; // . >
 

@@ -1683,7 +1683,10 @@ public class TUserMessagingPanel extends Activity {
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		            	progressDialog.dismiss(); 
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            

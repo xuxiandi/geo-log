@@ -2158,7 +2158,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
 		                if ((!isFinishing()) && progressDialog.isShowing()) 
-		                	progressDialog.dismiss(); 
+		                	try {
+			                	progressDialog.dismiss(); 
+		                	}
+		                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            
@@ -2274,7 +2277,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
 		                if ((!isFinishing()) && progressDialog.isShowing()) 
-		                	progressDialog.dismiss(); 
+		                	try {
+			                	progressDialog.dismiss(); 
+		                	}
+		                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            
@@ -2390,7 +2396,10 @@ public class TReflectionWindowEditorPanel extends Activity implements OnTouchLis
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		            	progressDialog.dismiss(); 
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            

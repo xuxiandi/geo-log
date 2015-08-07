@@ -725,7 +725,7 @@ public class TVideoRecorderServerArchive extends Activity {
 		                	try {
 			                	progressDialog.dismiss(); 
 		                	}
-		                	catch (IllegalArgumentException IAE) {} //. TODO
+		                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            
@@ -991,7 +991,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	                	try {
 		                	progressDialog.dismiss(); 
 	                	}
-	                	catch (IllegalArgumentException IAE) {} //. TODO
+	                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            
@@ -1182,7 +1182,7 @@ public class TVideoRecorderServerArchive extends Activity {
 	                	try {
 		                	progressDialog.dismiss(); 
 	                	}
-	                	catch (IllegalArgumentException IAE) {} //. TODO
+	                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            

@@ -468,7 +468,10 @@ public class TTrackerPanel extends Activity {
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
 		                if (progressDialog.isShowing()) 
-		                	progressDialog.dismiss(); 
+		                	try {
+			                	progressDialog.dismiss(); 
+		                	}
+		                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            
@@ -588,7 +591,10 @@ public class TTrackerPanel extends Activity {
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
 		                if (context.flVisible && progressDialog.isShowing()) 
-		                	progressDialog.dismiss(); 
+		                	try {
+			                	progressDialog.dismiss(); 
+		                	}
+		                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            

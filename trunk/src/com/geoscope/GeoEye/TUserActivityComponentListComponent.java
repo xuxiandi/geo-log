@@ -1513,7 +1513,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		                	try {
 			                	progressDialog.dismiss(); 
 		                	}
-		                	catch (IllegalArgumentException IAE) {} //. TODO
+		                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            
@@ -1876,7 +1876,7 @@ public class TUserActivityComponentListComponent extends TUIComponent {
 		                	try {
 			                	progressDialog.dismiss(); 
 		                	}
-		                	catch (IllegalArgumentException IAE) {} //. TODO
+		                	catch (IllegalArgumentException IAE) {} 
 						// .
 						break; // . >
 

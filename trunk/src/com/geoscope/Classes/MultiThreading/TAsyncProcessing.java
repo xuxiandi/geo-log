@@ -209,12 +209,11 @@ public class TAsyncProcessing extends TCancelableThread {
                 	break; //. >
 
                 case MESSAGE_PROGRESSBAR_HIDE:
-                	try {
-                    	if ((progressDialog != null) && progressDialog.isShowing())
-                    		progressDialog.dismiss(); 
-                	}
-                	catch (Exception Ex) {
-                	}
+                	if ((progressDialog != null) && progressDialog.isShowing())
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} 
                 	//.
                 	break; //. >
                 

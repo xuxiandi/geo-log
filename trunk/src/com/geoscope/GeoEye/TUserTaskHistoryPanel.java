@@ -424,7 +424,10 @@ public class TUserTaskHistoryPanel extends Activity {
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
 		                if ((!isFinishing()) && progressDialog.isShowing()) 
-		                	progressDialog.dismiss(); 
+		                	try {
+			                	progressDialog.dismiss(); 
+		                	}
+		                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            
@@ -541,7 +544,10 @@ public class TUserTaskHistoryPanel extends Activity {
 
 	            case MESSAGE_PROGRESSBAR_HIDE:
 	                if ((!isFinishing()) && progressDialog.isShowing()) 
-	                	progressDialog.dismiss(); 
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} 
 	            	//.
 	            	break; //. >
 	            

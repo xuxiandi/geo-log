@@ -266,7 +266,10 @@ public class TNewUserRegistrationPanel extends Activity {
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		            	progressDialog.dismiss(); 
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            
@@ -366,7 +369,10 @@ public class TNewUserRegistrationPanel extends Activity {
 		            	break; //. >
 
 		            case MESSAGE_PROGRESSBAR_HIDE:
-		            	progressDialog.dismiss(); 
+	                	try {
+		                	progressDialog.dismiss(); 
+	                	}
+	                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            

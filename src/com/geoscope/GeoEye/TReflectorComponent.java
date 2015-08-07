@@ -4603,7 +4603,7 @@ public class TReflectorComponent extends TUIComponent {
 	                	try {
 		                	progressDialog.dismiss(); 
 	                	}
-	                	catch (IllegalArgumentException IAE) {} //. TODO
+	                	catch (IllegalArgumentException IAE) {} 
 						// .
 						break; // . >
 
@@ -4827,7 +4827,7 @@ public class TReflectorComponent extends TUIComponent {
 	                	try {
 		                	progressDialog.dismiss(); 
 	                	}
-	                	catch (IllegalArgumentException IAE) {} //. TODO
+	                	catch (IllegalArgumentException IAE) {} 
 						// .
 						break; // . >
 
@@ -5120,7 +5120,7 @@ public class TReflectorComponent extends TUIComponent {
 	                	try {
 		                	progressDialog.dismiss(); 
 	                	}
-	                	catch (IllegalArgumentException IAE) {} //. TODO
+	                	catch (IllegalArgumentException IAE) {} 
 						// .
 						break; // . >
 
@@ -5988,7 +5988,7 @@ public class TReflectorComponent extends TUIComponent {
 		                	try {
 			                	progressDialog.dismiss(); 
 		                	}
-		                	catch (IllegalArgumentException IAE) {} //. TODO
+		                	catch (IllegalArgumentException IAE) {} 
 							//.
 							break; // . >
 							
@@ -7594,7 +7594,7 @@ public class TReflectorComponent extends TUIComponent {
                 	try {
 	                	progressDialog.dismiss(); 
                 	}
-                	catch (IllegalArgumentException IAE) {} //. TODO
+                	catch (IllegalArgumentException IAE) {} 
 					// .
 					break; // . >
 
@@ -8710,7 +8710,7 @@ public class TReflectorComponent extends TUIComponent {
 	                	try {
 		                	progressDialog.dismiss(); 
 	                	}
-	                	catch (IllegalArgumentException IAE) {} //. TODO
+	                	catch (IllegalArgumentException IAE) {} 
 						// .
 						break; // . >
 

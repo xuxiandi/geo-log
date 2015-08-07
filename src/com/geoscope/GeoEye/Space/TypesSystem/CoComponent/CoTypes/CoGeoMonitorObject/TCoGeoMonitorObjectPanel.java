@@ -331,7 +331,7 @@ public class TCoGeoMonitorObjectPanel extends Activity {
 	                	try {
 		                	progressDialog.dismiss(); 
 	                	}
-	                	catch (IllegalArgumentException IAE) {} //. TODO
+	                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            

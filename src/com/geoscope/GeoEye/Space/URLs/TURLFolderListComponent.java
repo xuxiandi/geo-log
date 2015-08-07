@@ -1446,7 +1446,7 @@ public class TURLFolderListComponent extends TUIComponent {
 	                	try {
 		                	progressDialog.dismiss(); 
 	                	}
-	                	catch (IllegalArgumentException IAE) {} //. TODO
+	                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            
@@ -1755,7 +1755,7 @@ public class TURLFolderListComponent extends TUIComponent {
 	                	try {
 		                	progressDialog.dismiss(); 
 	                	}
-	                	catch (IllegalArgumentException IAE) {} //. TODO
+	                	catch (IllegalArgumentException IAE) {} 
 		            	//.
 		            	break; //. >
 		            

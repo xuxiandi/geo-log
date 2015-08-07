@@ -16,7 +16,6 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 	public static class TStatisticHandler {
 		
 		public void DoOnVideoBuffer(int VideoBuffersCount) {
-			
 		}
 	}
 	

@@ -1,7 +1,6 @@
 package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.geoscope.Classes.MultiThreading.TCanceller;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.CoTypes.CoGeoMonitorObject.TCoGeoMonitorObject;
@@ -15,13 +14,22 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitore
 
 public class TH264IChannelFlowControl {
 
+	public static class TNotificationHandler {
+		
+		public void DoOnBitrateChange(int Bitrate) {
+		}
+	}
+	
 	private TH264IChannel H264IChannel;
 	//.
 	private TVCTRLChannel ControlChannel = null;
 	private TStreamChannelConnectorAbstract ControlChannelConnector = null;
+	//.
+	private TNotificationHandler NotificationHandler;
 	
-    public TH264IChannelFlowControl(TH264IChannel pH264IChannel, Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler) throws Exception {
+    public TH264IChannelFlowControl(TH264IChannel pH264IChannel, Context pcontext, String pServerAddress, int pServerPort, long pUserID, String pUserPassword, TCoGeoMonitorObject pObject, TOnProgressHandler pOnProgressHandler, TOnIdleHandler pOnIdleHandler, TOnExceptionHandler pOnExceptionHandler, TNotificationHandler pNotificationHandler) throws Exception {
     	H264IChannel = pH264IChannel;
+    	NotificationHandler = pNotificationHandler;
     	//.
     	ControlChannel = new TVCTRLChannel();
     	ControlChannel.ID = 3; //. design defined channel ID of Device.ControlsModule.InternalControlsModule.TVCTRLChannel 
@@ -76,7 +84,8 @@ public class TH264IChannelFlowControl {
     					if ((FillFactor > Check_ReduceBitrateFillFactor) && (FillFactorTrend >= 0.0)) {
     						try {
             					int Bitrate = ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 0.5);
-            					Log.d("VCTRLChannel", "Bitrate down: "+Integer.toString(Bitrate));
+            					if (NotificationHandler != null)
+            						NotificationHandler.DoOnBitrateChange(Bitrate);
             				}
             				catch (com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ValueOutOfRangeError VOORE) {
             				}
@@ -94,7 +103,8 @@ public class TH264IChannelFlowControl {
             						//.
             						try {
             							int Bitrate = ControlChannel.MultiplyChannelBitrate(H264IChannel.ID, 2.0);
-                    					Log.d("VCTRLChannel", "Bitrate up: "+Integer.toString(Bitrate));
+                    					if (NotificationHandler != null)
+                    						NotificationHandler.DoOnBitrateChange(Bitrate);
                     				}
                     				catch (com.geoscope.GeoLog.DEVICE.ControlsModule.InternalControlsModule.Model.Data.ControlStream.Channels.Video.VCTRL.TVCTRLChannel.ValueOutOfRangeError VOORE) {
                     				}

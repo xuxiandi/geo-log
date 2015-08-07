@@ -674,6 +674,19 @@ public class TDataStreamPanel extends Activity {
 		if (Channel instanceof TH264IChannel) {
 			TH264IChannel H264Channel = (TH264IChannel)Channel;
 			//.
+			final EditText edVideoBuffersProcessed = (EditText)findViewById(R.id.edVideoH264BuffersProcessed);
+			//.
+			final LinearLayout llVideoH264Bitrate = (LinearLayout)findViewById(R.id.llVideoH264Bitrate);
+			final EditText edVideoBitrate = (EditText)findViewById(R.id.edVideoH264Bitrate);
+			//.
+			final SurfaceView svVideoH264 = (SurfaceView)findViewById(R.id.svVideoH264);
+			Display display = getWindowManager().getDefaultDisplay();
+			Point size = new Point();
+			display.getSize(size);
+			int height = size.y;
+			RelativeLayout.LayoutParams RLP = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,height);
+			svVideoH264.setLayoutParams(RLP);
+			//.
 			if (Object != null) {
 				TH264IChannelFlowControl H264IChannelFlowControl = new TH264IChannelFlowControl(H264Channel, this, ServerAddress,ServerPort, UserID,UserPassword, Object, new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.ControlsModule.Model.Data.ControlStream.TStreamChannelConnectorAbstract.TOnProgressHandler(H264Channel) {
 					
@@ -693,26 +706,27 @@ public class TDataStreamPanel extends Activity {
 					public void DoOnException(Exception E) {
 						TDataStreamPanel.this.PostException(E);
 					}
+				}, new TH264IChannelFlowControl.TNotificationHandler() {
+					
+					@Override
+					public void DoOnBitrateChange(int Bitrate) {
+						if (Bitrate > 0) {
+							PostTextViewValueMessage(edVideoBitrate,Integer.toString((int)(Bitrate/1024))+" kbps");
+							PostViewShow(llVideoH264Bitrate);
+						}
+						else
+							PostViewGone(llVideoH264Bitrate);
+					}
 				});
 				H264Channel.FlowControl_Initialize(H264IChannelFlowControl);
 			}
-			//.
-			final EditText edVideoBuffersProcessed = (EditText)findViewById(R.id.edVideoH264BuffersProcessed);
-			//.
-			final SurfaceView svVideoH264 = (SurfaceView)findViewById(R.id.svVideoH264);
-			Display display = getWindowManager().getDefaultDisplay();
-			Point size = new Point();
-			display.getSize(size);
-			int height = size.y;
-			RelativeLayout.LayoutParams RLP = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,height);
-			svVideoH264.setLayoutParams(RLP);
 			//.
 			final TH264IChannelProcessor H264ChannelProcessor = (TH264IChannelProcessor)H264Channel.GetProcessor();
 			H264ChannelProcessor.StatisticHandler = new TH264IChannelProcessor.TStatisticHandler() {
 				
 				@Override
-				public void DoOnVideoBuffer(int AudioBuffersCount) {
-					PostTextViewValueMessage(edVideoBuffersProcessed,Integer.toString(AudioBuffersCount));
+				public void DoOnVideoBuffer(int VideoBuffersCount) {
+					PostTextViewValueMessage(edVideoBuffersProcessed,Integer.toString(VideoBuffersCount));
 				}
 			};
 			//.
@@ -741,6 +755,8 @@ public class TDataStreamPanel extends Activity {
 	private static final int MESSAGE_SHOWSTATUSMESSAGE 		= 1;
 	private static final int MESSAGE_DOONDATATYPE			= 2;
 	private static final int MESSAGE_TEXTVIEW_WRITEVALUE	= 3;
+	private static final int MESSAGE_VIEW_SHOW				= 4;
+	private static final int MESSAGE_VIEW_GONE				= 5;
 	
 	public static class TTextViewValueString {
 		
@@ -814,6 +830,24 @@ public class TDataStreamPanel extends Activity {
 					lbStatus.setVisibility(View.GONE);
     				//.
     				break; // . >
+
+    			case MESSAGE_VIEW_SHOW:
+					if (!flExists)
+						break; // . >
+    				View view = (View)msg.obj;
+    				//.
+    				view.setVisibility(View.VISIBLE);
+    				//.
+    				break; // . >
+    				
+    			case MESSAGE_VIEW_GONE:
+					if (!flExists)
+						break; // . >
+    				view = (View)msg.obj;
+    				//.
+    				view.setVisibility(View.GONE);
+    				//.
+    				break; // . >
     			}
         	}
         	catch (Throwable E) {
@@ -836,6 +870,14 @@ public class TDataStreamPanel extends Activity {
 	
 	protected void PostTextViewValueMessage(TextView TW, String Message) {
 		MessageHandler.obtainMessage(MESSAGE_TEXTVIEW_WRITEVALUE,new TTextViewValueString(TW, Message)).sendToTarget();
+	}
+	
+	protected void PostViewShow(View view) {
+		MessageHandler.obtainMessage(MESSAGE_VIEW_SHOW, view).sendToTarget();
+	}
+	
+	protected void PostViewGone(View view) {
+		MessageHandler.obtainMessage(MESSAGE_VIEW_GONE, view).sendToTarget();
 	}
 	
 	private static final int DoOnGPSFixDataType_SkipCounter = 8;

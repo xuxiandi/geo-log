@@ -33,8 +33,7 @@ public class TUserAgent {
 	}    
     
     public static synchronized void FreeUserAgent() {
-    	if (UserAgent != null)
-    	{
+    	if (UserAgent != null) {
     		UserAgent.Destroy();
     		UserAgent = null;
     	}
@@ -45,22 +44,16 @@ public class TUserAgent {
     	CreateUserAgent(context);
     }
     
-    public static synchronized TUserAgent GetUserAgent(Context context) throws Exception {
-    	if (UserAgent == null)
-    		UserAgent = new TUserAgent(context);
-    	return UserAgent;
+    public static TUserAgent GetUserAgent(Context context) throws Exception {
+    	return CreateUserAgent(context);
     }
     
-    public static synchronized TGeoScopeServerUser GetUserAgentUser() {
-    	if (UserAgent == null)
-    		return null; //. ->
-    	return UserAgent.User();
+    public static TGeoScopeServerUser GetUserAgentUser(Context context) throws Exception {
+    	return GetUserAgent(context).User();
     }
     
-    public static synchronized TGeoScopeServer GetUserAgentServer() {
-    	if (UserAgent == null)
-    		return null; //. ->
-    	return UserAgent.Server;
+    public static TGeoScopeServer GetUserAgentServer(Context context) throws Exception {
+    	return GetUserAgent(context).Server;
     }
     
     public static class TConfiguration {
@@ -72,6 +65,7 @@ public class TUserAgent {
     	public boolean 	flUserSession = false;
     	public boolean 	flSecureConnections = false;
     }
+    
     
     private TConfiguration GetConfigurationFromReflector() throws Exception {
     	TConfiguration Result = new TConfiguration();

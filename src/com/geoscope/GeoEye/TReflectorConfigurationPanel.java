@@ -120,223 +120,228 @@ public class TReflectorConfigurationPanel extends Activity {
         //.
         setContentView(R.layout.reflector_configuration_panel);
         //.
-        _TableLayout = (TableLayout)findViewById(R.id.ReflectorConfigurationTableLayout);
-        _TableLayout.setBackgroundColor(Color.blue(100));
-    	edCurrentProfileName = (TextView)findViewById(R.id.edCurrentProfileName);
-    	btnChangeCurrentProfile = (Button)findViewById(R.id.btnChangeCurrentProfile);
-    	btnChangeCurrentProfile.setOnClickListener(new OnClickListener() {
-    		
-    		@Override
-            public void onClick(View v) {
-            	ChangeCurrentProfile();
-            }
-        });
-    	btnCloneCurrentProfile = (Button)findViewById(R.id.btnCloneCurrentProfile);
-    	btnCloneCurrentProfile.setOnClickListener(new OnClickListener() {
-    		
-    		@Override
-            public void onClick(View v) {
-            	CloneCurrentProfile();
-            }
-        });
-        edServerAddress = (TextView)findViewById(R.id.edServerAddress);
-        edUserID = (TextView)findViewById(R.id.edUserID); 
-        edUserName = (TextView)findViewById(R.id.edUserName); 
-        edUserPassword = (TextView)findViewById(R.id.edUserPassword);
-        cbUserSession = (CheckBox)findViewById(R.id.cbUserSession);
-        cbSecureConnections = (CheckBox)findViewById(R.id.cbSecureConnections);
-        //.
-        spGeoSpace = (Spinner)findViewById(R.id.spGeoSpace);
-        String[] GeoSpaceNames = TSystemTGeoSpace.WellKnownGeoSpaces_GetNames();
-        ArrayAdapter<String> saGeoSpace = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, GeoSpaceNames);
-        saGeoSpace.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spGeoSpace.setAdapter(saGeoSpace);
-        //.
-    	cbVoiceCommands = (CheckBox)findViewById(R.id.cbVoiceCommands);
-    	cbVoiceCommands.setVisibility((TGeoLogApplication.VoiceRecognizer_GetFolder() != null) ? View.VISIBLE : View.GONE);
-    	cbHitCommands = (CheckBox)findViewById(R.id.cbHitCommands);
-    	cbHitCommands.setOnClickListener(new OnClickListener(){
-    		
-            @Override
-            public void onClick(View v) {
-            	btnHitCommandsSensitivity.setEnabled(cbHitCommands.isChecked());
-            }
-        });        
-    	btnHitCommandsSensitivity = (Button)findViewById(R.id.btnHitCommandsSensitivity);
-    	btnHitCommandsSensitivity.setOnClickListener(new OnClickListener() {
-    		
-        	@Override
-            public void onClick(View v) {
-        		HitCommands_ShowSensitivityPanel();
-            }
-        });
-    	cbAudioNotifications = (CheckBox)findViewById(R.id.cbAudioNotifications);
-        cbTMSOption = (CheckBox)findViewById(R.id.cbTMSOption);
-    	cbLargeControlButtons = (CheckBox)findViewById(R.id.cbLargeControlButtons);
-    	cbLargeControlButtons.setOnClickListener(new OnClickListener(){
-    		
-            @Override
-            public void onClick(View v) {
-				cbLargeControlButtons_flChanged = true;
-            }
-        });        
-    	cbTrackerHide = (CheckBox)findViewById(R.id.cbTrackerHide);
-    	cbTrackerHide.setOnClickListener(new OnClickListener(){
-    		
-            @Override
-            public void onClick(View v) {
-				cbTrackerHide_flChanged = true;
-            }
-        });        
-    	cbApplicationQuit = (CheckBox)findViewById(R.id.cbApplicationQuit);
-    	cbApplicationQuit.setOnClickListener(new OnClickListener(){
-    		
-            @Override
-            public void onClick(View v) {
-				cbApplicationQuit_flChanged = true;
-            }
-        });        
-        //.
-        btnRegisterNewUser = (Button)findViewById(R.id.btnRegisterNewUser);
-        btnRegisterNewUser.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	RegisterNewClient();
-            }
-        });
-        btnUserCurrentActivity = (Button)findViewById(R.id.btnUserCurrentActivity);
-        btnUserCurrentActivity.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	Intent intent = new Intent(TReflectorConfigurationPanel.this, TUserActivityPanel.class);
-            	startActivityForResult(intent,REQUEST_SETUSERACTIVITY);
-            }
-        });
-        lbContext = (TextView)findViewById(R.id.lbContext);
-        btnClearContext = (Button)findViewById(R.id.btnClearContext);
-        btnClearContext.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	new TContextClearing(true);            
-            }
-        });
-        btnClearReflections = (Button)findViewById(R.id.btnClearReflections);
-        btnClearReflections.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	new TVisualizationsClearing(true);            
-            }
-        });
-        btnSpaceLays = (Button)findViewById(R.id.btnSpaceLays);
-        btnSpaceLays.setVisibility((Component.Configuration.UserID == TGeoScopeServerUser.RootUserID) ? View.VISIBLE : View.GONE);
-        btnSpaceLays.setOnClickListener(new OnClickListener() {
-        	
-        	@Override
-            public void onClick(View v) {
-            	ShowSpaceLays();
-            }
-        });
-        cbUseTrackerService = (CheckBox)findViewById(R.id.cbUseTrackerService);
-        cbUseTrackerService.setOnClickListener(new OnClickListener(){
-        	
-            @Override
-            public void onClick(View v) {
-                boolean checked = ((CheckBox)v).isChecked();
-				try {
-					EnableDisableTrackerItems(checked);
-		    	}
-		    	catch (Exception E) {
-		            Toast.makeText(TReflectorConfigurationPanel.this, getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
-		    	}
-            }
-        });        
-    	cbTrackerServerConnection = (CheckBox)findViewById(R.id.cbTrackerServerConnection);
-    	cbTrackerServerConnection.setOnClickListener(new OnClickListener(){
-    		
-            @Override
-            public void onClick(View v) {
-                boolean checked = ((CheckBox)v).isChecked();
-	    		cbTrackerSaveOpQueue.setEnabled(!checked);
-            }
-        });        
-    	edTrackerServerObjectID = (TextView)findViewById(R.id.edTrackerServerObjectID);
-    	edTrackerServerObjectName = (TextView)findViewById(R.id.edTrackerServerObjectName);
-        btnConstructNewTrackerObject = (Button)findViewById(R.id.btnConstructNewTrackerObject);
-        btnConstructNewTrackerObject.setOnClickListener(new OnClickListener() {
-        	
-			@Override
-            public void onClick(View v) {
-            	ConstructNewTrackerObject();
-            }
-        });
-        edTrackerServerAddress = (TextView)findViewById(R.id.edTrackerServerAddress);
-        edTrackerServerPort = (TextView)findViewById(R.id.edTrackerServerPort);
-    	edTrackerOpQueueTransmitInterval = (TextView)findViewById(R.id.edTrackerOpQueueTransmitInterval);
-    	edTrackerPositionReadInterval = (TextView)findViewById(R.id.edTrackerPositionReadInterval);
-    	//.
-        spPOIMapIDGeoSpace = (Spinner)findViewById(R.id.spPOIMapIDGeoSpace);
-        ArrayAdapter<String> saPOIMapIDGeoSpace = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, GeoSpaceNames);
-        saPOIMapIDGeoSpace.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spPOIMapIDGeoSpace.setAdapter(saPOIMapIDGeoSpace);
-        //.
-    	cbTrackerVideoModuleEnabled = (CheckBox)findViewById(R.id.cbTrackerVideoModuleEnabled);
-    	cbTrackerVideoModuleEnabled.setOnClickListener(new OnClickListener(){
-    		
-            @Override
-            public void onClick(View v) {
-                boolean checked = ((CheckBox)v).isChecked();
-		    	btnTrackerVideoModulePropsPanel.setEnabled(checked);
-            }
-        });        
-    	btnTrackerVideoModulePropsPanel = (Button)findViewById(R.id.btnTrackerVideoModulePropsPanel);
-    	btnTrackerVideoModulePropsPanel.setOnClickListener(new OnClickListener() {
-    		
-    		@Override
-            public void onClick(View v) {
-            	if (flUpdating) 
-            		return; //. ->
-            	try {
-            		TReflectorConfigurationPanel.this.finish();
-            		//.
-            		TTracker Tracker = TTracker.GetTracker(TReflectorConfigurationPanel.this.getApplicationContext());
-            		if (Tracker != null)
-            			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TReflectorConfigurationPanel.this);
-            	}
-            	catch (Exception E) {
-					String S = E.getMessage();
-					if (S == null)
-						S = E.getClass().getName();
-                    Toast.makeText(TReflectorConfigurationPanel.this, S, Toast.LENGTH_LONG).show();
-            	}
-            }
-        });
-    	btnTrackerDataStreamerPropsPanel = (Button)findViewById(R.id.btnTrackerDataStreamerPropsPanel);
-    	btnTrackerDataStreamerPropsPanel.setOnClickListener(new OnClickListener() {
-    		
-    		@Override
-            public void onClick(View v) {
-            	if (flUpdating) 
-            		return; //. ->
-            	try {
-            		TTracker Tracker = TTracker.GetTracker(TReflectorConfigurationPanel.this.getApplicationContext());
-            		if (Tracker != null)
-            			Tracker.GeoLog.DataStreamerModule.ShowPropsPanel(TReflectorConfigurationPanel.this);
-            	}
-            	catch (Exception E) {
-                    Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
-            	}
-            }
-        });
-    	cbTrackerSaveOpQueue = (CheckBox)findViewById(R.id.cbTrackerSaveOpQueue);
-        //.
-        setResult(Activity.RESULT_CANCELED);
-        //.
-        //. StartUpdating();
-        Update();
+		try {
+	        _TableLayout = (TableLayout)findViewById(R.id.ReflectorConfigurationTableLayout);
+	        _TableLayout.setBackgroundColor(Color.blue(100));
+	    	edCurrentProfileName = (TextView)findViewById(R.id.edCurrentProfileName);
+	    	btnChangeCurrentProfile = (Button)findViewById(R.id.btnChangeCurrentProfile);
+	    	btnChangeCurrentProfile.setOnClickListener(new OnClickListener() {
+	    		
+	    		@Override
+	            public void onClick(View v) {
+	            	ChangeCurrentProfile();
+	            }
+	        });
+	    	btnCloneCurrentProfile = (Button)findViewById(R.id.btnCloneCurrentProfile);
+	    	btnCloneCurrentProfile.setOnClickListener(new OnClickListener() {
+	    		
+	    		@Override
+	            public void onClick(View v) {
+	            	CloneCurrentProfile();
+	            }
+	        });
+	        edServerAddress = (TextView)findViewById(R.id.edServerAddress);
+	        edUserID = (TextView)findViewById(R.id.edUserID); 
+	        edUserName = (TextView)findViewById(R.id.edUserName); 
+	        edUserPassword = (TextView)findViewById(R.id.edUserPassword);
+	        cbUserSession = (CheckBox)findViewById(R.id.cbUserSession);
+	        cbSecureConnections = (CheckBox)findViewById(R.id.cbSecureConnections);
+	        //.
+	        spGeoSpace = (Spinner)findViewById(R.id.spGeoSpace);
+	        String[] GeoSpaceNames = TSystemTGeoSpace.WellKnownGeoSpaces_GetNames();
+	        ArrayAdapter<String> saGeoSpace = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, GeoSpaceNames);
+	        saGeoSpace.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	        spGeoSpace.setAdapter(saGeoSpace);
+	        //.
+	    	cbVoiceCommands = (CheckBox)findViewById(R.id.cbVoiceCommands);
+	    	cbVoiceCommands.setVisibility((TGeoLogApplication.VoiceRecognizer_GetFolder() != null) ? View.VISIBLE : View.GONE);
+	    	cbHitCommands = (CheckBox)findViewById(R.id.cbHitCommands);
+	    	cbHitCommands.setOnClickListener(new OnClickListener(){
+	    		
+	            @Override
+	            public void onClick(View v) {
+	            	btnHitCommandsSensitivity.setEnabled(cbHitCommands.isChecked());
+	            }
+	        });        
+	    	btnHitCommandsSensitivity = (Button)findViewById(R.id.btnHitCommandsSensitivity);
+	    	btnHitCommandsSensitivity.setOnClickListener(new OnClickListener() {
+	    		
+	        	@Override
+	            public void onClick(View v) {
+	        		HitCommands_ShowSensitivityPanel();
+	            }
+	        });
+	    	cbAudioNotifications = (CheckBox)findViewById(R.id.cbAudioNotifications);
+	        cbTMSOption = (CheckBox)findViewById(R.id.cbTMSOption);
+	    	cbLargeControlButtons = (CheckBox)findViewById(R.id.cbLargeControlButtons);
+	    	cbLargeControlButtons.setOnClickListener(new OnClickListener(){
+	    		
+	            @Override
+	            public void onClick(View v) {
+					cbLargeControlButtons_flChanged = true;
+	            }
+	        });        
+	    	cbTrackerHide = (CheckBox)findViewById(R.id.cbTrackerHide);
+	    	cbTrackerHide.setOnClickListener(new OnClickListener(){
+	    		
+	            @Override
+	            public void onClick(View v) {
+					cbTrackerHide_flChanged = true;
+	            }
+	        });        
+	    	cbApplicationQuit = (CheckBox)findViewById(R.id.cbApplicationQuit);
+	    	cbApplicationQuit.setOnClickListener(new OnClickListener(){
+	    		
+	            @Override
+	            public void onClick(View v) {
+					cbApplicationQuit_flChanged = true;
+	            }
+	        });        
+	        //.
+	        btnRegisterNewUser = (Button)findViewById(R.id.btnRegisterNewUser);
+	        btnRegisterNewUser.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	            	RegisterNewClient();
+	            }
+	        });
+	        btnUserCurrentActivity = (Button)findViewById(R.id.btnUserCurrentActivity);
+	        btnUserCurrentActivity.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	            	Intent intent = new Intent(TReflectorConfigurationPanel.this, TUserActivityPanel.class);
+	            	startActivityForResult(intent,REQUEST_SETUSERACTIVITY);
+	            }
+	        });
+	        lbContext = (TextView)findViewById(R.id.lbContext);
+	        btnClearContext = (Button)findViewById(R.id.btnClearContext);
+	        btnClearContext.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	            	new TContextClearing(true);            
+	            }
+	        });
+	        btnClearReflections = (Button)findViewById(R.id.btnClearReflections);
+	        btnClearReflections.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	            	new TVisualizationsClearing(true);            
+	            }
+	        });
+	        btnSpaceLays = (Button)findViewById(R.id.btnSpaceLays);
+	        btnSpaceLays.setVisibility((Component.Configuration.UserID == TGeoScopeServerUser.RootUserID) ? View.VISIBLE : View.GONE);
+	        btnSpaceLays.setOnClickListener(new OnClickListener() {
+	        	
+	        	@Override
+	            public void onClick(View v) {
+	            	ShowSpaceLays();
+	            }
+	        });
+	        cbUseTrackerService = (CheckBox)findViewById(R.id.cbUseTrackerService);
+	        cbUseTrackerService.setOnClickListener(new OnClickListener(){
+	        	
+	            @Override
+	            public void onClick(View v) {
+	                boolean checked = ((CheckBox)v).isChecked();
+					try {
+						EnableDisableTrackerItems(checked);
+			    	}
+			    	catch (Exception E) {
+			            Toast.makeText(TReflectorConfigurationPanel.this, getString(R.string.STrackerError)+E.getMessage(), Toast.LENGTH_LONG).show();
+			    	}
+	            }
+	        });        
+	    	cbTrackerServerConnection = (CheckBox)findViewById(R.id.cbTrackerServerConnection);
+	    	cbTrackerServerConnection.setOnClickListener(new OnClickListener(){
+	    		
+	            @Override
+	            public void onClick(View v) {
+	                boolean checked = ((CheckBox)v).isChecked();
+		    		cbTrackerSaveOpQueue.setEnabled(!checked);
+	            }
+	        });        
+	    	edTrackerServerObjectID = (TextView)findViewById(R.id.edTrackerServerObjectID);
+	    	edTrackerServerObjectName = (TextView)findViewById(R.id.edTrackerServerObjectName);
+	        btnConstructNewTrackerObject = (Button)findViewById(R.id.btnConstructNewTrackerObject);
+	        btnConstructNewTrackerObject.setOnClickListener(new OnClickListener() {
+	        	
+				@Override
+	            public void onClick(View v) {
+	            	ConstructNewTrackerObject();
+	            }
+	        });
+	        edTrackerServerAddress = (TextView)findViewById(R.id.edTrackerServerAddress);
+	        edTrackerServerPort = (TextView)findViewById(R.id.edTrackerServerPort);
+	    	edTrackerOpQueueTransmitInterval = (TextView)findViewById(R.id.edTrackerOpQueueTransmitInterval);
+	    	edTrackerPositionReadInterval = (TextView)findViewById(R.id.edTrackerPositionReadInterval);
+	    	//.
+	        spPOIMapIDGeoSpace = (Spinner)findViewById(R.id.spPOIMapIDGeoSpace);
+	        ArrayAdapter<String> saPOIMapIDGeoSpace = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, GeoSpaceNames);
+	        saPOIMapIDGeoSpace.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	        spPOIMapIDGeoSpace.setAdapter(saPOIMapIDGeoSpace);
+	        //.
+	    	cbTrackerVideoModuleEnabled = (CheckBox)findViewById(R.id.cbTrackerVideoModuleEnabled);
+	    	cbTrackerVideoModuleEnabled.setOnClickListener(new OnClickListener(){
+	    		
+	            @Override
+	            public void onClick(View v) {
+	                boolean checked = ((CheckBox)v).isChecked();
+			    	btnTrackerVideoModulePropsPanel.setEnabled(checked);
+	            }
+	        });        
+	    	btnTrackerVideoModulePropsPanel = (Button)findViewById(R.id.btnTrackerVideoModulePropsPanel);
+	    	btnTrackerVideoModulePropsPanel.setOnClickListener(new OnClickListener() {
+	    		
+	    		@Override
+	            public void onClick(View v) {
+	            	if (flUpdating) 
+	            		return; //. ->
+	            	try {
+	            		TReflectorConfigurationPanel.this.finish();
+	            		//.
+	            		TTracker Tracker = TTracker.GetTracker(TReflectorConfigurationPanel.this.getApplicationContext());
+	            		if (Tracker != null)
+	            			Tracker.GeoLog.VideoRecorderModule.ShowPropsPanel(TReflectorConfigurationPanel.this);
+	            	}
+	            	catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+	                    Toast.makeText(TReflectorConfigurationPanel.this, S, Toast.LENGTH_LONG).show();
+	            	}
+	            }
+	        });
+	    	btnTrackerDataStreamerPropsPanel = (Button)findViewById(R.id.btnTrackerDataStreamerPropsPanel);
+	    	btnTrackerDataStreamerPropsPanel.setOnClickListener(new OnClickListener() {
+	    		
+	    		@Override
+	            public void onClick(View v) {
+	            	if (flUpdating) 
+	            		return; //. ->
+	            	try {
+	            		TTracker Tracker = TTracker.GetTracker(TReflectorConfigurationPanel.this.getApplicationContext());
+	            		if (Tracker != null)
+	            			Tracker.GeoLog.DataStreamerModule.ShowPropsPanel(TReflectorConfigurationPanel.this);
+	            	}
+	            	catch (Exception E) {
+	                    Toast.makeText(TReflectorConfigurationPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+	            	}
+	            }
+	        });
+	    	cbTrackerSaveOpQueue = (CheckBox)findViewById(R.id.cbTrackerSaveOpQueue);
+	        //.
+	        setResult(Activity.RESULT_CANCELED);
+	        //.
+	        //. StartUpdating();
+	        Update();
+    	}
+    	catch (Exception E) {
+            Toast.makeText(this, E.getMessage(), Toast.LENGTH_LONG).show();
+    	}
 	}
 
     @Override
@@ -1154,7 +1159,7 @@ public class TReflectorConfigurationPanel extends Activity {
 	    };
     }
         
-    private void Update() {
+    private void Update() throws Exception {
     	flUpdating = true;
     	try {
     		edCurrentProfileName.setText(TGeoLogApplication.ProfileName());
@@ -1197,7 +1202,7 @@ public class TReflectorConfigurationPanel extends Activity {
         	cbTrackerHide.setChecked(Component.Configuration.GeoLog_flHide);
         	cbApplicationQuit.setChecked(Component.Configuration.Application_flQuitAbility);
         	//.
-			TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
+			TGeoScopeServerUser User = TUserAgent.GetUserAgentUser(Component.context.getApplicationContext());
 			if (User != null)
 				lbContext.setText(getString(R.string.SContext)+" "+"("+getString(R.string.SFilling)+": "+Integer.toString((int)(100.0*User.Space.Context.Storage.DeviceFillFactor()))+" %"+")");
 			else

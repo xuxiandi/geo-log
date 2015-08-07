@@ -26,9 +26,7 @@ public class TTracker {
     }
     
     public static synchronized TTracker GetTracker(Context context) throws Exception {
-    	if (Tracker == null)
-    		Tracker = new TTracker(context);
-    	return Tracker;
+    	return CreateTracker(context);
     }
     
     public static synchronized boolean TrackerIsNull() {
@@ -66,6 +64,7 @@ public class TTracker {
     	if (Tracker != null)
     		Tracker.GeoLog.Log.WriteError(Source, Error);
     }
+    
     
     public Context context;
 	public TDEVICEModule GeoLog = null;

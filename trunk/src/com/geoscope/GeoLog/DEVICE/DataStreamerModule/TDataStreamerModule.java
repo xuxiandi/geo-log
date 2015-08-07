@@ -488,7 +488,7 @@ public class TDataStreamerModule extends TModule {
 		}
 		
 		private void StartStreamers() throws Exception {
-			TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
+			TGeoScopeServerUser User = TUserAgent.GetUserAgentUser(DataStreamerModule.Device.context.getApplicationContext());
 			//.
 			if (!StreamingComponents_Exist()) { //. fetch a DataStream component from the device object 
 				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(SpaceDefines.idTCoComponent,DataStreamerModule.Device.idOwnerComponent);
@@ -578,7 +578,7 @@ public class TDataStreamerModule extends TModule {
 			if (!StreamingComponents_Exist()) { //. //. empty the DataStream component 
 				ComponentStreamDescriptor = null;
 				//.
-				TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
+				TGeoScopeServerUser User = TUserAgent.GetUserAgentUser(DataStreamerModule.Device.context.getApplicationContext());
 				//.
 				TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(SpaceDefines.idTCoComponent,DataStreamerModule.Device.idOwnerComponent);
 				if (CF != null)
@@ -745,7 +745,7 @@ public class TDataStreamerModule extends TModule {
     }
     
     protected void DataStreamComponent_SetStreamDescriptor(long idDataStream, TStreamDescriptor StreamDescriptor) throws Exception {
-		TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
+		TGeoScopeServerUser User = TUserAgent.GetUserAgentUser(Device.context.getApplicationContext());
 		TDataStreamFunctionality DSF = (TDataStreamFunctionality)User.Space.TypesSystem.SystemTDataStream.TComponentFunctionality_Create(idDataStream);
 		try {
 			DSF.SetStreamDescriptor(StreamDescriptor);
@@ -760,7 +760,7 @@ public class TDataStreamerModule extends TModule {
 	}
 
 	public void DataStreamComponent_SetStreamDescriptor(TStreamDescriptor StreamDescriptor) throws Exception {
-		TGeoScopeServerUser User = TUserAgent.GetUserAgentUser();
+		TGeoScopeServerUser User = TUserAgent.GetUserAgentUser(Device.context.getApplicationContext());
 		//.
 		TComponentFunctionality CF = User.Space.TypesSystem.TComponentFunctionality_Create(SpaceDefines.idTCoComponent,Device.idOwnerComponent);
 		if (CF != null)

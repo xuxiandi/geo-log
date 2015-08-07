@@ -164,9 +164,9 @@ public class TDEVICEModule extends TModule
     private TConnectorModule.TConfigurationSubscribers.TConfigurationSubscriber ConnectorConfigurationSubscriber;
     
     @SuppressLint("NewApi")
-	public TDEVICEModule(Context pcontext) throws Exception
-    {
+	public TDEVICEModule(Context pcontext) throws Exception {
     	super(null);
+    	//.
     	flEnabled = false;
     	//.
         ModuleState = MODULE_STATE_INITIALIZING;
@@ -237,13 +237,13 @@ public class TDEVICEModule extends TModule
 		ConnectorModule.ConfigurationSubscribers.Subscribe(ConnectorConfigurationSubscriber);
         //.
         ModuleState = MODULE_STATE_INITIALIZED;
+        //.
 		Log.WriteInfo("Device", "initialized.");
 		//. starting
         Start();
     }
     
-    public void Destroy() throws Exception
-    {
+    public void Destroy() throws Exception {
         //. stopping
         Stop();
         //.
@@ -257,8 +257,7 @@ public class TDEVICEModule extends TModule
         	ComponentFileStreaming = null;
         }
         //.
-        if (ConnectorModule != null)
-        {
+        if (ConnectorModule != null) {
             ConnectorModule.Destroy();
             ConnectorModule = null;
         }     
@@ -302,8 +301,7 @@ public class TDEVICEModule extends TModule
         	AudioModule.Destroy();
         	AudioModule = null;
         }
-        if (LANModule != null)
-        {
+        if (LANModule != null) {
             LANModule.Destroy();
             LANModule = null;
         }
@@ -323,38 +321,31 @@ public class TDEVICEModule extends TModule
         	VideoRecorderModule.Destroy();
         	VideoRecorderModule = null;
         }
-        if (BatteryModule != null)
-        {
+        if (BatteryModule != null) {
         	BatteryModule.Destroy();
         	BatteryModule = null;
         }
-        if (DACModule != null) 
-        {
+        if (DACModule != null) {
         	DACModule.Destroy();
         	DACModule = null;
         }
-        if (ADCModule != null)
-        {
+        if (ADCModule != null) {
         	ADCModule.Destroy();
         	ADCModule = null;
         }
-        if (GPOModule != null)
-        {
+        if (GPOModule != null) {
             GPOModule.Destroy();
             GPOModule = null;
         }
-        if (GPIModule != null)
-        {
+        if (GPIModule != null) {
             GPIModule.Destroy();
             GPIModule = null;
         }
-        if (GPSModule != null)
-        {
+        if (GPSModule != null) {
             GPSModule.Destroy();
             GPSModule = null;
         }
-        if (MovementDetectorModule != null)
-        {
+        if (MovementDetectorModule != null) {
         	MovementDetectorModule.Destroy();
         	MovementDetectorModule = null;
         }
@@ -383,6 +374,7 @@ public class TDEVICEModule extends TModule
 	        BackupMonitor = new TBackupMonitor(this);
 	        //.
 	        ModuleState = MODULE_STATE_RUNNING;
+	        //.
 	        Log.WriteInfo("Device", "started.");
 		}
     }
@@ -421,6 +413,7 @@ public class TDEVICEModule extends TModule
     	super.Stop();
     	//.
         ModuleState = MODULE_STATE_NOTRUNNING;
+        //.
 		Log.WriteInfo("Device", "stopped.");
     }
     

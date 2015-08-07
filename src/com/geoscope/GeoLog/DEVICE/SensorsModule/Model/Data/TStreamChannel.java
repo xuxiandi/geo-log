@@ -200,14 +200,12 @@ public class TStreamChannel extends TChannel {
 				flStartSource = (Items.size() == 0);
 				//.
 				Items.add(Subscriber);
+				//.
 				Subscriber.Channel = Channel;
 			}
 			finally {
 				Lock.unlock();
 			}
-			//.
-			if (flStartSource)
-				Channel.SourceChannel_Start();
 			//.
 			synchronized (Items) {
 				if (ItemsNotifier != null)
@@ -216,6 +214,16 @@ public class TStreamChannel extends TChannel {
 			SubscribersSummary_ItemsNotifier.DoOnSubscribed(Subscriber);
 			//.
 			SubscribersSummary_Count++;
+			//. start the source if it needs
+			if (flStartSource)
+				try {
+					Channel.SourceChannel_Start();
+				}
+			catch (Exception E) {
+				Unsubscribe(Subscriber);
+				//.
+				throw E; //. =>
+			}
 		}
 
 		public void Unsubscribe(TPacketSubscriber Subscriber) throws Exception {
@@ -240,14 +248,14 @@ public class TStreamChannel extends TChannel {
 				Lock.unlock();
 			}
 			//.
-			if (flStopSources)
-				Channel.SourceChannel_Stop();
-			//.
 			SubscribersSummary_ItemsNotifier.DoOnUnsubscribed(Subscriber);
 			synchronized (Items) {
 				if (ItemsNotifier != null)
 					ItemsNotifier.DoOnUnsubscribed(Subscriber);
 			}
+			//. stop the source if it needs
+			if (flStopSources)
+				Channel.SourceChannel_Stop();
 		}
 
 		public boolean SubscriberExists(TPacketSubscriber Subscriber) {
@@ -434,10 +442,16 @@ public class TStreamChannel extends TChannel {
 	public void SourceChannel_Start() throws Exception {
 		synchronized (this) {
 			SourceChannel_StartCounter++;
-			if (SourceChannel_StartCounter == 1) {
+			if (SourceChannel_StartCounter == 1) 
 				if (SourceChannel != null)
-					SourceChannel.StartSource();
-			}
+					try {
+						SourceChannel.StartSource();
+					}
+					catch(Exception E) {
+						SourceChannel_StartCounter--;
+						//.
+						throw E; //. =>
+					}
 		}
 	}
 	

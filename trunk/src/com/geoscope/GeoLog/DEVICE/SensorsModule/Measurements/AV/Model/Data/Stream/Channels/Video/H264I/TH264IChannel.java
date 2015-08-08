@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.os.SystemClock;
+
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Containers.Text.XML.TMyXML;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
@@ -27,7 +29,7 @@ public class TH264IChannel extends TStreamChannel {
 		private TH264IChannel Channel;
 		//.
 		private int  	Index = 0;
-		private long	TimestampBase = 0;
+		private long	TimestampBase = -1;
 		//.
 		private byte[] IndexBA = new byte[4];
 		private byte[] TimestampBA = new byte[4];
@@ -38,6 +40,9 @@ public class TH264IChannel extends TStreamChannel {
 		
 		@Override
 		public void write(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+			if (TimestampBase == -1)
+				TimestampBase = SystemClock.elapsedRealtime();
+			//.
 			do {
 				int DataSize = TDataConverter.ConvertLEByteArrayToInt32(buffer, byteOffset); byteOffset += BufferDescriptorSize; byteCount -= (BufferDescriptorSize+DataSize);
 				//.
@@ -49,8 +54,6 @@ public class TH264IChannel extends TStreamChannel {
 					Channel.VideoFrameBufferedStream.write(buffer, byteOffset, DataSize); 
 					//.
 					Index += DataSize;
-					if (Channel.Packets == 1)
-						TimestampBase = System.currentTimeMillis();
 					//.
 					Channel.Packets++;
 					//.
@@ -60,7 +63,7 @@ public class TH264IChannel extends TStreamChannel {
 					TDataConverter.ConvertInt32ToLEByteArray(Index, IndexBA, 0);
 					Channel.VideoFrameIndexBufferedStream.write(IndexBA);
 					//.
-					TDataConverter.ConvertInt32ToLEByteArray((int)(System.currentTimeMillis()-TimestampBase), TimestampBA, 0);
+					TDataConverter.ConvertInt32ToLEByteArray((int)(SystemClock.elapsedRealtime()-TimestampBase), TimestampBA, 0);
 					Channel.VideoFrameTimestampBufferedStream.write(TimestampBA);
 					//.
 					break; //. >

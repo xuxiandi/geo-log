@@ -26,7 +26,6 @@ import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -507,7 +506,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 		private int 	Width;
 		private int 	Height;
 		//.
-		private long TimestampBase = 0;		
+		private long LastFrameTimestamp;
 		
 		public TVideoH264IChannelProcessor(TVideoRecorderServerMyPlayerComponent pPlayer, String pVideoFileName, String pVideoIndexFileName, String pVideoTimestampFileName, int pPackets, int pFrameRate, SurfaceHolder pSurface, int pWidth, int pHeight, int pPositionInMs) {
     		super(pPlayer, pPackets, pPositionInMs);
@@ -615,7 +614,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 													int		IntervalIndexesCount = 0;
 													//.
 													while (!Canceller.flCancel) {
-														int StartIndex;
+														int StartIndex = 0;
 														long _PositionInMs = 0;
 														int PositionIndex = 0;
 														if (flInitialized) {
@@ -623,41 +622,41 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 																synchronized (this) {
 																	_PositionInMs = PositionInMs;
 																}
-																int Limit = VideoFileTimestamps.limit() >> 2;
-																while (true) {
-																	int NewPositionIndex = ((PositionIndex+Limit) >> 1);
-																	if (NewPositionIndex == PositionIndex)
-																		break; //. >
-																	long TS = VideoFileTimestamps.getInt(NewPositionIndex << 2);
-																	if (_PositionInMs < TS) {
-																		if (Limit > PositionIndex)
-																			Limit = PositionIndex;
-																	}
-																	else 
-																		if (_PositionInMs > TS) {
-																			if (Limit < PositionIndex)
+																long TS = VideoFileTimestamps.getInt(0);
+																if (_PositionInMs >= TS) {
+																	int Limit = VideoFileTimestamps.limit() >> 2;
+																	while (true) {
+																		int NewPositionIndex = ((PositionIndex+Limit) >> 1);
+																		if (NewPositionIndex == PositionIndex)
+																			break; //. >
+																		TS = VideoFileTimestamps.getInt(NewPositionIndex << 2);
+																		if (_PositionInMs < TS) {
+																			if (Limit > PositionIndex)
 																				Limit = PositionIndex;
 																		}
-																		else
-																			break; //. >
-																	PositionIndex = NewPositionIndex;
+																		else 
+																			if (_PositionInMs > TS) {
+																				if (Limit < PositionIndex)
+																					Limit = PositionIndex;
+																			}
+																			else
+																				break; //. >
+																		PositionIndex = NewPositionIndex;
+																		//.
+																		if (Canceller.flCancel)
+																			return; //. >
+																	}
+																	if (PositionIndex >= VideoFileIndexesCount)
+																		PositionIndex = VideoFileIndexesCount-1;
 																	//.
-																	if (Canceller.flCancel)
-																		return; //. >
+																	StartIndex = VideoFileIndexes.getInt(PositionIndex << 2);
 																}
+																else
+																	PositionIndex = -1;
 															}
-															if (PositionIndex >= VideoFileIndexesCount)
-																PositionIndex = VideoFileIndexesCount-1;
-															//.
-															StartIndex = VideoFileIndexes.getInt(PositionIndex << 2);
-															//.
-															TimestampBase = SystemClock.elapsedRealtime()-_PositionInMs;
 														}
-														else {
-															StartIndex = 0;
-															//.
+														else 
 															flInitialized = true;
-														}
 														//.
 														flReady = true;
 														Player.MessageHandler.obtainMessage(MESSAGE_VIDEOCHANNELPROCESSOR_ISREADY).sendToTarget();
@@ -666,6 +665,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 														//.
 														PositionIndex++;
 														PlayedBuffersCount = 0;
+														int TS = 0;
 														for (int I = PositionIndex; I < VideoFileIndexesCount; I++) {
 															int FinishIndex = VideoFileIndexes.getInt(I << 2);
 															//.
@@ -710,13 +710,14 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 																IntervalIndexesCount++;
 															}
 															//.
-															int TS = 0;
 															int dTS = 0;
 															if (VideoFileTimestamps != null) { 
-																TS = VideoFileTimestamps.getInt((I-1) << 2);
-																dTS = (VideoFileTimestamps.getInt(I << 2)-TS)/IntervalIndexesCount;
+																int NewTS = VideoFileTimestamps.getInt(I << 2);
+																dTS = (NewTS-TS)/IntervalIndexesCount;
+																TS = NewTS;
 															}
 															//.
+															LastFrameTimestamp = -1;
 															int _StartIndex = 0;
 															for (int J = 0; J < IntervalIndexesCount; J++) {
 																int _FinishIndex = IntervalIndexes[J];
@@ -831,11 +832,12 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 				//.
 				flRunning = true;
 				//. no need for buffer render it on surface ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
+				long FrameTimestamp = bufferInfo.presentationTimeUs;
 				//. synchronizing video
 				if (flPlaying)
 					if (Player.AudioChannelProcessor != null) {
 						while (true) {
-							long Delta = bufferInfo.presentationTimeUs-Player.AudioChannelProcessor.CurrentPosition_GetInMs();
+							long Delta = FrameTimestamp-Player.AudioChannelProcessor.CurrentPosition_GetInMs();
 							if (Delta <= 0)
 								break; //. >
 							Thread.sleep(Delta % 100);
@@ -847,19 +849,13 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 								break; //. >
 						}
 					} 
-					else {
-						while (true) {
-							long Delta = bufferInfo.presentationTimeUs-(SystemClock.elapsedRealtime()-TimestampBase);
-							if (Delta <= 0)
-								break; //. >
-							Thread.sleep(Delta % 100);
-							//.
-							if (Canceller.flCancel | flSetPosition)
-								return; //. >
-							//.
-							if (flPause)
-								break; //. >
+					else { 
+						if (LastFrameTimestamp >= 0) {
+							int Delta = (int)(FrameTimestamp-LastFrameTimestamp);
+							if (Delta > 0)
+								Thread.sleep(Delta);
 						}
+						LastFrameTimestamp = FrameTimestamp; 
 					}
 				//. process output
 				if (flPlaying) {

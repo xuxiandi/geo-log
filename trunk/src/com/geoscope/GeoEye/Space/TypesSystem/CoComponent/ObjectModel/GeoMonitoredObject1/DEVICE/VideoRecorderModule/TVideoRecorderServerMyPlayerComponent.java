@@ -663,9 +663,13 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 														//.
 														StartSignal.WaitOne();
 														//.
+														int Time = 0;
+														if ((VideoFileTimestamps != null) && (PositionIndex >= 0))
+															Time = VideoFileTimestamps.getInt(PositionIndex << 2);														
+														//.
 														PositionIndex++;
+														LastFrameTimestamp = -1;
 														PlayedBuffersCount = 0;
-														int TS = 0;
 														for (int I = PositionIndex; I < VideoFileIndexesCount; I++) {
 															int FinishIndex = VideoFileIndexes.getInt(I << 2);
 															//.
@@ -710,23 +714,22 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 																IntervalIndexesCount++;
 															}
 															//.
-															int dTS = 0;
+															int FinishTime = 0;
+															int TimeDelta = 0;
 															if (VideoFileTimestamps != null) { 
-																int NewTS = VideoFileTimestamps.getInt(I << 2);
-																dTS = (NewTS-TS)/IntervalIndexesCount;
-																TS = NewTS;
+																FinishTime = VideoFileTimestamps.getInt(I << 2);
+																TimeDelta = (FinishTime-Time)/IntervalIndexesCount;
 															}
-															//.
-															LastFrameTimestamp = -1;
+															//. 
 															int _StartIndex = 0;
 															for (int J = 0; J < IntervalIndexesCount; J++) {
 																int _FinishIndex = IntervalIndexes[J];
 																//.
-														    	DecodeInputBuffer(Codec, Buffer, _StartIndex,(_FinishIndex-_StartIndex), TS);
-														    	TS += dTS;
+														    	DecodeInputBuffer(Codec, Buffer, _StartIndex,(_FinishIndex-_StartIndex), Time);
+														    	Time += TimeDelta;
 																//.
 																if (Player.AudioChannelProcessor == null) 
-																	Player.MessageHandler.obtainMessage(MESSAGE_VIDEOPLAYING_PROGRESS,(double)((I-1.0)/VideoFileIndexesCount)).sendToTarget();
+																	Player.MessageHandler.obtainMessage(MESSAGE_VIDEOPLAYING_PROGRESS,(double)((I-1.0+(J+0.0)/IntervalIndexesCount)/VideoFileIndexesCount)).sendToTarget();
 																//.
 														    	if (flRunning && (PlayedBuffersCount >= MinimumOfPlayedBufferCountBeforePausing))
 																	while (flPause) {
@@ -748,6 +751,7 @@ public class TVideoRecorderServerMyPlayerComponent extends TMeasurementProcessor
 																break; //. >
 															//.
 															StartIndex = FinishIndex;
+															Time = FinishTime;
 														}
 														//.
 														Codec.flush();

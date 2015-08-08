@@ -66,7 +66,7 @@ public class TURL extends com.geoscope.GeoEye.Space.URLs.TypesSystem.ModelUser.T
 			
 			@Override
 			public void Process() throws Exception {
-				TUserAgent UserAgent = TUserAgent.GetUserAgent(User.Server.context);
+				TUserAgent UserAgent = TUserAgent.GetUserAgent(context.getApplicationContext());
 				if (UserAgent != null) {
 					TUserDescriptor UserInfo = User.GetUserInfo(idComponent);
 					if (UserInfo.UserIsOnline) {

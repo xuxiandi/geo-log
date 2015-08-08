@@ -682,7 +682,7 @@ public class TComponentCreatingPanel extends Activity {
     		/*TAsyncProcessing Processing = new TAsyncProcessing(TMyUserPanel.this,getString(R.string.SWaitAMoment)) {
     			@Override
     			public void Process() throws Exception {
-    				TUserAgent UserAgent = TUserAgent.GetUserAgent();
+    				TUserAgent UserAgent = TUserAgent.GetUserAgent(this.getApplicationContext());
     				if (UserAgent == null)
     					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 			    	TTracker Tracker = TTracker.GetTracker();

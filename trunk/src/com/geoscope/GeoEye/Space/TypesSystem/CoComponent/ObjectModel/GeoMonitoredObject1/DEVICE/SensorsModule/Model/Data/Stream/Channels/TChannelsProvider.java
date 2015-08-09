@@ -3,6 +3,7 @@ package com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitor
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
+import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.TRC.TTRCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
@@ -20,6 +21,8 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 	public TStreamChannel GetChannel(String pTypeID) throws Exception {
 		if (TADSChannel.TypeID.equals(pTypeID))
 			return (new TADSChannel()); //. ->
+		if (TTRCChannel.TypeID.equals(pTypeID))
+			return (new TTRCChannel()); //. ->
 		if (TENVCChannel.TypeID.equals(pTypeID))
 			return (new TENVCChannel()); //. ->
 		if (TXENVCChannel.TypeID.equals(pTypeID))

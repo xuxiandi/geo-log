@@ -6,6 +6,7 @@ public class TGPSChannel extends TTLRChannel {
 
 	public static final String TypeID = "GeoLocation.GPS";
 
+	
 	@Override
 	public String GetTypeID() {
 		return TypeID;

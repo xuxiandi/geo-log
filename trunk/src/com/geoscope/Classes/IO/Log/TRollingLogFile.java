@@ -24,6 +24,18 @@ public class TRollingLogFile {
     public static final boolean flLogWarningMessages = true;
     public static final boolean flLogInfoMessages = true;
     
+	public static class TListener {
+		
+	    public void DoOnInfo(String Source, String Info) {
+	    }
+
+	    public void DoOnWarning(String Source, String Warning) {
+	    }
+
+	    public void DoOnError(String Source, String Error) {
+	    }
+	}
+	
     
     private File LogFile;
     //.
@@ -32,6 +44,8 @@ public class TRollingLogFile {
     private int 		Items_Capacity;
     private int			Items_UnsavedCount = 0;
     private int 		Items_SavingThreshold;
+    //.
+    private volatile TListener Listener = null;
 
     public TRollingLogFile(String LogFileName, int pItemsCapacity, int pItemsSavingThreshold) throws IOException {
     	LogFile = new File(LogFileName);
@@ -163,6 +177,14 @@ public class TRollingLogFile {
 	    	dest.close();	    	
 	    }
     }
+
+    public void SetListener(TListener pListener) {
+    	Listener = pListener;
+    }
+    
+    public TListener GetListener() {
+    	return Listener;
+    }
     
     private void AddItem(String S) {
     	Items[Items_Position] = S;
@@ -185,20 +207,34 @@ public class TRollingLogFile {
     public synchronized void WriteInfo(String Source, String Info) {
     	if (!flLogInfoMessages)
     		return; //. ->
+    	//.
     	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss",Locale.US)).format(new Date())+" "+"INFO: "+Source+", "+Info;
     	AddItem(S);
+    	//.
+    	TListener _Listener = Listener;
+    	if (_Listener != null)
+    		_Listener.DoOnInfo(Source, Info);
     }
     
     public synchronized void WriteWarning(String Source, String Warning) {
     	if (!flLogWarningMessages)
     		return; //. ->
+    	//.
     	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss",Locale.US)).format(new Date())+" "+"WARNINIG: "+Source+", "+Warning;
     	AddItem(S);
+    	//.
+    	TListener _Listener = Listener;
+    	if (_Listener != null)
+    		_Listener.DoOnWarning(Source, Warning);
     }
     
     public synchronized void WriteError(String Source, String Error) {
     	String S = (new SimpleDateFormat("dd/MM/yy HH:mm:ss",Locale.US)).format(new Date())+" "+"! ERROR: "+Source+", "+Error;
     	AddItem(S);
+    	//.
+    	TListener _Listener = Listener;
+    	if (_Listener != null)
+    		_Listener.DoOnError(Source, Error);
     }
     
     public synchronized void WriteError(String Source, String Error, StackTraceElement[] StackTrace) {
@@ -208,7 +244,12 @@ public class TRollingLogFile {
         	for (int I = 0; I < StackTrace.length; I++) {
         		StackTraceElement Element = StackTrace[I];
         		S = "  "+Element.getClassName()+"."+Element.getMethodName()+" line: "+Integer.toString(Element.getLineNumber());
+        		Error += "\n"+S; 
             	AddItem(S);
         	}
+    	//.
+    	TListener _Listener = Listener;
+    	if (_Listener != null)
+    		_Listener.DoOnError(Source, Error);
     }
 }

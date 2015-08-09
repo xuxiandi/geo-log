@@ -10,9 +10,13 @@ import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TDoubleContainerT
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt16ContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TInt32ContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestamped6DoubleContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedDataContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedDoubleContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt166DoubleContainerType;
 import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt16ContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedInt32ContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedTypedDataContainerType;
+import com.geoscope.Classes.Data.Stream.Channel.ContainerTypes.TTimestampedTypedTaggedDataContainerType;
 
 public class TContainerType {
 
@@ -29,12 +33,20 @@ public class TContainerType {
 			return (new T3DoubleContainerType()); //. -> 
 		if (TTimestampedInt16ContainerType.ID().equals(ContainerTypeID))
 			return (new TTimestampedInt16ContainerType()); //. -> 
+		if (TTimestampedInt32ContainerType.ID().equals(ContainerTypeID))
+			return (new TTimestampedInt32ContainerType()); //. -> 
 		if (TTimestampedDoubleContainerType.ID().equals(ContainerTypeID))
 			return (new TTimestampedDoubleContainerType()); //. -> 
 		if (TTimestamped6DoubleContainerType.ID().equals(ContainerTypeID))
 			return (new TTimestamped6DoubleContainerType()); //. -> 
 		if (TTimestampedInt166DoubleContainerType.ID().equals(ContainerTypeID))
 			return (new TTimestampedInt166DoubleContainerType()); //. -> 
+		if (TTimestampedDataContainerType.ID().equals(ContainerTypeID))
+			return (new TTimestampedDataContainerType()); //. -> 
+		if (TTimestampedTypedDataContainerType.ID().equals(ContainerTypeID))
+			return (new TTimestampedTypedDataContainerType()); //. -> 
+		if (TTimestampedTypedTaggedDataContainerType.ID().equals(ContainerTypeID))
+			return (new TTimestampedTypedTaggedDataContainerType()); //. -> 
 		return null;
 	}
 	

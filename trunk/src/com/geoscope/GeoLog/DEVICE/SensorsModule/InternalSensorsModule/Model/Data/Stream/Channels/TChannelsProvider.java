@@ -4,6 +4,7 @@ import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.TInternalSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.AOSS.TAOSSChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.TRC.TTRCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.EnvironmentConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
@@ -33,6 +34,8 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 			return (new TADSChannel(InternalSensorsModule, -1/*NoID*/, "")); //. ->
 		if (TAOSSChannel.TypeID.equals(pTypeID))
 			return (new TAOSSChannel(InternalSensorsModule, -1/*NoID*/)); //. ->
+		if (TTRCChannel.TypeID.equals(pTypeID))
+			return (new TTRCChannel(InternalSensorsModule, -1/*NoID*/)); //. ->
 		if (TXENVCChannel.TypeID.equals(pTypeID))
 			return (new TXENVCChannel(InternalSensorsModule, -1/*NoID*/, "")); //. ->
 		if (TChannel.TypeIsTypeOfChannel(pTypeID, TTLRChannel.TypeID))

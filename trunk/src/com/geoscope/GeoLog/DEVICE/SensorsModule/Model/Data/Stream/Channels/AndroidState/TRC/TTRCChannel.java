@@ -1,14 +1,14 @@
-package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS;
+package com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.TRC;
 
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel;
 
-public class TGPSChannel extends TTLRChannel {
+public class TTRCChannel extends TTLRChannel {
 
-	public static final String TypeID = "GeoLocation.GPS";
+	public static final String TypeID = TTLRChannel.TypeID+"."+"AndroidState.TRC";
 
 	
-	public TGPSChannel(TSensorsModule pSensorsModule) {
+	public TTRCChannel(TSensorsModule pSensorsModule) {
 		super(pSensorsModule);
 	}
 	

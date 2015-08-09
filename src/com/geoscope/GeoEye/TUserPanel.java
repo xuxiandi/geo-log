@@ -1243,7 +1243,7 @@ public class TUserPanel extends Activity {
 			
 			@Override
 			public void Process() throws Exception {
-		    	TUserAgent UserAgent = TUserAgent.GetUserAgent(context.getApplicationContext());
+		    	TUserAgent UserAgent = TUserAgent.GetUserAgent(TUserPanel.this.getApplicationContext());
 				if (UserAgent == null)
 					throw new Exception(getString(R.string.SUserAgentIsNotInitialized)); //. =>
 				//.

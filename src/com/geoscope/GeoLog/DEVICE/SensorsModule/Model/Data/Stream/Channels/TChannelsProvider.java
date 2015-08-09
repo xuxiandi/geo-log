@@ -4,6 +4,7 @@ import com.geoscope.Classes.Data.Stream.Channel.TChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.TSensorsModule;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.ADS.TADSChannel;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.AndroidState.TRC.TTRCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.ENVC.TENVCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.EnvironmentalConditions.XENVC.TXENVCChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.GeoLocation.GPS.TGPSChannel;
@@ -25,6 +26,8 @@ public class TChannelsProvider extends com.geoscope.Classes.Data.Stream.Channel.
 	public TStreamChannel GetChannel(String pTypeID) throws Exception {
 		if (TADSChannel.TypeID.equals(pTypeID))
 			return (new TADSChannel(SensorsModule)); //. ->
+		if (TTRCChannel.TypeID.equals(pTypeID))
+			return (new TTRCChannel(SensorsModule)); //. ->
 		if (TENVCChannel.TypeID.equals(pTypeID))
 			return (new TENVCChannel(SensorsModule)); //. ->
 		if (TXENVCChannel.TypeID.equals(pTypeID))

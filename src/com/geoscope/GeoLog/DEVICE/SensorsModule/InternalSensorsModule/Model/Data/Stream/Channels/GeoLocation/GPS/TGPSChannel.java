@@ -36,6 +36,7 @@ public class TGPSChannel extends TTLRChannel {
 		Parameters = "";
 		//.
 		DataTypes = new TDataTypes();
+		//.
 		GPSMode 	= DataTypes.AddItem(new TGPSModeDataType(new TTimestampedInt16ContainerType(), 			this, 	1, "","", ""));		
 		GPSStatus 	= DataTypes.AddItem(new TGPSStatusDataType(new TTimestampedInt16ContainerType(), 		this, 	2, "","", ""));		
 		GPSFix 		= DataTypes.AddItem(new TGPSFixDataType(new TTimestampedInt166DoubleContainerType(), 	this, 	3, "","", ""));		

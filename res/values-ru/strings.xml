@@ -1134,5 +1134,6 @@
     <string name="SChannelsOfStreaming">Каналы потоковой передачи</string>
     <string name="SDataStreamerChannelsConflictError">Конфликт каналов потоковой передачи</string>
     <string name="SBitrate">"Битрейт: "</string>
+    <string name="SAndroidTracing">Android-трейсинг</string>
     
 </resources>

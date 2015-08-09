@@ -14,6 +14,7 @@ import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.AOSS.TAOSSMeter
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ASTLR.TASTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.ECTLR.TECTLRMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.GPSTLR.TGPSTLRMeter;
+import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Telemetry.TRC.TTRCMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Meters.Video.TVideoMeter;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.Stream.Channels.Audio.AAC.TAACChannel;
@@ -242,6 +243,9 @@ public class TSensorsMeters {
 		//.
 		TAOSSMeter AOSSMeter = new TAOSSMeter(SensorsModule, "0", "", ProfileFolder); 
 		Items_AddItem(AOSSMeter);
+		//.
+		TTRCMeter TRCMeter = new TTRCMeter(SensorsModule, "0", "", ProfileFolder); 
+		Items_AddItem(TRCMeter);
 	}
 	
 	private synchronized void Items_AddItem(TSensorMeter Meter) {

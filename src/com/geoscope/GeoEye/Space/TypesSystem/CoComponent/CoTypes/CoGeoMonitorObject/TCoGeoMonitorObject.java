@@ -56,8 +56,8 @@ public class TCoGeoMonitorObject {
 		
 		public String Text() {
 			String S = Name;
-			if (Domains.length() > 0)
-				S += " "+"/"+Domains+"/";
+			/* if (Domains.length() > 0)
+				S += " "+"/"+Domains+"/"; */
 			return S;
 		}
 

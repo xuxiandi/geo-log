@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
-import android.widget.Toast;
 
 import com.geoscope.Classes.Data.Containers.TDataConverter;
 import com.geoscope.Classes.Data.Stream.Channel.TChannel;
@@ -123,6 +122,8 @@ public class TSensorsModule extends TModule {
 	private Timer 										Measurements_RemoveProcess;
 	//.
 	private TConnectorModule.TConfigurationSubscribers.TConfigurationSubscriber ConnectorConfigurationSubscriber;
+	//.
+	public boolean flStarted = false;
 	
     public TSensorsModule(TDEVICEModule pDevice) throws Exception {
     	super(pDevice);
@@ -190,10 +191,14 @@ public class TSensorsModule extends TModule {
     	super.Start();
     	//.
     	Device.ConnectorModule.ConfigurationSubscribers.Subscribe(ConnectorConfigurationSubscriber);
+    	//.
+    	flStarted = true;
     }
     
     @Override
     public void Stop() throws Exception {
+    	flStarted = false;
+    	//.
     	Device.ConnectorModule.ConfigurationSubscribers.Unsubscribe(ConnectorConfigurationSubscriber);
     	//.
     	Meters.Finalize();
@@ -234,7 +239,7 @@ public class TSensorsModule extends TModule {
     	//.
     	Model = NewModel;
     	//.
-    	TStreamChannel.TPacketSubscribers.SubscribersSummary_Init(new TStreamChannel.TPacketSubscribers.TItemsNotifier() {
+    	TStreamChannel.TPacketSubscribers.SubscribersSummary_Initialize(new TStreamChannel.TPacketSubscribers.TItemsNotifier() {
     		
     		@Override
     		protected void DoOnSubscribed(com.geoscope.GeoLog.DEVICE.SensorsModule.Model.Data.TStreamChannel.TPacketSubscriber Subscriber) throws Exception {
@@ -514,7 +519,7 @@ public class TSensorsModule extends TModule {
 
                 case MESSAGE_INACTIVE: 
                 	try {
-                		if (!Device.DataStreamerModule.StreamingIsActive()) {
+                		if (flStarted && !Device.DataStreamerModule.StreamingIsActive()) {
                 			TAsyncProcessing Processing = new TAsyncProcessing() {
                 				
                 				@Override
@@ -528,20 +533,26 @@ public class TSensorsModule extends TModule {
                 				
                 				@Override
                 				public void DoOnException(Exception E) {
-                					Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+            						String S = E.getMessage();
+            						if (S == null)
+            							S = E.getClass().getName();
+            						Device.Log.WriteError("SensorsModule.MessageHandler",S);
                 				}
                 			};
                 			Processing.Start();
                 		}
                 	}
                 	catch (Exception E) {
-                		Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+						Device.Log.WriteError("SensorsModule.MessageHandler",S);
                 	}
                 	break; //. >
 
                 case MESSAGE_ACTIVE: 
                 	try {
-                		if (!Device.DataStreamerModule.StreamingIsActive()) {
+                		if (flStarted && !Device.DataStreamerModule.StreamingIsActive()) {
                 			TAsyncProcessing Processing = new TAsyncProcessing() {
                 				
                 				@Override
@@ -555,14 +566,20 @@ public class TSensorsModule extends TModule {
                 				
                 				@Override
                 				public void DoOnException(Exception E) {
-                					Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+            						String S = E.getMessage();
+            						if (S == null)
+            							S = E.getClass().getName();
+            						Device.Log.WriteError("SensorsModule.MessageHandler",S);
                 				}
                 			};
                 			Processing.Start();
                 		}
                 	}
                 	catch (Exception E) {
-                		Toast.makeText(Device.context, E.getMessage(), Toast.LENGTH_LONG).show();
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+						Device.Log.WriteError("SensorsModule.MessageHandler",S);
                 	}
                 	break; //. >
                 }

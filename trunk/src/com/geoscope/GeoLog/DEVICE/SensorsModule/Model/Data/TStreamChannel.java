@@ -114,7 +114,7 @@ public class TStreamChannel extends TChannel {
 		
 		public static volatile int 				SubscribersSummary_Count = 0; 
 		private static volatile TItemsNotifier 	SubscribersSummary_ItemsNotifier = null;
-		public static void						SubscribersSummary_Init(TItemsNotifier pItemsNotifier) {
+		public static void						SubscribersSummary_Initialize(TItemsNotifier pItemsNotifier) {
 			SubscribersSummary_Count = 0;
 			SubscribersSummary_ItemsNotifier = pItemsNotifier;
 		}

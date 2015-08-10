@@ -1,0 +1,28 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llParent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#FF000000"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/lbName"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff999999"
+        android:gravity="left"
+        android:textColor="#ff000000"
+        android:textSize="18sp"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/lvList"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#FF000000"
+        android:cacheColorHint="#FF000000"
+        android:dividerHeight="1dp"
+        android:listSelector="@drawable/measurement_processor_telemetrytrc_list_selector_flatcolor" />
+
+</LinearLayout>

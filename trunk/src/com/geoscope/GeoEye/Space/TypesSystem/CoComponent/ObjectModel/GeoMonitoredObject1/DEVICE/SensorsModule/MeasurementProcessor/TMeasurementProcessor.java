@@ -29,6 +29,8 @@ public class TMeasurementProcessor extends TUIComponent {
 			return new TAOSSMeasurementProcessor(); //. ->
 		if (MeasurementDescriptor.IsTypeOf(TTRCMeasurementProcessor.TypeID))
 			return new TTRCMeasurementProcessor(); //. ->
+		if (MeasurementDescriptor.IsTypeOf(TTRCMeasurementProcessor.TypeID))
+			return new TTRCMeasurementProcessor(); //. ->
 		if (MeasurementDescriptor.IsTypeOf(TGPSTLRMeasurementProcessor.TypeID))
 			return new TGPSTLRMeasurementProcessor(); //. ->
 		if (MeasurementDescriptor.IsTypeOf(TAudioMeasurementProcessor.TypeID))

@@ -68,6 +68,7 @@ public class TTLRChannel extends TStreamChannel {
 						com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel DestinationChannel = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel();
 						DestinationChannel.Assign(this);
 						DestinationChannel.OnDataHandler = new com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Telemetry.TLR.TTLRChannel.TDoOnDataHandler() {
+							
 							@Override
 							public void DoOnData(TDataType DataType) {
 								TTLRChannel.this.DoOnData(DataType);

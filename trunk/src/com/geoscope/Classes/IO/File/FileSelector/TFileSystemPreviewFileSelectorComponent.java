@@ -680,6 +680,7 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
 		}
 	}
 	
+	
 	public boolean flExists = false;
 	//.
 	private Context context;
@@ -1110,9 +1111,9 @@ public class TFileSystemPreviewFileSelectorComponent extends TUIComponent {
 		int Cnt = FolderList.Count();
 		TListItem[] Items = new TListItem[Cnt];
 		for (int I = 0; I < Cnt; I++) {
-			TFolderFileList.TItem URL = FolderList.Items.get(I);
+			TFolderFileList.TItem _Item = FolderList.Items.get(I);
 			//.
-			TListItem Item = new TListItem(URL);
+			TListItem Item = new TListItem(_Item);
 			Items[I] = Item;
 		}
 		lvListAdapter = new TListAdapter(this, lvList, ProgressBar, Items);

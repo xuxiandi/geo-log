@@ -15,7 +15,7 @@ public class TTRCChannel extends TTLRChannel {
 
 	public static final String TypeID = TTLRChannel.TypeID+"."+"AndroidState.TRC";
 	
-	public static final int DATATYPE_MESSAGE_ID = 1;
+	public static final short DATATYPE_MESSAGE_ID = 1;
 	
 	public static final short TYPE_INFO 	= 1;
 	public static final short TYPE_WARNING 	= 2;

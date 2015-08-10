@@ -24,11 +24,11 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -61,7 +61,6 @@ import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectMode
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.TObjectModel.TObjectHistoryRecords;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.MeasurementProcessor.TMeasurementProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Measurements.TSensorsModuleMeasurementsArchive;
-import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.VideoRecorderModule.TVideoRecorderServerMyPlayerComponent;
 import com.geoscope.GeoEye.Space.TypesSystem.GeographServerObject.TGeographServerObjectController;
 import com.geoscope.GeoEye.Space.TypesSystem.Visualizations.TileImagery.TTimeLimit;
 import com.geoscope.GeoEye.UserAgentService.TUserAgent;
@@ -2092,7 +2091,7 @@ public class TObjectModelHistoryPanel extends Activity {
 	}
 	
 	private void MeasurementProcessor_Initialize(final TMeasurementProcessorItem MeasurementProcessor) throws Exception {
-		MeasurementProcessor.Processor.OnProgressHandler = new TVideoRecorderServerMyPlayerComponent.TOnProgressHandler() {
+		MeasurementProcessor.Processor.OnProgressHandler = new TMeasurementProcessor.TOnProgressHandler() {
 			
 			private static final double MinTriggerInterval = (1.0/(24.0*3600.0))*1.0; //. seconds
 			

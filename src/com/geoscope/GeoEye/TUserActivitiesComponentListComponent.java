@@ -1622,7 +1622,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
     		}
     	}
     	if (MinDistanceIndex >= 0) {
-    		lvActivitiesComponentListAdapter.Items_SetSelectedIndex(MinDistanceIndex, false);
+    		lvActivitiesComponentListAdapter.Items_SetSelectedIndex(MinDistanceIndex, true);
     		//.
     		lvActivitiesComponentList.setItemChecked(MinDistanceIndex, true);
     		lvActivitiesComponentList.setSelection(MinDistanceIndex);

@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#FF000000"
     android:minHeight="50dp"
     android:orientation="horizontal" >
 
@@ -12,9 +11,8 @@
         android:layout_height="256dp"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:background="@drawable/previewfileselector_list_placeholder"
-        android:contentDescription="@string/SGeoLog"
-        android:scaleType="fitXY" />
+        android:background="@drawable/measurement_processor_telemetrytrc_list_placeholder"
+        android:contentDescription="@string/SGeoLog" />
 
     <TextView
         android:id="@+id/lbName"
@@ -26,7 +24,7 @@
         android:fontFamily="Tahoma"
         android:paddingLeft="5dp"
         android:paddingTop="5dp"
-        android:textColor="@drawable/previewfileselector_list_row_text_selector"
+        android:textColor="@drawable/user_activity_component_list_row_text_selector"
         android:textSize="24sp"
         android:typeface="sans" />
 
@@ -38,7 +36,7 @@
         android:layout_alignTop="@+id/lbName"
         android:layout_toRightOf="@+id/ivImage"
         android:paddingLeft="5dp"
-        android:textColor="@color/brightinfo_color_default"
+        android:textColor="@color/info_color_default"
         android:textSize="14sp"
         android:visibility="visible" />
 

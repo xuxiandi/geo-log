@@ -136,7 +136,22 @@ public class TTRCMeasurementProcessor extends TMeasurementProcessor {
 			//.
 			holder.lbInfo.setText(OleDate.Format("yyyy/MM/dd HH:mm:ss",OleDate.UTCToLocalTime(Item.Timestamp)));
 			//.
-			///////holder.ivImage.setImageDrawable(Processor.ParentActivity.getResources().getDrawable(Item.Item.GetThumbnailImageResId()));
+			int ImageResID = R.drawable.event_info;
+			switch (Item.Type) {
+			
+			case com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.TRC.TTRCChannel.TYPE_INFO:
+				ImageResID = R.drawable.event_info;
+				break; //. >
+				
+			case com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.TRC.TTRCChannel.TYPE_WARNING:
+				ImageResID = R.drawable.event_warning;
+				break; //. >
+				
+			case com.geoscope.GeoLog.DEVICE.SensorsModule.InternalSensorsModule.Model.Data.Stream.Channels.AndroidState.TRC.TTRCChannel.TYPE_ERROR:
+				ImageResID = R.drawable.event_error;
+				break; //. >
+			}
+			holder.ivImage.setImageDrawable(Processor.ParentActivity.getResources().getDrawable(ImageResID));
 			holder.ivImage.setOnClickListener(null);
 			//. show selection
 			if (position == Items_SelectedIndex) {
@@ -358,7 +373,7 @@ public class TTRCMeasurementProcessor extends TMeasurementProcessor {
     		}
     	}
     	if (MinDistanceIndex >= 0) {
-    		lvListAdapter.Items_SetSelectedIndex(MinDistanceIndex, false);
+    		lvListAdapter.Items_SetSelectedIndex(MinDistanceIndex, true);
     		//.
     		lvList.setItemChecked(MinDistanceIndex, true);
     		lvList.setSelection(MinDistanceIndex);

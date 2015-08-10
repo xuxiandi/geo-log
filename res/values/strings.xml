@@ -1135,5 +1135,7 @@
     <string name="SDataStreamerChannelsConflictError">Data streamer has a channels conflict</string>
     <string name="SBitrate">"Bitrate: "</string>
     <string name="SAndroidTracing">Android tracing</string>
+    <string name="SSetName">Set name</string>
+    <string name="SNewNameHasBeenSet">New name has been set.</string>
     
 </resources>

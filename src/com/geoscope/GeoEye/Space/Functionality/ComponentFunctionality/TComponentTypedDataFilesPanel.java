@@ -26,12 +26,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.InputType;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AbsListView;
@@ -39,8 +42,10 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -636,11 +641,12 @@ public class TComponentTypedDataFilesPanel extends Activity {
 					//.
 		    		final CharSequence[] _items;
 		    		int SelectedIdx = -1;
-		    		_items = new CharSequence[4];
+		    		_items = new CharSequence[5];
 		    		_items[0] = TComponentTypedDataFilesPanel.this.getString(R.string.SOpen); 
 		    		_items[1] = TComponentTypedDataFilesPanel.this.getString(R.string.SContent1); 
 		    		_items[2] = TComponentTypedDataFilesPanel.this.getString(R.string.SGetURLFile); 
-		    		_items[3] = TComponentTypedDataFilesPanel.this.getString(R.string.SRemove); 
+		    		_items[3] = TComponentTypedDataFilesPanel.this.getString(R.string.SSetName); 
+		    		_items[4] = TComponentTypedDataFilesPanel.this.getString(R.string.SRemove); 
 		    		//.
 		    		AlertDialog.Builder builder = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
 		    		builder.setTitle(R.string.SSelect);
@@ -756,8 +762,95 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		        		    		arg0.dismiss();
 		        		    		//.
 		    		    			break; //. >
+			    		    		
+		    		    		case 3: //. set name
+    		    					final TComponentTypedDataFile _ComponentTypedDataFile = ComponentTypedDataFile;
+    		    					//.
+		    		    			final EditText input = new EditText(TComponentTypedDataFilesPanel.this);
+		    		    			input.setInputType(InputType.TYPE_CLASS_TEXT);
+		    		    			input.setText(_ComponentTypedDataFile.DataName);
+		    		    			//.
+		    		    			final AlertDialog dlg = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this)
+		    		    			//.
+		    		    			.setTitle(R.string.SDataName)
+		    		    			.setMessage(R.string.SEnterName)
+		    		    			//.
+		    		    			.setView(input)
+		    		    			.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+		    		    				
+		    		    				@Override
+		    		    				public void onClick(DialogInterface dialog, int whichButton) {
+		    		    					//. hide keyboard
+		    		    					InputMethodManager imm = (InputMethodManager)TComponentTypedDataFilesPanel.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+		    		    					imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+		    		    					//.
+		    		    					try {
+		    		    						final String Name = input.getText().toString();
+		    		    	    				//.
+			    		    					TAsyncProcessing NameChanging = new TAsyncProcessing(TComponentTypedDataFilesPanel.this) {
+
+			    		    						@Override
+			    		    						public void Process() throws Exception {
+			    		    							TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_ComponentTypedDataFile.DataComponentType,_ComponentTypedDataFile.DataComponentID);
+			    		    							if (CF != null)
+			    		    								try {
+			    		    									CF.SetName(Name);
+			    		    								} finally {
+			    		    									CF.Release();
+			    		    								}
+			    		    								else
+			    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(_ComponentTypedDataFile.DataComponentType)); //. =>
+			    		    						}
+
+			    		    						@Override
+			    		    						public void DoOnCompleted() throws Exception {
+			    		    							_ComponentTypedDataFile.DataName = Name;
+			    		    							//.
+			    		    							Update();
+			    		    							//.
+			    		    							Toast.makeText(TComponentTypedDataFilesPanel.this, R.string.SNewNameHasBeenSet, Toast.LENGTH_LONG).show();
+			    		    							//.
+			    		    							setResult(Activity.RESULT_OK);
+			    		    						}
+			    		    						
+			    		    						@Override
+			    		    						public void DoOnException(Exception E) {
+			    		    							Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+			    		    						}
+			    		    					};
+			    		    					NameChanging.Start();
+		    		    					} catch (Exception E) {
+		    		    						Toast.makeText(TComponentTypedDataFilesPanel.this, E.getMessage(),	Toast.LENGTH_LONG).show();
+		    		    					}
+		    		    				}
+		    		    			})
+		    		    			//.
+		    		    			.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+		    		    				
+		    		    				@Override
+		    		    				public void onClick(DialogInterface dialog, int whichButton) {
+		    		    					// . hide keyboard
+		    		    					InputMethodManager imm = (InputMethodManager)TComponentTypedDataFilesPanel.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+		    		    					imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+		    		    				}
+		    		    			}).create();
+		    		    			//.
+		    		    			input.setOnEditorActionListener(new OnEditorActionListener() {
+		    		    				
+		    		    				@Override
+		    		    				public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+		    		    					dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
+		    		    					return false;
+		    		    				}
+		    		    	        });        
+		    		    			// .
+		    		    			dlg.show();
+		    		    			//.
+		        		    		arg0.dismiss();
+		        		    		//.
+		    		    			break; //. >
 		    		    			
-		    		    		case 3: //. remove component
+		    		    		case 4: //. remove component
 		    		    			AlertDialog.Builder alert = new AlertDialog.Builder(TComponentTypedDataFilesPanel.this);
 		    		    			//.
 		    		    			alert.setTitle(R.string.SRemoval);
@@ -928,7 +1021,6 @@ public class TComponentTypedDataFilesPanel extends Activity {
 
         case REQUEST_ADD_COMPONENT: 
         	if (resultCode == RESULT_OK) {   
-        	    setResult(RESULT_OK);
         	    //.
         	    StartUpdating();
         	}
@@ -1135,13 +1227,13 @@ public class TComponentTypedDataFilesPanel extends Activity {
 		UpdateCount++;
     }
 
-    private void StartUpdating() {
+    public void StartUpdating() {
     	if (Updating != null)
     		Updating.Cancel();
     	Updating = new TUpdating(DataFiles, true, false);
     }    
     
-    private void StopUpdating() {
+    public void StopUpdating() {
 		if (Updating != null) {
 			Updating.Cancel();
 			Updating = null;

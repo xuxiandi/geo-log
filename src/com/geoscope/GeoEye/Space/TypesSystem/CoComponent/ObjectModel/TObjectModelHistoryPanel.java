@@ -1437,18 +1437,25 @@ public class TObjectModelHistoryPanel extends Activity {
 	        	
 	            @Override
 	            public void onClick(View v) {
-	            	//. start component
-	            	if (cbShowUserActivitiesComponentList.isChecked()) {
-	            		if (!UserActivitiesComponentList.flStarted)
-	            			UserActivitiesComponentList.Start();
-	            	}
-	            	//.
-	            	if (cbShowUserActivitiesComponentList.isChecked())
-	            		UserActivitiesComponentList.Show();
-	            	else
-	            		UserActivitiesComponentList.Hide();
-	                //. validation
-	            	TimeIntervalSlider.ValidateCurrentTime(true);
+		        	try {
+		            	//. start component
+		            	if (cbShowUserActivitiesComponentList.isChecked()) {
+		            		if (!UserActivitiesComponentList.flStarted) {
+		            			UserActivitiesComponentList.Start();
+		            			//.
+		            			UserActivitiesComponentList.StartUpdating();
+		            		}
+		            	}
+		            	//.
+		            	if (cbShowUserActivitiesComponentList.isChecked())
+		            		UserActivitiesComponentList.Show();
+		            	else
+		            		UserActivitiesComponentList.Hide();
+		                //. validation
+		            	TimeIntervalSlider.ValidateCurrentTime(true);
+		    		} catch (Exception E) {
+		    			Toast.makeText(TObjectModelHistoryPanel.this, E.getMessage(), Toast.LENGTH_LONG).show();
+		    		}
 	            }
 	        });        
 	        //.

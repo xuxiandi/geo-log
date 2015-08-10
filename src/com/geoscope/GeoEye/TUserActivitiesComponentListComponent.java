@@ -27,19 +27,24 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.InputType;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -673,15 +678,16 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 					//.
 		    		final CharSequence[] _items;
 		    		int SelectedIdx = -1;
-		    		_items = new CharSequence[7];
+		    		_items = new CharSequence[9];
 		    		_items[0] = ParentActivity.getString(R.string.SOpen); 
 		    		_items[1] = ParentActivity.getString(R.string.SContent1); 
 		    		_items[2] = ParentActivity.getString(R.string.SUserActivity); 
 		    		_items[3] = ParentActivity.getString(R.string.SShowGeoLocation); 
 		    		_items[4] = ParentActivity.getString(R.string.SGetURLFile); 
 		    		_items[5] = ParentActivity.getString(R.string.SSendURLLinkToUser); 
-		    		_items[6] = ParentActivity.getString(R.string.SSecurity1); 
-		    		_items[7] = ParentActivity.getString(R.string.SRemove); 
+		    		_items[6] = ParentActivity.getString(R.string.SSetName); 
+		    		_items[7] = ParentActivity.getString(R.string.SSecurity1); 
+		    		_items[8] = ParentActivity.getString(R.string.SRemove); 
 		    		//.
 		    		AlertDialog.Builder builder = new AlertDialog.Builder(ParentActivity);
 		    		builder.setTitle(R.string.SSelect);
@@ -880,7 +886,88 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 6: //. component security
+		    		    		case 6: //. set name
+		    		    			final EditText input = new EditText(ParentActivity);
+		    		    			input.setInputType(InputType.TYPE_CLASS_TEXT);
+		    		    			input.setText(_Component.GetName());
+		    		    			//.
+		    		    			final AlertDialog dlg = new AlertDialog.Builder(ParentActivity)
+		    		    			//.
+		    		    			.setTitle(R.string.SDataName)
+		    		    			.setMessage(R.string.SEnterName)
+		    		    			//.
+		    		    			.setView(input)
+		    		    			.setPositiveButton(R.string.SOk, new DialogInterface.OnClickListener() {
+		    		    				
+		    		    				@Override
+		    		    				public void onClick(DialogInterface dialog, int whichButton) {
+		    		    					//. hide keyboard
+		    		    					InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+		    		    					imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+		    		    					//.
+		    		    					try {
+		    		    						final String Name = input.getText().toString();
+		    		    	    				//.
+			    		    					TAsyncProcessing NameChanging = new TAsyncProcessing(ParentActivity) {
+
+			    		    						@Override
+			    		    						public void Process() throws Exception {
+			    		    							TComponentFunctionality CF = UserAgent.User().Space.TypesSystem.TComponentFunctionality_Create(_Component.idTComponent,_Component.idComponent);
+			    		    							if (CF != null)
+			    		    								try {
+			    		    									CF.SetName(Name);
+			    		    								} finally {
+			    		    									CF.Release();
+			    		    								}
+			    		    								else
+			    		    									throw new Exception("there is no functionality for type, idType = "+Integer.toString(_Component.idTComponent)); //. =>
+			    		    						}
+
+			    		    						@Override
+			    		    						public void DoOnCompleted() throws Exception {
+			    		    							Toast.makeText(ParentActivity, R.string.SNewNameHasBeenSet, Toast.LENGTH_LONG).show();
+			    		    							//.
+			    		    							StartUpdating();
+			    		    						}
+			    		    						
+			    		    						@Override
+			    		    						public void DoOnException(Exception E) {
+			    		    							Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+			    		    						}
+			    		    					};
+			    		    					NameChanging.Start();
+		    		    					} catch (Exception E) {
+		    		    						Toast.makeText(ParentActivity, E.getMessage(),	Toast.LENGTH_LONG).show();
+		    		    					}
+		    		    				}
+		    		    			})
+		    		    			//.
+		    		    			.setNegativeButton(R.string.SCancel, new DialogInterface.OnClickListener() {
+		    		    				
+		    		    				@Override
+		    		    				public void onClick(DialogInterface dialog, int whichButton) {
+		    		    					// . hide keyboard
+		    		    					InputMethodManager imm = (InputMethodManager)ParentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+		    		    					imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+		    		    				}
+		    		    			}).create();
+		    		    			//.
+		    		    			input.setOnEditorActionListener(new OnEditorActionListener() {
+		    		    				
+		    		    				@Override
+		    		    				public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+		    		    					dlg.getButton(DialogInterface.BUTTON_POSITIVE).performClick(); 
+		    		    					return false;
+		    		    				}
+		    		    	        });        
+		    		    			// .
+		    		    			dlg.show();
+		    		    			//.
+		        		    		arg0.dismiss();
+		        		    		//.
+		    		    			break; //. >
+		    		    			
+		    		    		case 7: //. component security
 		    						final CharSequence[] _items;
 		    						_items = new CharSequence[2];
 		    						_items[0] = ParentActivity.getString(R.string.SShowSecurity);
@@ -1057,7 +1144,7 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 		        		    		//.
 		    		    			break; //. >
 		    		    			
-		    		    		case 7: //. remove component
+		    		    		case 8: //. remove component
 		    		    			AlertDialog.Builder alert = new AlertDialog.Builder(ParentActivity);
 		    		    			//.
 		    		    			alert.setTitle(R.string.SRemoval);
@@ -1181,8 +1268,17 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
 	}
 
 	@Override
-	public void Start() {
-        flStarted = true;
+	public void Start() throws Exception {
+		super.Start();
+		//.
+		flStarted = true;
+	}
+	
+	@Override
+	public void Stop() throws Exception {
+		flStarted = false;		
+		//.
+		super.Stop();
 	}
 	
 	@Override
@@ -1218,6 +1314,8 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
         case REQUEST_COMPONENT_CONTENT: 
         	if (resultCode == Activity.RESULT_OK)
 				try {
+					flUpdated = false;
+					//.
 					Restart();
 				} catch (Exception E) {
 				}
@@ -1596,13 +1694,13 @@ public class TUserActivitiesComponentListComponent extends TUIComponent {
     	}
     }
 
-    private void StartUpdating() {
+    public void StartUpdating() {
     	if (Updating != null)
     		Updating.Cancel();
     	Updating = new TUpdating(true,false);
     }    
     
-    private void StopUpdating() {
+    public void StopUpdating() {
     	if (Updating != null) 
     		Updating.Cancel();
     }    

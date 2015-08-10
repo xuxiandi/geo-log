@@ -10,10 +10,11 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#ff999999"
-        android:gravity="left"
+        android:gravity="center_horizontal"
+        android:text="@string/SAndroidTracing"
         android:textColor="#ff000000"
         android:textSize="18sp"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
     <ListView
         android:id="@+id/lvList"

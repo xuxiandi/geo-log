@@ -319,6 +319,14 @@ public class TComponentTypedDataFiles {
 		DataType = pDataType;
 	}
 
+	public String GetName() {
+		TComponentTypedDataFile RootItem = GetRootItem();
+		if (RootItem != null)
+			return RootItem.DataName; //. ->
+		else
+			return ""; //. ->
+	}
+	
 	public TComponentTypedDataFiles Clone() {
 		return (new TComponentTypedDataFiles(context, DataModel, DataType));
 	}

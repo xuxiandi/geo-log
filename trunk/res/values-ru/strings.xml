@@ -1135,5 +1135,7 @@
     <string name="SDataStreamerChannelsConflictError">Конфликт каналов потоковой передачи</string>
     <string name="SBitrate">"Битрейт: "</string>
     <string name="SAndroidTracing">Android-трейсинг</string>
+    <string name="SSetName">Установить имя</string>
+    <string name="SNewNameHasBeenSet">Новое имя установлено.</string>
     
 </resources>

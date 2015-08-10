@@ -112,6 +112,14 @@ public class TComponentFunctionality extends TFunctionality {
 		return TypeFunctionality.TypeSystem.TypesSystem.Space;
 	}
 	
+	public void SetName(String Value) throws Exception {
+		throw new Exception("not supported for the component"); //. =>
+	}
+	
+	public String GetName() throws Exception {
+		throw new Exception("not supported for the component"); //. =>
+	}
+	
 	public TComponentData Context_GetData() {
 		TContextCache ContextCache = TypeSystem.ContextCache;
 		if (ContextCache == null)

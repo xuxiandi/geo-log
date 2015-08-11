@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -306,6 +308,8 @@ public class TCoGeoMonitorObjects {
 		default:
 			throw new Exception("unknown data version, version: "+Integer.toString(Version)); //. =>
 		}
+		//.
+		AlphaSort();
 	}
 	
 	public synchronized void Save() throws IllegalArgumentException, IllegalStateException, IOException {
@@ -395,6 +399,8 @@ public class TCoGeoMonitorObjects {
 			Items = _Items;
 		}
 		//.
+		AlphaSort();
+		//.
 		try {
 			Save();
 		} catch (Exception E) {
@@ -418,6 +424,8 @@ public class TCoGeoMonitorObjects {
 			_Items[Items.length] = Item;
 			Items = _Items;
 		}
+		//.
+		AlphaSort();
 		//.
 		try {
 			Save();
@@ -445,6 +453,17 @@ public class TCoGeoMonitorObjects {
 		} catch (Exception E) {
             Toast.makeText(Reflector.context, E.getMessage(), Toast.LENGTH_SHORT).show();
 		}
+	}
+	
+	
+	private void AlphaSort() {
+		Arrays.sort(Items, new Comparator<TCoGeoMonitorObject>(){
+			
+			@Override
+			public int compare(TCoGeoMonitorObject lo, TCoGeoMonitorObject ro) {
+		    	return lo.Name.compareToIgnoreCase(ro.Name);
+			}}
+		);		
 	}
 	
 	public void EnableDisableItem(long pID, boolean pflEnable) {

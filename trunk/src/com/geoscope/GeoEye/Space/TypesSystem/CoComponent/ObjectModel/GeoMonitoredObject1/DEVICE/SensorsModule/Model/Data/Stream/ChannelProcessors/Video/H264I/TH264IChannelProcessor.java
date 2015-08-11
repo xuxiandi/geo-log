@@ -4,9 +4,10 @@ import java.nio.ByteBuffer;
 
 import android.media.MediaCodec;
 import android.media.MediaFormat;
-import android.os.SystemClock;
 import android.view.Surface;
 
+import com.geoscope.Classes.IO.Memory.Buffering.TMemoryBuffering;
+import com.geoscope.Classes.IO.Memory.Buffering.TMemoryBuffering.TBuffer;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.TStreamChannel;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.ChannelProcessor.TChannelProcessor;
 import com.geoscope.GeoEye.Space.TypesSystem.CoComponent.ObjectModel.GeoMonitoredObject1.DEVICE.SensorsModule.Model.Data.Stream.Channels.Video.H264I.TH264IChannel;
@@ -22,9 +23,12 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 	private static final String CodecTypeName = "video/avc";
 	private static final int 	CodecLatency = 1000; //. microseconds
 	private static final int 	CodecWaitInterval = 1000000; //. microseconds
+	private static final int	CodecBufferingInterval = 2000; //. milliseconds
 
 	
 	private TH264IChannel H264Channel;
+	//.
+	public TMemoryBuffering Buffering = null;
 	//.
 	private int VideoBuffersCount = 0;
 	//.
@@ -41,19 +45,40 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 		//.
 		H264Channel = (TH264IChannel)Channel;
 		//.
-		H264Channel.SetOnH264FramesHandler(new TH264IChannel.TDoOnH264FramesHandler() {
+		int BuffersCount = 2;
+		if (H264Channel.FrameRate > 0) {
+			int FrameDelay = 1000/H264Channel.FrameRate;
+			BuffersCount = CodecBufferingInterval/FrameDelay;
+		}
+		//.
+		Buffering = new TMemoryBuffering(BuffersCount, new TMemoryBuffering.TOnBufferDequeueHandler() {
+			
+			private int 	ABuffer_Size = 0;
+			private byte[] 	ABuffer = new byte[8192];
+			//.
+			private long LastFrameTimestamp = -1;
 			
 			@Override
-			public void DoOnH264Packet(byte[] Packet, int PacketOffset,	int PacketSize) throws Exception {
-				while (true) {
+			public void DoOnBufferDequeue(TBuffer Buffer) {
+				try {
+					long Timestamp;
+					synchronized (Buffer) {
+						Timestamp = Buffer.Timestamp;
+						//.
+						ABuffer_Size = Buffer.Size;
+						if (ABuffer_Size > ABuffer.length)
+							ABuffer = new byte[ABuffer_Size];
+						System.arraycopy(Buffer.Data,0, ABuffer,0, ABuffer_Size);
+					}
+					//.
 					synchronized (CodecLock) {
 						if (Codec != null) {
 							int inputBufferIndex = Codec.dequeueInputBuffer(CodecWaitInterval);
 							if (inputBufferIndex >= 0) {
 								ByteBuffer inputBuffer = CodecInputBuffers[inputBufferIndex];
 								inputBuffer.clear();
-								inputBuffer.put(Packet, PacketOffset, PacketSize);
-								Codec.queueInputBuffer(inputBufferIndex, 0, PacketSize, SystemClock.elapsedRealtime(), 0);
+								inputBuffer.put(ABuffer, 0, ABuffer_Size);
+								Codec.queueInputBuffer(inputBufferIndex, 0, ABuffer_Size, Timestamp, 0);
 							}
 							//.
 							MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
@@ -61,11 +86,22 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 							while (outputBufferIndex >= 0) {
 								//. no need for buffer render it on surface ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
 								//.
+								if ((LastFrameTimestamp == -1) && (bufferInfo.presentationTimeUs != 0))
+									LastFrameTimestamp = bufferInfo.presentationTimeUs;
+								//.
+								if (LastFrameTimestamp != -1) {
+									int Delay = (int)(bufferInfo.presentationTimeUs-LastFrameTimestamp);
+									LastFrameTimestamp = bufferInfo.presentationTimeUs;
+									//.
+									if (Delay > 0)
+										Thread.sleep(Delay);
+								}
+								//.
 								Codec.releaseOutputBuffer(outputBufferIndex, true);
 								outputBufferIndex = Codec.dequeueOutputBuffer(bufferInfo, CodecLatency);
 								//.
 								VideoBuffersCount++;
-								if (StatisticHandler != null)
+								if ((StatisticHandler != null) && ((VideoBuffersCount % 10) == 0))
 									StatisticHandler.DoOnVideoBuffer(VideoBuffersCount);
 							}
 							if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) 
@@ -74,13 +110,28 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 							     // Subsequent data will conform to new format.
 							     ///? MediaFormat format = _Codec.getOutputFormat();
 							}
-							//.
-							return; //. ->
 						}
 					}
-					//. wait for the codec initialization, it is done as soon as video surface is created
+				} catch (Exception E) {
+				}
+			}
+		});
+		//.
+		H264Channel.SetOnH264FramesHandler(new TH264IChannel.TDoOnH264FramesHandler() {
+			
+			@Override
+			public void DoOnH264Packet(int Timestamp, byte[] Packet, int PacketOffset,	int PacketSize) throws Exception {
+				//. wait for the codec initialization, it is done as soon as video surface is created
+				while (true) {
+					synchronized (CodecLock) {
+						if (Codec != null) 
+							break; //. >
+					}
+					//.
 					Thread.sleep(10);
 				}
+				//.
+				Buffering.EnqueueBuffer(Packet, PacketOffset, PacketSize, Timestamp);
 			}
 		});
 	}
@@ -90,6 +141,11 @@ public class TH264IChannelProcessor extends TChannelProcessor {
 		Stop();
 		//.
 		H264Channel.SetOnH264FramesHandler(null);
+		//.
+		if (Buffering != null) {
+			Buffering.Destroy();
+			Buffering = null;
+		}
 		//.
 		super.Destroy();
 	}

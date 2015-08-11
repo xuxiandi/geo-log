@@ -105,7 +105,7 @@ public class TMemoryBuffering {
 		Destroy(false);
 	}
 	
-	public void EnqueueBuffer(byte[] buffer, int size, long timestamp) {
+	public void EnqueueBuffer(byte[] buffer, int ofs, int size, long timestamp) {
 		TBuffer Buffer;
 		synchronized (this) {
 			Buffer = Buffers[WritePos];
@@ -124,12 +124,24 @@ public class TMemoryBuffering {
 				Buffer.Timestamp = timestamp;
 				if (Buffer.Data.length < size)
 					Buffer.Data = new byte[size];
-				System.arraycopy(buffer,0, Buffer.Data,0, size);
+				System.arraycopy(buffer,ofs, Buffer.Data,0, size);
 				Buffer.Size = size;
 			}
 		}
 		//.
 		BuffersDequeueing.Process();
+	}
+	
+	public void EnqueueBuffer(byte[] buffer, int size, long timestamp) {
+		EnqueueBuffer(buffer, 0, size, timestamp);
+	}
+	
+	public void EnqueueBuffer(byte[] buffer, int ofs, int size) {
+		EnqueueBuffer(buffer, ofs, size, 0);
+	}
+	
+	public void EnqueueBuffer(byte[] buffer, int size) {
+		EnqueueBuffer(buffer, 0, size);
 	}
 	
 	private void DequeueBuffers() throws CancelException {

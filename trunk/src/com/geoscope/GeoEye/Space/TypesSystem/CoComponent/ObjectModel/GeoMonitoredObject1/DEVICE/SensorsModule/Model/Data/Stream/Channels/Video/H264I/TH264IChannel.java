@@ -25,14 +25,19 @@ public class TH264IChannel extends TStreamChannel {
 	public static final short DataTag 					= 1;
 	public static final short IndexTag 					= 2;
 	public static final short TimestampTag 				= 3;
+	public static final short DataTimestampTag 			= 4;
 	
 	public static class TDoOnH264FramesHandler {
 		
-		public void DoOnH264Packet(byte[] Packet, int PacketOffset, int PacketSize) throws Exception {
+		public void DoOnH264Packet(int Timestamp, byte[] Packet, int PacketOffset, int PacketSize) throws Exception {
 		}
 	}	
 	
 	
+	public int FrameRate = -1;
+	//.
+	private int LastDataTimestamp = 0;
+	//.
 	private TDoOnH264FramesHandler OnH264FramesHandler = null;
 	//.
 	private volatile TH264IChannelFlowControl FlowControl = null;
@@ -51,6 +56,23 @@ public class TH264IChannel extends TStreamChannel {
 	@Override
 	public String GetTypeID() {
 		return TypeID;
+	}
+	
+	@Override
+	public void Parse() throws Exception {
+		super.Parse();
+		//. defaults
+		FrameRate = -1;
+		//.
+		TConfigurationParser CP = new TConfigurationParser(Configuration);
+		if (CP.DecoderConfiguration != null) {
+			int Version = Integer.parseInt(CP.DecoderConfiguration[0]);
+			if (Version != 1)
+				throw new Exception("unknown configuration version"); //. =>
+			//. byte[] ConfigurationBuffer = Base64.decode(CP.DecoderConfiguration[1], Base64.NO_WRAP);
+			if (CP.DecoderConfiguration.length > 2)
+				FrameRate= Integer.parseInt(CP.DecoderConfiguration[2]);
+		}
 	}
 	
 	@Override
@@ -128,10 +150,14 @@ public class TH264IChannel extends TStreamChannel {
 		short Tag = TDataConverter.ConvertLEByteArrayToInt16(BA, Idx); Idx += TagSize; Size -= TagSize;
 		switch (Tag) {
 		
+		case DataTimestampTag:
+			LastDataTimestamp = TDataConverter.ConvertLEByteArrayToInt32(BA, Idx); 
+			break; //. >
+			
 		case DataTag:
 			synchronized (this) {
 				if (OnH264FramesHandler != null)
-					OnH264FramesHandler.DoOnH264Packet(BA, Idx, Size);
+					OnH264FramesHandler.DoOnH264Packet(LastDataTimestamp, BA, Idx, Size);
 			}
 			break; //. >
 		}

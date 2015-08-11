@@ -507,8 +507,9 @@ public class TSensorsModule extends TModule {
     	context.startActivity(intent);
     }
 
-    public static final int MESSAGE_INACTIVE 	= 0;
-    public static final int MESSAGE_ACTIVE 		= 1;
+    public static final int MESSAGE_INACTIVE 				= 0;
+    public static final int MESSAGE_ACTIVE 					= 1;
+    public static final int MESSAGE_MODEL_BUILDANDPUBLISH 	= 2;
     
 	public Handler MessageHandler = new Handler() {
 		
@@ -546,7 +547,7 @@ public class TSensorsModule extends TModule {
 						String S = E.getMessage();
 						if (S == null)
 							S = E.getClass().getName();
-						Device.Log.WriteError("SensorsModule.MessageHandler",S);
+						Device.Log.WriteError("SensorsModule.MessageHandler(MESSAGE_INACTIVE)",S);
                 	}
                 	break; //. >
 
@@ -569,7 +570,7 @@ public class TSensorsModule extends TModule {
             						String S = E.getMessage();
             						if (S == null)
             							S = E.getClass().getName();
-            						Device.Log.WriteError("SensorsModule.MessageHandler",S);
+            						Device.Log.WriteError("SensorsModule.MessageHandler(MESSAGE_ACTIVE)",S);
                 				}
                 			};
                 			Processing.Start();
@@ -582,6 +583,19 @@ public class TSensorsModule extends TModule {
 						Device.Log.WriteError("SensorsModule.MessageHandler",S);
                 	}
                 	break; //. >
+
+                case MESSAGE_MODEL_BUILDANDPUBLISH: 
+                	try {
+                		if (flStarted) 
+                    		Model_BuildAndPublish();
+                	}
+                	catch (Exception E) {
+						String S = E.getMessage();
+						if (S == null)
+							S = E.getClass().getName();
+						Device.Log.WriteError("SensorsModule.MessageHandler(MESSAGE_MODEL_BUILDANDPUBLISH)",S);
+                	}
+                	break; //. >
                 }
         	}
         	catch (Throwable E) {
@@ -589,4 +603,9 @@ public class TSensorsModule extends TModule {
         	}
         }
     };
+    
+    public void Model_PostBuildAndPublish() {
+		MessageHandler.obtainMessage(MESSAGE_MODEL_BUILDANDPUBLISH).sendToTarget();
+
+    }
 }

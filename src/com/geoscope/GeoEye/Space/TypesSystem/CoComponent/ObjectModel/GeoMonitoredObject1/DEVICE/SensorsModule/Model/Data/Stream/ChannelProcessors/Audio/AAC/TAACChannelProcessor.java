@@ -193,7 +193,7 @@ public class TAACChannelProcessor extends TChannelProcessor {
 				AudioBuffersCount++;
 				//.
 				TStatisticHandler _StatisticHandler = StatisticHandler;
-				if (_StatisticHandler != null)
+				if ((_StatisticHandler != null) && ((AudioBuffersCount % 10) == 0))
 					_StatisticHandler.DoOnAudioBuffer(AudioBuffersCount);
 			}
 		};

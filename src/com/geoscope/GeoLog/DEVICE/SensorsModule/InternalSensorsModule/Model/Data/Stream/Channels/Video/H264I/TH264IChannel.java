@@ -152,24 +152,27 @@ public class TH264IChannel extends TStreamChannel {
 			@Override
 			public void DoOnConfiguration(byte[] Buffer, int BufferSize) throws Exception {
 				//. save a configuration for a Channel.Configuration value
-				Configuration_SaveToFile(Buffer, BufferSize);
+				if (Configuration_SaveToFile(Buffer, BufferSize, GetFrameRate())) {
+					Configuration_LoadFromConfigurationFile();
+					//.
+					InternalSensorsModule.SensorsModule.Model_PostBuildAndPublish(); //. publish the changed model
+				}
 				//. start a new stream session and fill the channel configuration with data
 				int StreamSession = ChannelStreamConfiguration.Set(Buffer, BufferSize);
 				//. send new session packet
 				DestinationChannel.DoOnChannelStreamSession(StreamSession);
 				//. send configuration
-				DestinationChannel.DoOnH264Packet(Buffer, BufferSize);
+				DestinationChannel.DoOnTimestampedH264Packet(0/*Timestamp*/, Buffer, BufferSize);
 			}
 			
 			@Override
 			public void DoOnOutputBuffer(byte[] Buffer, int BufferSize, long Timestamp, boolean flSyncFrame) throws Exception {
-				if (flSyncFrame) {
-					Timestamp = Timestamp/1000; //. convert to milliseconds from microseconds
-					//.
-					DestinationChannel.DoOnH264IndexAndTimestamp(Index, (int)Timestamp);
-				}
+				Timestamp = Timestamp/1000; //. convert to milliseconds from microseconds
 				//.
-				DestinationChannel.DoOnH264Packet(Buffer, BufferSize);
+				if (flSyncFrame) 
+					DestinationChannel.DoOnH264IndexAndTimestamp(Index, (int)Timestamp);
+				//.
+				DestinationChannel.DoOnTimestampedH264Packet((int)Timestamp, Buffer, BufferSize);
 				//.
 				Index += BufferSize;
 			}
@@ -317,6 +320,8 @@ public class TH264IChannel extends TStreamChannel {
 		Configuration = "";
 		Parameters = "";
 		//.
+		Configuration_LoadFromConfigurationFile();
+		//.
 		VideoFrameSource = new TVideoFrameSource();
 	}
 	
@@ -380,11 +385,11 @@ public class TH264IChannel extends TStreamChannel {
 		}
 	}
 	
-	private void Configuration_SaveToFile(byte[] Data, int DataSize) throws IOException {
+	private boolean Configuration_SaveToFile(byte[] Data, int DataSize, int FrameRate) throws IOException {
 		String CFN = Folder()+"/"+TChannel.ConfigurationFileName;
 		File CF = new File(CFN);
 		if (CF.exists())
-			return; //. ->
+			return false; //. ->
 		CF.getParentFile().mkdirs();
 		String TCFN = Folder()+"/"+TChannel.ConfigurationFileName+".tmp";
 		File TCF = new File(TCFN);
@@ -401,7 +406,7 @@ public class TH264IChannel extends TStreamChannel {
 				}
 				String DataString = new String(BOS.toByteArray(), "utf-8");
 				//.
-				String ConfigurationString = "1:;1,"+DataString;
+				String ConfigurationString = "1:;1,"+DataString+','+Integer.toString(FrameRate);
 				//.
 				FOS.write(ConfigurationString.getBytes("utf-8"));
 			}
@@ -413,6 +418,8 @@ public class TH264IChannel extends TStreamChannel {
 			FOS.close();
 		}
 		TCF.renameTo(CF);
+		//.
+		return true;
 	}
 	
 	@Override
